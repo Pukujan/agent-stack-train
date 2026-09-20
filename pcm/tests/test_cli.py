@@ -97,6 +97,59 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("PROJECT.md", meta["sources"])
         self.assertEqual(validate_repo(root), [])
 
+    def test_minimal_end_to_end_dogfood_flow(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-e2e-"))
+        self.addCleanup(shutil.rmtree, root, True)
+
+        init_repo(root, "minimal", "Dogfood", "DOG")
+        self.assertEqual(validate_repo(root), [])
+
+        task = task_new(
+            root,
+            "first dogfood task",
+            "Exercise the initialized minimal repository.",
+            "Verify the v1 commands compose end to end.",
+            "dogfood-agent",
+            "P0",
+        )
+        self.assertEqual(task.name, "TASK-DOG-0001-first-dogfood-task.md")
+        self.assertEqual(validate_repo(root), [])
+
+        original = task.read_text(encoding="utf-8")
+        checkpoint_task(
+            root,
+            "DOG-0001",
+            "dogfood-agent",
+            "2026-09-20T18:35:00Z",
+            ["initialized and validated the minimal repository"],
+            ["init and validate returned success"],
+            ["keep the minimal profile dependency-free"],
+            ["tasks/TASK-DOG-0001-first-dogfood-task.md"],
+            [],
+            "generate a provenance-bearing context pack",
+        )
+        updated = task.read_text(encoding="utf-8")
+        self.assertIn(original.split("## Handoff", 1)[0].rstrip(), updated)
+        self.assertIn("continuity:checkpoint", updated)
+        self.assertEqual(validate_repo(root), [])
+
+        subprocess.run(["git", "init", "-q", root], check=True)
+        subprocess.run(["git", "-C", root, "config", "user.email", "dogfood@example.invalid"], check=True)
+        subprocess.run(["git", "-C", root, "config", "user.name", "PCM Dogfood"], check=True)
+        subprocess.run(["git", "-C", root, "add", "."], check=True)
+        subprocess.run(["git", "-C", root, "commit", "-qm", "dogfood source state"], check=True)
+        subprocess.run(["git", "-C", root, "remote", "add", "origin", "https://example.invalid/pcm-minimal-dogfood.git"], check=True)
+
+        output = pack_task(root, "DOG-0001", None)
+        meta = extract_marker(output.read_text(encoding="utf-8"), "context-pack")
+        self.assertEqual(meta["repository"], "https://example.invalid/pcm-minimal-dogfood.git")
+        self.assertEqual(meta["task_id"], "DOG-0001")
+        self.assertNotEqual(meta["commit"], "unknown")
+        self.assertIn("PROJECT.md", meta["sources"])
+        self.assertIn("checkpoints/CURRENT.md", meta["sources"])
+        self.assertIn("tasks/TASK-DOG-0001-first-dogfood-task.md", meta["sources"])
+        self.assertEqual(validate_repo(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()
