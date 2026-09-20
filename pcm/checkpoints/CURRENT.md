@@ -21,7 +21,7 @@ Turn the continuity pattern into a reusable, machine-validatable, versioned prot
 
 ## Active
 
-- PCM-0002 — dogfood v1 end-to-end on a fresh minimal repository.
+- PCM-0002 — implementation complete on task branch; awaiting review/merge.
 
 ## Queued
 
@@ -37,4 +37,4 @@ None known.
 
 ## Next atomic action
 
-Run the PCM-0002 minimal end-to-end dogfood flow: `init -> validate -> task new -> checkpoint -> pack -> validate`, then add deterministic regression coverage for any core defect found.
+Review and merge `task/PCM-0002-dogfood-minimal`; after merge, activate PCM-0003.
