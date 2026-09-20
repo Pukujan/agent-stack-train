@@ -1,0 +1,11 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "",
+  "personality": ["clear", "warm", "specific"],
+  "audience_feeling": "",
+  "promise": "",
+  "preferred_terms": {},
+  "avoid": [],
+  "good_examples": [],
+  "bad_examples": []
+}

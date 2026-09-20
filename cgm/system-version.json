@@ -1,0 +1,26 @@
+{
+  "system": "content-generation-modules",
+  "version": "0.1.0",
+  "status": "draft",
+  "purpose": "Reusable agent contract for human-oriented brand, content, visual, image, and HTML-demo generation.",
+  "modules": [
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "visual-direction",
+    "image-generation",
+    "html-demo"
+  ],
+  "canonical_files": [
+    "project-brief.json",
+    "brand-language.json",
+    "visual-style.json",
+    "asset-manifest.json",
+    "review-rubric.json"
+  ],
+  "quality_model": {
+    "objective": "deterministic checks and repository evidence",
+    "advisory": "model-assisted rubric scores",
+    "final": "human review"
+  }
+}

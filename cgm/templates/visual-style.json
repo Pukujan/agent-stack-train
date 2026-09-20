@@ -1,0 +1,21 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "",
+  "palette": {
+    "background": "",
+    "primary": "",
+    "accent": "",
+    "warm_accent": "",
+    "text": ""
+  },
+  "subjects": [""],
+  "composition": ["one dominant idea", "main subjects remain visible"],
+  "text_policy": "minimal in-image text",
+  "roles": {
+    "hero": {"orientation": "wide", "dimensions": ""},
+    "problem": {"orientation": "wide", "dimensions": ""},
+    "system": {"orientation": "square", "dimensions": ""},
+    "evidence": {"orientation": "portrait", "dimensions": ""}
+  },
+  "reject_when": []
+}

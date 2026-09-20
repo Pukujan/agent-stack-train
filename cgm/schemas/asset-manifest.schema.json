@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "content-generation.asset-manifest.v1",
+  "type": "object",
+  "required": ["schema_version", "system_version", "assets"],
+  "properties": {
+    "schema_version": {"const": "content-generation.asset-manifest.v1"},
+    "system_version": {"type": "string", "minLength": 1},
+    "assets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/asset"}
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["path", "role", "orientation", "dimensions", "text_policy", "review"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "orientation": {"enum": ["wide", "square", "portrait", "icon", "svg"]},
+        "dimensions": {"type": "string", "minLength": 1},
+        "text_policy": {"type": "string", "minLength": 1},
+        "prompt_recipe": {"type": "string"},
+        "review": {"enum": ["accepted", "draft", "rejected"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

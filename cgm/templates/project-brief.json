@@ -1,0 +1,20 @@
+{
+  "schema_version": "content-generation.project-brief.v1",
+  "project": "",
+  "audience": [],
+  "problem": "",
+  "solution": "",
+  "mechanism": [],
+  "evidence": [
+    {
+      "claim": "",
+      "source": "",
+      "status": "shipped"
+    }
+  ],
+  "boundaries": [],
+  "terminology": {
+    "preferred": {},
+    "avoid": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "content-generation.image-brief.v1",
+  "asset_role": "",
+  "message": "",
+  "subject": "",
+  "relationship": "",
+  "setting": "",
+  "composition": "",
+  "visual_treatment": "",
+  "dimensions": "",
+  "text_policy": "minimal",
+  "negative_constraints": [],
+  "reference_assets": []
+}
