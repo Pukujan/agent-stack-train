@@ -4,7 +4,7 @@
 
 Phase: bootstrap — define and implement protocol v1.
 
-Current P0 task: `TASK-PCM-0001-bootstrap-v1.md`.
+Current P0 task: `TASK-PCM-0001-bootstrap-v1.md` / GitHub issue #1 / branch `task/PCM-0001-bootstrap-v1`.
 
 ## Main objective
 
