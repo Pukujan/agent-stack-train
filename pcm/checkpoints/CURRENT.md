@@ -1,5 +1,7 @@
 # Current Repository Checkpoint
 
+<!-- continuity:current {"active_task":"PCM-0001","active_task_file":"tasks/TASK-PCM-0001-bootstrap-v1.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+
 ## Program state
 
 Phase: bootstrap — define and implement protocol v1.
@@ -18,11 +20,12 @@ Turn the continuity pattern proven in Eval Lab and the ChatGPT provenance-export
 - self-hosting AGENTS/read-order established;
 - protocol configuration introduced;
 - handoff/versioning docs established;
-- active bootstrap task prepared.
+- active bootstrap task prepared;
+- PCM-0001 implementation completed on its task branch: v1 schemas/templates/CLI and fixture tests are present and self-validation passes in the tested worktree.
 
 ## Active
 
-- PCM-0001: v1 schemas/templates/CLI/validator/bootstrap design and implementation.
+- PCM-0001: implementation complete on task branch; awaiting review/merge.
 
 ## Queued
 
@@ -35,8 +38,8 @@ Turn the continuity pattern proven in Eval Lab and the ChatGPT provenance-export
 
 ## Blockers
 
-None known at bootstrap. Tooling language/package choice remains an implementation decision for PCM-0001 and should be justified in-task.
+None known.
 
 ## Next atomic action
 
-Implement PCM-0001 from its task contract: define v1 machine-readable schemas and templates first, then the smallest validator/bootstrap CLI needed to initialize and validate a fixture repository.
+Review and merge `task/PCM-0001-bootstrap-v1`; after merge, activate PCM-0002 without starting adapter work.

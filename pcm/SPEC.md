@@ -1,6 +1,6 @@
 # Project Continuity Protocol — Draft v1 Specification
 
-Status: bootstrap draft.
+Status: executable bootstrap draft (`0.1.0-draft`).
 
 ## 1. Purpose
 
@@ -33,24 +33,45 @@ Generated view derived from canonical objects and tagged with repository/ref/com
 ### TRACKER MIRROR
 Optional Issue/Beads/PR representation linked by the same task ID. It is not canonical unless a profile explicitly says otherwise.
 
-## 3. Required invariants
+## 3. v1 machine-readable shape
+
+The declared protocol remains Git-readable Markdown plus JSON configuration. Canonical Markdown files include one single-line JSON metadata marker:
+
+```text
+<!-- continuity:<kind> { ... } -->
+```
+
+The v1 JSON Schema draft 2020-12 contracts are:
+
+- `schemas/v1/config.schema.json`
+- `schemas/v1/project.schema.json`
+- `schemas/v1/current.schema.json`
+- `schemas/v1/task.schema.json`
+- `schemas/v1/checkpoint.schema.json`
+- `schemas/v1/context-pack.schema.json`
+
+Profiles are versioned under `templates/v1/`. `software` extends the `minimal` profile with software-agent/readme conventions; profiles may add requirements but cannot weaken core invariants.
+
+## 4. Required invariants
 
 A continuity-compliant repository must allow deterministic validation of at least:
 
 - protocol version is declared;
-- PROJECT exists;
-- CURRENT exists;
+- PROJECT exists and has valid project metadata;
+- CURRENT exists and has valid current metadata;
 - CURRENT names zero or one primary active task;
-- named active task exists;
+- named active task exists and its file/reference agree;
 - task ID/status/goal/why/acceptance/next-action fields exist;
-- task dependencies reference valid task IDs or documented externals;
-- append-only checkpoint structure is valid;
+- task dependencies reference valid task IDs or use an `external:` dependency identifier;
+- checkpoint structure is valid; v1 checkpoint metadata is validated when present;
 - completed tasks are not marked active;
-- context packs identify their source commit/ref and are treated as derived;
+- context packs identify source repository/ref/commit/protocol version/source files and are treated as derived;
 - no secret material is required inside continuity state;
 - tracker references are optional and cannot be the only copy of task context.
 
-## 4. Session lifecycle
+Pre-v1 checkpoint entries may lack the v1 metadata marker; validators preserve that history and require the legacy human sections rather than rewriting it.
+
+## 5. Session lifecycle
 
 ### Start
 Read PROJECT → CURRENT → active TASK → minimum relevant spec.
@@ -64,37 +85,30 @@ Record observed evidence, decisions, changes, uncertainty, next action.
 ### Stop/handoff
 Ensure state is committed or dirty state is explicitly recorded, tests/evidence are captured, blockers are named, and next action is singular/unambiguous.
 
-## 5. Versioning
+## 6. CLI behavior
 
-Projects declare a protocol version. Backward-compatible optional additions are minor versions; incompatible required-state changes are major versions. Migration tooling is planned.
+`continuity init` materializes v1 schemas and profile files. It performs a full conflict preflight and never silently overwrites different existing content.
 
-## 6. Profiles
+`continuity validate` is deterministic and requires no LLM. It returns success only when core v1 structural invariants hold.
 
-Profiles may add requirements but cannot weaken core invariants.
+`continuity task new` allocates the next four-digit task ID from the configured prefix and writes one bounded task file.
 
-Planned profiles:
-- minimal;
-- software;
-- research;
-- browser-extension.
+`continuity checkpoint` adds a checkpoint entry without deleting or replacing prior checkpoint history.
 
-## 7. Authority
+`continuity pack` creates a derived Markdown view with repository/ref/commit/protocol/task/generation/source metadata.
+
+## 7. Versioning
+
+Projects declare a protocol version in `.continuity/config.json`. Backward-compatible optional additions are minor versions; incompatible required-state changes are major versions. Migrations must preserve historical checkpoint evidence.
+
+## 8. Authority
 
 Canonical repository files are authoritative for project continuity. Generated context packs and chat summaries are derived. External trackers are coordination mirrors.
 
-## 8. Evidence semantics
+## 9. Evidence semantics
 
-Continuity records should prefer claims tied to evidence. Validators may check structure but do not decide whether a model's semantic claim is true.
+Continuity records should prefer claims tied to evidence. Validators check structure and references but do not decide whether a human/model semantic claim is true.
 
-## 9. v1 implementation target
+## 10. v1 implementation boundary
 
-The first implementation should provide:
-- schemas;
-- templates;
-- validator;
-- init/bootstrap;
-- task creation;
-- checkpoint append;
-- context-pack generation;
-- GitHub adapter;
-- tests/examples.
+PCM-0001 covers schemas, minimal/software templates, deterministic validator, init/bootstrap, task creation, checkpoint append, context-pack generation, tests, and self-dogfooding. GitHub/Beads synchronization adapters are deferred to later tasks.

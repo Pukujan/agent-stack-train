@@ -21,7 +21,7 @@ Then implement the task. Do not reconstruct context from the conversation that c
 
 ## Exact next action
 
-Define the v1 machine-readable schema/template layout and implement the smallest deterministic initialization + validation path with fixture tests.
+Review and merge `task/PCM-0001-bootstrap-v1`; after merge, activate PCM-0002 without starting adapter work.
 
 ## Authority
 

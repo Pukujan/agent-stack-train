@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-continuity"
+version = "0.1.0"
+description = "Repository-native project continuity protocol and CLI"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+continuity = "continuity.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

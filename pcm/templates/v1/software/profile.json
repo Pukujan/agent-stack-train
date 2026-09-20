@@ -1,0 +1,9 @@
+{
+  "extends": "minimal",
+  "files": [
+    "AGENTS.md",
+    "README.md"
+  ],
+  "profile": "software",
+  "protocol_version": "0.1.0-draft"
+}

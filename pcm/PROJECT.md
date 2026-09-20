@@ -1,5 +1,7 @@
 # Project Continuity Modules — Project Contract
 
+<!-- continuity:project {"id":"project-continuity-modules","protocol_version":"0.1.0-draft","schema":"project-continuity.project.v1","title":"Project Continuity Modules"} -->
+
 ## Main goal
 
 Build a reusable, versioned project-continuity protocol and toolkit that lets a fresh AI or human session enter any participating repository and recover the project's purpose, current state, bounded task, evidence, blockers, and exact next action without needing prior conversation history.
