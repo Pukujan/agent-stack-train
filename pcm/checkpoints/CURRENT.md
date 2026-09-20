@@ -19,7 +19,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Active
 
-- PCM-0003 — adopt continuity v1 in `Pukujan/custom-extensions`.
+- PCM-0003 — target adoption merged; PCM task branch awaiting review/merge.
 
 ## Queued
 
@@ -34,4 +34,4 @@ None known.
 
 ## Next atomic action
 
-Create a dedicated adoption branch in `Pukujan/custom-extensions`, add the non-destructive continuity overlay, validate it with the PCM v1 validator, and merge only after all available target-repository gates pass.
+Review and merge `task/PCM-0003-adopt-custom-extensions`; after merge, activate PCM-0004.
