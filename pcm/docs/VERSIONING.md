@@ -15,7 +15,7 @@ Incompatible changes to required canonical objects, meanings, or validation inva
 
 ## Project declaration
 
-A participating repository declares the protocol version in `.continuity/config.json` or the future versioned equivalent.
+A participating repository declares the protocol version in `.continuity/config.json`. The PCM-0001 executable draft uses config schema `project-continuity.config.v1`, protocol version `0.1.0-draft`, and JSON Schema contracts under `schemas/v1/`.
 
 ## Migration rule
 
@@ -29,4 +29,4 @@ A migration must:
 
 ## Draft phase
 
-This repository currently declares `0.1.0-draft`. PCM-0001 should establish the concrete v1 schema/tooling shape. A stable `1.0.0` release is a later explicit task after dogfooding and migrations are demonstrated.
+`0.1.0-draft` establishes the concrete v1 schema/tooling shape. A stable `1.0.0` release remains a later explicit task after dogfooding and migrations are demonstrated.

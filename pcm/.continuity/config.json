@@ -1,16 +1,17 @@
 {
-  "schema": "project-continuity.config.v0",
-  "protocol": "project-continuity",
-  "protocol_version": "0.1.0-draft",
-  "profile": "software",
-  "task_prefix": "PCM",
   "canonical": {
-    "project": "PROJECT.md",
     "current": "checkpoints/CURRENT.md",
+    "project": "PROJECT.md",
     "tasks": "tasks"
   },
+  "profile": "software",
+  "protocol": "project-continuity",
+  "protocol_version": "0.1.0-draft",
+  "schema": "project-continuity.config.v1",
+  "schema_dir": "schemas/v1",
+  "task_prefix": "PCM",
   "trackers": {
-    "github": true,
-    "beads": false
+    "beads": false,
+    "github": true
   }
 }

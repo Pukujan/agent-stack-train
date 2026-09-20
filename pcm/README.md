@@ -2,47 +2,43 @@
 
 A reusable, versioned protocol and bootstrap toolkit for making repositories resumable by fresh AI or human sessions without depending on prior chat history.
 
-## Start here
+## Point a new agent here
 
-If you are a new agent/session, read in this order:
+Give a fresh session only the repository and point it to `HANDOFF.md`. That file names the bounded active task and exact cold-start read order. Canonical state is repository state; prior chat history is not required.
 
-1. `PROJECT.md`
-2. `AGENTS.md`
-3. `checkpoints/CURRENT.md`
-4. the active task linked from CURRENT
-5. the minimum relevant design/spec document
+## v1 bootstrap CLI
 
-Do not reconstruct project state from old conversations unless the active task explicitly requires historical evidence.
-
-## Main idea
-
-A continuity-enabled project separates:
-
-- stable project intent — why the project exists;
-- current program state — where the project is now;
-- bounded task state — what one agent/session should do;
-- append-only checkpoints — what actually happened and what evidence exists;
-- coordination mirrors — GitHub Issues/Beads/PRs;
-- generated context packs — disposable summaries derived from canonical repository state.
-
-The repository is the durable state. Chat sessions are execution environments.
-
-## Target user experience
-
-Eventually, another repository should be able to run something like:
+Python 3.11+ is the only runtime requirement. From a source checkout:
 
 ```bash
-continuity init --profile software
+python -m pip install -e .
+continuity init --profile software --name "My Project" --task-prefix APP
 continuity validate
-continuity task new
-continuity checkpoint
-continuity pack TASK-0001
+continuity task new --slug first-task --goal "..." --why "..."
+continuity checkpoint APP-0001 --agent "..." --completed "..." --evidence "..." --next "..."
+continuity pack APP-0001
 ```
 
-and become continuity-compliant without hand-authoring the protocol.
+`init` is non-destructive: it writes continuity-managed files only when absent or already byte-identical, and refuses the entire initialization before writing if a planned path contains different user content.
 
-## Current status
+## v1 layout
 
-The protocol is in bootstrap/design phase. The active task is `PCM-0001`: define v1 schemas/templates/validator/bootstrap behavior and dogfood the protocol on this repository itself.
+- `.continuity/config.json` — protocol/profile/task-prefix declaration.
+- `schemas/v1/*.schema.json` — JSON Schema draft 2020-12 contracts for config, project, current, task, checkpoint, and context-pack metadata.
+- `templates/v1/minimal` — minimal profile templates.
+- `templates/v1/software` — software-profile overlay templates.
+- `PROJECT.md` — stable project contract.
+- `checkpoints/CURRENT.md` — repository-wide current state.
+- `tasks/TASK-*.md` — bounded work plus append-only checkpoint history.
+- `.continuity/packs/*.md` — generated, disposable context packs.
 
-See `checkpoints/CURRENT.md`.
+Canonical Markdown carries a single-line `<!-- continuity:<kind> {...} -->` JSON metadata marker. The Markdown remains human-readable; the marker makes required fields deterministic to validate.
+
+## Development validation
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+PYTHONPATH=src python -m continuity validate --root .
+```
+
+The validator checks the declared protocol metadata, canonical file presence, active-task references/status, task dependencies, checkpoint structure, and context-pack provenance metadata. GitHub/Beads adapters remain outside the PCM-0001 core.

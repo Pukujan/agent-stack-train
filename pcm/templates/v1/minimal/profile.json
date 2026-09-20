@@ -1,0 +1,9 @@
+{
+  "files": [
+    "PROJECT.md",
+    "checkpoints/CURRENT.md",
+    "HANDOFF.md"
+  ],
+  "profile": "minimal",
+  "protocol_version": "0.1.0-draft"
+}
