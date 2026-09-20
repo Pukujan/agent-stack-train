@@ -1,8 +1,8 @@
 # TASK-PCM-0001 — Bootstrap Project Continuity Protocol v1
 
-<!-- continuity:task {"acceptance":["protocol v1 draft schema locations/names established","schemas cover config/project/current/task/checkpoint/context-pack metadata","versioned templates exist for minimal and software profiles","target repository can be initialized without silently overwriting existing user content","deterministic validate identifies missing/invalid canonical state","validator checks active-task references and core required fields","task creation produces stable IDs/files from configured prefix","checkpoint operation appends rather than rewrites history","context-pack generation records repo/ref/commit/protocol version/source files","tests include valid fixtures and intentionally broken repositories","this repository itself passes its own validator","README contains a concise point-a-new-agent-here workflow","exact commands/results and next action are checkpointed before stop"],"depends_on":[],"goal":"Create the first executable continuity protocol: versioned schemas + templates + deterministic validation + bootstrap/init for a target repository, while dogfooding the protocol in this repository.","id":"PCM-0001","next_action":"Review and merge task/PCM-0001-bootstrap-v1; after merge, activate PCM-0002 without starting adapter work.","owner":"ChatGPT/Sol (current implementation session; GitHub assignee Pukujan)","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current continuity method works manually but still depends on a user telling each new agent how to recreate PROJECT/CURRENT/TASK/handoff/context-pack structure. PCM-0001 turns that convention into reusable infrastructure."} -->
+<!-- continuity:task {"acceptance":["protocol v1 draft schema locations/names established","schemas cover config/project/current/task/checkpoint/context-pack metadata","versioned templates exist for minimal and software profiles","target repository can be initialized without silently overwriting existing user content","deterministic validate identifies missing/invalid canonical state","validator checks active-task references and core required fields","task creation produces stable IDs/files from configured prefix","checkpoint operation appends rather than rewrites history","context-pack generation records repo/ref/commit/protocol version/source files","tests include valid fixtures and intentionally broken repositories","this repository itself passes its own validator","README contains a concise point-a-new-agent-here workflow","exact commands/results and next action are checkpointed before stop"],"depends_on":[],"goal":"Create the first executable continuity protocol: versioned schemas + templates + deterministic validation + bootstrap/init for a target repository, while dogfooding the protocol in this repository.","id":"PCM-0001","next_action":"No further PCM-0001 work; continue under the active PCM-0002 task contract.","owner":"ChatGPT/Sol (current implementation session; GitHub assignee Pukujan)","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"The current continuity method works manually but still depends on a user telling each new agent how to recreate PROJECT/CURRENT/TASK/handoff/context-pack structure. PCM-0001 turns that convention into reusable infrastructure."} -->
 
-- Status: active
+- Status: completed
 - Owner: ChatGPT/Sol (current implementation session; GitHub assignee Pukujan)
 - Priority: P0
 - Depends on: none
@@ -126,6 +126,35 @@ Blocked/uncertain:
 
 Next:
 - Review and merge task/PCM-0001-bootstrap-v1; after merge, activate PCM-0002 without starting adapter work.
+
+### 2026-09-20 18:27:22 UTC — ChatGPT/Sol merge completion
+
+<!-- continuity:checkpoint {"agent":"ChatGPT/Sol merge completion","blocked":[],"changed":["tasks/TASK-PCM-0001-bootstrap-v1.md","checkpoints/CURRENT.md","HANDOFF.md","tasks/TASK-PCM-0002-dogfood-minimal.md"],"completed":["Merged PR #2 into main after verifying mergeability and all available CI/status signals.","Closed PCM-0001 canonically and activated the queued PCM-0002 task."],"decisions":["Treat PCM-0001 as completed after merge commit 03cfcddc3b6d9bd4125b659518c22f7e9d369c71; further work proceeds only under PCM-0002."],"evidence":["PR #2 merge result -> merged=true; merge commit 03cfcddc3b6d9bd4125b659518c22f7e9d369c71.","PR #2 get_pr_info -> mergeable=true.","Head commit status checks -> 0 statuses; 0 check runs; 0 workflow runs; repository has no .github/workflows directory.","GitHub Issue #1 -> closed/completed at 2026-09-20T18:27:22Z."],"next_action":"No further PCM-0001 work; continue under the active PCM-0002 task contract.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0001","timestamp":"2026-09-20T18:27:22Z"} -->
+
+Completed:
+- Merged PR #2 into main after verifying mergeability and all available CI/status signals.
+- Closed PCM-0001 canonically and activated the queued PCM-0002 task.
+
+Evidence:
+- PR #2 merge result -> merged=true; merge commit 03cfcddc3b6d9bd4125b659518c22f7e9d369c71.
+- PR #2 get_pr_info -> mergeable=true.
+- Head commit status checks -> 0 statuses; 0 check runs; 0 workflow runs; repository has no .github/workflows directory.
+- GitHub Issue #1 -> closed/completed at 2026-09-20T18:27:22Z.
+
+Decisions:
+- Treat PCM-0001 as completed after merge commit 03cfcddc3b6d9bd4125b659518c22f7e9d369c71; further work proceeds only under PCM-0002.
+
+Changed:
+- tasks/TASK-PCM-0001-bootstrap-v1.md
+- checkpoints/CURRENT.md
+- HANDOFF.md
+- tasks/TASK-PCM-0002-dogfood-minimal.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- No further PCM-0001 work; continue under the active PCM-0002 task contract.
 
 ## Handoff
 
