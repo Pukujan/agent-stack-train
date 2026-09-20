@@ -4,25 +4,25 @@ This repository is ready for a fresh session without prior chat history.
 
 ## Active work
 
-- Task: `PCM-0001 — Bootstrap Project Continuity Protocol v1`
-- GitHub issue: #1
-- Suggested task branch: `task/PCM-0001-bootstrap-v1`
-- Canonical task file: `tasks/TASK-PCM-0001-bootstrap-v1.md`
+- Task: `PCM-0002 — Dogfood v1 on a minimal repository`
+- GitHub issue: #3
+- Suggested task branch: `task/PCM-0002-dogfood-minimal`
+- Canonical task file: `tasks/TASK-PCM-0002-dogfood-minimal.md`
 
 ## Read exactly this first
 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `tasks/TASK-PCM-0001-bootstrap-v1.md`
+4. `tasks/TASK-PCM-0002-dogfood-minimal.md`
 5. `SPEC.md`
 
-Then implement the task. Do not reconstruct context from the conversation that created this repository.
+Then implement only the bounded task. Do not reconstruct project state from prior conversations.
 
 ## Exact next action
 
-Review and merge `task/PCM-0001-bootstrap-v1`; after merge, activate PCM-0002 without starting adapter work.
+Run the minimal end-to-end dogfood flow: `init -> validate -> task new -> checkpoint -> pack -> validate`, then add deterministic regression coverage for any core defect found.
 
 ## Authority
 
-`PROJECT + CURRENT + TASK + relevant spec` are canonical. Issue #1 is the coordination mirror. Update the task checkpoint before ending the session.
+`PROJECT + CURRENT + TASK + relevant spec` are canonical. Issue #3 is the coordination mirror. Update the task checkpoint before ending the session.
