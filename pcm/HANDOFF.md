@@ -23,7 +23,7 @@ Then implement only the bounded adoption task. Do not reconstruct project state 
 
 ## Exact next action
 
-Create the target adoption branch, add the non-destructive continuity overlay, validate it with the PCM v1 validator, and merge the target PR only if all available gates pass.
+Review and merge `task/PCM-0003-adopt-custom-extensions`; after merge, activate PCM-0004.
 
 ## Authority
 
