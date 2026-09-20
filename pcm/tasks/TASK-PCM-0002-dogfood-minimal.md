@@ -1,8 +1,8 @@
 # TASK-PCM-0002 — Dogfood v1 on a minimal repository
 
-<!-- continuity:task {"acceptance":["a fresh minimal target repository can be initialized end-to-end with the PCM-0001 CLI","initialized minimal state validates deterministically","task creation allocates the configured prefix/id and produces a valid task file","checkpoint operation preserves existing task history and resulting state validates","context-pack generation records repository/ref/commit/protocol version/task/source files","deterministic end-to-end test coverage exercises init -> validate -> task new -> checkpoint -> pack -> validate","any core defect found while dogfooding is fixed only when required for this flow and is covered by a regression test","no GitHub/Beads adapter or external repository migration work is started","exact commands/results, decisions, blockers, changed paths, and one next action are checkpointed before stop"],"depends_on":["PCM-0001"],"goal":"Exercise Project Continuity Protocol v1 end-to-end on a freshly initialized minimal repository and capture/fix only core defects required for that flow.","id":"PCM-0002","next_action":"Review and merge task/PCM-0002-dogfood-minimal; after merge, activate PCM-0003.","owner":"ChatGPT/Sol current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"PCM-0001 established the executable protocol; the next risk is whether the commands compose correctly in a fresh minimal repository rather than only in isolated fixtures/tests."} -->
+<!-- continuity:task {"acceptance":["a fresh minimal target repository can be initialized end-to-end with the PCM-0001 CLI","initialized minimal state validates deterministically","task creation allocates the configured prefix/id and produces a valid task file","checkpoint operation preserves existing task history and resulting state validates","context-pack generation records repository/ref/commit/protocol version/task/source files","deterministic end-to-end test coverage exercises init -> validate -> task new -> checkpoint -> pack -> validate","any core defect found while dogfooding is fixed only when required for this flow and is covered by a regression test","no GitHub/Beads adapter or external repository migration work is started","exact commands/results, decisions, blockers, changed paths, and one next action are checkpointed before stop"],"depends_on":["PCM-0001"],"goal":"Exercise Project Continuity Protocol v1 end-to-end on a freshly initialized minimal repository and capture/fix only core defects required for that flow.","id":"PCM-0002","next_action":"No further PCM-0002 work; continue under the active PCM-0003 task contract.","owner":"ChatGPT/Sol current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"PCM-0001 established the executable protocol; the next risk is whether the commands compose correctly in a fresh minimal repository rather than only in isolated fixtures/tests."} -->
 
-- Status: active
+- Status: completed
 - Owner: ChatGPT/Sol current implementation session; GitHub assignee Pukujan
 - Priority: P0
 - Depends on: PCM-0001
@@ -88,6 +88,35 @@ Blocked/uncertain:
 
 Next:
 - Review and merge `task/PCM-0002-dogfood-minimal`; after merge, activate PCM-0003.
+
+### 2026-09-20 18:32:56 UTC — ChatGPT/Sol merge completion
+
+<!-- continuity:checkpoint {"agent":"ChatGPT/Sol merge completion","blocked":[],"changed":["tasks/TASK-PCM-0002-dogfood-minimal.md","tasks/TASK-PCM-0003-adopt-custom-extensions.md","checkpoints/CURRENT.md","HANDOFF.md"],"completed":["Merged PR #4 into main after verifying mergeability and all available CI/status signals.","Closed PCM-0002 canonically and activated PCM-0003."],"decisions":["Treat PCM-0002 as completed after merge commit 8d67ed6bb21f3936e24d56af4bae58bc15238e92; proceed only under PCM-0003."],"evidence":["PR #4 merge result -> merged=true; merge commit 8d67ed6bb21f3936e24d56af4bae58bc15238e92.","PR #4 get_pr_info -> mergeable=true.","Head commit status checks -> 0 statuses; 0 check runs; 0 workflow runs.","GitHub Issue #3 -> closed/completed at 2026-09-20T18:32:56Z."],"next_action":"No further PCM-0002 work; continue under the active PCM-0003 task contract.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0002","timestamp":"2026-09-20T18:32:56Z"} -->
+
+Completed:
+- Merged PR #4 into main after verifying mergeability and all available CI/status signals.
+- Closed PCM-0002 canonically and activated PCM-0003.
+
+Evidence:
+- PR #4 merge result -> merged=true; merge commit `8d67ed6bb21f3936e24d56af4bae58bc15238e92`.
+- PR #4 get_pr_info -> mergeable=true.
+- Head commit status checks -> 0 statuses; 0 check runs; 0 workflow runs.
+- GitHub Issue #3 -> closed/completed at 2026-09-20T18:32:56Z.
+
+Decisions:
+- Treat PCM-0002 as completed after merge commit `8d67ed6bb21f3936e24d56af4bae58bc15238e92`; proceed only under PCM-0003.
+
+Changed:
+- tasks/TASK-PCM-0002-dogfood-minimal.md
+- tasks/TASK-PCM-0003-adopt-custom-extensions.md
+- checkpoints/CURRENT.md
+- HANDOFF.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- No further PCM-0002 work; continue under the active PCM-0003 task contract.
 
 ## Handoff
 
