@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "status": "draft",
   "purpose": "Reusable agent contract for human-oriented brand, content, visual, image, and HTML-demo generation.",
   "modules": [

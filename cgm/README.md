@@ -116,4 +116,4 @@ See [`CHATGPT_SETUP.md`](CHATGPT_SETUP.md) for a reusable ChatGPT Project/custom
 
 ## Current version
 
-The initial contract is `0.1.0`. It is intentionally small and will be promoted only after being dogfooded in more than one repository.
+The current draft contract is `0.1.1`. It is intentionally small and will be promoted only after being dogfooded in more than one repository.

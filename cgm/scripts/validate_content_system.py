@@ -76,17 +76,76 @@ def check(root: Path) -> list[str]:
     return errors
 
 
+def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
+    errors: list[str] = []
+    required = {
+        "system-version.json": "content-generation.adapter.v1",
+        "project-brief.json": "content-generation.project-brief.v1",
+        "brand-language.json": "content-generation.brand-language.v1",
+        "visual-style.json": "content-generation.visual-style.v1",
+        "asset-manifest.json": "content-generation.asset-manifest.v1",
+        "review-rubric.json": "content-generation.review-rubric.v1",
+    }
+    values: dict[str, dict] = {}
+    for name, schema_version in required.items():
+        path = adapter / name
+        try:
+            values[name] = load_json(path)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+        if values[name].get("schema_version") != schema_version:
+            errors.append(f"{name} must declare {schema_version}")
+
+    system = values.get("system-version.json", {})
+    for field in ("helper_repository", "helper_version", "helper_commit"):
+        if not system.get(field):
+            errors.append(f"adapter system-version.json missing {field}")
+    if not system.get("modules") or set(system["modules"]) != EXPECTED_MODULES:
+        errors.append("adapter system-version.json modules do not match the helper contract")
+
+    project = values.get("project-brief.json", {})
+    for field in ("project", "audience", "problem", "solution", "evidence", "boundaries"):
+        if not project.get(field):
+            errors.append(f"adapter project-brief.json missing {field}")
+
+    brand = values.get("brand-language.json", {})
+    for field in ("name", "personality", "promise", "avoid"):
+        if not brand.get(field):
+            errors.append(f"adapter brand-language.json missing {field}")
+
+    visual = values.get("visual-style.json", {})
+    for field in ("reference_asset", "palette", "roles", "reject_when"):
+        if not visual.get(field):
+            errors.append(f"adapter visual-style.json missing {field}")
+
+    manifest = values.get("asset-manifest.json", {})
+    assets = manifest.get("assets", [])
+    if not assets:
+        errors.append("adapter asset-manifest.json must contain at least one asset")
+    if project_root:
+        for asset in assets:
+            asset_path = asset.get("path")
+            if asset_path and not (project_root / asset_path).is_file():
+                errors.append(f"asset does not exist under project root: {asset_path}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--adapter", type=Path)
+    parser.add_argument("--project-root", type=Path)
     args = parser.parse_args()
     errors = check(args.root.resolve())
+    if args.adapter:
+        errors.extend(check_adapter(args.adapter.resolve(), args.project_root.resolve() if args.project_root else None))
     if errors:
         print("INVALID")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("VALID: content-generation-modules contract")
+    print("VALID: content-generation-modules contract" + (" and target adapter" if args.adapter else ""))
     return 0
 
 
