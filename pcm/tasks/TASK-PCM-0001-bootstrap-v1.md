@@ -5,7 +5,7 @@
 - Priority: P0
 - Depends on: none
 - Suggested branch: `task/PCM-0001-bootstrap-v1`
-- GitHub issue: to be linked after creation
+- GitHub issue: #1
 
 ## Goal
 
