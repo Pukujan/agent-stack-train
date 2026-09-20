@@ -21,7 +21,7 @@ Then implement only the bounded task. Do not reconstruct project state from prio
 
 ## Exact next action
 
-Run the minimal end-to-end dogfood flow: `init -> validate -> task new -> checkpoint -> pack -> validate`, then add deterministic regression coverage for any core defect found.
+Review and merge `task/PCM-0002-dogfood-minimal`; after merge, activate PCM-0003.
 
 ## Authority
 
