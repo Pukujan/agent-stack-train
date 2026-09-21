@@ -1,28 +1,59 @@
 # Content Generation Modules
 
-When an agent starts from a blank prompt, a README or visual brief can sound polished while mixing product facts with guesses. The next person then has to untangle what is true, what is planned, and which project files are authoritative.
+![Editorial illustration of scattered repository evidence becoming a clear README for a human reader](assets/marketing/hero-content-truth.png)
 
-This repository is a **versioned, agent-readable contract** for turning a target repository's facts and evidence into reviewable brand language, project context, README content, visual direction, generated-image briefs, and responsive HTML demos. It gives an agent a bounded way to work; it does not contain a product, brand, model, or universal set of claims.
+**Your product already has a story. It is just scattered across code, notes, tests, screenshots, and half-finished drafts.**
 
-## Start here
+When an agent turns that material directly into a README, visual brief, or HTML demo, the result can look polished and still leave a reader asking: what is this, who is it for, and which claims can I trust?
 
-Use this helper when a project needs public-facing content or visuals that remain connected to its shipped behavior.
+Content Generation Modules gives the work a usable shape. It turns a target repository's facts and evidence into human-ready brand language, project context, README content, visual direction, image briefs, and responsive HTML demos—while keeping a human in the review loop.
 
-1. Add a `.content-system/` adapter to the target project.
-2. Pin the helper's release or commit in `.content-system/system-version.json`.
-3. Add an `AGENTS.md` pointer that tells agents to load the adapter before README, marketing, image, or HTML work.
-4. Copy the relevant files from [`templates/`](templates/) and replace their empty fields with facts from the target repository. Update template version fields to match the pinned helper.
-5. Ask the agent to read the adapter, inspect the cited evidence, and build or update `project-brief.json` before drafting.
-6. Validate the helper and adapter before review:
+## Make the product easier to understand
 
-   ```powershell
-   python scripts/validate_content_system.py `
-     --root path/to/content-generation-modules `
-     --adapter path/to/target-repository/.content-system `
-     --project-root path/to/target-repository
-   ```
+The hard part is rarely producing more words or more pixels. The hard part is keeping the story connected to the product.
 
-The smallest useful adapter contains these files:
+This system helps an agent:
+
+- **Start with a real situation.** Name what the reader is trying to do and what becomes difficult.
+- **Separate facts from guesses.** Point important claims to code, tests, data, or committed artifacts.
+- **Give every output a job.** Shape the README, visual, image, or demo around one clear message.
+- **Leave the final judgment to people.** Use deterministic checks for structure and human review for meaning and quality.
+
+![Editorial workflow showing six modules around one evidence brief](assets/marketing/six-modules-one-story.png)
+
+## Six modules. One story.
+
+| Module | What it helps an agent do | Typical output |
+| --- | --- | --- |
+| [`brand-foundation`](modules/brand-foundation/SKILL.md) | define the audience, promise, voice, and claim boundaries | `brand-language.json` |
+| [`content-context`](modules/content-context/SKILL.md) | map the repository's user, problem, mechanism, evidence, and limits | `project-brief.json` |
+| [`writing-direction`](modules/writing-direction/SKILL.md) | put the reader's situation before the architecture | README, post, landing-page copy |
+| [`visual-direction`](modules/visual-direction/SKILL.md) | give every visual one role, composition, palette, and crop plan | `visual-style.json` |
+| [`image-generation`](modules/image-generation/SKILL.md) | create reviewable prompts and asset records | images plus manifest entries |
+| [`html-demo`](modules/html-demo/SKILL.md) | turn the story into an accessible, responsive demonstration | HTML/CSS demo and screenshots |
+
+Load only the modules needed for the requested output. Each entry point is short so the target repository can carry the product facts and examples that make the work specific.
+
+## From evidence to output
+
+```text
+facts in the target repository
+              |
+              v
+small adapter with an evidence boundary
+              |
+              v
+brief -> direction -> draft -> review
+              |
+              v
+README, visual, image, or HTML output
+```
+
+The adapter keeps the source of truth close to the product. The brief records what is shipped, experimentally supported, planned, or unknown. The directions shape the output for a human reader. The validator checks the structure. A person decides whether the result deserves to ship.
+
+## Start with a target repository
+
+Add this small adapter to the project that owns the product story:
 
 ```text
 .content-system/
@@ -34,64 +65,39 @@ The smallest useful adapter contains these files:
 └── review-rubric.json
 ```
 
-`system-version.json` must declare `schema_version: content-generation.adapter.v1` and record `helper_repository`, `helper_version`, `helper_commit`, and the six module names. The commit or release pin keeps a target project from silently changing behavior when this helper's `main` branch moves.
+Then:
 
-## The workflow
+1. Pin the helper release or commit in `.content-system/system-version.json`.
+2. Add an `AGENTS.md` pointer telling agents to load the adapter before README, marketing, image, or HTML work.
+3. Copy the relevant starters from [`templates/`](templates/) and replace empty fields with facts from the target repository.
+4. Build or update `project-brief.json` before drafting.
+5. Validate the helper and adapter before review:
 
-```text
-target repository facts
-        |
-        v
-project adapter + evidence boundary
-        |
-        v
-content / visual / image / HTML module
-        |
-        v
-draft -> deterministic checks -> model rubric -> human review
-        |
-        v
-versioned output + metadata + checkpoint
-```
+   ```powershell
+   python scripts/validate_content_system.py `
+     --root path/to/content-generation-modules `
+     --adapter path/to/target-repository/.content-system `
+     --project-root path/to/target-repository
+   ```
 
-The workflow starts with the reader's situation, names the problem and consequence, explains the project and its mechanism, links claims to evidence, and states the boundaries. That order helps a first-time reader understand the product before encountering its architecture.
+The adapter's `system-version.json` must declare `schema_version: content-generation.adapter.v1` and record `helper_repository`, `helper_version`, `helper_commit`, and the six module names. The pin prevents a target project from silently changing when this helper's `main` branch moves.
 
-## Modules
+## Trust is part of the output
 
-| Module | Responsibility | Typical output |
-| --- | --- | --- |
-| [`brand-foundation`](modules/brand-foundation/SKILL.md) | audience, positioning, promise, personality, language boundaries, supported claims | `brand-language.json` |
-| [`content-context`](modules/content-context/SKILL.md) | repository facts, evidence, terminology, claims, and limitations | `project-brief.json` |
-| [`writing-direction`](modules/writing-direction/SKILL.md) | story order, plain language, skimmability, and marketing formats | README, post, landing-page copy |
-| [`visual-direction`](modules/visual-direction/SKILL.md) | palette, composition, hierarchy, responsive roles, and rejection conditions | `visual-style.json` |
-| [`image-generation`](modules/image-generation/SKILL.md) | prompt recipes, references, settings, and review records | images plus asset-manifest entries |
-| [`html-demo`](modules/html-demo/SKILL.md) | semantic structure, responsive behavior, accessibility, and rendered QA | HTML/CSS demo and screenshots |
+This repository is a helper contract, not a universal brand or a product database. The target repository supplies the product facts, audience, evidence, visual identity, and asset files.
 
-Load only the modules needed for the requested output. The entry points are intentionally short; project facts and large examples belong in the target repository.
+The validator checks the contract, module entry points, schemas, templates, adapter fields, version pins, and—when a project root is supplied—asset paths. It does not decide whether copy is persuasive, an image is beautiful, or a model-assisted score is right. Human review remains authoritative for subjective quality.
 
-## Evidence and trust boundaries
+For visual work, keep one dominant idea, keep the main human and product subjects visible, declare the aspect ratio and crop behavior, and reject visuals that imply unsupported capabilities. For narrative raster assets, record a short exact title and subtitle when the asset needs to orient a first-time reader. Keep icons, SVGs, logos, and tiny helper graphics text-free unless lettering is explicitly required.
 
-The adapter is a source map, not marketing copy. Each important claim should be marked as shipped, experimentally supported, planned, or unknown and should point to a file, test, data set, or committed artifact.
-
-The validator checks the structure of the contract, module entry points, schemas, templates, version pins, required adapter fields, and—when a project root is supplied—asset paths. It does not decide whether copy is persuasive, an image is beautiful, or a model-assisted score is correct. Human review remains the final decision for subjective quality.
-
-This helper does not promise product capabilities, invent audience research, run a hosted generation service, or replace the target repository's own facts. If the evidence is missing, the output should say so.
-
-## Visual and reproducibility rules
-
-Every image has one role and one dominant idea. Keep the human and product subjects visible, preserve calm contrast and negative space, declare the aspect ratio and crop behavior, and reject visuals that imply unsupported capabilities.
-
-For narrative raster assets, record one short exact title and one short exact subtitle when the asset needs to orient a first-time reader. Keep icons, SVGs, logos, and tiny helper graphics text-free unless lettering is explicitly required. Record the helper version, model or provider when available, prompt recipe, references, dimensions, settings, review decision, and final hash. When a hosted generator does not expose a stable seed or model version, record reproducible intent instead of claiming pixel-identical reproduction.
-
-## Repository files
+## Repository map
 
 - [`templates/`](templates/) contains starter JSON files and a README outline.
 - [`schemas/`](schemas/) defines the project brief, asset manifest, and review rubric shapes.
+- [`assets/marketing/`](assets/marketing/) contains the generated README visuals and their safe prompt notes.
 - [`scripts/validate_content_system.py`](scripts/validate_content_system.py) runs dependency-free structural checks.
 - [`CHATGPT_SETUP.md`](CHATGPT_SETUP.md) explains how to use the helper as durable context for a ChatGPT Project or custom GPT.
 - [`tests/`](tests/) covers the validator's helper and adapter checks.
-
-## Validate this repository
 
 From the repository root:
 
@@ -100,8 +106,4 @@ python scripts/validate_content_system.py --root .
 python -m unittest discover -s tests -v
 ```
 
-For a target repository, pass its adapter and project root as shown in [Start here](#start-here). Keep the helper version in the target adapter aligned with the files used to produce the output.
-
-## Current version
-
-The current draft contract is `0.1.2` (`v0.1.2`). It is intentionally small and will be promoted only after being dogfooded in more than one repository.
+The current draft contract is `0.1.2` (`v0.1.2`). It is intentionally small and will be promoted after being used in more than one repository.
