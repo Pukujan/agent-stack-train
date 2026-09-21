@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0004","active_task_file":"tasks/TASK-PCM-0004-content-system.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0008","active_task_file":"tasks/TASK-PCM-0008-multi-repo-content-system.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: `TASK-PCM-0004-content-system.md` / branch `task/PCM-0004-content-system` / durable handoff PR #9 / awaiting user review.
+Current P0 task: `TASK-PCM-0008-multi-repo-content-system.md` / branch `task/PCM-0008-multi-repo-content-system` / three target previews planned.
 
 ## Main objective
 
@@ -21,6 +21,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 - PCM-0003 — custom-extensions adoption merged in PR #6; the canonical task state is recorded in the prior checkpoint history.
 - PCM-0004 — reusable content-generation system is published at v0.1.1 and Eval Lab preview PR #30 is open with green CI.
+- PCM-0008 — three repository-specific content-system previews are scoped; target branches are not created yet.
 
 ## Queued
 
@@ -34,4 +35,4 @@ None known.
 
 ## Next atomic action
 
-Review the helper release and Eval Lab PR #30; do not merge or promote the README until the user approves the rendered preview.
+Create the three target preview branches after reading their required repository contracts; keep canonical READMEs unchanged until the user reviews rendered packets.
