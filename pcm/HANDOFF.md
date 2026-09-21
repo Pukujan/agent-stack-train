@@ -4,8 +4,8 @@ This repository is ready for a fresh session without prior chat history.
 
 ## Active work
 
-- Task: `PCM-0008 — Multi-repository content-system previews` (four README-enabled PRs open)
-- Suggested task branch: `task/PCM-0008-readme-promotion-evidence`
+- Task: `PCM-0008 — Multi-repository content-system previews` (complete; four README-enabled PRs merged)
+- Suggested task branch: `task/PCM-0008-close-readme-promotion`
 - Canonical task file: `tasks/TASK-PCM-0008-multi-repo-content-system.md`
 - Helper repository: `Pukujan/content-generation-modules`
 - Existing pilot repository: `Pukujan/Eval-lab`
@@ -26,9 +26,9 @@ Then implement only the bounded multi-repository preview task. Do not reconstruc
 
 ## Exact next action
 
-Review the four open target PRs and the local PDF packets recorded in the task file. README promotion is staged in each branch; merge only after the user approves the rendered previews.
+No pending action for PCM-0008. Future sessions can reuse the v0.1.2 helper contract for another explicitly requested repository.
 
-The shared visual contract is now explicit: every narrative raster image gets one small, exact title and subtitle; SVGs, logos, icons, and tiny helper graphics remain text-free. All three target adapters pin `content-generation-modules` v0.1.2 at `cb8c18fa7789e4b651e1f963892bf056b0d3276d`.
+The shared visual contract is now explicit: every narrative raster image gets one small, exact title and subtitle; SVGs, logos, icons, and tiny helper graphics remain text-free. All four adapters pin `content-generation-modules` v0.1.2 at `cb8c18fa7789e4b651e1f963892bf056b0d3276d`.
 
 ## Authority
 

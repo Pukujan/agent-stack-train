@@ -1,8 +1,8 @@
 # TASK-PCM-0008 — Multi-repository content-system previews
 
-<!-- continuity:task {"acceptance":["three recently updated public repositories receive separate non-destructive content-system preview branches","each preview pins content-generation-modules v0.1.2 by tag and commit and preserves the target repository's owner instructions","each preview has a repository-specific story, skimmable Markdown, responsive HTML, and a rendered review artifact","each preview records image/asset roles and provenance without committing caches or secrets","deterministic validation and repository-native checks are run where available","target README files remain unchanged until explicit user approval","the continuity task records exact branches, PRs, render paths, validation, failures, and next actions"],"depends_on":["PCM-0004"],"goal":"Apply the reusable content-generation system to a small, representative set of recently updated public repositories so the user can compare repository-specific marketing, human-language, visual, and responsive README previews before promotion.","id":"PCM-0008","next_action":"Review the three open preview PRs and local rendered packets; promote only after explicit user approval.","owner":"Codex current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The user wants the human-oriented content and visual workflow to be repeatable across multiple repositories while remaining inspectable and durable across future Codex/Luna sessions."} -->
+<!-- continuity:task {"acceptance":["three recently updated public repositories receive separate non-destructive content-system preview branches","each preview pins content-generation-modules v0.1.2 by tag and commit and preserves the target repository's owner instructions","each preview has a repository-specific story, skimmable Markdown, responsive HTML, and a rendered review artifact","each preview records image/asset roles and provenance without committing caches or secrets","deterministic validation and repository-native checks are run where available","target README files change only after explicit user approval","the continuity task records exact branches, PRs, render paths, validation, failures, and next actions"],"depends_on":["PCM-0004"],"goal":"Apply the reusable content-generation system to a small, representative set of recently updated public repositories so the user can compare repository-specific marketing, human-language, visual, and responsive README previews before promotion.","id":"PCM-0008","next_action":"No pending action; the four approved README promotions are merged.","owner":"Codex current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"complete","why":"The user wants the human-oriented content and visual workflow to be repeatable across multiple repositories while remaining inspectable and durable across future Codex/Luna sessions."} -->
 
-- Status: active; human review state: four README-enabled PRs open and local review packets complete
+- Status: complete; four README-enabled PRs merged and local review packets retained
 - Owner: Codex current implementation session; GitHub assignee Pukujan
 - Priority: P0
 - Depends on: PCM-0004
@@ -206,3 +206,34 @@ Blocked/uncertain:
 Next:
 
 - user reviews the four README-enabled PRs and local packets, then selects which target PRs to merge.
+
+### 2026-09-21 — README promotions merged
+
+Completed:
+
+- merged Eval Lab PR #30 at `530e753c1247b290d5519cad26de67b93dbb00f6`;
+- merged Harness on Steroids PR #1 at `dde8d1ec6241b20df001dc30cb0234ef9dc71c9d`;
+- merged Custom Extensions PR #9 at `a86f87d5e57273abd75791b15faa5ff22aec53ea`;
+- merged Hades Product PR #2 at `3e57ff3b00055d1537b5aaae36f456db29698f07`;
+- confirmed each PR reports `MERGED` and each default branch contains the README promotion.
+
+Evidence:
+
+- Eval Lab CI passed on Python 3.11 and 3.12 before merge;
+- Harness owner-gate passed before merge;
+- Custom Extensions and Hades Product had no configured GitHub checks and both local validations passed;
+- the helper release v0.1.2 CI is green at `cb8c18fa7789e4b651e1f963892bf056b0d3276d`.
+
+Decisions:
+
+- mark PCM-0008 complete because the user explicitly approved merging all four README-enabled PRs;
+- retain the local PDF packets and the durable helper contract for future repository adoptions;
+- keep the title-plus-subtitle raster rule and text-free SVG/icon exception as the default CGM pattern.
+
+Blocked/uncertain:
+
+- none.
+
+Next:
+
+- no pending action for PCM-0008; future work may reuse the v0.1.2 adapter against another repository.
