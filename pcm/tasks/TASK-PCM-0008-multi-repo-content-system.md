@@ -2,7 +2,7 @@
 
 <!-- continuity:task {"acceptance":["three recently updated public repositories receive separate non-destructive content-system preview branches","each preview pins content-generation-modules v0.1.2 by tag and commit and preserves the target repository's owner instructions","each preview has a repository-specific story, skimmable Markdown, responsive HTML, and a rendered review artifact","each preview records image/asset roles and provenance without committing caches or secrets","deterministic validation and repository-native checks are run where available","target README files remain unchanged until explicit user approval","the continuity task records exact branches, PRs, render paths, validation, failures, and next actions"],"depends_on":["PCM-0004"],"goal":"Apply the reusable content-generation system to a small, representative set of recently updated public repositories so the user can compare repository-specific marketing, human-language, visual, and responsive README previews before promotion.","id":"PCM-0008","next_action":"Review the three open preview PRs and local rendered packets; promote only after explicit user approval.","owner":"Codex current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The user wants the human-oriented content and visual workflow to be repeatable across multiple repositories while remaining inspectable and durable across future Codex/Luna sessions."} -->
 
-- Status: active; human review state: three preview PRs open and local review packets complete
+- Status: active; human review state: four README-enabled PRs open and local review packets complete
 - Owner: Codex current implementation session; GitHub assignee Pukujan
 - Priority: P0
 - Depends on: PCM-0004
@@ -39,11 +39,12 @@ Create separate, repository-specific previews that make each project easier for 
 
 ## Completed preview evidence
 
-| Repository | Commit | Pull request | Local rendered packet |
+| Repository | Preview commit | README commit | Pull request | Local rendered packet |
 |---|---|---|---|
-| `Pukujan/harness-on-steroids` | `ee818c2` | https://github.com/Pukujan/harness-on-steroids/pull/1 | `D:\claude\harness-on-steroids-TASK-0015\review-output\harness-preview.pdf` |
-| `Pukujan/custom-extensions` | `b941548` | https://github.com/Pukujan/custom-extensions/pull/9 | `D:\claude\custom-extensions-TASK-0016\review-output\extensions-preview.pdf` |
-| `Pukujan/hades-product` | `326e13e` | https://github.com/Pukujan/hades-product/pull/2 | `D:\claude\hades-product-TASK-0017\review-output\hades-preview.pdf` |
+| `Pukujan/harness-on-steroids` | `ee818c2` | `10abc87` | https://github.com/Pukujan/harness-on-steroids/pull/1 | `D:\claude\harness-on-steroids-TASK-0015\review-output\harness-preview.pdf` |
+| `Pukujan/custom-extensions` | `b941548` | `f873fbd` | https://github.com/Pukujan/custom-extensions/pull/9 | `D:\claude\custom-extensions-TASK-0016\review-output\extensions-preview.pdf` |
+| `Pukujan/hades-product` | `326e13e` | `bc1ef89` | https://github.com/Pukujan/hades-product/pull/2 | `D:\claude\hades-product-TASK-0017\review-output\hades-preview.pdf` |
+| `Pukujan/Eval-lab` | `e25411b` | `3f72ede` | https://github.com/Pukujan/Eval-lab/pull/30 | `D:\claude\eval-lab-TASK-0014\review-output\content-system-preview.pdf` |
 
 Each preview also has `desktop-1440.png`, `tablet-900.png`, and `mobile-390.png` under its `review-output/` directory. The HTML review page and Markdown story are committed; generated screenshots and PDFs remain local review artifacts and are intentionally not committed.
 
@@ -173,3 +174,35 @@ Blocked/uncertain:
 Next:
 
 - review the Eval Lab PR alongside the three new target PRs, then promote or merge only the repositories the user explicitly approves.
+
+### 2026-09-20 — README promotion staged across all targets
+
+Completed:
+
+- promoted the reviewed CGM story into each target README without replacing repository-specific technical content;
+- added one wide hero and one square supporting image to Harness, Custom Extensions, and Hades Product;
+- kept Eval Lab's wide, square, and portrait assets in the README and added the shared contract reference;
+- updated each preview note and handoff so it records that README promotion is staged on the branch;
+- updated PR descriptions to describe the README-enabled scope.
+
+Evidence:
+
+- README image-path checks passed for all four repositories;
+- `harness-on-steroids` owner-gate passed in runs `35554026373` and `35554028954`;
+- Eval Lab push run `35554031004` and pull-request run `35554027693` passed Python 3.11 and 3.12;
+- Custom Extensions and Hades Product report no configured GitHub checks, not failed checks;
+- local Harness pytest, Custom Extensions 46-test suite, Eval Lab contract/Ruff/64-test gates, and all `git diff --check` gates passed.
+
+Decisions:
+
+- preserve canonical repository explanations and add the human-first story around them;
+- use the generated images as explanatory assets, not alternate hero banners;
+- keep all four target PRs open until the user reviews the rendered README result.
+
+Blocked/uncertain:
+
+- none; only explicit human acceptance remains before merging the target PRs.
+
+Next:
+
+- user reviews the four README-enabled PRs and local packets, then selects which target PRs to merge.
