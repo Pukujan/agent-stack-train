@@ -10,6 +10,7 @@ This repository is ready for a fresh session without prior chat history.
 - Helper repository: `Pukujan/content-generation-modules`
 - Pilot repository: `Pukujan/Eval-lab`
 - Eval Lab preview PR: `https://github.com/Pukujan/Eval-lab/pull/30`
+- Durable handoff PR: `https://github.com/Pukujan/project-continuity-modules/pull/9`
 
 ## Read exactly this first
 

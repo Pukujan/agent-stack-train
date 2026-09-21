@@ -6,7 +6,7 @@
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: `TASK-PCM-0004-content-system.md` / branch `task/PCM-0004-content-system` / awaiting review.
+Current P0 task: `TASK-PCM-0004-content-system.md` / branch `task/PCM-0004-content-system` / durable handoff PR #9 / awaiting user review.
 
 ## Main objective
 
