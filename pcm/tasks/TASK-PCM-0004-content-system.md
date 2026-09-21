@@ -1,8 +1,9 @@
 # TASK-PCM-0004 — Build and dogfood the reusable content-generation system
 
-<!-- continuity:task {"acceptance":["content-generation-modules contains versioned modules for brand foundation, content context, writing direction, visual direction, image generation, and HTML demos","the helper repo has machine-readable project/asset/review schemas and a pinned release or commit reference","Eval Lab receives a non-destructive project adapter that points agents to the helper contract and preserves its existing research contracts","the Eval Lab adapter includes a durable project brief, brand-language rules, visual-style rules, and asset manifest","deterministic validation checks the adapter, claims/asset metadata, and required preview outputs","at least one rendered README/HTML/PDF review packet is produced for human inspection","the task records exact branch, PR, render, and validation evidence for a fresh Luna session","no target repository is merged without user review"],"depends_on":["PCM-0003"],"goal":"Create a reusable, versioned content-generation helper repository and apply it to Eval Lab as a preview-only dogfood integration with durable rendered review artifacts.","id":"PCM-0004","next_action":"Create the helper repository contract and the Eval Lab preview task branches.","owner":"Codex current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The user needs multiple agents and ChatGPT sessions to produce human-oriented brand language, README content, visual direction, images, and HTML demos consistently without rebuilding the workflow from conversation history."} -->
+<!-- continuity:task {"acceptance":["content-generation-modules contains versioned modules for brand foundation, content context, writing direction, visual direction, image generation, and HTML demos","the helper repo has machine-readable project/asset/review schemas and a pinned release or commit reference","Eval Lab receives a non-destructive project adapter that points agents to the helper contract and preserves its existing research contracts","the Eval Lab adapter includes a durable project brief, brand-language rules, visual-style rules, and asset manifest","deterministic validation checks the adapter, claims/asset metadata, and required preview outputs","at least one rendered README/HTML/PDF review packet is produced for human inspection","the task records exact branch, PR, render, and validation evidence for a fresh Luna session","no target repository is merged without user review"],"depends_on":["PCM-0003"],"goal":"Create a reusable, versioned content-generation helper repository and apply it to Eval Lab as a preview-only dogfood integration with durable rendered review artifacts.","id":"PCM-0004","next_action":"Review PR #30 and the rendered preview; do not merge the target branch until the user approves promotion into README.md.","owner":"Codex current implementation session; GitHub assignee Pukujan","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The user needs multiple agents and ChatGPT sessions to produce human-oriented brand language, README content, visual direction, images, and HTML demos consistently without rebuilding the workflow from conversation history."} -->
 
-- Status: active
+- Status: awaiting user review
+- Protocol status: active; human review state: awaiting user review
 - Owner: Codex current implementation session; GitHub assignee Pukujan
 - Priority: P0
 - Depends on: PCM-0003
@@ -28,9 +29,11 @@ The system covers:
 
 In `Pukujan/project-continuity-modules`:
 
+- `.gitignore`;
 - `tasks/TASK-PCM-0004-content-system.md`;
 - `checkpoints/CURRENT.md`;
 - `HANDOFF.md`.
+- `artifacts/PCM-0004-content-system-review.md`.
 
 In `Pukujan/content-generation-modules`:
 
@@ -95,3 +98,42 @@ Blocked/uncertain:
 Next:
 
 - create the helper repository contract and the Eval Lab preview task branch.
+
+### 2026-09-20 — Codex implementation and review handoff
+
+Completed:
+
+- published `Pukujan/content-generation-modules` draft helper version `v0.1.1`;
+- added six reusable agent modules, three JSON schemas, target templates, ChatGPT setup guidance, and dependency-free validation;
+- applied a pinned project adapter to Eval Lab in preview-only PR #30;
+- added story-first Markdown and responsive HTML previews using the existing accepted hero, wide, square, portrait, and SVG assets;
+- generated and visually inspected desktop/tablet/mobile screenshots and a four-page A4 PDF review packet;
+- corrected a stale-base CI failure and recorded the cause.
+
+Evidence:
+
+- helper release: commit `3e89100fed61da19bd3d3f17ad336f189b576c38`, tag `v0.1.1`;
+- helper validation: `VALID: content-generation-modules contract`;
+- target adapter validation: `VALID: content-generation-modules contract and target adapter`;
+- Eval Lab local gate: repository contract OK, Ruff clean, `64 passed`;
+- corrected Eval Lab CI run `35546202014`: Python 3.11 and 3.12 passed;
+- Eval Lab PR #30: open, clean, all required checks passing;
+- durable preview index: `artifacts/PCM-0004-content-system-review.md`.
+
+Decisions:
+
+- use the empty `content-generation-modules` repository as the generic helper, while keeping Eval Lab facts and claims in its local `.content-system/` adapter;
+- pin the helper by tag and commit rather than reading moving `main`;
+- keep canonical Eval Lab `README.md` unchanged until user review;
+- retain historical CI failures as audit evidence; do not delete them.
+
+Blocked/uncertain:
+
+- no content-system blocker;
+- additional target repositories for multi-repository dogfooding have not been supplied;
+- promotion of the preview story into the canonical README awaits user approval.
+- the existing Windows continuity test `test_minimal_end_to_end_dogfood_flow` currently fails because generated source paths use backslashes while the assertion expects `checkpoints/CURRENT.md`; fixing that protocol portability defect is outside PCM-0004 scope.
+
+Next:
+
+- open the durable preview links, review the PDF/screenshots, and decide whether to promote the system into Eval Lab's README before applying it to additional repositories; separately queue the Windows path assertion as a continuity maintenance task.

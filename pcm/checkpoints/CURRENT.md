@@ -6,7 +6,7 @@
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: `TASK-PCM-0004-content-system.md` / branch `task/PCM-0004-content-system`.
+Current P0 task: `TASK-PCM-0004-content-system.md` / branch `task/PCM-0004-content-system` / awaiting review.
 
 ## Main objective
 
@@ -20,7 +20,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 ## Active
 
 - PCM-0003 — custom-extensions adoption merged in PR #6; the canonical task state is recorded in the prior checkpoint history.
-- PCM-0004 — reusable content-generation system and Eval Lab preview adoption is active.
+- PCM-0004 — reusable content-generation system is published at v0.1.1 and Eval Lab preview PR #30 is open with green CI.
 
 ## Queued
 
@@ -34,4 +34,4 @@ None known.
 
 ## Next atomic action
 
-Create the helper repository contract and the Eval Lab preview task branch under PCM-0004.
+Review the helper release and Eval Lab PR #30; do not merge or promote the README until the user approves the rendered preview.
