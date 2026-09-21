@@ -4,26 +4,28 @@ This repository is ready for a fresh session without prior chat history.
 
 ## Active work
 
-- Task: `PCM-0003 — Adopt continuity v1 in custom-extensions`
-- GitHub issue: #5
-- Suggested task branch: `task/PCM-0003-adopt-custom-extensions`
-- Canonical task file: `tasks/TASK-PCM-0003-adopt-custom-extensions.md`
-- Target repository: `Pukujan/custom-extensions`
+- Task: `PCM-0004 — Build and dogfood the reusable content-generation system` (awaiting user review)
+- Suggested task branch: `task/PCM-0004-content-system`
+- Canonical task file: `tasks/TASK-PCM-0004-content-system.md`
+- Helper repository: `Pukujan/content-generation-modules`
+- Pilot repository: `Pukujan/Eval-lab`
+- Eval Lab preview PR: `https://github.com/Pukujan/Eval-lab/pull/30`
+- Durable handoff PR: `https://github.com/Pukujan/project-continuity-modules/pull/9`
 
 ## Read exactly this first
 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `tasks/TASK-PCM-0003-adopt-custom-extensions.md`
+4. `tasks/TASK-PCM-0004-content-system.md`
 5. `SPEC.md`
 6. target repository `HANDOFF.md` and its prescribed read order
 
-Then implement only the bounded adoption task. Do not reconstruct project state from prior conversations.
+Then implement only the bounded content-system task. Do not reconstruct project state from prior conversations.
 
 ## Exact next action
 
-Review and merge `task/PCM-0003-adopt-custom-extensions`; after merge, activate PCM-0004.
+Review the helper release and Eval Lab PR #30; do not merge or promote the README until the user approves the rendered preview.
 
 ## Authority
 
