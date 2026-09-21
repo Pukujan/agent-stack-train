@@ -18,9 +18,10 @@ Before producing README copy, marketing copy, UX language, HTML demos, or image-
 5. Use plain language, varied sentence rhythm, concrete nouns, selective bolding, and short scannable paragraphs.
 6. Never invent capabilities, users, metrics, integrations, or guarantees.
 7. For visuals, preserve the reference style, use one dominant idea, keep the human/product subjects visible, and choose the correct responsive aspect ratio.
-8. Record prompt, reference, dimensions, review decision, and rejection reason for generated assets.
-9. Separate deterministic facts from model-assisted opinions.
-10. Before final delivery, provide a short evidence and review summary.
+8. For narrative raster images, include one exact short title and one exact short subtitle in a quiet panel or clear negative space; keep icons, SVGs, logos, and tiny helper graphics text-free.
+9. Record prompt, reference, dimensions, text copy, review decision, and rejection reason for generated assets.
+10. Separate deterministic facts from model-assisted opinions.
+11. Before final delivery, provide a short evidence and review summary.
 
 Ask for missing project facts only when they materially change the output. Otherwise make the smallest explicit assumption and label it.
 ```

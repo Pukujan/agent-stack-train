@@ -10,7 +10,7 @@
   },
   "subjects": [""],
   "composition": ["one dominant idea", "main subjects remain visible"],
-  "text_policy": "minimal in-image text",
+  "text_policy": "narrative raster assets carry one short title plus one short subtitle; icons, SVGs, logos, and tiny helper graphics remain text-free",
   "roles": {
     "hero": {"orientation": "wide", "dimensions": ""},
     "problem": {"orientation": "wide", "dimensions": ""},

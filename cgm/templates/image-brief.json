@@ -8,7 +8,7 @@
   "composition": "",
   "visual_treatment": "",
   "dimensions": "",
-  "text_policy": "minimal",
+  "text_policy": "required short title + subtitle for narrative raster assets; none for icons, SVGs, logos, or tiny helper graphics",
   "negative_constraints": [],
   "reference_assets": []
 }

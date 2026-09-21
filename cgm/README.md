@@ -78,7 +78,8 @@ Every image has one role and one dominant idea. The visual system should preserv
 - the main human and AI/product subjects;
 - calm contrast and a restrained palette;
 - enough negative space for the layout where the image will be used;
-- minimal or no in-image text except for a deliberate hero title;
+- a short title plus subtitle on narrative raster assets so a first-time reader can orient without opening the README;
+- no text on icons, SVGs, logos, or tiny helper graphics unless explicitly requested;
 - a declared aspect ratio and mobile/tablet crop strategy.
 
 The hero establishes the reference pattern. Supporting images should feel related without becoming alternate hero banners.
@@ -116,4 +117,4 @@ See [`CHATGPT_SETUP.md`](CHATGPT_SETUP.md) for a reusable ChatGPT Project/custom
 
 ## Current version
 
-The current draft contract is `0.1.1`. It is intentionally small and will be promoted only after being dogfooded in more than one repository.
+The current draft contract is `0.1.2`. It is intentionally small and will be promoted only after being dogfooded in more than one repository.

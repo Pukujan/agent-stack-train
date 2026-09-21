@@ -13,3 +13,10 @@
 
 - added deterministic validation for a target repository adapter;
 - added project-root asset existence checks when validating an adapter.
+
+## 0.1.2 — draft
+
+- made a short, exact title plus subtitle the default for narrative raster assets;
+- kept icons, SVGs, logos, and tiny helper graphics text-free by default;
+- added rejection guidance for garbled, crowded, or overlong generated copy;
+- updated image-brief and visual-style templates so future adapters inherit the rule.
