@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0008","active_task_file":"tasks/TASK-PCM-0008-multi-repo-content-system.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: `TASK-PCM-0008-multi-repo-content-system.md` / branch `task/PCM-0008-close-readme-promotion` / complete; all four README-enabled PRs merged.
+Current P0 task: none; PCM-0008 completed and all four README-enabled PRs merged.
 
 ## Main objective
 
