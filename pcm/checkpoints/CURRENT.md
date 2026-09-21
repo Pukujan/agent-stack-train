@@ -6,7 +6,7 @@
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: `TASK-PCM-0008-multi-repo-content-system.md` / branch `task/PCM-0008-multi-repo-content-system` / three target previews planned.
+Current P0 task: `TASK-PCM-0008-multi-repo-content-system.md` / branch `task/PCM-0008-multi-repo-content-system-evidence` / three target preview PRs open for review.
 
 ## Main objective
 
@@ -21,7 +21,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 - PCM-0003 — custom-extensions adoption merged in PR #6; the canonical task state is recorded in the prior checkpoint history.
 - PCM-0004 — reusable content-generation system is published at v0.1.1 and Eval Lab preview PR #30 is open with green CI.
-- PCM-0008 — three repository-specific content-system previews are scoped; target branches are not created yet.
+- PCM-0008 — three repository-specific content-system previews are published as open PRs; all adapters pin content-generation-modules v0.1.2.
 
 ## Queued
 
@@ -35,4 +35,4 @@ None known.
 
 ## Next atomic action
 
-Create the three target preview branches after reading their required repository contracts; keep canonical READMEs unchanged until the user reviews rendered packets.
+Review the three open preview PRs and local PDF packets. Keep canonical READMEs unchanged until the user approves a specific promotion.
