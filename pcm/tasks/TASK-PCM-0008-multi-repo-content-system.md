@@ -140,3 +140,36 @@ Blocked/uncertain:
 Next:
 
 - user reviews the three open preview PRs and local PDF packets; after explicit approval, promote only the selected Markdown/image direction into each canonical README and merge the corresponding PR.
+
+### 2026-09-20 — Eval Lab adapter aligned with v0.1.2
+
+Completed:
+
+- updated the existing Eval Lab preview PR #30 to pin `content-generation-modules` v0.1.2 at `cb8c18fa7789e4b651e1f963892bf056b0d3276d`;
+- regenerated the problem, square system, and portrait evidence raster assets so every narrative raster image has a short title and subtitle;
+- left the accepted hero and all SVG helper icons in place, with icons remaining text-free;
+- recorded the update in Eval Lab commit `e25411b` on `task/TASK-0014-content-system-adoption`.
+
+Evidence:
+
+- local adapter validation returned `VALID: content-generation-modules contract`;
+- repository contract returned `Repository contract OK`;
+- Ruff returned `All checks passed!`;
+- `PYTHONPATH=.;src python -m pytest -q` returned `64 passed`;
+- responsive render checks passed at 1440px, 900px, and 390px with all four images loaded and no horizontal overflow;
+- PDF packet: `D:\\claude\\eval-lab-TASK-0014\\review-output\\content-system-preview.pdf`, 4 A4 pages;
+- GitHub push run `35549659966` and pull-request run `35549662574` both passed Python 3.11 and 3.12 jobs.
+
+Decisions:
+
+- treat the title-plus-subtitle rule as a shared helper contract, not a one-off Eval Lab preference;
+- keep canonical README promotion and PR merge behind explicit user review;
+- retain the existing text-free SVG/icon exception for small helper visuals.
+
+Blocked/uncertain:
+
+- none for validation or CI; user review remains the promotion gate.
+
+Next:
+
+- review the Eval Lab PR alongside the three new target PRs, then promote or merge only the repositories the user explicitly approves.

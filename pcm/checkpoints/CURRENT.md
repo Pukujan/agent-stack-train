@@ -20,7 +20,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 ## Active
 
 - PCM-0003 — custom-extensions adoption merged in PR #6; the canonical task state is recorded in the prior checkpoint history.
-- PCM-0004 — reusable content-generation system is published at v0.1.1 and Eval Lab preview PR #30 is open with green CI.
+- PCM-0004 — reusable content-generation system is published at v0.1.2; Eval Lab preview PR #30 is open with green CI after the narrative image text-contract update.
 - PCM-0008 — three repository-specific content-system previews are published as open PRs; all adapters pin content-generation-modules v0.1.2.
 
 ## Queued
