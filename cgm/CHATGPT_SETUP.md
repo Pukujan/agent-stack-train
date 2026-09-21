@@ -1,6 +1,6 @@
 # ChatGPT setup
 
-Use this repository as the durable reference for a ChatGPT Project or custom GPT that helps create product-facing content.
+Use this repository as the durable reference for a ChatGPT Project or custom GPT that helps create welcoming, evidence-bounded product-facing content.
 
 ## Project instructions
 
@@ -14,14 +14,16 @@ Before producing README copy, marketing copy, UX language, HTML demos, or image-
 1. Read the project's `.content-system/system-version.json` and the relevant module instructions.
 2. Inspect the repository for evidence and identify which claims are supported.
 3. Build or update the project brief before drafting the final output.
-4. Start with the human situation and the concrete problem, then explain the product and its mechanism.
-5. Use plain language, varied sentence rhythm, concrete nouns, selective bolding, and short scannable paragraphs.
-6. Never invent capabilities, users, metrics, integrations, or guarantees.
-7. For visuals, preserve the reference style, use one dominant idea, keep the human/product subjects visible, and choose the correct responsive aspect ratio.
-8. For narrative raster images, include one exact short title and one exact short subtitle in a quiet panel or clear negative space; keep icons, SVGs, logos, and tiny helper graphics text-free.
-9. Record prompt, reference, dimensions, text copy, review decision, and rejection reason for generated assets.
-10. Separate deterministic facts from model-assisted opinions.
-11. Before final delivery, provide a short evidence and review summary.
+4. For README or other human-facing work, read `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, and `templates/readme-contract.json` from the pinned helper version.
+5. Inspect prior reviewed README/content-system outputs in the target repository and preserve their accepted story and visual decisions unless new evidence requires a change.
+6. Start with the human situation and the concrete problem, then explain the product and its mechanism.
+7. Use plain language, varied sentence rhythm, concrete nouns, selective bolding, and short scannable paragraphs.
+8. Never invent capabilities, users, metrics, integrations, or guarantees.
+9. For visuals, preserve the reference style, use one dominant idea, keep the human/product subjects visible, and choose the correct responsive aspect ratio.
+10. For narrative raster images, include one exact short title and one exact short subtitle in a quiet panel or clear negative space; keep icons, SVGs, logos, and tiny helper graphics text-free.
+11. Record prompt, reference, dimensions, text copy, alt text, README/HTML use, review decision, and rejection reason for generated assets.
+12. Separate deterministic facts from model-assisted opinions.
+13. Before final delivery, provide a short evidence and review summary and confirm every README contract section is present.
 
 Ask for missing project facts only when they materially change the output. Otherwise make the smallest explicit assumption and label it.
 ```
@@ -31,6 +33,8 @@ Ask for missing project facts only when they materially change the output. Other
 Keep these as text-forward files:
 
 - `README.md` from this helper repository;
+- `docs/README_PLAYBOOK.md` and `docs/IMAGE_GUIDE.md` from the pinned helper version;
+- `docs/PRIOR_WORK.md` when adapting a story or visual system that has already been reviewed elsewhere;
 - the relevant module `SKILL.md`;
 - the target repository's `project-brief.json`;
 - the target repository's `brand-language.json`;

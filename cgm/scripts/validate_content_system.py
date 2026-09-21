@@ -19,6 +19,13 @@ EXPECTED_MODULES = {
     "html-demo",
 }
 
+REQUIRED_HELPER_DOCS = (
+    "docs/README_PLAYBOOK.md",
+    "docs/IMAGE_GUIDE.md",
+    "docs/PRIOR_WORK.md",
+    "docs/MIGRATING_TO_0.2.md",
+)
+
 
 def load_json(path: Path) -> dict:
     try:
@@ -30,6 +37,61 @@ def load_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"expected object in {path}")
     return value
+
+
+def check_readme(root: Path) -> list[str]:
+    errors: list[str] = []
+    readme_path = root / "README.md"
+    if not readme_path.is_file():
+        return ["missing README.md"]
+
+    try:
+        contract = load_json(root / "templates" / "readme-contract.json")
+    except ValueError as exc:
+        return [str(exc)]
+
+    text = readme_path.read_text(encoding="utf-8")
+    for section in contract.get("required_sections", []):
+        heading = section.get("heading")
+        if heading and f"## {heading}" not in text:
+            errors.append(f"README missing required section: {heading}")
+
+    story_heading = "## Why this exists"
+    mechanism_heading = "## How it works"
+    story_position = text.find(story_heading)
+    mechanism_position = text.find(mechanism_heading)
+    if story_position == -1 or mechanism_position == -1:
+        pass
+    elif story_position > mechanism_position:
+        errors.append("README must explain why the project exists before how it works")
+    first_code_block = text.find("```")
+    if first_code_block != -1 and story_position != -1 and first_code_block < story_position:
+        errors.append("README must place technical code after the human situation")
+
+    for reference in contract.get("required_references", []):
+        if reference not in text:
+            errors.append(f"README missing required reference: {reference}")
+
+    visual_policy = contract.get("visual_policy", {})
+    image_refs = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text)
+    image_refs.extend(re.findall(r"<img[^>]+src=[\"']([^\"']+)[\"']", text, flags=re.IGNORECASE))
+    local_image_refs = [ref for ref in image_refs if not ref.startswith(("http://", "https://", "#"))]
+    minimum_images = int(visual_policy.get("minimum_narrative_images_for_this_helper", 0))
+    if len(local_image_refs) < minimum_images:
+        errors.append(
+            "README must reference at least "
+            f"{minimum_images} local narrative image(s); found {len(local_image_refs)}"
+        )
+    for reference in local_image_refs:
+        image_path = reference.split("#", 1)[0].strip("<>")
+        if not (root / image_path).is_file():
+            errors.append(f"README image does not exist: {image_path}")
+
+    for guide in visual_policy.get("required_guides", []):
+        if not (root / guide).is_file():
+            errors.append(f"missing required image guide or record: {guide}")
+
+    return errors
 
 
 def check(root: Path) -> list[str]:
@@ -45,6 +107,12 @@ def check(root: Path) -> list[str]:
     modules = set(version.get("modules", []))
     if modules != EXPECTED_MODULES:
         errors.append(f"system modules must be exactly {sorted(EXPECTED_MODULES)}")
+    human_output = version.get("human_output_contract", {})
+    if human_output.get("version") != "content-generation.readme-contract.v1":
+        errors.append("system-version.json must declare content-generation.readme-contract.v1")
+    for field in ("template", "playbook", "image_guide", "prior_work"):
+        if not human_output.get(field):
+            errors.append(f"system-version.json human_output_contract missing {field}")
     for module in EXPECTED_MODULES:
         path = root / "modules" / module / "SKILL.md"
         if not path.is_file():
@@ -56,6 +124,7 @@ def check(root: Path) -> list[str]:
         "project-brief.schema.json",
         "asset-manifest.schema.json",
         "review-rubric.schema.json",
+        "readme-contract.schema.json",
     }
     for name in required_schemas:
         path = root / "schemas" / name
@@ -67,12 +136,23 @@ def check(root: Path) -> list[str]:
         if "$schema" not in schema or "$id" not in schema:
             errors.append(f"schema missing $schema or $id: {path.relative_to(root)}")
 
-    for name in ("project-brief.json", "brand-language.json", "visual-style.json", "asset-manifest.json", "review-rubric.json"):
+    for name in (
+        "project-brief.json",
+        "brand-language.json",
+        "visual-style.json",
+        "asset-manifest.json",
+        "review-rubric.json",
+        "readme-contract.json",
+    ):
         if not (root / "templates" / name).is_file():
             errors.append(f"missing template: templates/{name}")
 
     if not (root / "CHATGPT_SETUP.md").is_file():
         errors.append("missing CHATGPT_SETUP.md")
+    for path in REQUIRED_HELPER_DOCS:
+        if not (root / path).is_file():
+            errors.append(f"missing helper guide: {path}")
+    errors.extend(check_readme(root))
     return errors
 
 

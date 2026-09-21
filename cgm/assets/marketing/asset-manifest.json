@@ -1,0 +1,28 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.2.0",
+  "assets": [
+    {
+      "path": "assets/marketing/hero-content-truth.png",
+      "role": "README story introduction",
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "text_policy": "exact short title plus subtitle",
+      "prompt_recipe": "scattered repository evidence becomes a clear README for a human reader; title Make product truth visible; subtitle From repository evidence to human-ready content",
+      "alt_text": "Scattered repository notes and files become a clear README that a human reader can understand.",
+      "usage": "Place below the README title and opening promise.",
+      "review": "accepted"
+    },
+    {
+      "path": "assets/marketing/six-modules-one-story.png",
+      "role": "README workflow explanation",
+      "orientation": "square",
+      "dimensions": "1024x1024",
+      "text_policy": "exact short title plus subtitle",
+      "prompt_recipe": "six content modules surround one evidence brief while human review closes the loop; title Six modules. One story.; subtitle Keep the work grounded in evidence.",
+      "alt_text": "Six content modules surround one evidence brief while a person marks the result ready for review.",
+      "usage": "Place beside the module table or workflow explanation.",
+      "review": "accepted"
+    }
+  ]
+}

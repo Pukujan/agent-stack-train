@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "content-generation.readme-contract.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "purpose",
+    "required_sections",
+    "required_references",
+    "visual_policy",
+    "review_questions"
+  ],
+  "properties": {
+    "schema_version": {"const": "content-generation.readme-contract.v1"},
+    "purpose": {"type": "string", "minLength": 1},
+    "required_sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "heading", "question"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "heading": {"type": "string", "minLength": 1},
+          "question": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "required_references": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "visual_policy": {
+      "type": "object",
+      "required": [
+        "use_when",
+        "minimum_narrative_images_for_this_helper",
+        "required_image_record_fields",
+        "required_guides"
+      ],
+      "properties": {
+        "use_when": {"type": "string", "minLength": 1},
+        "minimum_narrative_images_for_this_helper": {"type": "integer", "minimum": 0},
+        "required_image_record_fields": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "required_guides": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      },
+      "additionalProperties": false
+    },
+    "review_questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false
+}

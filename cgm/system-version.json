@@ -1,8 +1,8 @@
 {
   "system": "content-generation-modules",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "status": "draft",
-  "purpose": "Reusable agent contract for human-oriented brand, content, visual, image, and HTML-demo generation.",
+  "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
     "brand-foundation",
     "content-context",
@@ -18,6 +18,21 @@
     "asset-manifest.json",
     "review-rubric.json"
   ],
+  "helper_contract_files": [
+    "templates/readme-contract.json",
+    "docs/README_PLAYBOOK.md",
+    "docs/IMAGE_GUIDE.md",
+    "docs/PRIOR_WORK.md",
+    "docs/MIGRATING_TO_0.2.md"
+  ],
+  "human_output_contract": {
+    "version": "content-generation.readme-contract.v1",
+    "template": "templates/README.template.md",
+    "playbook": "docs/README_PLAYBOOK.md",
+    "image_guide": "docs/IMAGE_GUIDE.md",
+    "prior_work": "docs/PRIOR_WORK.md",
+    "technical_details_order": "after-human-story"
+  },
   "quality_model": {
     "objective": "deterministic checks and repository evidence",
     "advisory": "model-assisted rubric scores",

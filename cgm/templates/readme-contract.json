@@ -1,0 +1,35 @@
+{
+  "schema_version": "content-generation.readme-contract.v1",
+  "purpose": "Make README and human-facing project documentation welcoming before technical details become necessary.",
+  "required_sections": [
+    {"id": "why_this_exists", "heading": "Why this exists", "question": "What human situation and consequence make this project matter?"},
+    {"id": "what_this_project_is", "heading": "What this project is", "question": "Who is it for, what does it do, and what does it not claim?"},
+    {"id": "what_you_can_make_or_use", "heading": "What you can make or use", "question": "What useful output, workflow, or decision can the reader reach?"},
+    {"id": "how_it_works", "heading": "How it works", "question": "Can the mechanism be understood before the architecture?"},
+    {"id": "evidence_and_boundaries", "heading": "Evidence and boundaries", "question": "Which claims are supported and where does the project stop?"},
+    {"id": "image_generation_and_use", "heading": "Image generation and use", "question": "Can a person generate, review, place, and reuse the visuals safely?"},
+    {"id": "templates_and_guides", "heading": "Templates and guides", "question": "Can a maintainer find the next source file or guide?"},
+    {"id": "prior_work_and_references", "heading": "Prior work and references", "question": "Does the README preserve relevant prior research and reviewed examples?"},
+    {"id": "try_it", "heading": "Try it", "question": "Is there a smallest useful next action?"}
+  ],
+  "required_references": [
+    "docs/README_PLAYBOOK.md",
+    "docs/IMAGE_GUIDE.md",
+    "docs/PRIOR_WORK.md",
+    "docs/MIGRATING_TO_0.2.md",
+    "templates/README.template.md"
+  ],
+  "visual_policy": {
+    "use_when": "the target repository has a visual contract, committed narrative assets, or a request for visual direction",
+    "minimum_narrative_images_for_this_helper": 2,
+    "required_image_record_fields": ["role", "exact_text", "dimensions", "prompt_intent", "alt_text", "usage", "crop_behavior", "rejection_conditions", "review_decision"],
+    "required_guides": ["docs/IMAGE_GUIDE.md", "assets/marketing/IMAGE_NOTES.md"]
+  },
+  "review_questions": [
+    "Can a first-time reader explain why the project exists after twenty seconds?",
+    "Does the first screen feel welcoming before it becomes technical?",
+    "Can the reader distinguish shipped evidence from plans and unknowns?",
+    "Do the visuals clarify one human idea and remain useful when stacked on a narrow screen?",
+    "Can another maintainer regenerate or reuse each visual from the recorded guide?"
+  ]
+}

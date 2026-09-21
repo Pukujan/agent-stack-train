@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_content_system import check, check_adapter
+from scripts.validate_content_system import check, check_adapter, check_readme
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +11,32 @@ ROOT = Path(__file__).resolve().parents[1]
 class ContentSystemValidationTests(unittest.TestCase):
     def test_repository_contract_is_valid(self):
         self.assertEqual(check(ROOT), [])
+
+    def test_readme_gate_rejects_a_technical_only_readme(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            (target / "README.md").write_text("# Internal API\n\n## Setup\n", encoding="utf-8")
+            errors = check_readme(target)
+            self.assertTrue(any("README missing required section" in error for error in errors))
+            self.assertTrue(any("local narrative image" in error for error in errors))
+
+    def test_readme_gate_rejects_technical_details_before_the_human_story(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            (target / "README.md").write_text(
+                "# Project\n\n```powershell\npython run.py\n```\n\n## Why this exists\n",
+                encoding="utf-8",
+            )
+            errors = check_readme(target)
+            self.assertTrue(any("technical code after the human situation" in error for error in errors))
 
     def test_missing_module_is_reported(self):
         with tempfile.TemporaryDirectory() as directory:
