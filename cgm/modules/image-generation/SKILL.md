@@ -16,6 +16,8 @@ description: Turn a project brief and visual style into reproducible, reviewable
 7. Record the prompt recipe, exact copy, role, dimensions, references, settings, review decision, and final hash in the asset manifest or a linked prompt record.
 8. Link the image guide and prompt record from the human-facing document so another person can regenerate, replace, or reuse the asset safely.
 
+When the target has no stronger visual contract, use [`docs/BRAND_DIRECTION.md`](../../docs/BRAND_DIRECTION.md) as the default direction. Preserve a recognizable human-and-companion relationship across related assets, use anime-inspired editorial scenes and blue-violet evening light, and make the content workflow visible through one simple diagram or artifact.
+
 ## Prompt recipe
 
 Compose the brief in this order:

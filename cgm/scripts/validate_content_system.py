@@ -20,9 +20,12 @@ EXPECTED_MODULES = {
 }
 
 REQUIRED_HELPER_DOCS = (
+    "docs/CONTENT_RESEARCH.md",
+    "docs/BRAND_DIRECTION.md",
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
+    "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.2.md",
 )
 
@@ -72,6 +75,12 @@ def check_readme(root: Path) -> list[str]:
         if reference not in text:
             errors.append(f"README missing required reference: {reference}")
 
+    if contract.get("scanability_policy"):
+        if not re.search(r"\*\*[^*\n]+\*\*", text):
+            errors.append("README must include at least one meaningful bold scan anchor")
+        if not re.search(r"^## .+", text, flags=re.MULTILINE):
+            errors.append("README must use semantic level-two headings for scan structure")
+
     visual_policy = contract.get("visual_policy", {})
     image_refs = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text)
     image_refs.extend(re.findall(r"<img[^>]+src=[\"']([^\"']+)[\"']", text, flags=re.IGNORECASE))
@@ -113,6 +122,16 @@ def check(root: Path) -> list[str]:
     for field in ("template", "playbook", "image_guide", "prior_work"):
         if not human_output.get(field):
             errors.append(f"system-version.json human_output_contract missing {field}")
+    if not human_output.get("research"):
+        errors.append("system-version.json human_output_contract missing research")
+    if not human_output.get("brand_direction"):
+        errors.append("system-version.json human_output_contract missing brand_direction")
+    scanability = version.get("scanability_contract", {})
+    if scanability.get("version") != "content-generation.scanability.v1":
+        errors.append("system-version.json must declare content-generation.scanability.v1")
+    for field in ("heading_rule", "bolding_rule", "scan_test", "accessibility_rule"):
+        if not scanability.get(field):
+            errors.append(f"system-version.json scanability_contract missing {field}")
     for module in EXPECTED_MODULES:
         path = root / "modules" / module / "SKILL.md"
         if not path.is_file():

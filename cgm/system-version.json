@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -23,7 +23,8 @@
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
-    "docs/MIGRATING_TO_0.2.md"
+    "docs/MIGRATING_TO_0.2.md",
+    "docs/MIGRATING_TO_0.3.md"
   ],
   "human_output_contract": {
     "version": "content-generation.readme-contract.v1",
@@ -31,7 +32,16 @@
     "playbook": "docs/README_PLAYBOOK.md",
     "image_guide": "docs/IMAGE_GUIDE.md",
     "prior_work": "docs/PRIOR_WORK.md",
+    "research": "docs/CONTENT_RESEARCH.md",
+    "brand_direction": "docs/BRAND_DIRECTION.md",
     "technical_details_order": "after-human-story"
+  },
+  "scanability_contract": {
+    "version": "content-generation.scanability.v1",
+    "heading_rule": "Use descriptive headings that tell the reader what they will learn or gain.",
+    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
+    "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
+    "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
   },
   "quality_model": {
     "objective": "deterministic checks and repository evidence",

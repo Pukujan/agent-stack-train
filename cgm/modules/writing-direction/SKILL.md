@@ -53,6 +53,19 @@ Each important paragraph should contain:
 - do not bold entire paragraphs;
 - do not claim that a system “understands,” “guarantees,” or “solves” something without evidence.
 
+## Scan-first formatting
+
+Use [`docs/CONTENT_RESEARCH.md`](../../docs/CONTENT_RESEARCH.md) as the research source for this contract.
+
+- Make the heading tell the reader what they will learn or gain.
+- Put the main point early in the section and keep one idea per paragraph.
+- Use bullets for parallel benefits, steps, options, and requirements.
+- Bold one short phrase when it gives a skimming reader a useful anchor. Prefer a problem, outcome, mechanism, proof, or boundary.
+- Treat one short bold phrase per paragraph, often 2–8 words, as a practical heuristic rather than a universal rule.
+- Read headings and bold phrases alone. They should form a useful second story about the project.
+- Do not use bold as a replacement for semantic headings or descriptive links.
+- If the sentence becomes inaccurate or unclear when bold is removed, fix the sentence instead of depending on styling.
+
 ## Final review
 
 Ask what a first-time reader can repeat after twenty seconds. If the answer is only a category (“an AI-powered evaluation platform”), the copy needs a more concrete situation and mechanism.

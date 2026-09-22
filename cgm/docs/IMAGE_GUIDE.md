@@ -2,6 +2,8 @@
 
 Images in a repository README should help a person understand one idea before they read the technical explanation. This guide covers the complete path from visual question to committed asset.
 
+The helper's default visual direction is documented in [`BRAND_DIRECTION.md`](BRAND_DIRECTION.md). It is anime-inspired editorial content UX: a recurring human and friendly companion, deep blue-violet lighting, warm accents, readable title copy, and one clear workflow or relationship per image. A target repository with its own accepted visual system takes precedence.
+
 ## Choose the job first
 
 | Role | Reader question | Typical placement |
@@ -50,6 +52,8 @@ Constraints: <must keep, must show, must remain visible>
 Avoid: <garbled text, extra labels, unsupported claims, clutter>
 Use in README/HTML: <section and placement>
 ```
+
+For the helper's default direction, use the prior [Harness on Steroids](https://github.com/Pukujan/harness-on-steroids) and [Eval Lab](https://github.com/Pukujan/Eval-lab) assets as continuity references for human-and-companion scenes, lighting, and simple diagrams. Do not copy their characters, logos, or compositions; create a target-specific scene.
 
 ## Text-bearing raster rules
 

@@ -14,10 +14,10 @@ Before producing README copy, marketing copy, UX language, HTML demos, or image-
 1. Read the project's `.content-system/system-version.json` and the relevant module instructions.
 2. Inspect the repository for evidence and identify which claims are supported.
 3. Build or update the project brief before drafting the final output.
-4. For README or other human-facing work, read `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, and `templates/readme-contract.json` from the pinned helper version.
+4. For README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, and `templates/readme-contract.json` from the pinned helper version.
 5. Inspect prior reviewed README/content-system outputs in the target repository and preserve their accepted story and visual decisions unless new evidence requires a change.
 6. Start with the human situation and the concrete problem, then explain the product and its mechanism.
-7. Use plain language, varied sentence rhythm, concrete nouns, selective bolding, and short scannable paragraphs.
+7. Use plain language, descriptive headings, varied sentence rhythm, concrete nouns, selective bolding, and short scannable paragraphs. Read the headings and bold phrases as a second story.
 8. Never invent capabilities, users, metrics, integrations, or guarantees.
 9. For visuals, preserve the reference style, use one dominant idea, keep the human/product subjects visible, and choose the correct responsive aspect ratio.
 10. For narrative raster images, include one exact short title and one exact short subtitle in a quiet panel or clear negative space; keep icons, SVGs, logos, and tiny helper graphics text-free.
@@ -33,6 +33,7 @@ Ask for missing project facts only when they materially change the output. Other
 Keep these as text-forward files:
 
 - `README.md` from this helper repository;
+- `docs/CONTENT_RESEARCH.md` and `docs/BRAND_DIRECTION.md` from the pinned helper version;
 - `docs/README_PLAYBOOK.md` and `docs/IMAGE_GUIDE.md` from the pinned helper version;
 - `docs/PRIOR_WORK.md` when adapting a story or visual system that has already been reviewed elsewhere;
 - the relevant module `SKILL.md`;

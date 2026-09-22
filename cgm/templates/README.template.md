@@ -1,12 +1,14 @@
 # Project name
 
-> One sentence that names the human situation and the concrete promise.
+> **One sentence that names the human situation and the concrete promise.**
 
 ![Short description of the project's main human-facing idea](path/to/hero.png)
 
 ## Why this exists
 
 Start with a situation the reader recognizes. Explain what becomes hard, costly, risky, or confusing, and why this project deserves to exist.
+
+**Use one short bold anchor when it helps a skimming reader retain the point.** Keep the paragraph readable without the styling.
 
 ## What this project is
 
@@ -41,3 +43,7 @@ Link to reviewed examples, earlier projects, or source research that shaped the 
 ## Try it
 
 Give the smallest useful path to a first result, then link to the technical setup and full documentation.
+
+### Scan test
+
+Read only the headings, bold phrases, and link text. They should communicate the problem, promise, mechanism, boundary, and next action. See [`docs/CONTENT_RESEARCH.md`](../docs/CONTENT_RESEARCH.md).

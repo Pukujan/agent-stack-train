@@ -13,12 +13,21 @@
     {"id": "try_it", "heading": "Try it", "question": "Is there a smallest useful next action?"}
   ],
   "required_references": [
+    "docs/CONTENT_RESEARCH.md",
+    "docs/BRAND_DIRECTION.md",
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
+    "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.2.md",
     "templates/README.template.md"
   ],
+  "scanability_policy": {
+    "heading_rule": "Use descriptive headings that tell the reader what they will learn or gain.",
+    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
+    "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
+    "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
+  },
   "visual_policy": {
     "use_when": "the target repository has a visual contract, committed narrative assets, or a request for visual direction",
     "minimum_narrative_images_for_this_helper": 2,

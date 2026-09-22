@@ -1,28 +1,51 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.2.0",
+  "system_version": "0.3.0",
   "assets": [
     {
-      "path": "assets/marketing/hero-content-truth.png",
+      "path": "assets/marketing/hero-story-loop.png",
       "role": "README story introduction",
       "orientation": "wide",
       "dimensions": "1536x1024",
-      "text_policy": "exact short title plus subtitle",
-      "prompt_recipe": "scattered repository evidence becomes a clear README for a human reader; title Make product truth visible; subtitle From repository evidence to human-ready content",
-      "alt_text": "Scattered repository notes and files become a clear README that a human reader can understand.",
-      "usage": "Place below the README title and opening promise.",
-      "review": "accepted"
+      "text_policy": "exact short title plus subtitle; incidental prop lettering is not relied on",
+      "prompt_recipe": "original anime-inspired content designer and friendly story-guide companion in a blue-violet evening studio; four-step research, writing, visual, review loop; title Give every project a clearer story; subtitle Research first. Write for humans. Ship with evidence.",
+      "alt_text": "An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story.",
+      "usage": "Place below the README title and opening promise as the primary story introduction.",
+      "crop_behavior": "Keep the title, designer, companion, and four-step loop visible on wide and narrow crops.",
+      "rejection_conditions": "Reject if the human/companion relationship is unclear, the loop is unreadable, the title or subtitle changes, or the image becomes generic cyberpunk.",
+      "review": "accepted",
+      "provider": "built-in image_gen",
+      "hash": "8dcb2de6856a52de262610bbca67d2cd0a5e7adaa6232a1c8114018941747655"
     },
     {
-      "path": "assets/marketing/six-modules-one-story.png",
+      "path": "assets/marketing/problem-scattered-story.png",
+      "role": "README problem explanation",
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "text_policy": "exact short title plus subtitle; incidental prop lettering is not relied on",
+      "prompt_recipe": "original anime-inspired content designer and story-guide companion sorting repository notes, screenshots, prompts, and test results while a reader waits; title Raw material is not a story; subtitle A full repository can still leave readers guessing.",
+      "alt_text": "An anime-inspired content designer and story-guide companion sort repository notes, screenshots, prompts, and test results into a clearer story for a waiting reader.",
+      "usage": "Place in the Why this exists section after the problem paragraph.",
+      "crop_behavior": "Keep the evidence pile, characters, waiting reader, and emerging story path visible when stacked on narrow screens.",
+      "rejection_conditions": "Reject if the problem cannot be recognized at a glance, the characters are covered, the image implies unsupported metrics, or the title/subtitle changes.",
+      "review": "accepted",
+      "provider": "built-in image_gen",
+      "hash": "edea3b94e5159e570f6a5832731aeef50e6f6a4956d6db71a45a426de0a2fd29"
+    },
+    {
+      "path": "assets/marketing/story-loop-square.png",
       "role": "README workflow explanation",
       "orientation": "square",
       "dimensions": "1024x1024",
-      "text_policy": "exact short title plus subtitle",
-      "prompt_recipe": "six content modules surround one evidence brief while human review closes the loop; title Six modules. One story.; subtitle Keep the work grounded in evidence.",
-      "alt_text": "Six content modules surround one evidence brief while a person marks the result ready for review.",
-      "usage": "Place beside the module table or workflow explanation.",
-      "review": "accepted"
+      "text_policy": "exact short title plus subtitle; four workflow cards use icons rather than relied-on labels",
+      "prompt_recipe": "original anime-inspired content designer and friendly story-guide companion review a four-step loop with research, writing, visual, and review icons; title The story loop; subtitle Research, write, illustrate, review.",
+      "alt_text": "An anime-inspired content designer and story-guide companion review a four-step research, writing, visual, and review loop.",
+      "usage": "Place beside the What you can make or use section or directly before the How it works workflow.",
+      "crop_behavior": "Keep the title, characters, and four-step loop visible when the image is stacked at 520px or less.",
+      "rejection_conditions": "Reject if the loop is not legible, the characters lose continuity with the hero, the title/subtitle changes, or the image becomes a second hero without a workflow job.",
+      "review": "accepted",
+      "provider": "built-in image_gen",
+      "hash": "c38720314c79e7b1cc5693ebbb3e50fd2524675c3171e28e21c497c9d5c5d0c6"
     }
   ]
 }

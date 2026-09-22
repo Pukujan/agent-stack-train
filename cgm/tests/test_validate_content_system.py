@@ -38,6 +38,20 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_readme(target)
             self.assertTrue(any("technical code after the human situation" in error for error in errors))
 
+    def test_readme_gate_requires_scan_anchor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            (target / "README.md").write_text(
+                "# Project\n\n## Why this exists\n\nA human situation.\n",
+                encoding="utf-8",
+            )
+            errors = check_readme(target)
+            self.assertTrue(any("bold scan anchor" in error for error in errors))
+
     def test_missing_module_is_reported(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)

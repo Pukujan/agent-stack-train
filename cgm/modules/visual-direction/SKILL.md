@@ -28,6 +28,8 @@ Before generating, declare:
 - keep diagrams simple enough to understand at the target size;
 - do not use neon contrast or dense interface panels to manufacture complexity.
 
+When the target uses the helper default, prefer the anime-inspired human-and-companion continuity documented in [`docs/BRAND_DIRECTION.md`](../../docs/BRAND_DIRECTION.md). Keep the characters recognizable across related assets, but change the scene and diagram so each image answers a different reader question. Prior reviewed references include [Harness on Steroids](https://github.com/Pukujan/harness-on-steroids) and [Eval Lab](https://github.com/Pukujan/Eval-lab).
+
 ## Responsive roles
 
 Declare separate roles for wide hero, wide problem, square system, portrait evidence, icon, and social preview. Do not force every asset into the hero's dimensions.

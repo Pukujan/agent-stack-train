@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — draft
+
+- recorded the UX, accessibility, and marketing research behind descriptive headings, short sections, bullets, and selective bolding in `docs/CONTENT_RESEARCH.md`;
+- made the heading-and-bold second-story scan test part of the README template, playbook, writing module, machine-readable contract, and validator;
+- added `docs/BRAND_DIRECTION.md` with the Story Loop direction and analysis of prior anime-inspired README work in Harness on Steroids and Eval Lab;
+- replaced the paper-study marketing visuals with original anime-inspired content UX assets showing a content designer, story-guide companion, and research-to-review loop;
+- recorded the new image prompts, exact copy, alt text, crop behavior, rejection conditions, and review decisions;
+- added migration guidance for existing `0.2.x` target repositories;
+- versioned the helper contract from `0.2.0` to `0.3.0`.
+
 ## 0.2.0 — draft
 
 - made the README a human-facing product entry point with a required situation, consequence, product promise, mechanism, evidence, boundaries, and next action;

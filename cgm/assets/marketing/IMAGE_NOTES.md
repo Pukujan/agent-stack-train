@@ -1,31 +1,45 @@
 # Marketing image notes
 
-These images are committed README assets generated with the built-in image generation tool on 2026-09-21. The tool did not expose a stable seed or model version, so these notes record reproducible intent rather than pixel-identical settings. The complete workflow is in [`docs/IMAGE_GUIDE.md`](../../docs/IMAGE_GUIDE.md).
+These images were generated with the built-in image generation tool on 2026-09-21. The tool did not expose a stable seed or model version, so these notes record reproducible intent rather than pixel-identical settings. The complete workflow is in [`docs/IMAGE_GUIDE.md`](../../docs/IMAGE_GUIDE.md), and the visual system is in [`docs/BRAND_DIRECTION.md`](../../docs/BRAND_DIRECTION.md).
 
-## `hero-content-truth.png`
+The visual direction follows the repository’s prior reviewed README work in [Harness on Steroids](https://github.com/Pukujan/harness-on-steroids) and [Eval Lab](https://github.com/Pukujan/Eval-lab): anime-inspired editorial scenes, a recurring human and friendly companion, blue-violet evening light, warm accents, and a simple diagram that explains one idea. The characters and compositions here are original to this repository.
 
-- Role: wide README hero; introduce the human problem and promise.
-- Dimensions and role: wide 3:2 landscape; keep the upper-left copy panel and the right-side reader visible on narrow crops.
-- Exact text: `Make product truth visible` / `From repository evidence to human-ready content`.
-- Prompt intent: show scattered repository evidence becoming a clear README that a human reader can understand.
-- Composition: left-to-right journey from messy notes and files through connected evidence cards to a readable product document and a human reader.
-- Alt text: `Scattered repository notes and files become a clear README that a human reader can understand.`
-- README use: place directly below the title and opening promise; retain the image as the story introduction.
-- Rejection conditions: unreadable title/subtitle, covered reader or document, dense dashboard, invented product metrics, or a second competing focal point.
-- Review: accepted because the title and subtitle are legible, the transformation is clear at a glance, and the main subjects remain visible.
+## `hero-story-loop.png`
 
-## `six-modules-one-story.png`
+- Role: wide README hero; introduce the problem and promise.
+- Dimensions and role: 1536x1024 landscape; keep the upper-left title, content designer, story-guide companion, and four-step loop visible on narrow crops.
+- Exact text: `Give every project a clearer story` / `Research first. Write for humans. Ship with evidence.`
+- Prompt intent: show an original anime-inspired content designer and friendly story-guide companion moving from repository evidence to a clear README through research, writing, visual, and review.
+- Composition: title on the left, characters at center-right, a simple four-step loop on the glass board, and readable content artifacts on the desk.
+- Alt text: `An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story.`
+- README use: place directly below the title and opening promise as the story introduction.
+- Rejection conditions: unclear human/companion relationship, unreadable loop, changed title or subtitle, generic cyberpunk, fake metrics, or a competing dashboard.
+- Review: accepted because the human relationship, content artifacts, title, and loop are readable at README scale.
 
-- Role: square supporting workflow visual; explain how the six modules support one evidence brief.
-- Dimensions and role: square 1:1; keep the central brief, six surrounding cards, and review mark visible when stacked below the hero.
-- Exact text: `Six modules. One story.` / `Keep the work grounded in evidence.`.
-- Prompt intent: show the six modules surrounding one evidence brief, with human review closing the loop.
-- Composition: centered evidence brief, six connected module cards, and a visible review mark.
-- Alt text: `Six content modules surround one evidence brief while a person marks the result ready for review.`
-- README use: place beside or immediately before the module table; it explains the system shape without replacing the table.
-- Rejection conditions: illegible title/subtitle, more than one dominant workflow, dense fake UI, missing evidence center, or a crop that hides the review gesture.
-- Review: accepted because the module ring and evidence center remain readable at README scale and the image has one dominant idea.
+## `problem-scattered-story.png`
+
+- Role: wide README problem illustration; make the human tension visible.
+- Dimensions and role: 1536x1024 landscape; keep the evidence pile, characters, waiting reader, and emerging story path visible when stacked on mobile.
+- Exact text: `Raw material is not a story` / `A full repository can still leave readers guessing.`
+- Prompt intent: show repository notes, screenshots, prompts, and test results spread across a desk while a content designer and companion begin sorting a path toward a clear story.
+- Composition: dense evidence cluster on the left, designer and companion at center, a waiting reader and question mark in the background, and a visible path toward a clean page on the right.
+- Alt text: `An anime-inspired content designer and story-guide companion sort repository notes, screenshots, prompts, and test results into a clearer story for a waiting reader.`
+- README use: place after the Why this exists problem statement.
+- Rejection conditions: the problem cannot be recognized at a glance, characters are covered, unsupported metrics appear, or title/subtitle changes.
+- Review: accepted because the scene shows the problem before the mechanism and keeps the content UX relationship visible.
+
+## `story-loop-square.png`
+
+- Role: square README workflow visual; explain the four-part content loop.
+- Dimensions and role: 1024x1024 square; keep the title, characters, and four workflow cards visible at 520px and below.
+- Exact text: `The story loop` / `Research, write, illustrate, review.`
+- Prompt intent: show an original anime-inspired content designer and story-guide companion reviewing a four-step loop through research, writing, visual, and review icons.
+- Composition: large title at the top, designer and companion on either side, four glowing icon cards forming a loop between them, and a calm evening studio behind the work.
+- Alt text: `An anime-inspired content designer and story-guide companion review a four-step research, writing, visual, and review loop.`
+- README use: place before or beside the How it works workflow.
+- Rejection conditions: illegible loop, broken character continuity, changed title/subtitle, or a second hero without a workflow job.
+- Review: accepted because the loop remains the dominant idea and the image answers a different question from the hero.
 
 ## Reuse rule
 
-Do not reuse either image as a generic product banner in another repository. Copy the prompt intent and review criteria into the target repository's own visual style and asset manifest, then generate a target-specific scene with its own exact copy and alt text.
+Do not copy these characters, logos, or scenes into another repository. Reuse the method—human relationship, readable promise, one visual question, and documented prompt record—then generate target-specific assets from that repository’s own visual contract.

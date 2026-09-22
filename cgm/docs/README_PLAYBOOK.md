@@ -50,11 +50,28 @@ Technical details belong in the mechanism, setup, and reference sections after t
 - Say what is not yet built, measured, or proven where that boundary affects the reader's decision.
 - Give the reader a path to a useful next action even when the project is research or architecture work.
 
+## Make the writing skimmable
+
+The research behind these rules is in [`CONTENT_RESEARCH.md`](CONTENT_RESEARCH.md). Apply it before polishing tone:
+
+- write headings that describe the answer or outcome, not only the category;
+- put the main point in the first sentence of a section;
+- keep one idea per paragraph and use bullets for parallel information;
+- bold one short, meaningful anchor when it helps a reader recover the point quickly;
+- use bold for a problem, outcome, mechanism, proof, or boundary rather than for generic adjectives;
+- read only the headings, bold phrases, and link text as a second-story test;
+- keep the text understandable if bold styling disappears;
+- use semantic headings and descriptive links so the visual treatment does not carry structure by itself.
+
+There is no universal number of words to bold. The helper's practical house rule is one short phrase per paragraph, often 2–8 words, with restraint preferred over coverage.
+
 ## Use visuals as explanation
 
 A hero should establish the human problem and promise. A supporting visual should explain one different mechanism or boundary. Do not fill the README with alternate hero banners.
 
 Place each image beside the paragraph it clarifies. Give it useful alt text, preserve the declared responsive role, and link to the prompt record or [image guide](IMAGE_GUIDE.md). A visual without a role, usage note, or review decision is an orphaned asset.
+
+Use the target repository's visual contract first. When the target inherits the helper's default direction, prefer the anime-inspired human-and-companion continuity documented in [`BRAND_DIRECTION.md`](BRAND_DIRECTION.md) and in the prior [Harness](https://github.com/Pukujan/harness-on-steroids) and [Eval Lab](https://github.com/Pukujan/Eval-lab) outputs.
 
 ## Preserve evidence and status
 
