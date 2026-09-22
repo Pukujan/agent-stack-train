@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -23,6 +23,7 @@
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
+    "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.2.md",
     "docs/MIGRATING_TO_0.3.md"
   ],
@@ -34,6 +35,7 @@
     "prior_work": "docs/PRIOR_WORK.md",
     "research": "docs/CONTENT_RESEARCH.md",
     "brand_direction": "docs/BRAND_DIRECTION.md",
+    "holdout_evaluation": "docs/HOLDOUT_EVALUATION.md",
     "technical_details_order": "after-human-story"
   },
   "scanability_contract": {

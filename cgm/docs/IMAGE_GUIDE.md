@@ -22,7 +22,7 @@ Use one dominant idea per asset. A supporting visual should teach a different pa
 
 1. **Read the story.** Start from `project-brief.json`, `brand-language.json`, and `visual-style.json`. Identify the reader, the single message, and the boundary the image must preserve.
 2. **Write the brief.** Declare the role, audience, subject relationship, scene, composition, palette, dimensions, crop, text policy, exact title/subtitle, and rejection conditions.
-3. **Generate candidates.** Use the image-capable tool available in the current workflow. Keep the prompt and safe settings with the review record. If a provider does not expose a stable seed or model version, record reproducible intent instead of claiming exact reproduction.
+3. **Generate candidates.** For `0.3.x` narrative roles, use ChatGPT's built-in image generation workflow and keep the exact prompt with the review record. A hand-authored SVG or generic diagram is not a substitute for a requested narrative image. If the provider does not expose a stable seed or model version, record reproducible intent instead of claiming exact reproduction.
 4. **Inspect at use size.** Review the original and the rendered README/HTML at wide, tablet, and narrow widths. Check the subject, copy, crop, contrast, and alt-text meaning.
 5. **Reject clearly.** Reject garbled or crowded text, competing focal points, covered subjects, wrong aspect ratios, dense fake UI, unsupported product claims, and any image that becomes decorative noise.
 6. **Commit the accepted asset.** Use a stable path under the target repository, add it to `asset-manifest.json`, and give it useful alt text in the README or HTML.
@@ -95,6 +95,7 @@ The alt text should communicate the image's job, not repeat its filename or embe
 - Keep contrast calm but sufficient; do not make neon or dense panels do the explaining.
 - Verify that the paragraph and alt text still convey the main idea if the image fails to load.
 - Record the final dimensions, file hash, and review decision.
+- Verify the recorded SHA-256 against the committed file before handoff.
 
 ## Asset record
 

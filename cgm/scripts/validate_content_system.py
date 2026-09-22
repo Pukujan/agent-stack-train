@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -19,12 +20,34 @@ EXPECTED_MODULES = {
     "html-demo",
 }
 
+NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
+NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+REQUIRED_NARRATIVE_ASSET_FIELDS = (
+    "path",
+    "role",
+    "orientation",
+    "dimensions",
+    "text_policy",
+    "prompt_recipe",
+    "exact_title",
+    "exact_subtitle",
+    "alt_text",
+    "usage",
+    "crop_behavior",
+    "rejection_conditions",
+    "review_decision",
+    "provider",
+    "prompt_record",
+    "hash",
+)
+
 REQUIRED_HELPER_DOCS = (
     "docs/CONTENT_RESEARCH.md",
     "docs/BRAND_DIRECTION.md",
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
+    "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.2.md",
 )
@@ -40,6 +63,67 @@ def load_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"expected object in {path}")
     return value
+
+
+def _version_tuple(value: object) -> tuple[int, int, int]:
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", str(value or ""))
+    if not match:
+        return (0, 0, 0)
+    return tuple(int(part) for part in match.groups())
+
+
+def check_narrative_assets(
+    visual: dict, manifest: dict, project_root: Path | None = None
+) -> list[str]:
+    """Enforce the 0.3.x narrative-image provenance contract for target adapters."""
+    errors: list[str] = []
+    if visual.get("generation_workflow") != "built-in image_gen":
+        errors.append("adapter visual-style.json must declare generation_workflow: built-in image_gen")
+
+    roles = visual.get("narrative_roles")
+    if not isinstance(roles, list) or not roles:
+        errors.append("adapter visual-style.json must declare narrative_roles")
+        role_markers = NARRATIVE_ROLE_MARKERS
+    else:
+        role_markers = tuple(str(role).lower() for role in roles)
+
+    for asset in manifest.get("assets", []):
+        role = str(asset.get("role", "")).lower()
+        if not any(role == marker or role.startswith(f"{marker} ") for marker in role_markers):
+            continue
+
+        for field in REQUIRED_NARRATIVE_ASSET_FIELDS:
+            if not asset.get(field):
+                errors.append(f"narrative asset {asset.get('path', '<unknown>')} missing {field}")
+
+        asset_path = str(asset.get("path", ""))
+        if Path(asset_path).suffix.lower() not in NARRATIVE_RASTER_SUFFIXES:
+            errors.append(f"narrative asset must be a raster image, not SVG: {asset_path}")
+
+        if str(asset.get("provider", "")).lower() != "built-in image_gen":
+            errors.append(f"narrative asset must record provider built-in image_gen: {asset_path}")
+
+        prompt_recipe = str(asset.get("prompt_recipe", ""))
+        if str(asset.get("exact_title", "")) not in prompt_recipe:
+            errors.append(f"narrative asset prompt must include exact_title: {asset_path}")
+        if str(asset.get("exact_subtitle", "")) not in prompt_recipe:
+            errors.append(f"narrative asset prompt must include exact_subtitle: {asset_path}")
+
+        digest = str(asset.get("hash", ""))
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+            errors.append(f"narrative asset hash must be a SHA-256 digest: {asset_path}")
+
+        if project_root:
+            image_path = project_root / asset_path
+            prompt_record = project_root / str(asset.get("prompt_record", ""))
+            if not prompt_record.is_file():
+                errors.append(f"narrative asset prompt record does not exist: {asset.get('prompt_record')}")
+            if image_path.is_file() and re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+                actual_digest = hashlib.sha256(image_path.read_bytes()).hexdigest()
+                if actual_digest.lower() != digest.lower():
+                    errors.append(f"narrative asset hash does not match file: {asset_path}")
+
+    return errors
 
 
 def check_readme(root: Path) -> list[str]:
@@ -227,6 +311,8 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
             asset_path = asset.get("path")
             if asset_path and not (project_root / asset_path).is_file():
                 errors.append(f"asset does not exist under project root: {asset_path}")
+    if _version_tuple(system.get("helper_version")) >= (0, 3, 0):
+        errors.extend(check_narrative_assets(visual, manifest, project_root))
     return errors
 
 

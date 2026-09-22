@@ -1,6 +1,8 @@
 {
   "schema_version": "content-generation.visual-style.v1",
   "reference_asset": "",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": ["hero", "problem", "supporting", "evidence", "story", "social"],
   "palette": {
     "background": "",
     "primary": "",

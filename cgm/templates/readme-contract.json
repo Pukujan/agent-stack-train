@@ -18,6 +18,7 @@
     "docs/README_PLAYBOOK.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
+    "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.2.md",
     "templates/README.template.md"

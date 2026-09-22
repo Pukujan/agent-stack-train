@@ -99,6 +99,7 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/BRAND_DIRECTION.md`](docs/BRAND_DIRECTION.md) defines the Story Loop brand direction and prior-work visual analysis.
 - [`docs/README_PLAYBOOK.md`](docs/README_PLAYBOOK.md) explains the twenty-second test, welcoming language, selective emphasis, evidence status, and human review.
 - [`docs/IMAGE_GUIDE.md`](docs/IMAGE_GUIDE.md) explains image roles, prompt structure, exact in-image copy, responsive crops, alt text, manifests, and rejection rules.
+- [`docs/HOLDOUT_EVALUATION.md`](docs/HOLDOUT_EVALUATION.md) explains how to test repeatability on private, unseen target repositories.
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) explains how existing `0.1.x` target repositories adopted the human-facing contract.
 - [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) explains how existing `0.2.x` target repositories adopt the scan-first and anime-inspired visual direction.
 - [`templates/`](templates/) contains starter project, brand, visual, image, asset, review, and README files.
@@ -145,4 +146,4 @@ Then pin the helper release or commit, read the playbook and image guide, inspec
 
 ## Current version
 
-The current helper contract is `0.3.0` (`v0.3.0`). It adds the durable scan-first content research, the Story Loop brand direction, the prior-work visual analysis, and anime-inspired README assets with documented generation and use. Existing target repositories pinned to `v0.2.0` remain on that earlier contract until they deliberately migrate.
+The current helper contract is `0.3.1` (`v0.3.1`). It adds the durable scan-first content research, the Story Loop brand direction, the prior-work visual analysis, anime-inspired README assets with documented generation and use, deterministic narrative-image provenance checks, and a private holdout evaluation protocol. Existing target repositories pinned to `v0.2.0` remain on that earlier contract until they deliberately migrate.

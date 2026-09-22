@@ -11,7 +11,7 @@ description: Turn a project brief and visual style into reproducible, reviewable
 2. Choose the asset role: hero, problem, system, evidence, story, social preview, icon, or helper graphic.
 3. Declare the audience, message, subject relationship, responsive role, and text policy before writing the prompt.
 4. Compose the prompt in the recipe below and supply exact title/subtitle copy when the role is a narrative raster asset.
-5. Generate candidates, inspect the actual files at their intended README or HTML sizes, and reject candidates against the visual contract.
+5. Generate candidates with ChatGPT's built-in image generation workflow for narrative roles, inspect the actual files at their intended README or HTML sizes, and reject candidates against the visual contract. Do not replace a requested narrative raster with a hand-authored SVG.
 6. Move the accepted asset into the target repository, add alt text, and reference it from the README or HTML where it does useful explanatory work.
 7. Record the prompt recipe, exact copy, role, dimensions, references, settings, review decision, and final hash in the asset manifest or a linked prompt record.
 8. Link the image guide and prompt record from the human-facing document so another person can regenerate, replace, or reuse the asset safely.

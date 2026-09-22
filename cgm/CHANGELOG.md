@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — draft
+
+- added a deterministic `0.3.x` narrative-image gate that rejects SVG substitutions, missing built-in image-generation provenance, missing exact title/subtitle records, missing prompt records, and stale file hashes;
+- added `docs/HOLDOUT_EVALUATION.md` with a private three-run protocol for testing whether an agent repeats the contract on unseen target repositories;
+- updated the visual template, README contract, migration guide, and helper version to make the generation workflow and holdout path durable.
+
 ## 0.3.0 — draft
 
 - recorded the UX, accessibility, and marketing research behind descriptive headings, short sections, bullets, and selective bolding in `docs/CONTENT_RESEARCH.md`;
