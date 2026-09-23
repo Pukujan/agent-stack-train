@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from continuity.cli import (
     ContinuityError,
+    build_parser,
     checkpoint_task,
     extract_marker,
     init_repo,
@@ -56,9 +57,87 @@ class ContinuityTests(unittest.TestCase):
         init_repo(root, "software", "Example", "SOFT")
 
         agents = (root / "AGENTS.md").read_text(encoding="utf-8")
-        self.assertIn("single canonical checkout", agents)
+        self.assertIn("one canonical checkout", agents)
         self.assertIn("Do not create another clone", agents)
+        self.assertIn("single-checkout mode", agents)
+        self.assertIn("Do not create another clone, task folder, or linked Git worktree anywhere", agents)
+        self.assertNotIn("<canonical-root>/.worktrees/<task-slug>", agents)
+        config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
+        schema = json.loads((root / "schemas" / "v1" / "config.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(config["workspace_mode"], "single-checkout")
+        self.assertEqual(
+            schema["properties"]["workspace_mode"]["enum"],
+            ["single-checkout", "linked-worktrees"],
+        )
+        self.assertEqual(validate_repo(root), [])
+
+    def test_linked_worktrees_require_explicit_opt_in(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-worktree-mode-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "software", "Example", "SOFT", "linked-worktrees")
+
+        agents = (root / "AGENTS.md").read_text(encoding="utf-8")
+        config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
+        self.assertEqual(config["workspace_mode"], "linked-worktrees")
+        self.assertIn("linked-worktrees mode", agents)
         self.assertIn("<canonical-root>/.worktrees/<task-slug>", agents)
+        self.assertEqual(validate_repo(root), [])
+
+    def test_init_cli_accepts_explicit_linked_worktree_mode(self) -> None:
+        args = build_parser().parse_args(
+            ["init", "--profile", "software", "--workspace-mode", "linked-worktrees"]
+        )
+
+        self.assertEqual(args.workspace_mode, "linked-worktrees")
+
+    def test_single_checkout_validation_accepts_only_canonical_worktree(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-canonical-worktree-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "SOFT")
+        (root / ".git").mkdir()
+        result = subprocess.CompletedProcess(
+            args=["git", "worktree", "list", "--porcelain"],
+            returncode=0,
+            stdout=f"worktree {root}\nHEAD 0123456789abcdef\n",
+            stderr="",
+        )
+
+        with patch("continuity.cli.subprocess.run", return_value=result):
+            errors = validate_repo(root)
+
+        self.assertEqual(errors, [])
+
+    def test_single_checkout_validation_rejects_registered_linked_worktree(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-single-checkout-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "SOFT")
+        (root / ".git").mkdir()
+        worktree_output = (
+            f"worktree {root}\nHEAD 0123456789abcdef\n\n"
+            f"worktree {root / '.worktrees' / 'task'}\nHEAD fedcba9876543210\n"
+        )
+        result = subprocess.CompletedProcess(
+            args=["git", "worktree", "list", "--porcelain"],
+            returncode=0,
+            stdout=worktree_output,
+            stderr="",
+        )
+
+        with patch("continuity.cli.subprocess.run", return_value=result):
+            errors = validate_repo(root)
+
+        self.assertTrue(
+            any("single-checkout mode requires exactly one registered Git worktree" in e for e in errors),
+            errors,
+        )
+
+    def test_legacy_config_without_workspace_mode_remains_valid(self) -> None:
+        root = self.copy_fixture("valid-minimal")
+        config_path = root / ".continuity" / "config.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config.pop("workspace_mode", None)
+        config_path.write_text(json.dumps(config), encoding="utf-8")
+
         self.assertEqual(validate_repo(root), [])
 
     def test_init_refuses_conflicting_existing_content_before_writes(self) -> None:

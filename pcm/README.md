@@ -106,9 +106,9 @@ The goal is not to preserve every sentence an agent ever produced. The goal is t
 
 ### Execution versus bookkeeping
 
-Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue through an already-authorized alternate worktree or host and record a small recovery receipt with `--recovery-root`. Reconcile that receipt into the canonical task when it becomes writable.
+Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue only through an already-authorized alternate environment and record a small recovery receipt with `--recovery-root`. Do not create a clone or worktree as a workaround. Reconcile that receipt into the canonical task when it becomes writable.
 
-The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. A local worktree is only an execution view. PCM therefore permits disposable or migrated worktrees, while keeping one authoritative task branch and avoiding competing continuity state. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
+The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. New software projects default to serial task branches in one canonical checkout; projects may explicitly select registered linked worktrees when parallel execution is required. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
 
 ## Why Git is the transport
 
@@ -210,6 +210,11 @@ Then, inside the project you want to make resumable:
 continuity init --profile software --name "My Project" --task-prefix APP
 continuity validate
 ```
+
+Software initialization defaults to `workspace_mode: single-checkout`: task
+branches run sequentially in the canonical folder and reuse its one dependency
+environment. Linked task worktrees are available only by explicit opt-in with
+`--workspace-mode linked-worktrees`.
 
 Create a bounded task:
 

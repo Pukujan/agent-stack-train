@@ -40,15 +40,15 @@ task/PCM-0001-bootstrap-v1
 
 One primary agent/session owns the writable task state at a time.
 
-## Canonical checkout and task worktrees
+## Canonical checkout and workspace mode
 
 - Before writing, identify the single canonical checkout by host/path and normalized Git remote; continue in that checkout.
 - Do not create another clone or sibling project folder to isolate a task. A different task or branch does not justify a duplicate checkout.
-- If a separate working directory is necessary, reuse an existing registered linked worktree or create one at `<canonical-root>/.worktrees/<task-slug>`.
-- Keep `.worktrees/` ignored by the canonical repository, and record the canonical root separately from the task worktree in the handoff/checkpoint.
-- If the canonical checkout is unavailable or ambiguous, stop and resolve ownership/path before creating anything.
+- New software projects default to `workspace_mode: single-checkout`: run task branches sequentially in the canonical folder, reuse its one root dependency environment, and do not create task folders or linked Git worktrees anywhere.
+- `linked-worktrees` is permitted only when explicitly selected in `.continuity/config.json`. Only those projects may reuse or create registered worktrees under `<canonical-root>/.worktrees/<task-slug>`; `.worktrees/` must be ignored and the canonical checkout must be recorded separately in the handoff.
+- If the workspace mode is missing or the canonical checkout is unavailable or ambiguous, do not create a worktree. Resolve policy and ownership before creating any directory.
 
-This remains a lineage rule, not a project-cloning rule: alternate execution may use another authorized host, but each host must use its one canonical checkout and any task isolation must be a registered linked worktree below that checkout. The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not.
+The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not. A project may use linked worktrees only when its declared mode permits them.
 
 ## Checkpoint rule
 
@@ -63,9 +63,9 @@ Before stopping after meaningful work, append to the active task:
 
 Update `checkpoints/CURRENT.md` only when program-wide state or priority changes.
 
-Continuity bookkeeping supports execution but does not gate safe execution. If a canonical task, CURRENT, or HANDOFF file is temporarily unavailable, do not repair storage merely to force a write, stop otherwise-safe authorized work, or ask again for an already-authorized host/worktree. Continue in the authorized alternate checkout and run `continuity checkpoint ... --recovery-root <alternate-root>` to leave a recovery receipt. Reconcile it later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`. Recovery receipts are temporary evidence, not a competing project identity.
+Continuity bookkeeping supports execution but does not gate safe execution. If a canonical task, CURRENT, or HANDOFF file is temporarily unavailable, do not repair storage merely to force a write or stop otherwise-safe authorized work. Use only an already-authorized alternate environment; never create a clone or worktree to bypass unavailable checkpoint state. Run `continuity checkpoint ... --recovery-root <alternate-root>` only when that alternate environment is authorized, then reconcile with `continuity recovery reconcile --root <canonical-root> --file <receipt>`. Recovery receipts are temporary evidence, not a competing project identity.
 
-Normal checkpoint delivery is mandatory: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; a normal checkpoint is not complete while it exists only in a local worktree. CI runs on every pushed branch, and pull-request automation merges after the required checks pass. Do not create a second branch or worktree identity to avoid publishing.
+Normal checkpoint delivery is mandatory: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; a normal checkpoint is not complete while it exists only on a local branch. CI runs on every pushed branch, and pull-request automation merges after the required checks pass. Do not create a second branch or worktree identity to avoid publishing.
 
 If the remote itself is unavailable, use the degraded recovery-receipt path. That is an emergency continuity condition, not a successful normal handoff: record the exact local state, continue only when the task remains safe, and publish/reconcile as soon as the shared Git path is available again.
 
