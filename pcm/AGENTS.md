@@ -28,6 +28,14 @@ task/PCM-0001-bootstrap-v1
 
 One primary agent/session owns the writable task state at a time.
 
+## Canonical checkout and task worktrees
+
+- Before writing, identify the single canonical checkout by host/path and normalized Git remote; continue in that checkout.
+- Do not create another clone or sibling project folder to isolate a task. A different task or branch does not justify a duplicate checkout.
+- If a separate working directory is necessary, reuse an existing registered linked worktree or create one at `<canonical-root>/.worktrees/<task-slug>`.
+- Keep `.worktrees/` ignored by the canonical repository, and record the canonical root separately from the task worktree in the handoff/checkpoint.
+- If the canonical checkout is unavailable or ambiguous, stop and resolve ownership/path before creating anything.
+
 ## Checkpoint rule
 
 Before stopping after meaningful work, append to the active task:

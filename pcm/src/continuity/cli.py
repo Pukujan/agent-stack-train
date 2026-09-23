@@ -210,6 +210,11 @@ def agents_template() -> str:
         "Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.\n\n"
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
+        "## Canonical checkout and worktree\n\n"
+        "- Identify the single canonical checkout by host/path and normalized Git remote, then reuse it.\n"
+        "- Do not create another clone or sibling project folder for a task.\n"
+        "- When isolation is needed, reuse a registered linked worktree or create one under `<canonical-root>/.worktrees/<task-slug>`; ensure `.worktrees/` is ignored.\n"
+        "- Record the canonical root separately from the task worktree. If the root is ambiguous or unavailable, resolve it before creating a directory.\n\n"
         "## Checkpoint\n\n"
         "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n"
     )
@@ -584,9 +589,9 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     project_path = root / config["canonical"]["project"]
     current_path = root / config["canonical"]["current"]
     sources = [
-        str(project_path.relative_to(root)),
-        str(current_path.relative_to(root)),
-        str(task_path.relative_to(root)),
+        project_path.relative_to(root).as_posix(),
+        current_path.relative_to(root).as_posix(),
+        task_path.relative_to(root).as_posix(),
     ]
     for optional in ("SPEC.md", "AGENTS.md"):
         if (root / optional).exists():

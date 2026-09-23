@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0009","active_task_file":"tasks/TASK-PCM-0009-canonical-checkout-worktree-policy.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: none; PCM-0008 completed and all four README-enabled PRs merged.
+Current P0 task: PCM-0009 — enforce one canonical checkout and nested linked worktrees.
 
 ## Main objective
 
@@ -22,6 +22,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 - PCM-0003 — custom-extensions adoption merged in PR #6; the canonical task state is recorded in the prior checkpoint history.
 - PCM-0004 — reusable content-generation system is published at v0.1.2; Eval Lab README promotion PR #30 is merged with green CI.
+- PCM-0009 — prevent sibling project clones and make nested linked worktrees the software-profile default.
 
 ## Queued
 
@@ -35,4 +36,4 @@ None known.
 
 ## Next atomic action
 
-No pending action for PCM-0008. Reuse the v0.1.2 CGM adapter for a future repository when explicitly requested.
+Implement the PCM-0009 policy in the operating contract and software template, then verify initialization tests.
