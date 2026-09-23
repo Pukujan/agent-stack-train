@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0009","active_task_file":"tasks/TASK-PCM-0009-helper-target-boundary.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0011","active_task_file":"tasks/TASK-PCM-0011-canonical-checkout-worktree-policy.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P0 task: PCM-0009 — helper/target identity hardening and cold-start blind acceptance.
+Current P0 task: PCM-0011 — canonical checkouts and nested task worktrees.
 PCM-0010 remains separately recorded as the stacked degraded-continuity delivery in PR #18.
 
 ## Main objective
@@ -15,14 +15,15 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Completed
 
+- PCM-0009 — helper/target identity hardening merged to `main` in PR #16 at `93c0549`; required checks passed.
 - PCM-0001 — executable v1 schemas/templates/CLI/validator/bootstrap merged;
 - PCM-0002 — fresh minimal end-to-end dogfood merged; 8-test suite passed and final validation was VALID.
 - PCM-0008 — four repository-specific README promotions merged after review; all adapters pin content-generation-modules v0.1.2.
 
 ## Active
 
-- PCM-0009 — helper/target identity hardening and cold-start blind acceptance; GitHub issue #15, PR #16.
 - PCM-0010 — degraded continuity guidance, recovery receipt/reconciliation, deterministic regression tests, and fresh-session blind rerun; GitHub issue #17, stacked delivery PR #18.
+- PCM-0011 — canonical checkout identity and nested linked-worktree policy, in PR #19.
 
 ## Prior completed/adopted work
 
@@ -41,4 +42,4 @@ None known.
 
 ## Next atomic action
 
-Verify the automatically merged candidate on `main`, then perform release metadata verification for package 0.2.0.
+Verify PCM-0011's CI and auto-merge PR #19, then reconcile the resulting policy in HADES-v2's workspace.

@@ -40,7 +40,15 @@ task/PCM-0001-bootstrap-v1
 
 One primary agent/session owns the writable task state at a time.
 
-This is a lineage rule, not a permanent physical-worktree rule. A repository/task branch may be checked out in an authorized alternate worktree or host when execution needs to move. The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not.
+## Canonical checkout and task worktrees
+
+- Before writing, identify the single canonical checkout by host/path and normalized Git remote; continue in that checkout.
+- Do not create another clone or sibling project folder to isolate a task. A different task or branch does not justify a duplicate checkout.
+- If a separate working directory is necessary, reuse an existing registered linked worktree or create one at `<canonical-root>/.worktrees/<task-slug>`.
+- Keep `.worktrees/` ignored by the canonical repository, and record the canonical root separately from the task worktree in the handoff/checkpoint.
+- If the canonical checkout is unavailable or ambiguous, stop and resolve ownership/path before creating anything.
+
+This remains a lineage rule, not a project-cloning rule: alternate execution may use another authorized host, but each host must use its one canonical checkout and any task isolation must be a registered linked worktree below that checkout. The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not.
 
 ## Checkpoint rule
 

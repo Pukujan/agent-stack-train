@@ -50,6 +50,17 @@ class ContinuityTests(unittest.TestCase):
         self.assertTrue(any(line.endswith("PROJECT.md") for line in results))
         self.assertEqual(validate_repo(root), [])
 
+    def test_software_profile_includes_canonical_checkout_policy(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-software-init-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "software", "Example", "SOFT")
+
+        agents = (root / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("single canonical checkout", agents)
+        self.assertIn("Do not create another clone", agents)
+        self.assertIn("<canonical-root>/.worktrees/<task-slug>", agents)
+        self.assertEqual(validate_repo(root), [])
+
     def test_init_refuses_conflicting_existing_content_before_writes(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="continuity-conflict-"))
         self.addCleanup(shutil.rmtree, root, True)
