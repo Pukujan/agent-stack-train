@@ -40,15 +40,15 @@ task/PCM-0001-bootstrap-v1
 
 One primary agent/session owns the writable task state at a time.
 
-## Canonical checkout and workspace mode
+## Canonical checkout
 
 - Before writing, identify the single canonical checkout by host/path and normalized Git remote; continue in that checkout.
 - Do not create another clone or sibling project folder to isolate a task. A different task or branch does not justify a duplicate checkout.
-- New software projects default to `workspace_mode: single-checkout`: run task branches sequentially in the canonical folder, reuse its one root dependency environment, and do not create task folders or linked Git worktrees anywhere.
-- `linked-worktrees` is permitted only when explicitly selected in `.continuity/config.json`. Only those projects may reuse or create registered worktrees under `<canonical-root>/.worktrees/<task-slug>`; `.worktrees/` must be ignored and the canonical checkout must be recorded separately in the handoff.
-- If the workspace mode is missing or the canonical checkout is unavailable or ambiguous, do not create a worktree. Resolve policy and ownership before creating any directory.
+- Run task branches sequentially in the one canonical folder and reuse its one root dependency environment.
+- Never create task clones, Git worktrees, task folders, or additional dependency environments.
+- If the canonical checkout is unavailable or ambiguous, resolve policy and ownership before creating any directory.
 
-The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not. A project may use linked worktrees only when its declared mode permits them.
+The Git repository, task ID, branch/ref, and commit history identify the work; a filesystem path does not. Every task uses the canonical checkout.
 
 ## Checkpoint rule
 

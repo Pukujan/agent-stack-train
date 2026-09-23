@@ -33,13 +33,6 @@
       ],
       "type": "string"
     },
-    "workspace_mode": {
-      "enum": [
-        "single-checkout",
-        "linked-worktrees"
-      ],
-      "type": "string"
-    },
     "protocol": {
       "const": "project-continuity"
     },

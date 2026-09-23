@@ -71,7 +71,7 @@ Execution safety and existing authorization outrank checkpoint bookkeeping. A te
 
 Use an already-authorized alternate checkout or host when needed. Record the same task ID, repository identity, branch/ref, source commit, evidence, and next action in a recovery receipt with `continuity checkpoint --recovery-root <alternate-root>`. Do not repair storage merely to force a write, ask again for permission that already exists, treat a physical path as project identity, or create competing continuity state. Reconcile the receipt after the canonical checkout is writable with `continuity recovery reconcile`.
 
-One authoritative task/repository lineage may have multiple execution worktrees. The worktree is a view; the pushed task branch is the required durable shared handoff for normal operation. CI runs on every pushed branch, and pull-request automation merges after the required checks pass.
+Each task uses the one canonical checkout, with task branches run sequentially. Do not create task clones, task folders, or linked Git worktrees. The pushed task branch is the required durable shared handoff for normal operation. CI runs on every pushed branch, and pull-request automation merges after the required checks pass.
 
 ## Context packs
 

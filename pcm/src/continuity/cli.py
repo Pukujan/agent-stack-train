@@ -8,7 +8,7 @@ import sys
 from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 PROTOCOL_VERSION = "0.1.0-draft"
 CONFIG_SCHEMA = "project-continuity.config.v1"
@@ -30,11 +30,6 @@ SCHEMA_FILES = {
 
 BUILTIN_SCHEMAS = {'config': {'$id': 'https://project-continuity.dev/schema/v1/config.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'canonical': {'additionalProperties': False, 'properties': {'current': {'minLength': 1, 'type': 'string'}, 'project': {'minLength': 1, 'type': 'string'}, 'tasks': {'minLength': 1, 'type': 'string'}}, 'required': ['project', 'current', 'tasks'], 'type': 'object'}, 'profile': {'enum': ['minimal', 'software'], 'type': 'string'}, 'protocol': {'const': 'project-continuity'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.config.v1'}, 'schema_dir': {'const': 'schemas/v1'}, 'task_prefix': {'pattern': '^[A-Z][A-Z0-9]*$', 'type': 'string'}, 'trackers': {'additionalProperties': False, 'properties': {'beads': {'type': 'boolean'}, 'github': {'type': 'boolean'}}, 'required': ['github', 'beads'], 'type': 'object'}}, 'required': ['schema', 'protocol', 'protocol_version', 'profile', 'task_prefix', 'canonical', 'schema_dir', 'trackers'], 'title': 'Project Continuity Config v1', 'type': 'object'}, 'project': {'$id': 'https://project-continuity.dev/schema/v1/project.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'id': {'pattern': '^[a-z0-9][a-z0-9-]*$', 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.project.v1'}, 'title': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'title'], 'title': 'Project metadata v1', 'type': 'object'}, 'current': {'$id': 'https://project-continuity.dev/schema/v1/current.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'active_task': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': ['string', 'null']}, 'active_task_file': {'minLength': 1, 'type': ['string', 'null']}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.current.v1'}}, 'required': ['schema', 'protocol_version', 'active_task', 'active_task_file'], 'title': 'Current checkpoint metadata v1', 'type': 'object'}, 'task': {'$id': 'https://project-continuity.dev/schema/v1/task.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'acceptance': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'depends_on': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'goal': {'minLength': 1, 'type': 'string'}, 'id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'owner': {'minLength': 1, 'type': 'string'}, 'priority': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.task.v1'}, 'status': {'enum': ['queued', 'active', 'blocked', 'completed', 'cancelled'], 'type': 'string'}, 'why': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'status', 'owner', 'priority', 'depends_on', 'goal', 'why', 'acceptance', 'next_action'], 'title': 'Task metadata v1', 'type': 'object'}, 'checkpoint': {'$id': 'https://project-continuity.dev/schema/v1/checkpoint.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'agent': {'minLength': 1, 'type': 'string'}, 'blocked': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'changed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'completed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'decisions': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'evidence': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.checkpoint.v1'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'timestamp': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'task_id', 'timestamp', 'agent', 'completed', 'evidence', 'decisions', 'changed', 'blocked', 'next_action'], 'title': 'Checkpoint metadata v1', 'type': 'object'}, 'context-pack': {'$id': 'https://project-continuity.dev/schema/v1/context-pack.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'commit': {'minLength': 1, 'type': 'string'}, 'generated_at': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'ref': {'minLength': 1, 'type': 'string'}, 'repository': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.context-pack.v1'}, 'sources': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 3, 'type': 'array'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'repository', 'ref', 'commit', 'task_id', 'generated_at', 'sources'], 'title': 'Context pack metadata v1', 'type': 'object'}}
 
-
-cast(dict[str, Any], BUILTIN_SCHEMAS["config"])["properties"]["workspace_mode"] = {
-    "enum": ["single-checkout", "linked-worktrees"],
-    "type": "string",
-}
 
 BUILTIN_SCHEMAS["recovery"] = {
     "$id": "https://project-continuity.dev/schema/v1/recovery.schema.json",
@@ -256,23 +251,14 @@ def handoff_template() -> str:
     )
 
 
-def agents_template(workspace_mode: str = "single-checkout") -> str:
-    if workspace_mode == "single-checkout":
-        workspace_rules = (
-            "## Canonical checkout (single-checkout mode)\n\n"
-            "- Identify and reuse the one canonical checkout by host/path and normalized Git remote.\n"
-            "- Do not create another clone, task folder, or linked Git worktree anywhere.\n"
-            "- Run tasks sequentially on branches in the canonical checkout. Before switching tasks, commit and push the checkpoint, open or update its PR, pass required CI, merge, then fast-forward this same checkout.\n"
-            "- Reuse the repository's one root dependency environment; do not install per-task `.venv` or `node_modules` copies.\n\n"
-        )
-    else:
-        workspace_rules = (
-            "## Canonical checkout (linked-worktrees mode)\n\n"
-            "- Identify and reuse the one canonical checkout by host/path and normalized Git remote.\n"
-            "- Do not create another clone or sibling project folder for a task.\n"
-            "- Only in this explicitly selected mode, reuse or create a registered linked worktree under `<canonical-root>/.worktrees/<task-slug>`; ensure `.worktrees/` is ignored.\n"
-            "- Record the canonical root separately from the task worktree. If the root is ambiguous or unavailable, resolve ownership before creating a directory.\n\n"
-        )
+def agents_template() -> str:
+    workspace_rules = (
+        "## Canonical checkout\n\n"
+        "- Identify and reuse the one canonical checkout by host/path and normalized Git remote.\n"
+        "- Do not create clones, task folders, or linked Git worktrees anywhere.\n"
+        "- Run tasks sequentially on branches in the canonical checkout. Before switching tasks, commit and push the checkpoint, open or update its PR, pass required CI, merge, then fast-forward this same checkout.\n"
+        "- Reuse the repository's one root dependency environment; do not install per-task `.venv` or `node_modules` copies.\n\n"
+    )
     return (
         "# Agent Operating Contract\n\n"
         "## Start\n\n"
@@ -300,22 +286,17 @@ def init_repo(
     profile: str,
     name: str,
     prefix: str,
-    workspace_mode: str = "single-checkout",
 ) -> list[str]:
     if profile not in {"minimal", "software"}:
         raise ContinuityError(f"unsupported profile: {profile}")
     prefix = prefix.upper()
     if re.fullmatch(r"[A-Z][A-Z0-9]*", prefix) is None:
         raise ContinuityError("task prefix must match [A-Z][A-Z0-9]*")
-    if workspace_mode not in {"single-checkout", "linked-worktrees"}:
-        raise ContinuityError("workspace mode must be 'single-checkout' or 'linked-worktrees'")
-
     config = {
         "schema": CONFIG_SCHEMA,
         "protocol": "project-continuity",
         "protocol_version": PROTOCOL_VERSION,
         "profile": profile,
-        "workspace_mode": workspace_mode,
         "task_prefix": prefix,
         "canonical": {
             "project": "PROJECT.md",
@@ -337,7 +318,7 @@ def init_repo(
             BUILTIN_SCHEMAS[kind], indent=2, sort_keys=True
         ) + "\n"
     if profile == "software":
-        planned["AGENTS.md"] = agents_template(workspace_mode)
+        planned["AGENTS.md"] = agents_template()
         planned["README.md"] = readme_template(name)
 
     conflicts = [
@@ -457,11 +438,8 @@ def validate_checkpoint_structure(root: Path, task_path: Path, text: str) -> lis
     return errors
 
 
-def validate_workspace_mode(root: Path, config: dict[str, Any]) -> list[str]:
-    """Enforce the declared local workspace mode without changing Git state."""
-    if config.get("workspace_mode", "linked-worktrees") != "single-checkout":
-        return []
-
+def validate_single_checkout(root: Path) -> list[str]:
+    """Enforce one canonical Git checkout without changing Git state."""
     root = root.resolve()
     if not (root / ".git").exists():
         return []
@@ -475,7 +453,7 @@ def validate_workspace_mode(root: Path, config: dict[str, Any]) -> list[str]:
             text=True,
         )
     except (OSError, subprocess.CalledProcessError) as exc:
-        return [f"could not inspect linked worktrees for single-checkout mode: {exc}"]
+        return [f"could not inspect registered Git worktrees: {exc}"]
 
     worktrees = [
         line.removeprefix("worktree ")
@@ -503,6 +481,13 @@ def validate_repo(root: Path) -> list[str]:
     except ContinuityError as exc:
         return [str(exc)]
 
+    if "workspace_mode" in config:
+        return [(
+            f"{config_path}: unsupported legacy key 'workspace_mode'; "
+            "migration required: remove this key from .continuity/config.json, then run continuity validate again. "
+            "Validation does not modify configuration."
+        )]
+
     try:
         config_errors = [
             f"{config_path}: {e}"
@@ -518,7 +503,7 @@ def validate_repo(root: Path) -> list[str]:
     if config_errors:
         return sorted(set(errors))
 
-    errors.extend(validate_workspace_mode(root, config))
+    errors.extend(validate_single_checkout(root))
 
     canonical = config.get("canonical", {})
     project_path = root / canonical.get("project", "PROJECT.md")
@@ -1045,12 +1030,6 @@ def build_parser() -> argparse.ArgumentParser:
     p_init = sub.add_parser("init")
     p_init.add_argument("--root", default=".")
     p_init.add_argument("--profile", choices=["minimal", "software"], default="minimal")
-    p_init.add_argument(
-        "--workspace-mode",
-        choices=["single-checkout", "linked-worktrees"],
-        default="single-checkout",
-        help="default to one serial checkout; linked worktrees require explicit opt-in",
-    )
     p_init.add_argument("--name", default=None)
     p_init.add_argument("--task-prefix", default="TASK")
 
@@ -1113,7 +1092,6 @@ def main(argv: list[str] | None = None) -> int:
                 args.profile,
                 name,
                 args.task_prefix,
-                args.workspace_mode,
             )
             for line in results:
                 print(line)

@@ -8,13 +8,13 @@ Read PROJECT → CURRENT → active TASK → minimum relevant spec before editin
 
 Work only inside the active bounded task. Split or revise the task before materially expanding scope.
 
-## Canonical checkout and workspace mode
+## Canonical checkout
 
 - Identify the single canonical checkout by host/path and normalized Git remote, then reuse it.
 - Do not create another clone or sibling project folder for a task.
-- New software projects default to `workspace_mode: single-checkout`: work sequentially on task branches in the canonical checkout, reuse its one root dependency environment, and do not create task folders or linked Git worktrees anywhere.
-- A project may use `workspace_mode: linked-worktrees` only when that value is explicitly selected in `.continuity/config.json`. Only then may tasks use registered linked worktrees under `<canonical-root>/.worktrees/<task-slug>`; ensure `.worktrees/` is ignored and record the canonical checkout separately.
-- If the workspace mode is missing or the canonical checkout is unavailable or ambiguous, do not create a worktree. Resolve policy and ownership first.
+- Work sequentially on task branches in the one canonical checkout and reuse its one root dependency environment.
+- Never create task clones, Git worktrees, task folders, or additional dependency environments.
+- If the canonical checkout is unavailable or ambiguous, resolve policy and ownership before creating a directory.
 
 ## Checkpoint
 
