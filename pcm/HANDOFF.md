@@ -4,27 +4,25 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
-- Tasks: `PCM-0009` and `PCM-0010` automated delivery gate
-- Issues: #15 and #17
-- PRs: #16 (main delivery) and #18 (stacked PCM-0010 delivery)
-- PCM-0009 and PCM-0010 remain separately scoped in task history
+- None. PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`.
+- GitHub issue #24 is closed by PR #26.
+- PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Candidate CLI/package version remains: `0.2.0`
 - Protocol version remains: `0.1.0-draft`
-- Release gate: deterministic suite + fresh-session blind acceptance in `docs/BLIND_TEST_PCM-0010.md`
 
 ## Read exactly this first
 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `tasks/TASK-PCM-0010-continuity-bookkeeping.md`
+4. `SPEC.md`
 5. `docs/HANDOFF_PROTOCOL.md`
-6. `docs/BLIND_TEST_PCM-0010.md`
+6. `docs/AGENT_LIFECYCLE.md`
 7. `docs/VERSIONING.md`
 
 ## Exact next action
 
-Complete PCM-0012 by running the automated lint, typing, compilation, tests, package build, and continuity validation, then push it for protected CI and automatic merge. Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+Activate PCM-0005 when ready to resume the queued adapter work. Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 

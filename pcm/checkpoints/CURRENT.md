@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0014","active_task_file":"tasks/TASK-PCM-0014-agent-lifecycle.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current P1 task: PCM-0014 — close completed delegated agents and bound concurrency; GitHub issue #24.
+No active task. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
 
 ## Main objective
@@ -25,10 +25,11 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0008 — four repository-specific README promotions merged after review; all adapters pin content-generation-modules v0.1.2.
 - PCM-0009 — helper/target identity hardening and cold-start blind acceptance merged in PR #16.
 - PCM-0010 — degraded continuity bookkeeping, recovery receipts, mandatory checkpoint pushes, and protected CI merge flow merged in PR #18 and the protected main delivery.
+- PCM-0014 — delegated-agent lifecycle policy and deterministic cleanup guidance merged automatically in PR #26 at `b9e0f7c`; protected CI passed.
 
 ## Active
 
-- PCM-0014 — close completed delegated agents and bound concurrency; GitHub issue #24.
+- None.
 
 ## Prior completed/adopted work
 
@@ -47,4 +48,4 @@ None known.
 
 ## Next atomic action
 
-Run PCM-0014's automated lint, typing, compilation, tests, package build, and continuity validation, then push it for protected CI and automatic merge.
+Activate PCM-0005 when ready to resume the queued adapter work.

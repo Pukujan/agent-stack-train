@@ -1,11 +1,11 @@
 # TASK-PCM-0014 — Close completed delegated agents and bound concurrency
 
-<!-- continuity:task {"acceptance":["delegated-agent lifecycle is normative in the PCM specification and operating guidance","completed, interrupted, failed, cancelled, and timed-out workers all require parent capture followed by explicit close","generated minimal and software guidance carries the cleanup rule","deterministic policy tests prevent the close-after-result rule from disappearing","issue #24 and the final evidence are recorded without modifying unrelated repositories","full lint, type, compilation, test, package, and continuity validation pass"],"depends_on":["PCM-0013"],"goal":"Prevent finished delegated agents from remaining open and consuming concurrency slots after their work is complete.","id":"PCM-0014","next_action":"Run the full automated release gate, push, and allow protected CI to merge.","owner":"Codex current PCM policy implementation session; GitHub issue #24","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Open completed agents remain visible and can count toward the concurrency limit. PCM needs an explicit capture, checkpoint, and close lifecycle for every delegated worker."} -->
+<!-- continuity:task {"acceptance":["delegated-agent lifecycle is normative in the PCM specification and operating guidance","completed, interrupted, failed, cancelled, and timed-out workers all require parent capture followed by explicit close","generated minimal and software guidance carries the cleanup rule","deterministic policy tests prevent the close-after-result rule from disappearing","issue #24 and the final evidence are recorded without modifying unrelated repositories","full lint, type, compilation, test, package, and continuity validation pass"],"depends_on":["PCM-0013"],"goal":"Prevent finished delegated agents from remaining open and consuming concurrency slots after their work is complete.","id":"PCM-0014","next_action":"No further action; PCM-0014 merged automatically in PR #26 at b9e0f7c.","owner":"Codex current PCM policy implementation session; GitHub issue #24","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Open completed agents remain visible and can count toward the concurrency limit. PCM needs an explicit capture, checkpoint, and close lifecycle for every delegated worker."} -->
 
-- Status: active
+- Status: completed
 - Owner: Codex current PCM policy implementation session; GitHub issue #24
 - Priority: P1
-- Depends on: PCM-0010
+- Depends on: PCM-0013
 - GitHub issue: #24
 - Suggested branch: `task/PCM-0014-agent-lifecycle`
 
@@ -35,7 +35,7 @@ inference-recommendation-engine, or any unrelated target repository.
 - [x] generated minimal and software guidance carries the cleanup rule;
 - [x] deterministic policy tests prevent the close-after-result rule from disappearing;
 - [x] issue #24 and the final evidence are recorded without modifying unrelated repositories;
-- [ ] full lint, type, compilation, test, package, and continuity validation pass.
+- [x] full lint, type, compilation, test, package, and continuity validation pass.
 
 ## Checkpoint log
 
@@ -77,6 +77,37 @@ Blocked/uncertain:
 Next:
 
 - Run the full automated release gate, push, and allow protected CI to merge.
+
+### 2026-09-23 13:39 UTC — Codex PCM-0014 merged closeout
+
+Completed:
+
+- Protected CI passed on PR #26: quality, Python 3.11 tests, Python 3.12 tests, package build, and automatic merge.
+- PR #26 merged automatically into `main` at `b9e0f7c1ec9a36f46bbb57091806fb35d4b8af2`.
+- The task is complete and no delegated worker remains open from this task.
+
+Evidence:
+
+- `gh pr view 26 --repo Pukujan/project-continuity-modules` -> `MERGED`.
+- Hosted required checks -> all successful; auto-merge -> successful.
+- Local final gate -> Ruff, MyPy, compileall, 21 tests, package build, and `continuity validate` all passed.
+
+Decisions:
+
+- Preserve PCM-0012 and PCM-0013 as their existing workspace-policy identities; agent lifecycle is PCM-0014.
+
+Changed:
+
+- `checkpoints/CURRENT.md`
+- this task
+
+Blocked/uncertain:
+
+- none
+
+Next:
+
+- Activate PCM-0005 when ready to resume the queued adapter work.
 
 ### 2026-09-23 13:34:48 UTC — Codex PCM-0014 agent lifecycle policy
 
