@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0022","active_task_file":"tasks/TASK-PCM-0022-agent-facing-holdouts.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0023","active_task_file":"tasks/TASK-PCM-0023-auditable-continuity-records.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-On 2026-09-23, the user selected PCM-0022 / issue #39 as the active bounded slice before the previously queued PCM-0019 / issue #34. This is a priority change, not a claim that #34 is complete; its managed-worktree implementation remains separate.
+On 2026-09-23, the user selected PCM-0023 / issue #32 as the active bounded slice: define and propagate human-first, evidence-backed continuity records for issues, PRs, and PCM-owned continuation documents. PCM-0022 / issue #39 remains open for its corrected-candidate holdout after the separately scoped issue #34; neither is claimed complete by this priority change.
 
 PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; stale issue #17 status was corrected and it closed through PR #37 at `cf76827`. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
@@ -32,6 +32,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Active
 
+- PCM-0023 / issue #32 — define and implement the layered human-first/auditable records contract and its propagation to future PCM adopters.
 - PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Keep #39 open for its remaining corrected-candidate holdout, which depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
 - Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
@@ -48,13 +49,12 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Reported follow-ups (not yet implemented)
 
-- PCM-0016 / issue #32 — durable issue intake and evidence-backed closeout.
 - PCM-0017 / issue #31 — version identity and installed-package parity.
 - PCM-0018 / issue #33 — idempotent checkpoints and blind fresh-session document discovery.
 - PCM-0019 / issue #34 — managed worktrees, push/merge/cleanup, and safe dependency-cache reuse.
 - PCM-0020 / issue #35 — safe Codex main-session rotation.
 - PCM-0021 / issue #30 — archive helper conversations while preserving main-session history.
-- PCM-0022 / issue #39 — agent-facing behavior testing and holdout fairness (active).
+- PCM-0022 / issue #39 — agent-facing behavior testing and holdout fairness (policy merged; candidate rerun remains pending issue #34).
 
 ## Blockers
 
@@ -62,4 +62,4 @@ None known.
 
 ## Next atomic action
 
-After issue #34 is implemented, run and record the corrected-candidate fresh-session holdout required by #39 before closing it. PR #40 already merged the policy slice with all required checks passing. Keep issue #34 implementation and strict-checkout issue #20 separately scoped.
+Commit and publish PCM-0023's tested policy/templates, open the PR linked to issue #32, and verify required CI and automatic merge. Keep #39's post-#34 holdout and #34 implementation separately tracked.

@@ -24,6 +24,12 @@ close workers that are no longer needed, including completed, interrupted,
 failed, cancelled, and timed-out workers. Do not leave completed workers open for
 possible future use; see `docs/AGENT_LIFECYCLE.md`.
 
+## Continuity records
+
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+
+Write continuity issues, updates, pull requests, and project-state documents so a new reader can understand the problem, human outcome, scope, evidence, and next action without the original chat. Cite external claims and link repository claims to their revision or CI evidence. Include reproduction detail only when it is needed to verify the claim. Keep PR openings skimmable; put long logs in linked artifacts. Preserve project ownership outside continuity. Do not claim automatic tracker sync or chat capture unless implemented and tested.
+
 ## Verification
 
 Each task names the useful outcome for a person and the smallest checks that can verify it. Prefer deterministic checks. Use a fresh-session holdout only when the promise is about what a new session can discover or do; judge it against visible requirements, not hidden expectations. A passing test does not replace the promised human-visible result.

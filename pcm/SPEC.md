@@ -129,3 +129,13 @@ Continuity records should prefer claims tied to evidence. Validators check struc
 ## 10. v1 implementation boundary
 
 PCM-0001 covers schemas, minimal/software templates, deterministic validator, init/bootstrap, task creation, checkpoint append, context-pack generation, tests, and self-dogfooding. GitHub/Beads synchronization adapters are deferred to later tasks.
+
+## 11. Continuity record writing and evidence
+
+Continuity records MUST orient a fresh human or agent to the problem, consequence, intended observable outcome, scope, current status, evidence, and next action. Their level of detail should fit the risk and reader need: detailed enough to continue and audit without copying full logs or repeating canonical state in every issue, update, or pull request.
+
+External factual claims SHOULD link directly to authoritative sources. Repository claims SHOULD identify a stable commit/revision and relevant file, issue, PR, or CI run. Experimental, research, failure-reproduction, and agent-behavior claims MUST record enough of the starting revision, inputs/configuration, runtime, commands/prompts, results, and limitations to reproduce the claim; omit fields irrelevant to routine work.
+
+Keep machine-readable IDs and versions aligned across task/checkpoint, tracker, PR, and evidence links. Human-readable and machine-readable records SHOULD share one declared source or have deterministic checks for shared identifiers and status. A valid schema, citation, link, or agent report is not proof of semantic truth.
+
+PCM owns the continuation-record contract and its propagation to adopting projects. It does not standardize unrelated domain/product writing. GitHub issue and PR templates are optional aids, not synchronization adapters; installing them MUST preserve conflicting project files. PCM MUST NOT claim automatic conversation capture or tracker synchronization without a separately implemented and tested integration. The full policy is in docs/CONTINUITY_RECORDS_POLICY.md.

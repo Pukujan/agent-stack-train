@@ -23,6 +23,12 @@ continuity init --root /path/to/target --profile software --name "Target Project
 continuity validate --root /path/to/target
 ```
 
+For a project that uses GitHub issues and wants PCM's optional issue/PR writing prompts, opt in with the extra initialization flag:
+
+    continuity init --root /path/to/target --profile software --name "Target Project" --task-prefix APP --github-templates
+
+These templates guide human-readable, evidence-linked records; they do not synchronize issues or capture conversations. Initialization refuses conflicting files before writing anything. For an existing template, preserve its owner and merge only the relevant PCM guidance deliberately.
+
 ## Mature target with existing contracts
 
 A mature repository may already have authoritative PROJECT, AGENTS, README, HANDOFF, status, or design documents. Preserve those semantics.

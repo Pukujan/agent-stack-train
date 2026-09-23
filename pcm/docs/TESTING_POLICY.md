@@ -4,7 +4,7 @@
 
 A change is not complete just because the test suite is green. The issue should say what becomes easier, safer, clearer, or newly possible for a person—and how we will know that result was delivered. Tests support that outcome; they do not replace it.
 
-Keep each issue brief: the problem and consequence, the intended outcome, scope and non-goals, observable acceptance checks, and a proportionate verification plan. Link the task, pull request, and CI result instead of copying their contents into the issue. Create a sub-issue only when a piece of work can be independently owned and delivered.
+Give each issue enough human context for a new reader to understand the problem, consequence, intended outcome, scope/non-goals, and observable acceptance checks. Keep that opening skimmable, then link the canonical task, source evidence, PR, and CI result rather than copying their full contents. Progress updates explain what changed, evidence, what remains, and the next action. Create a sub-issue only when a piece of work can be independently owned and delivered. See docs/CONTINUITY_RECORDS_POLICY.md for the full writing and provenance contract.
 
 PDD, SDD, and TDD are useful ways to think about the problem, the behavior contract, and tests. They are not three required documents for every change. Keep the test plan in the issue or bounded task. Keep executable tests and reusable fixtures in the repository.
 
@@ -50,4 +50,4 @@ Keep the detailed rubric outside the participant's context during the run, but p
 
 ## Record the result in human language
 
-Lead updates with the user's problem and what changed. Then link the evidence and tests, label what is shipped versus still planned or unknown, state any boundary, and give one next action. Technical names belong after that orientation. Pictures are not needed for an issue log unless a visual genuinely explains the outcome.
+Lead updates with the person's problem and what changed. Then link the evidence and tests, label what is shipped versus still planned or unknown, state any boundary, and give one next action. Technical names belong after that orientation. Keep a PR's opening summary skimmable and place detailed reproduction/provenance in linked or expandable evidence. Pictures are not needed for an issue log unless a visual genuinely explains the outcome.

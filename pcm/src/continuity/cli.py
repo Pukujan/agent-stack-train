@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 PROTOCOL_VERSION = "0.1.0-draft"
+CONTINUITY_RECORDS_POLICY_MARKER = '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
 CONFIG_SCHEMA = "project-continuity.config.v1"
 MARKER_RE = re.compile(r"<!--\s*continuity:(?P<kind>[a-z-]+)\s+(?P<payload>\{.*\})\s*-->")
 TASK_FILE_RE = re.compile(r"^TASK-(?P<prefix>[A-Z][A-Z0-9]*)-(?P<num>\d{4})(?:-(?P<slug>[a-z0-9-]+))?\.md$")
@@ -245,6 +246,9 @@ def handoff_template() -> str:
         "4. the active task named by CURRENT\n"
         "5. the minimum relevant specification/design document\n\n"
         "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n\n"
+        "## Continuity records\n\n"
+        f"{CONTINUITY_RECORDS_POLICY_MARKER}\n\n"
+        "Write continuity issues, updates, pull requests, and project-state documents so a fresh reader can understand the problem, human outcome, scope, evidence, and next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when needed to verify the claim. Keep PR openings skimmable; link long logs. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
         "## Degraded continuity\n\n"
         "Execution safety and existing authorization outrank continuity bookkeeping. If a canonical continuity file is temporarily unavailable, do not stop safe work, repair storage just to force a checkpoint, or ask again for an already-authorized host/worktree. Use an authorized alternate checkout and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write a JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint or replace the alternate task file. Reconcile it into the canonical task with `continuity recovery reconcile --root <canonical-root> --file <receipt>` when writable. The repository/task lineage is authoritative; a physical path is not.\n\n"
         "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; it fails rather than silently leaving a normal checkpoint local. CI runs on the pushed branch and the repository's pull-request automation merges it after required checks pass.\n"
@@ -266,11 +270,93 @@ def agents_template() -> str:
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
         + workspace_rules
+        + "## Continuity records\n\n"
+        f"{CONTINUITY_RECORDS_POLICY_MARKER}\n\n"
+        "For continuity issues, progress updates, pull requests, and project-state documents, explain the human problem and outcome first, then scope, status, linked evidence, and one next action. Cite external claims and tie repository claims to a revision, issue, PR, or CI result. Record reproduction details only when needed. Keep PR openings skimmable; link long logs. Preserve existing project ownership outside continuity. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
         + "## Checkpoint\n\n"
         "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n\n"
         "If canonical continuity state is temporarily unavailable, treat that as degraded continuity rather than an execution blocker: keep safe authorized work moving, use an already-authorized alternate checkout/host, and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> --agent <name> --completed <work> --evidence <result> --next <next-action>` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, treat a physical worktree as project identity, repair storage merely to write a checkpoint, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.\n\n"
         "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it commits and pushes the checkpoint to the task branch. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.\n"
     )
+
+
+def github_issue_template() -> str:
+    return """---
+name: Continuity task
+about: Record an actionable continuity outcome with clear evidence
+title: "Continuity: [human outcome]"
+labels: ""
+assignees: ""
+---
+
+## Problem and consequence
+
+Who or what is affected, and what becomes harder, unsafe, or impossible?
+
+## Desired result
+
+What observable result would resolve the problem?
+
+## Scope and boundaries
+
+What is included, what is not, and what dependencies or uncertainty matter?
+
+## How we will know
+
+List observable acceptance checks proportionate to the outcome.
+
+## Evidence and sources
+
+Link relevant repository state at a revision. Cite direct sources for external factual claims.
+
+## Reproduction (only when needed)
+
+Record the starting revision, relevant inputs/configuration, runtime, exact command or prompt, observed result, and limitations.
+
+## Continuity links
+
+- Task ID and canonical task file:
+- Related issues or PRs:
+- Current owner and next action:
+
+This template records context; it does not automatically synchronize this issue with repository tasks, pull requests, or checkpoints.
+"""
+
+
+def github_pr_template() -> str:
+    return """## Human outcome
+
+What changed for the person or project?
+
+## Change and scope
+
+Summarize the change and important boundaries.
+
+## Verification
+
+List focused commands and observed results. Link the CI run; do not paste full logs.
+
+## Evidence and provenance (when relevant)
+
+- Task ID and issue:
+- Starting revision, inputs, or source:
+- Direct citations or reproducible artifact:
+- What remains unknown:
+
+<details>
+<summary>Reproduction details or extended technical notes (only when useful)</summary>
+
+Add exact commands, configuration, inputs, results, and limitations here when they are needed to verify the claim.
+
+</details>
+
+## Continuity closeout
+
+- Task checkpoint updated:
+- One next action or explicit completion:
+
+This template records context; it does not automatically synchronize this pull request with issues or checkpoints.
+"""
 
 
 def readme_template(name: str) -> str:
@@ -286,6 +372,7 @@ def init_repo(
     profile: str,
     name: str,
     prefix: str,
+    github_templates: bool = False,
 ) -> list[str]:
     if profile not in {"minimal", "software"}:
         raise ContinuityError(f"unsupported profile: {profile}")
@@ -320,6 +407,9 @@ def init_repo(
     if profile == "software":
         planned["AGENTS.md"] = agents_template()
         planned["README.md"] = readme_template(name)
+    if github_templates:
+        planned[".github/ISSUE_TEMPLATE/task.md"] = github_issue_template()
+        planned[".github/pull_request_template.md"] = github_pr_template()
 
     conflicts = [
         rel for rel, content in planned.items()
@@ -386,8 +476,8 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
         "depends_on": [],
         "goal": goal,
         "why": why,
-        "acceptance": ["define task-specific acceptance criteria"],
-        "next_action": "replace placeholder acceptance criteria, then begin bounded work",
+        "acceptance": ["replace this with observable, task-specific acceptance checks"],
+        "next_action": "define scope and observable acceptance checks, then begin bounded work",
     }
     content = (
         f"# TASK-{task_id} — {slug.replace('-', ' ').title()}\n\n"
@@ -395,7 +485,12 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
         f"- Status: active\n- Owner: {owner}\n- Priority: {priority}\n- Depends on: none\n\n"
         f"## Goal\n\n{goal}\n\n## Why\n\n{why}\n\n"
         "## Allowed files\n\n- define bounded paths before implementation.\n\n"
-        "## Acceptance criteria\n\n- [ ] define task-specific acceptance criteria.\n\n"
+        "## Human outcome\n\nDescribe what becomes easier, safer, clearer, or possible when this task is complete.\n\n"
+        "## Scope and boundaries\n\n- In scope:\n- Out of scope:\n- Dependencies/uncertainty:\n\n"
+        "## Acceptance criteria\n\n- [ ] state observable, task-specific outcomes.\n\n"
+        "## Evidence and sources\n\nLink repository state at a revision and cite external factual claims directly. Record commands and results for claims that need verification.\n\n"
+        "## Reproduction details (only when needed)\n\nStarting revision, material inputs/configuration, runtime, exact command or prompt, observed result, and limitations.\n\n"
+        "## Related records\n\n- Issue/tracker link (if used):\n- Related PR/CI evidence:\n\n"
         "## Checkpoint log\n\n"
         "No checkpoints yet.\n\n"
         "## Handoff\n\n"
@@ -1032,6 +1127,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_init.add_argument("--profile", choices=["minimal", "software"], default="minimal")
     p_init.add_argument("--name", default=None)
     p_init.add_argument("--task-prefix", default="TASK")
+    p_init.add_argument(
+        "--github-templates",
+        action="store_true",
+        help="install optional GitHub issue and PR writing templates; does not enable synchronization",
+    )
 
     p_validate = sub.add_parser("validate")
     p_validate.add_argument("--root", default=".")
@@ -1092,6 +1192,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.profile,
                 name,
                 args.task_prefix,
+                github_templates=args.github_templates,
             )
             for line in results:
                 print(line)

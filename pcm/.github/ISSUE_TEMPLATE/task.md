@@ -1,23 +1,39 @@
 ---
 name: Continuity task
-about: Create a bounded project-continuity task mirror
-title: "PCM-XXXX: "
+about: Record an actionable continuity outcome with clear evidence
+title: "Continuity: [human outcome]"
 labels: ""
 assignees: ""
 ---
 
-## Goal
+## Problem and consequence
 
-## Why
+Who or what is affected, and what becomes harder, unsafe, or impossible?
 
-## Canonical task file
+## Desired result
 
-`tasks/TASK-PCM-XXXX-short-name.md`
+What observable result would resolve the problem?
 
-## Dependencies
+## Scope and boundaries
 
-## Acceptance highlights
+What is included, what is not, and what dependencies or uncertainty matter?
 
-## Next atomic action
+## How we will know
 
-## Scope guard
+List observable acceptance checks proportionate to the outcome.
+
+## Evidence and sources
+
+Link relevant repository state at a revision. Cite direct sources for external factual claims.
+
+## Reproduction (only when needed)
+
+Record the starting revision, relevant inputs/configuration, runtime, exact command or prompt, observed result, and limitations.
+
+## Continuity links
+
+- Task ID and canonical task file:
+- Related issues or PRs:
+- Current owner and next action:
+
+This template records context; it does not automatically synchronize this issue with repository tasks, pull requests, or checkpoints.

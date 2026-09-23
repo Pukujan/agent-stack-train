@@ -13,8 +13,11 @@ from continuity.cli import (
     build_parser,
     checkpoint_task,
     extract_marker,
+    github_issue_template,
+    github_pr_template,
     init_repo,
     load_json,
+    main,
     pack_task,
     preflight_repo,
     publish_checkpoint,
@@ -32,6 +35,54 @@ class ContinuityTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, tmp, True)
         shutil.copytree(FIXTURES / name, tmp, dirs_exist_ok=True)
         return tmp
+
+    def test_github_templates_are_opt_in_idempotent_and_valid(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-github-templates-"))
+        self.addCleanup(shutil.rmtree, root, True)
+
+        self.assertEqual(
+            main(["init", "--root", str(root), "--profile", "minimal", "--name", "Example", "--github-templates"]),
+            0,
+        )
+        issue_path = root / ".github" / "ISSUE_TEMPLATE" / "task.md"
+        pr_path = root / ".github" / "pull_request_template.md"
+        self.assertEqual(issue_path.read_text(encoding="utf-8"), github_issue_template())
+        self.assertEqual(pr_path.read_text(encoding="utf-8"), github_pr_template())
+        config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
+        self.assertFalse(config["trackers"]["github"])
+        self.assertEqual(validate_repo(root), [])
+
+        before = {path: path.read_bytes() for path in (issue_path, pr_path)}
+        self.assertEqual(
+            main(["init", "--root", str(root), "--profile", "minimal", "--name", "Example", "--github-templates"]),
+            0,
+        )
+        self.assertEqual({path: path.read_bytes() for path in before}, before)
+
+    def test_github_template_conflict_prevents_partial_initialization(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-github-conflict-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        custom_template = root / ".github" / "pull_request_template.md"
+        custom_template.parent.mkdir(parents=True)
+        custom_template.write_text("Existing project-owned PR template.\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ContinuityError, "initialization conflicts"):
+            init_repo(root, "minimal", "Example", "APP", github_templates=True)
+
+        self.assertEqual(custom_template.read_text(encoding="utf-8"), "Existing project-owned PR template.\n")
+        self.assertFalse((root / "PROJECT.md").exists())
+        self.assertFalse((root / ".continuity" / "config.json").exists())
+
+    def test_github_templates_remain_opt_in_and_do_not_claim_sync(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-no-github-templates-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP")
+
+        self.assertFalse((root / ".github" / "ISSUE_TEMPLATE" / "task.md").exists())
+        config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
+        self.assertFalse(config["trackers"]["github"])
+        self.assertIn("does not automatically synchronize", github_issue_template().lower())
+        self.assertIn("does not automatically synchronize", github_pr_template().lower())
 
     def test_valid_fixture(self) -> None:
         root = self.copy_fixture("valid-minimal")

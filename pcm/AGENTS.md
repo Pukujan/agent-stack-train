@@ -88,6 +88,12 @@ Distinguish:
 
 Never promote an unsupported previous-session statement into project fact.
 
+## Continuity record writing
+
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+
+For continuity issues, progress updates, pull requests, and PCM-owned project-state documents, orient the reader to the human problem and consequence, observable outcome, scope, status, evidence, and next action. Link external claims to direct sources and repository claims to a commit/revision, issue, PR, CI run, or artifact. Record enough inputs and commands to reproduce a result only when the claim depends on an experiment, research, or failure reproduction. Keep PR openings skimmable; link or collapse long logs and technical detail. Preserve the target project's ownership of unrelated writing and documents. See docs/CONTINUITY_RECORDS_POLICY.md.
+
 ## Verification rule
 
 Name the human-visible outcome and choose checks in proportion to the promise being changed. Deterministic regression tests are the default; fresh-session holdouts are reserved for agent-facing workflow promises and must use the visible-contract fairness rules. Do not add process documents or test-type sub-issues by default. See `docs/TESTING_POLICY.md`.
