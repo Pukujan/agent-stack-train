@@ -1,6 +1,14 @@
-# Protocol Versioning and Migration
+# Versioning and Migration
 
-## Version classes
+PCM has two independent version identities:
+
+- **CLI/package version** — the installable `project-continuity` tool in `pyproject.toml`.
+- **protocol version** — the repository-state contract declared in `.continuity/config.json`.
+
+A CLI release can add safety commands or fix validation behavior without forcing every target repository to migrate its protocol declaration.
+
+
+## Protocol version classes
 
 The continuity protocol uses semantic-versioning principles.
 
@@ -12,6 +20,18 @@ Backward-compatible optional capabilities, new profiles, new optional fields/ada
 
 ### Major
 Incompatible changes to required canonical objects, meanings, or validation invariants.
+
+## CLI/package version classes
+
+The CLI/package also follows semantic versioning:
+
+- PATCH: implementation/documentation fixes with no new public command or behavior contract.
+- MINOR: backward-compatible commands or safety capabilities, such as target preflight.
+- MAJOR: incompatible CLI/API changes.
+
+PCM-0009 therefore releases as CLI/package **0.2.0** because it adds the backward-compatible `preflight` command and adoption contract. The repository protocol remains **0.1.0-draft** because no required canonical object or schema meaning changes.
+
+PCM-0010 keeps the repository protocol at **0.1.0-draft**. Recovery receipts are optional, backward-compatible evidence outside the required canonical lifecycle; they do not replace or weaken existing PROJECT/CURRENT/TASK/CHECKPOINT schemas. The CLI/package remains on the 0.2.x compatibility line while it adds degraded-continuity handling and recovery reconciliation.
 
 ## Project declaration
 

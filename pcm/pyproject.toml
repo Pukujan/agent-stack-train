@@ -4,13 +4,39 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "project-continuity"
-version = "0.1.0"
+version = "0.2.0"
 description = "Repository-native project continuity protocol and CLI"
 requires-python = ">=3.11"
 dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2",
+    "mypy>=1.11",
+    "ruff>=0.6",
+]
 
 [project.scripts]
 continuity = "continuity.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ISC"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/continuity/cli.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true

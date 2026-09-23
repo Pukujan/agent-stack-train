@@ -1,35 +1,31 @@
 # Current Handoff
 
-This repository is ready for a fresh session without prior chat history.
+This repository is ready for a fresh PCM development session without prior chat history.
 
 ## Active work
 
-- Task: `PCM-0008 — Multi-repository content-system previews` (complete; four README-enabled PRs merged)
-- Suggested task branch: `task/PCM-0008-close-readme-promotion`
-- Canonical task file: `tasks/TASK-PCM-0008-multi-repo-content-system.md`
-- Helper repository: `Pukujan/content-generation-modules`
-- Existing pilot repository: `Pukujan/Eval-lab`
-- Existing Eval Lab preview PR: `https://github.com/Pukujan/Eval-lab/pull/30`
-- Durable handoff PR: `https://github.com/Pukujan/project-continuity-modules/pull/9`
-- New preview targets: `Pukujan/harness-on-steroids`, `Pukujan/custom-extensions`, `Pukujan/hades-product`
+- Tasks: `PCM-0009` and `PCM-0010` automated delivery gate
+- Issues: #15 and #17
+- PRs: #16 (main delivery) and #18 (stacked PCM-0010 delivery)
+- PCM-0009 and PCM-0010 remain separately scoped in task history
+- Candidate CLI/package version remains: `0.2.0`
+- Protocol version remains: `0.1.0-draft`
+- Release gate: deterministic suite + fresh-session blind acceptance in `docs/BLIND_TEST_PCM-0010.md`
 
 ## Read exactly this first
 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `tasks/TASK-PCM-0008-multi-repo-content-system.md`
-5. `SPEC.md`
-6. target repository `HANDOFF.md` and its prescribed read order
-
-Then implement only the bounded multi-repository preview task. Do not reconstruct project state from prior conversations.
+4. `tasks/TASK-PCM-0010-continuity-bookkeeping.md`
+5. `docs/HANDOFF_PROTOCOL.md`
+6. `docs/BLIND_TEST_PCM-0010.md`
+7. `docs/VERSIONING.md`
 
 ## Exact next action
 
-No pending action for PCM-0008. Future sessions can reuse the v0.1.2 helper contract for another explicitly requested repository.
-
-The shared visual contract is now explicit: every narrative raster image gets one small, exact title and subtitle; SVGs, logos, icons, and tiny helper graphics remain text-free. All four adapters pin `content-generation-modules` v0.1.2 at `cb8c18fa7789e4b651e1f963892bf056b0d3276d`.
+Verify the automatically merged candidate on `main`, then perform release metadata verification for package 0.2.0. Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 
-PCM task state is canonical in this repository. Existing target-repository contracts remain authoritative for target semantics; PCM-0003 must overlay rather than replace them.
+PCM owns only its protocol/tooling development state. When PCM is used as a helper for another repository, that target repository owns its PROJECT/CURRENT/TASK/checkpoint state. A target is not integrated until `continuity validate --root <target>` succeeds. The authoritative identity is the repository/task lineage and Git history; alternate worktrees/hosts are execution infrastructure. Normal checkpoints commit and push the task branch; CI and pull-request automation deliver the pushed state. Use and later reconcile a recovery receipt when canonical continuity state is temporarily unavailable.
