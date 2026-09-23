@@ -1,0 +1,169 @@
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix pcm: <urn:pcm:> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# PROV-O describes how the research record was produced. The pcm: vocabulary
+# adds local epistemic labels; it does not claim that PROV-O certifies truth.
+
+pcm:user a prov:Person ;
+    dct:description "User requesting durable, versioned, testable PCM continuity across sessions and agents." .
+
+pcm:luna a prov:SoftwareAgent ;
+    dct:description "GPT-6 Luna parent agent recording the discussion and coordinating the plan." .
+
+pcm:astra a prov:SoftwareAgent ;
+    dct:description "GPT-6 Astra delegated planning agent requested for bounded PCM-0015 planning." .
+
+pcm:requestCrossSessionContinuity a prov:Entity ;
+    pcm:epistemicStatus "user_requirement" ;
+    dct:description "User request for Git-canonical checkpointing, fresh-session handoffs, versioned PCM adoption, and project-memory discovery." .
+
+pcm:requestIdempotencyAndMemory a prov:Entity ;
+    pcm:epistemicStatus "user_requirement" ;
+    dct:description "User request for idempotent checkpoint operations, paired human/machine docs, manifests, reliable discovery, and evidence-aware claims." .
+
+pcm:requestBoundedPlan a prov:Entity ;
+    pcm:epistemicStatus "user_requirement" ;
+    dct:description "User request to preserve the discussion, ask Astra for a durable scoped plan and tests, and continue as Luna." .
+
+pcm:priorAssistantDesign a prov:Entity ;
+    pcm:epistemicStatus "prior_agent_proposal" ;
+    dct:description "Previous assistant suggestions for manifests, generated views, document indexes, claims, context packs, and test cases. These remain proposals until reviewed." .
+
+pcm:repoSnapshot a prov:Entity ;
+    pcm:epistemicStatus "observed_repo_fact" ;
+    dct:description "PCM checkout observed at commit 388df1f057832d99b7c72d8022be5d1dae9a9946; package version 0.2.0; protocol version 0.1.0-draft; clean before PCM-0015 changes." ;
+    prov:hadPrimarySource <https://github.com/Pukujan/project-continuity-modules/tree/388df1f057832d99b7c72d8022be5d1dae9a9946> .
+
+pcm:provPrimer a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "W3C PROV Primer" ;
+    prov:value <https://www.w3.org/TR/prov-primer/> .
+
+pcm:provOntology a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "W3C PROV-O: The PROV Ontology" ;
+    prov:value <https://www.w3.org/TR/prov-o/> .
+
+pcm:jsonSchemaSpec a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "JSON Schema specification" ;
+    prov:value <https://json-schema.org/specification> .
+
+pcm:openApiSpec a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "OpenAPI Specification" ;
+    prov:value <https://spec.openapis.org/oas/latest.html> .
+
+pcm:lostInMiddlePaper a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "Lost in the Middle: How Language Models Use Long Contexts" ;
+    prov:value <https://arxiv.org/abs/2307.03172> .
+
+pcm:openAiSubagentsDocs a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "OpenAI Subagents guidance" ;
+    prov:value <https://learn.chatgpt.com/docs/agent-configuration/subagents> .
+
+pcm:pypaPackagingGuide a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "Python Packaging User Guide: Writing pyproject.toml" ;
+    prov:value <https://packaging.python.org/en/latest/guides/writing-pyproject-toml/> .
+
+pcm:uvToolsGuide a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "uv tool management" ;
+    prov:value <https://docs.astral.sh/uv/concepts/tools/> .
+
+pcm:npmPackageJsonDocs a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "npm package.json documentation" ;
+    prov:value <https://docs.npmjs.com/cli/v11/configuring-npm/package-json/> .
+
+pcm:npmUpdateDocs a prov:Entity ;
+    pcm:epistemicStatus "external_source" ;
+    dct:title "npm update documentation" ;
+    prov:value <https://docs.npmjs.com/cli/v11/commands/npm-update/> .
+
+pcm:distributionSurfaceCheck a prov:Activity ;
+    dct:description "Inspect package metadata, CI/release configuration, public PyPI URL, and official Python/Node package-manager behavior on 2026-09-23." ;
+    prov:used pcm:repoSnapshot,
+        pcm:pypaPackagingGuide,
+        pcm:uvToolsGuide,
+        pcm:npmPackageJsonDocs,
+        pcm:npmUpdateDocs ;
+    prov:wasAssociatedWith pcm:luna .
+
+pcm:distributionObservations a prov:Entity ;
+    pcm:epistemicStatus "observed_repo_fact plus time-bounded observed_external_state" ;
+    dct:description "Repository declares project-continuity 0.2.0 for Python >=3.11 and builds it in CI; no publishing workflow or GitHub release was observed; the public PyPI project URL returned 404 at the check time; no Node package/runtime support was found in targeted inspection." ;
+    prov:wasGeneratedBy pcm:distributionSurfaceCheck ;
+    prov:wasDerivedFrom pcm:repoSnapshot,
+        pcm:pypaPackagingGuide,
+        pcm:uvToolsGuide,
+        pcm:npmPackageJsonDocs,
+        pcm:npmUpdateDocs ;
+    prov:hadPrimarySource <https://pypi.org/project/project-continuity/> .
+
+pcm:contextCapture a prov:Activity ;
+    dct:description "Capture user requirements, prior proposals, repository observations, and research references as a PCM-0015 planning context." ;
+    prov:used pcm:requestCrossSessionContinuity,
+        pcm:requestIdempotencyAndMemory,
+        pcm:requestBoundedPlan,
+        pcm:priorAssistantDesign,
+        pcm:repoSnapshot,
+        pcm:provPrimer,
+        pcm:provOntology,
+        pcm:jsonSchemaSpec,
+        pcm:openApiSpec,
+        pcm:lostInMiddlePaper,
+        pcm:openAiSubagentsDocs ;
+    prov:wasAssociatedWith pcm:luna .
+
+pcm:researchContext a prov:Entity ;
+    dct:title "PCM-0015 verbatim discussion and epistemic context" ;
+    pcm:epistemicStatus "source record; mixed evidence classes explicitly labeled in accompanying Markdown" ;
+    prov:wasGeneratedBy pcm:contextCapture ;
+    prov:wasDerivedFrom pcm:requestCrossSessionContinuity,
+        pcm:requestIdempotencyAndMemory,
+        pcm:requestBoundedPlan,
+        pcm:priorAssistantDesign,
+        pcm:repoSnapshot .
+
+pcm:contextEnrichment a prov:Activity ;
+    dct:description "Add time-bounded package publication observations and official Python/Node package-manager sources to the PCM-0015 context record." ;
+    prov:used pcm:researchContext,
+        pcm:distributionObservations ;
+    prov:wasAssociatedWith pcm:luna .
+
+pcm:enrichedResearchContext a prov:Entity ;
+    dct:title "PCM-0015 epistemic context, enriched with distribution research" ;
+    pcm:epistemicStatus "revision of source record; new time-bounded external observations are explicitly distinguished" ;
+    prov:wasGeneratedBy pcm:contextEnrichment ;
+    prov:wasDerivedFrom pcm:researchContext,
+        pcm:distributionObservations .
+
+pcm:planningTask a prov:Entity ;
+    dct:identifier "PCM-0015" ;
+    pcm:epistemicStatus "active bounded planning task; implementation is out of scope" ;
+    prov:wasGeneratedBy pcm:contextCapture ;
+    prov:wasDerivedFrom pcm:researchContext .
+
+pcm:proposedMemoryArchitecture a prov:Entity ;
+    pcm:epistemicStatus "inference / recommendation requiring Astra review and executable acceptance tests" ;
+    dct:description "Potential small, Git-backed continuity memory combining machine-validated state, generated human views, indexed documents, evidence-linked claims, bounded context packs, and idempotent updates." ;
+    prov:wasDerivedFrom pcm:requestCrossSessionContinuity,
+        pcm:requestIdempotencyAndMemory,
+        pcm:priorAssistantDesign,
+        pcm:repoSnapshot,
+        pcm:distributionObservations,
+        pcm:provPrimer,
+        pcm:provOntology,
+        pcm:jsonSchemaSpec,
+        pcm:openApiSpec,
+        pcm:lostInMiddlePaper .
+
+pcm:openQuestions a prov:Entity ;
+    pcm:epistemicStatus "unresolved; planning agent must analyze and classify decisions" ;
+    dct:description "Distribution surfaces and package managers; Python/Node version compatibility; source of truth for paired docs; size/cost of ordinary checkpoints; whether PROV is stored natively or exported; task claims and lease semantics; migration conflict handling; slice boundaries and minimum efficacy tests." .
