@@ -74,7 +74,11 @@ Execution safety and existing authorization outrank checkpoint bookkeeping. A te
 
 Use an already-authorized alternate checkout or host when needed. Record the same task ID, repository identity, branch/ref, source commit, evidence, and next action in a recovery receipt with `continuity checkpoint --recovery-root <alternate-root>`. Do not repair storage merely to force a write, ask again for permission that already exists, treat a physical path as project identity, or create competing continuity state. Reconcile the receipt after the canonical checkout is writable with `continuity recovery reconcile`.
 
-Each task uses the one canonical checkout, with task branches run sequentially. Do not create task clones, task folders, or linked Git worktrees. The pushed task branch is the required durable shared handoff for normal operation. CI runs on every pushed branch, and pull-request automation merges after the required checks pass.
+The Git repository, remote, task ID, branch/ref, and commit history define task identity; a local path does not. Keep one permanent main checkout as the project home base. Use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task under `<canonical-root>/pcm/worktree/<TASK-ID>`; do not create one per session/agent or create sibling clones. Reuse the same task worktree across sessions.
+
+After the task's commits/checkpoints are pushed, required CI passes, its PR is merged, its task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. The command verifies the GitHub PR, required checks, and merged commit, and refuses dirty or unproven cleanup; never force-remove unfinished or user-modified work. Until another host has a tested CI/merge verifier, cleanup for non-GitHub remotes fails closed and leaves the worktree intact. A worktree shares Git repository data, but mutable dependencies are not automatically shared: reuse safe package download/build caches, and keep environments separate when lockfiles or runtimes differ. Projects that require stricter disk minimization may select `workspace.mode: single-checkout`.
+
+Normal checkpoints still need to be pushed; worktrees do not create a second project identity. If checkpoint storage is unavailable, use only an already-authorized alternate environment and the recovery-receipt path above, not a newly created worktree as a workaround.
 
 ## Delegated-agent cleanup
 

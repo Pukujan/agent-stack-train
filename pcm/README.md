@@ -108,7 +108,9 @@ The goal is not to preserve every sentence an agent ever produced. The goal is t
 
 Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue only through an already-authorized alternate environment and record a small recovery receipt with `--recovery-root`. Do not create a clone or worktree as a workaround. Reconcile that receipt into the canonical task when it becomes writable.
 
-The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Every project uses serial task branches in one canonical checkout and one dependency environment. Task clones, task folders, and linked Git worktrees are prohibited. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
+The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Keep one permanent project folder as the home base and use it for sequential tasks. When simultaneous work or isolation genuinely helps, create a temporary managed worktree for that task under `pcm/worktree/<TASK-ID>`; reuse it across sessions rather than making one per agent. Do not create sibling clones. Git worktrees share repository data, so they are lighter than separate clones, though each still has its own checked-out files and may have its own dependency environment. After changes are pushed, required checks pass, GitHub merges the PR, and the task is complete, run `continuity worktree remove <TASK-ID>`; PCM verifies the result before removing the clean worktree. Other Git hosts stay untouched until PCM has a tested CI/merge verifier for them. Unfinished or dirty work is kept, never force-deleted.
+
+Dependency downloads/build artifacts should use the package manager's shared cache where supported. pnpm documents a shared content store whose package files are linked into each `node_modules` ([pnpm storage model](https://pnpm.io/)); uv documents a reusable, thread-safe cache ([uv cache](https://docs.astral.sh/uv/concepts/cache/)), while normally keeping a project-specific `.venv` ([uv project layout](https://docs.astral.sh/uv/concepts/projects/layout/)). The goal is to avoid downloading/building the same dependencies repeatedly without allowing one task's dependency edits to disrupt another. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
 
 Delegated agents are also temporary execution views. After a worker returns, the
 parent records its result and evidence in the task checkpoint and explicitly
@@ -217,11 +219,15 @@ continuity init --profile software --name "My Project" --task-prefix APP
 continuity validate
 ```
 
-Software initialization generates guidance requiring sequential task branches
-in one canonical folder and reuse of its one dependency environment. The
-`workspace_mode` config key is no longer supported. If a project has this
-legacy key, remove it manually from `.continuity/config.json`; validation will
-explain this migration and will not modify the file.
+Software initialization defaults to managed temporary task worktrees. Use the
+main checkout for sequential work; create a worktree only when isolation or
+parallelism helps, then run `continuity worktree remove <TASK-ID>` after the
+task is merged, complete, and clean. Choose `--workspace-mode single-checkout`
+to prohibit worktrees. The old scalar `workspace_mode` config key is not
+supported; replace it with a `workspace` object such as
+`"workspace": {"mode": "managed-worktrees"}` or
+`"workspace": {"mode": "single-checkout"}`. Validation explains this
+migration and does not modify existing configuration.
 
 Create a bounded task:
 

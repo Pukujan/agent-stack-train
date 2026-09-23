@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0019","active_task_file":"tasks/TASK-PCM-0019-managed-worktrees.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-On 2026-09-23, the user selected PCM-0023 / issue #32 as the active bounded slice. PR #43 delivered the human-first, evidence-backed continuity-record policy and passed all required CI before merging at `867e5ae`. Closeout PR #44 aligns task status and closes #32. No next task has been activated. PCM-0022 / issue #39 remains open for its corrected-candidate holdout after the separately scoped issue #34.
+On 2026-09-23, the user activated PCM-0019 / issue #34 to replace the blanket worktree ban with a managed temporary-worktree lifecycle. The candidate keeps one permanent home checkout for sequential work, permits task-scoped temporary linked worktrees when parallelism/isolation is useful, and verifies GitHub checks/merge before cleanup. A Windows NTFS experiment measured 5,243,374 file-storage bytes for the home checkout plus three linked worktrees versus 8,390,584 bytes for the home checkout plus three non-hardlinked clones; full suites pass 43 tests each on Python 3.11 and 3.12. Sources, method, and limitations are recorded in the task. Hosted PR CI, merge, issue closeout, and the separate PCM-0022/#39 holdout remain pending. No unrelated target repository is in scope.
 
 PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; stale issue #17 status was corrected and it closed through PR #37 at `cf76827`. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
@@ -31,9 +31,9 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0015 — planning-only versioned memory/adoption proposal merged in PR #29 at `b379ba3`; required CI passed and issue #28 was closed after follow-ups were linked.
 - PCM-0023 — human-first auditable continuity records merged in PR #43 at `867e5ae`; quality, Python 3.11/3.12 tests, package build, and automatic-merge checks passed.
 
-## Open but not activated
+## Open and separately tracked
 
-- PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Keep #39 open for its remaining corrected-candidate holdout, which depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
+- PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Its corrected-candidate holdout depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be mislabeled as this task's evidence.
 - Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
 ## Prior completed/adopted work
@@ -47,7 +47,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 2. PCM-0006 — optional Beads adapter.
 3. PCM-0007 — protocol v1.0 release/migration contract.
 
-## Reported follow-ups (not yet implemented)
+## Other open reports (not part of PCM-0019 implementation)
 
 - PCM-0017 / issue #31 — version identity and installed-package parity.
 - PCM-0018 / issue #33 — idempotent checkpoints and blind fresh-session document discovery.
@@ -62,4 +62,4 @@ None known.
 
 ## Next atomic action
 
-No task is active. After closeout PR #44 merges and issue #32 is closed, wait for the user's next bounded priority. Keep #39's post-#34 holdout and #34 implementation separately tracked.
+Publish the PCM-0019 candidate for protected CI, then run the separate #39 corrected-candidate holdout and scenario variant before closing issue #34 or selecting another report.

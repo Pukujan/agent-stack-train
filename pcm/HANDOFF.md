@@ -4,6 +4,10 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
+- PCM-0019 / issue #34 is active: implement temporary task-owned worktrees under `pcm/worktree/<TASK-ID>`, safe push/CI/merge/removal, and immutable package-cache reuse. Start with `tasks/TASK-PCM-0019-managed-worktrees.md`.
+- Preserve strict single-checkout as an explicit opt-out. Issue #20's feature landed in PR #21 but remains open; reconcile it only after #34's final policy and tests pass.
+- PCM-0022 / issue #39 remains a separate test-method task. Run its corrected-candidate fresh-session checks only after #34 has a candidate; do not fold its policy/harness work into #34.
+- #42 README image recovery is deferred; do not search for or generate images until the user provides the promised plan.
 - PCM-0023 / issue #32 completed in PR #43 at `867e5ae`; closeout PR #44 updates the canonical task status/current pointer and closes #32.
 - PCM-0022 / issue #39 remains open: its policy merged in PR #40, but its corrected-candidate fresh-session rerun depends on the separate issue #34. Read its task file only when resuming that follow-up.
 - PCM-0019 / issue #34 remains open and separate. The #39 corrected-candidate holdout depends on its future implementation; do not implement managed worktrees under PCM-0022.
@@ -28,11 +32,15 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-After closeout PR #44 merges and issue #32 is closed, activate no work until the user selects the next bounded priority. Keep the #39 holdout dependent on #34.
+Finish PCM-0019/#34: align the generated and repository guidance with the managed-worktree lifecycle, complete deterministic safety and disk-footprint tests, run all local gates and continuity validation, then push for required CI and automatic merge. Keep the #39 fresh-session holdout separate and dependent on this candidate.
 
 ## Authority
 
 PCM owns only its protocol/tooling development state. When PCM is used as a helper for another repository, that target repository owns its PROJECT/CURRENT/TASK/checkpoint state. A target is not integrated until `continuity validate --root <target>` succeeds. The authoritative identity is the repository/task lineage and Git history; alternate worktrees/hosts are execution infrastructure. Normal checkpoints commit and push the task branch; CI and pull-request automation deliver the pushed state. Use and later reconcile a recovery receipt when canonical continuity state is temporarily unavailable.
+
+## Workspace policy
+
+Keep one permanent main checkout as the project home base and use it for sequential work. Create a linked worktree only when parallelism or isolation is useful, under `pcm/worktree/<TASK-ID>`, and reuse that task's worktree across sessions. Do not create one per agent or sibling clones. After required checks pass, the PR is merged, the task is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`; it verifies GitHub delivery and refuses unsafe cleanup. Other Git hosts remain unsupported for cleanup until PCM has a tested CI/merge verifier for them. Shared package caches are encouraged, but mutable dependency environments stay separate when their lockfiles or runtimes differ. Strict `single-checkout` mode remains available.
 
 ## Continuity records
 

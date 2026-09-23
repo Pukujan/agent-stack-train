@@ -10,17 +10,17 @@ Work only inside the active bounded task. Split or revise the task before materi
 
 ## Canonical checkout
 
-- Identify the single canonical checkout by host/path and normalized Git remote, then reuse it.
-- Do not create another clone or sibling project folder for a task.
-- Work sequentially on task branches in the one canonical checkout and reuse its one root dependency environment.
-- Never create task clones, Git worktrees, task folders, or additional dependency environments.
-- If the canonical checkout is unavailable or ambiguous, resolve policy and ownership before creating a directory.
+The Git repository, remote, task ID, branch/ref, and commit history identify the work; the physical path does not. Keep one permanent main checkout as the project home base and use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task at `<canonical-root>/pcm/worktree/<TASK-ID>`. Do not create one per session/agent, sibling clones, or arbitrary worktree paths; resume the same worktree across sessions.
+
+After required checks pass, the PR is merged, the task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. It verifies the GitHub PR, required checks, and merged commit and refuses unsafe cleanup; never force-remove unfinished or user-modified work. Other Git hosts remain unsupported for cleanup until PCM has a tested CI/merge verifier for them. `workspace.mode: single-checkout` is available when a project explicitly wants to prohibit linked worktrees.
+
+Reuse immutable package download/build caches where supported, but keep mutable `node_modules` and `.venv` separate when lockfiles or runtimes differ. Track dependency changes in manifests, lockfiles, or patch files rather than hidden edits to installed packages.
 
 ## Checkpoint
 
 Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.
 
-Continuity bookkeeping supports execution but does not gate safe execution. If canonical continuity state is temporarily unavailable, continue safe authorized work only in an already-authorized alternate environment; do not create a clone or worktree to work around it. When authorized, run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, repair storage merely to write a checkpoint, create competing continuity state, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.
+Continuity bookkeeping supports execution but does not gate safe execution. If canonical continuity state is temporarily unavailable, continue safe authorized work only in an already-authorized alternate environment; do not create a clone or a new worktree merely to work around it. When authorized, run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, repair storage merely to write a checkpoint, create competing continuity state, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.
 
 For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it commits the checkpoint and pushes the task branch to `origin`. A normal checkpoint is not complete while it exists only in a local worktree. CI runs on every pushed branch and pull-request automation merges after required checks pass.
 

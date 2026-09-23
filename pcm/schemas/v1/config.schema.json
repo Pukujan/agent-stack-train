@@ -50,6 +50,22 @@
       "pattern": "^[A-Z][A-Z0-9]*$",
       "type": "string"
     },
+    "workspace": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "managed-worktrees",
+            "single-checkout"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "type": "object"
+    },
     "trackers": {
       "additionalProperties": false,
       "properties": {

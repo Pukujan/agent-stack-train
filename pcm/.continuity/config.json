@@ -13,5 +13,8 @@
   "trackers": {
     "beads": false,
     "github": true
+  },
+  "workspace": {
+    "mode": "managed-worktrees"
   }
 }

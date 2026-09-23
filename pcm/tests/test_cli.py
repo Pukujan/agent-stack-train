@@ -102,23 +102,32 @@ class ContinuityTests(unittest.TestCase):
         self.assertTrue(any(line.endswith("PROJECT.md") for line in results))
         self.assertEqual(validate_repo(root), [])
 
-    def test_software_profile_includes_canonical_checkout_policy(self) -> None:
+    def test_software_profile_includes_managed_worktree_policy(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="continuity-software-init-"))
         self.addCleanup(shutil.rmtree, root, True)
         init_repo(root, "software", "Example", "SOFT")
 
         agents = (root / "AGENTS.md").read_text(encoding="utf-8")
-        self.assertIn("one canonical checkout", agents)
-        self.assertIn("Do not create clones", agents)
-        self.assertIn("Do not create clones, task folders, or linked Git worktrees anywhere", agents)
-        self.assertNotIn("<canonical-root>/.worktrees/<task-slug>", agents)
+        self.assertIn("one per independent active task, not one per session or agent", agents)
+        self.assertIn("pcm/worktree/<TASK-ID>", agents)
+        self.assertIn("continuity worktree remove", agents)
+        self.assertIn("required CI passes", agents)
+        self.assertIn("Reuse package-manager download/build caches", agents)
+        self.assertNotIn("Do not create clones, task folders, or linked Git worktrees anywhere", agents)
         config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
         schema = json.loads((root / "schemas" / "v1" / "config.schema.json").read_text(encoding="utf-8"))
-        self.assertNotIn("workspace_mode", config)
-        self.assertNotIn("workspace_mode", schema["properties"])
+        self.assertEqual(config["workspace"]["mode"], "managed-worktrees")
+        self.assertEqual(
+            schema["properties"]["workspace"]["properties"]["mode"]["enum"],
+            ["managed-worktrees", "single-checkout"],
+        )
         self.assertEqual(validate_repo(root), [])
 
-    def test_init_cli_rejects_removed_workspace_mode_option(self) -> None:
+    def test_init_cli_accepts_only_supported_workspace_modes(self) -> None:
+        args = build_parser().parse_args(
+            ["init", "--profile", "software", "--workspace-mode", "single-checkout"]
+        )
+        self.assertEqual(args.workspace_mode, "single-checkout")
         with self.assertRaises(SystemExit):
             build_parser().parse_args(
                 ["init", "--profile", "software", "--workspace-mode", "linked-worktrees"]
@@ -145,6 +154,10 @@ class ContinuityTests(unittest.TestCase):
         root = Path(tempfile.mkdtemp(prefix="continuity-single-checkout-"))
         self.addCleanup(shutil.rmtree, root, True)
         init_repo(root, "minimal", "Example", "SOFT")
+        config_path = root / ".continuity" / "config.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config["workspace"]["mode"] = "single-checkout"
+        config_path.write_text(json.dumps(config), encoding="utf-8")
         (root / ".git").mkdir()
         worktree_output = (
             f"worktree {root}\nHEAD 0123456789abcdef\n\n"
@@ -175,7 +188,7 @@ class ContinuityTests(unittest.TestCase):
 
         errors = validate_repo(root)
         self.assertTrue(any("unsupported legacy key 'workspace_mode'" in error for error in errors), errors)
-        self.assertTrue(any("remove this key" in error for error in errors), errors)
+        self.assertTrue(any("use `workspace:" in error for error in errors), errors)
         self.assertEqual(config_path.read_bytes(), original)
 
         config.pop("workspace_mode")

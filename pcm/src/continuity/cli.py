@@ -6,12 +6,15 @@ import re
 import subprocess
 import sys
 from contextlib import suppress
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 PROTOCOL_VERSION = "0.1.0-draft"
-CONTINUITY_RECORDS_POLICY_MARKER = '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
+CONTINUITY_RECORDS_POLICY_MARKER = (
+    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
+)
 CONFIG_SCHEMA = "project-continuity.config.v1"
 MARKER_RE = re.compile(r"<!--\s*continuity:(?P<kind>[a-z-]+)\s+(?P<payload>\{.*\})\s*-->")
 TASK_FILE_RE = re.compile(r"^TASK-(?P<prefix>[A-Z][A-Z0-9]*)-(?P<num>\d{4})(?:-(?P<slug>[a-z0-9-]+))?\.md$")
@@ -29,8 +32,174 @@ SCHEMA_FILES = {
     "recovery": "recovery.schema.json",
 }
 
-BUILTIN_SCHEMAS = {'config': {'$id': 'https://project-continuity.dev/schema/v1/config.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'canonical': {'additionalProperties': False, 'properties': {'current': {'minLength': 1, 'type': 'string'}, 'project': {'minLength': 1, 'type': 'string'}, 'tasks': {'minLength': 1, 'type': 'string'}}, 'required': ['project', 'current', 'tasks'], 'type': 'object'}, 'profile': {'enum': ['minimal', 'software'], 'type': 'string'}, 'protocol': {'const': 'project-continuity'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.config.v1'}, 'schema_dir': {'const': 'schemas/v1'}, 'task_prefix': {'pattern': '^[A-Z][A-Z0-9]*$', 'type': 'string'}, 'trackers': {'additionalProperties': False, 'properties': {'beads': {'type': 'boolean'}, 'github': {'type': 'boolean'}}, 'required': ['github', 'beads'], 'type': 'object'}}, 'required': ['schema', 'protocol', 'protocol_version', 'profile', 'task_prefix', 'canonical', 'schema_dir', 'trackers'], 'title': 'Project Continuity Config v1', 'type': 'object'}, 'project': {'$id': 'https://project-continuity.dev/schema/v1/project.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'id': {'pattern': '^[a-z0-9][a-z0-9-]*$', 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.project.v1'}, 'title': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'title'], 'title': 'Project metadata v1', 'type': 'object'}, 'current': {'$id': 'https://project-continuity.dev/schema/v1/current.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'active_task': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': ['string', 'null']}, 'active_task_file': {'minLength': 1, 'type': ['string', 'null']}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.current.v1'}}, 'required': ['schema', 'protocol_version', 'active_task', 'active_task_file'], 'title': 'Current checkpoint metadata v1', 'type': 'object'}, 'task': {'$id': 'https://project-continuity.dev/schema/v1/task.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'acceptance': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'depends_on': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'goal': {'minLength': 1, 'type': 'string'}, 'id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'owner': {'minLength': 1, 'type': 'string'}, 'priority': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.task.v1'}, 'status': {'enum': ['queued', 'active', 'blocked', 'completed', 'cancelled'], 'type': 'string'}, 'why': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'status', 'owner', 'priority', 'depends_on', 'goal', 'why', 'acceptance', 'next_action'], 'title': 'Task metadata v1', 'type': 'object'}, 'checkpoint': {'$id': 'https://project-continuity.dev/schema/v1/checkpoint.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'agent': {'minLength': 1, 'type': 'string'}, 'blocked': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'changed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'completed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'decisions': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'evidence': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.checkpoint.v1'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'timestamp': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'task_id', 'timestamp', 'agent', 'completed', 'evidence', 'decisions', 'changed', 'blocked', 'next_action'], 'title': 'Checkpoint metadata v1', 'type': 'object'}, 'context-pack': {'$id': 'https://project-continuity.dev/schema/v1/context-pack.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'commit': {'minLength': 1, 'type': 'string'}, 'generated_at': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'ref': {'minLength': 1, 'type': 'string'}, 'repository': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.context-pack.v1'}, 'sources': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 3, 'type': 'array'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'repository', 'ref', 'commit', 'task_id', 'generated_at', 'sources'], 'title': 'Context pack metadata v1', 'type': 'object'}}
+WORKSPACE_MODES = {"managed-worktrees", "single-checkout"}
+WORKSPACE_SCHEMA: dict[str, Any] = {
+    "additionalProperties": False,
+    "properties": {"mode": {"enum": sorted(WORKSPACE_MODES), "type": "string"}},
+    "required": ["mode"],
+    "type": "object",
+}
 
+BUILTIN_SCHEMAS = {
+    "config": {
+        "$id": "https://project-continuity.dev/schema/v1/config.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "canonical": {
+                "additionalProperties": False,
+                "properties": {
+                    "current": {"minLength": 1, "type": "string"},
+                    "project": {"minLength": 1, "type": "string"},
+                    "tasks": {"minLength": 1, "type": "string"},
+                },
+                "required": ["project", "current", "tasks"],
+                "type": "object",
+            },
+            "profile": {"enum": ["minimal", "software"], "type": "string"},
+            "protocol": {"const": "project-continuity"},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.config.v1"},
+            "schema_dir": {"const": "schemas/v1"},
+            "task_prefix": {"pattern": "^[A-Z][A-Z0-9]*$", "type": "string"},
+            "trackers": {
+                "additionalProperties": False,
+                "properties": {"beads": {"type": "boolean"}, "github": {"type": "boolean"}},
+                "required": ["github", "beads"],
+                "type": "object",
+            },
+        },
+        "required": [
+            "schema",
+            "protocol",
+            "protocol_version",
+            "profile",
+            "task_prefix",
+            "canonical",
+            "schema_dir",
+            "trackers",
+        ],
+        "title": "Project Continuity Config v1",
+        "type": "object",
+    },
+    "project": {
+        "$id": "https://project-continuity.dev/schema/v1/project.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "id": {"pattern": "^[a-z0-9][a-z0-9-]*$", "type": "string"},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.project.v1"},
+            "title": {"minLength": 1, "type": "string"},
+        },
+        "required": ["schema", "protocol_version", "id", "title"],
+        "title": "Project metadata v1",
+        "type": "object",
+    },
+    "current": {
+        "$id": "https://project-continuity.dev/schema/v1/current.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "active_task": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": ["string", "null"]},
+            "active_task_file": {"minLength": 1, "type": ["string", "null"]},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.current.v1"},
+        },
+        "required": ["schema", "protocol_version", "active_task", "active_task_file"],
+        "title": "Current checkpoint metadata v1",
+        "type": "object",
+    },
+    "task": {
+        "$id": "https://project-continuity.dev/schema/v1/task.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "acceptance": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "depends_on": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
+            "goal": {"minLength": 1, "type": "string"},
+            "id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+            "next_action": {"minLength": 1, "type": "string"},
+            "owner": {"minLength": 1, "type": "string"},
+            "priority": {"minLength": 1, "type": "string"},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.task.v1"},
+            "status": {"enum": ["queued", "active", "blocked", "completed", "cancelled"], "type": "string"},
+            "why": {"minLength": 1, "type": "string"},
+        },
+        "required": [
+            "schema",
+            "protocol_version",
+            "id",
+            "status",
+            "owner",
+            "priority",
+            "depends_on",
+            "goal",
+            "why",
+            "acceptance",
+            "next_action",
+        ],
+        "title": "Task metadata v1",
+        "type": "object",
+    },
+    "checkpoint": {
+        "$id": "https://project-continuity.dev/schema/v1/checkpoint.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "agent": {"minLength": 1, "type": "string"},
+            "blocked": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
+            "changed": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "completed": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "decisions": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "evidence": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "next_action": {"minLength": 1, "type": "string"},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.checkpoint.v1"},
+            "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+            "timestamp": {"minLength": 1, "type": "string"},
+        },
+        "required": [
+            "schema",
+            "protocol_version",
+            "task_id",
+            "timestamp",
+            "agent",
+            "completed",
+            "evidence",
+            "decisions",
+            "changed",
+            "blocked",
+            "next_action",
+        ],
+        "title": "Checkpoint metadata v1",
+        "type": "object",
+    },
+    "context-pack": {
+        "$id": "https://project-continuity.dev/schema/v1/context-pack.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "commit": {"minLength": 1, "type": "string"},
+            "generated_at": {"minLength": 1, "type": "string"},
+            "protocol_version": {"minLength": 1, "type": "string"},
+            "ref": {"minLength": 1, "type": "string"},
+            "repository": {"minLength": 1, "type": "string"},
+            "schema": {"const": "project-continuity.context-pack.v1"},
+            "sources": {"items": {"minLength": 1, "type": "string"}, "minItems": 3, "type": "array"},
+            "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+        },
+        "required": ["schema", "protocol_version", "repository", "ref", "commit", "task_id", "generated_at", "sources"],
+        "title": "Context pack metadata v1",
+        "type": "object",
+    },
+}
+
+
+_config_properties = BUILTIN_SCHEMAS["config"].get("properties")
+if isinstance(_config_properties, dict):
+    _config_properties["workspace"] = WORKSPACE_SCHEMA
 
 BUILTIN_SCHEMAS["recovery"] = {
     "$id": "https://project-continuity.dev/schema/v1/recovery.schema.json",
@@ -76,6 +245,12 @@ class ContinuityError(Exception):
 
 class CanonicalUnavailable(ContinuityError):
     """Canonical continuity state cannot be read or written right now."""
+
+
+@dataclass(frozen=True)
+class GitWorktree:
+    path: str
+    branch: str | None
 
 
 def _json(obj: Any) -> str:
@@ -125,7 +300,14 @@ def schema_dir(root: Path) -> Path:
 def load_schema(root: Path, kind: str) -> dict[str, Any]:
     path = schema_dir(root) / SCHEMA_FILES[kind]
     if path.exists():
-        return load_json(path)
+        schema = load_json(path)
+        if kind == "config":
+            # Existing v1 repositories can retain their checked-in schema and
+            # still adopt this optional, backward-compatible policy field.
+            properties = schema.setdefault("properties", {})
+            if isinstance(properties, dict) and "workspace" not in properties:
+                properties["workspace"] = WORKSPACE_SCHEMA
+        return schema
     return BUILTIN_SCHEMAS[kind]
 
 
@@ -142,7 +324,9 @@ def validate_schema(instance: Any, schema: dict[str, Any], path: str = "$") -> l
             "integer": int,
             "null": type(None),
         }
-        if not any(isinstance(instance, type_map[t]) and not (t == "integer" and isinstance(instance, bool)) for t in types):
+        if not any(
+            isinstance(instance, type_map[t]) and not (t == "integer" and isinstance(instance, bool)) for t in types
+        ):
             errors.append(f"{path}: expected type {types}, got {type(instance).__name__}")
             return errors
 
@@ -235,7 +419,28 @@ def current_template(prefix: str) -> str:
     )
 
 
-def handoff_template() -> str:
+def workspace_policy_text(workspace_mode: str) -> str:
+    if workspace_mode == "single-checkout":
+        return (
+            "## Workspace mode: single checkout\n\n"
+            "Use the main checkout for sequential work. Do not create clones or linked worktrees. "
+            "This is the strictest and simplest option when parallel isolation is not needed.\n\n"
+        )
+    return (
+        "## Workspace mode: managed task worktrees\n\n"
+        "The Git repository, remote, and task history stay canonical; the main checkout remains the permanent home base. "
+        "Use it for sequential work. Create a linked worktree only when parallel work or isolation is actually useful, "
+        "at `<canonical-root>/pcm/worktree/<TASK-ID>`. Use one per independent active task, not one per session or agent; "
+        "a new session continuing that task resumes the same tree. Do not create sibling clones or arbitrary worktree paths.\n\n"
+        "After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. "
+        "Removal verifies the GitHub PR, required checks, and merged commit; it refuses dirty, untracked, unpublished, unmerged, or unverifiable work. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
+        "Linked worktrees share the repository's Git object store; they are not full repository clones. Reuse package-manager download/build caches and installed runtimes where supported. "
+        "Keep mutable `node_modules` and `.venv` environments separate when lockfiles or interpreters differ; store dependency changes in tracked manifests/lockfiles or patch files, not as hidden edits inside an installed environment. "
+        "Remove the task worktree after verified merge and completion.\n\n"
+    )
+
+
+def handoff_template(workspace_mode: str) -> str:
     return (
         "# Current Handoff\n\n"
         "Start from repository state, not prior chat history.\n\n"
@@ -246,7 +451,8 @@ def handoff_template() -> str:
         "4. the active task named by CURRENT\n"
         "5. the minimum relevant specification/design document\n\n"
         "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n\n"
-        "## Continuity records\n\n"
+        + workspace_policy_text(workspace_mode)
+        + "## Continuity records\n\n"
         f"{CONTINUITY_RECORDS_POLICY_MARKER}\n\n"
         "Write continuity issues, updates, pull requests, and project-state documents so a fresh reader can understand the problem, human outcome, scope, evidence, and next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when needed to verify the claim. Keep PR openings skimmable; link long logs. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
         "## Degraded continuity\n\n"
@@ -255,21 +461,14 @@ def handoff_template() -> str:
     )
 
 
-def agents_template() -> str:
-    workspace_rules = (
-        "## Canonical checkout\n\n"
-        "- Identify and reuse the one canonical checkout by host/path and normalized Git remote.\n"
-        "- Do not create clones, task folders, or linked Git worktrees anywhere.\n"
-        "- Run tasks sequentially on branches in the canonical checkout. Before switching tasks, commit and push the checkpoint, open or update its PR, pass required CI, merge, then fast-forward this same checkout.\n"
-        "- Reuse the repository's one root dependency environment; do not install per-task `.venv` or `node_modules` copies.\n\n"
-    )
+def agents_template(workspace_mode: str) -> str:
     return (
         "# Agent Operating Contract\n\n"
         "## Start\n\n"
         "Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.\n\n"
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
-        + workspace_rules
+        + workspace_policy_text(workspace_mode)
         + "## Continuity records\n\n"
         f"{CONTINUITY_RECORDS_POLICY_MARKER}\n\n"
         "For continuity issues, progress updates, pull requests, and project-state documents, explain the human problem and outcome first, then scope, status, linked evidence, and one next action. Cite external claims and tie repository claims to a revision, issue, PR, or CI result. Record reproduction details only when needed. Keep PR openings skimmable; link long logs. Preserve existing project ownership outside continuity. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
@@ -373,12 +572,16 @@ def init_repo(
     name: str,
     prefix: str,
     github_templates: bool = False,
+    workspace_mode: str | None = None,
 ) -> list[str]:
     if profile not in {"minimal", "software"}:
         raise ContinuityError(f"unsupported profile: {profile}")
     prefix = prefix.upper()
     if re.fullmatch(r"[A-Z][A-Z0-9]*", prefix) is None:
         raise ContinuityError("task prefix must match [A-Z][A-Z0-9]*")
+    workspace_mode = workspace_mode or "managed-worktrees"
+    if workspace_mode not in WORKSPACE_MODES:
+        raise ContinuityError(f"unsupported workspace mode: {workspace_mode}")
     config = {
         "schema": CONFIG_SCHEMA,
         "protocol": "project-continuity",
@@ -392,27 +595,27 @@ def init_repo(
         },
         "schema_dir": "schemas/v1",
         "trackers": {"github": False, "beads": False},
+        "workspace": {"mode": workspace_mode},
     }
 
     planned = {
         ".continuity/config.json": json.dumps(config, indent=2, sort_keys=True) + "\n",
         "PROJECT.md": project_template(name),
         "checkpoints/CURRENT.md": current_template(prefix),
-        "HANDOFF.md": handoff_template(),
+        "HANDOFF.md": handoff_template(workspace_mode),
     }
     for kind, filename in SCHEMA_FILES.items():
-        planned[f"schemas/v1/{filename}"] = json.dumps(
-            BUILTIN_SCHEMAS[kind], indent=2, sort_keys=True
-        ) + "\n"
+        planned[f"schemas/v1/{filename}"] = json.dumps(BUILTIN_SCHEMAS[kind], indent=2, sort_keys=True) + "\n"
     if profile == "software":
-        planned["AGENTS.md"] = agents_template()
+        planned["AGENTS.md"] = agents_template(workspace_mode)
         planned["README.md"] = readme_template(name)
     if github_templates:
         planned[".github/ISSUE_TEMPLATE/task.md"] = github_issue_template()
         planned[".github/pull_request_template.md"] = github_pr_template()
 
     conflicts = [
-        rel for rel, content in planned.items()
+        rel
+        for rel, content in planned.items()
         if (root / rel).exists() and (root / rel).read_text(encoding="utf-8") != content
     ]
     if conflicts:
@@ -521,8 +724,10 @@ def validate_checkpoint_structure(root: Path, task_path: Path, text: str) -> lis
     for index, entry in enumerate(entries, 1):
         body = "\n".join(entry)
         meta = extract_marker(body, "checkpoint")
-        required_sections = SECTION_NAMES if meta is not None else (
-            "Completed:", "Evidence:", "Decisions:", "Blocked/uncertain:", "Next:"
+        required_sections = (
+            SECTION_NAMES
+            if meta is not None
+            else ("Completed:", "Evidence:", "Decisions:", "Blocked/uncertain:", "Next:")
         )
         missing = [name for name in required_sections if name not in body]
         if missing:
@@ -546,26 +751,105 @@ def validate_single_checkout(root: Path) -> list[str]:
             capture_output=True,
             check=True,
             text=True,
+            encoding="utf-8",
         )
     except (OSError, subprocess.CalledProcessError) as exc:
         return [f"could not inspect registered Git worktrees: {exc}"]
 
-    worktrees = [
-        line.removeprefix("worktree ")
-        for line in result.stdout.splitlines()
-        if line.startswith("worktree ")
-    ]
+    worktrees = [line.removeprefix("worktree ") for line in result.stdout.splitlines() if line.startswith("worktree ")]
 
     def normalize(path: str | Path) -> str:
         return str(Path(path).resolve()).replace("\\", "/").casefold()
 
     if len(worktrees) != 1 or normalize(worktrees[0]) != normalize(root):
         found = ", ".join(worktrees) if worktrees else "none"
-        return [(
-            "single-checkout mode requires exactly one registered Git worktree "
-            f"at {root}; found: {found}"
-        )]
+        return [(f"single-checkout mode requires exactly one registered Git worktree at {root}; found: {found}")]
     return []
+
+
+def parse_git_worktrees(output: str) -> list[GitWorktree]:
+    entries: list[GitWorktree] = []
+    path: str | None = None
+    branch: str | None = None
+    for line in [*output.splitlines(), ""]:
+        if not line:
+            if path is not None:
+                entries.append(GitWorktree(path, branch))
+            path = None
+            branch = None
+        elif line.startswith("worktree "):
+            if path is not None:
+                entries.append(GitWorktree(path, branch))
+            path = line.removeprefix("worktree ")
+            branch = None
+        elif line.startswith("branch "):
+            branch = line.removeprefix("branch ")
+    return entries
+
+
+def branch_for_task(task_path: Path) -> str:
+    return f"task/{task_path.stem.removeprefix('TASK-')}"
+
+
+def validate_managed_worktrees(root: Path, config: dict[str, Any]) -> list[str]:
+    root = root.resolve()
+    if not (root / ".git").exists():
+        return []
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "worktree", "list", "--porcelain"],
+            capture_output=True,
+            check=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        return [f"could not inspect registered Git worktrees: {exc}"]
+
+    entries = parse_git_worktrees(result.stdout)
+    if not entries:
+        return ["Git reported no registered worktrees for the managed repository"]
+    canonical_root = Path(entries[0].path).resolve()
+    errors: list[str] = []
+    for entry in entries[1:]:
+        path = Path(entry.path).resolve()
+        try:
+            relative = path.relative_to(canonical_root)
+        except ValueError:
+            errors.append(f"managed worktree is outside the canonical checkout: {path}")
+            continue
+        if len(relative.parts) != 3 or relative.parts[:2] != ("pcm", "worktree"):
+            errors.append(f"additional worktree must be under pcm/worktree/<TASK-ID> in the canonical checkout: {path}")
+            continue
+        task_id = relative.parts[2]
+        if TASK_ID_RE.fullmatch(task_id) is None:
+            errors.append(f"managed worktree directory must be a task ID, got: {relative.parts[2]}")
+            continue
+        try:
+            task_path = find_task(canonical_root, config, task_id)
+        except ContinuityError as exc:
+            errors.append(f"{path}: {exc}")
+            continue
+        meta = task_metadata(task_path)
+        if meta is None or meta.get("id") != task_id:
+            errors.append(f"{path}: task file does not identify {task_id}")
+            continue
+        if meta.get("status") not in {"active", "blocked"}:
+            errors.append(f"{path}: task {task_id} is finished; remove its managed worktree after merge")
+        expected_branch = branch_for_task(task_path)
+        if entry.branch != f"refs/heads/{expected_branch}":
+            errors.append(f"{path}: expected task branch {expected_branch}, found {entry.branch or 'detached HEAD'}")
+    return errors
+
+
+def validate_workspace_layout(root: Path, config: dict[str, Any]) -> list[str]:
+    workspace = config.get("workspace")
+    mode = workspace.get("mode", "single-checkout") if isinstance(workspace, dict) else "single-checkout"
+    if mode == "single-checkout":
+        return validate_single_checkout(root)
+    if mode == "managed-worktrees":
+        return validate_managed_worktrees(root, config)
+    return [f"unsupported workspace mode: {mode}"]
 
 
 def validate_repo(root: Path) -> list[str]:
@@ -577,17 +861,17 @@ def validate_repo(root: Path) -> list[str]:
         return [str(exc)]
 
     if "workspace_mode" in config:
-        return [(
-            f"{config_path}: unsupported legacy key 'workspace_mode'; "
-            "migration required: remove this key from .continuity/config.json, then run continuity validate again. "
-            "Validation does not modify configuration."
-        )]
+        return [
+            (
+                f"{config_path}: unsupported legacy key 'workspace_mode'; "
+                "migration required: use `workspace: {mode: single-checkout}` or "
+                "`workspace: {mode: managed-worktrees}` in .continuity/config.json. "
+                "Validation does not modify configuration."
+            )
+        ]
 
     try:
-        config_errors = [
-            f"{config_path}: {e}"
-            for e in validate_schema(config, load_schema(root, "config"))
-        ]
+        config_errors = [f"{config_path}: {e}" for e in validate_schema(config, load_schema(root, "config"))]
         errors.extend(config_errors)
     except ContinuityError as exc:
         errors.append(str(exc))
@@ -598,7 +882,7 @@ def validate_repo(root: Path) -> list[str]:
     if config_errors:
         return sorted(set(errors))
 
-    errors.extend(validate_single_checkout(root))
+    errors.extend(validate_workspace_layout(root, config))
 
     canonical = config.get("canonical", {})
     project_path = root / canonical.get("project", "PROJECT.md")
@@ -721,13 +1005,11 @@ def validate_repo(root: Path) -> list[str]:
             try:
                 receipt = load_json(receipt_path)
                 errors.extend(
-                    f"{receipt_path}: {error}"
-                    for error in validate_schema(receipt, load_schema(root, "recovery"))
+                    f"{receipt_path}: {error}" for error in validate_schema(receipt, load_schema(root, "recovery"))
                 )
             except ContinuityError as exc:
                 errors.append(f"{receipt_path}: {exc}")
     return sorted(set(errors))
-
 
 
 def preflight_repo(root: Path) -> tuple[str, list[str]]:
@@ -978,7 +1260,15 @@ def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
         raise ContinuityError(f"recovery receipt has no checkpoint: {receipt_path}")
     task_id = checkpoint.get("task_id")
     required = (
-        "task_id", "agent", "timestamp", "completed", "evidence", "decisions", "changed", "blocked", "next_action"
+        "task_id",
+        "agent",
+        "timestamp",
+        "completed",
+        "evidence",
+        "decisions",
+        "changed",
+        "blocked",
+        "next_action",
     )
     if not all(key in checkpoint for key in required) or not isinstance(task_id, str):
         raise ContinuityError(f"recovery receipt checkpoint is incomplete: {receipt_path}")
@@ -1010,6 +1300,7 @@ def git_value(root: Path, args: list[str], fallback: str | None = None) -> str:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
         )
         value = proc.stdout.strip()
         if value:
@@ -1028,12 +1319,296 @@ def git_run(root: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
         )
     except FileNotFoundError as exc:
         raise ContinuityError("git is required for checkpoint publishing") from exc
     except subprocess.CalledProcessError as exc:
         detail = (exc.stderr or exc.stdout or "git command failed").strip()
         raise ContinuityError(f"git {' '.join(args)} failed: {detail}") from exc
+
+
+def canonical_worktree_root(root: Path) -> Path:
+    root = root.resolve()
+    entries = parse_git_worktrees(git_run(root, ["worktree", "list", "--porcelain"]).stdout)
+    if not entries:
+        raise ContinuityError("Git reported no worktree for this repository")
+    primary = Path(entries[0].path).resolve()
+    if root != primary:
+        raise ContinuityError(
+            f"run this command from the canonical checkout {primary}; a task worktree is not the project identity"
+        )
+    git_value(root, ["remote", "get-url", "origin"])
+    return primary
+
+
+def task_for_worktree(root: Path, task_id: str, config: dict[str, Any]) -> tuple[Path, dict[str, Any]]:
+    if TASK_ID_RE.fullmatch(task_id) is None:
+        raise ContinuityError(f"invalid task ID: {task_id}")
+    task_path = find_task(root, config, task_id)
+    meta = task_metadata(task_path)
+    if meta is None or meta.get("id") != task_id:
+        raise ContinuityError(f"task metadata does not identify {task_id}: {task_path}")
+    return task_path, meta
+
+
+def workspace_mode(config: dict[str, Any]) -> str:
+    workspace = config.get("workspace")
+    if workspace is None:
+        return "single-checkout"
+    if not isinstance(workspace, dict):
+        raise ContinuityError("workspace configuration must be an object")
+    mode = workspace.get("mode")
+    if not isinstance(mode, str) or mode not in WORKSPACE_MODES:
+        raise ContinuityError(f"unsupported workspace mode: {mode}")
+    return mode
+
+
+def worktree_inventory(root: Path) -> list[GitWorktree]:
+    return parse_git_worktrees(git_run(root, ["worktree", "list", "--porcelain"]).stdout)
+
+
+def managed_worktree_path(root: Path, task_id: str) -> Path:
+    root = root.resolve()
+    for parent in (root / "pcm", root / "pcm" / "worktree"):
+        if parent.is_symlink():
+            raise ContinuityError(f"refusing to use a symlink in the managed worktree path: {parent}")
+        if parent.exists() and not parent.is_dir():
+            raise ContinuityError(f"managed worktree path component is not a directory: {parent}")
+    path = root / "pcm" / "worktree" / task_id
+    if not path.resolve(strict=False).is_relative_to(root):
+        raise ContinuityError(f"managed worktree path escapes the canonical checkout: {path}")
+    return path
+
+
+def ensure_managed_worktree_ignored(root: Path) -> None:
+    raw_path = git_value(root, ["rev-parse", "--git-path", "info/exclude"])
+    exclude = Path(raw_path)
+    if not exclude.is_absolute():
+        exclude = root / exclude
+    try:
+        content = exclude.read_text(encoding="utf-8") if exclude.exists() else ""
+        if "/pcm/worktree/" not in content.splitlines():
+            updated = content.rstrip("\r\n")
+            if updated:
+                updated += "\n"
+            updated += "# PCM managed task worktrees\n/pcm/worktree/\n"
+            exclude.parent.mkdir(parents=True, exist_ok=True)
+            exclude.write_text(updated, encoding="utf-8")
+    except OSError as exc:
+        raise ContinuityError(f"could not configure the local managed-worktree ignore: {exc}") from exc
+
+
+def github_repository(remote: str) -> str | None:
+    match = re.fullmatch(
+        r"(?:https://github\.com/|ssh://git@github\.com/|git@github\.com:)([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+?)(?:\.git)?",
+        remote,
+    )
+    return match.group(1) if match else None
+
+
+def run_external(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(command, cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=False)
+    except OSError as exc:
+        raise ContinuityError(f"could not run {command[0]}: {exc}") from exc
+
+
+def remote_default_branch(root: Path, github_repo: str | None) -> str:
+    if github_repo:
+        result = run_external(
+            ["gh", "repo", "view", github_repo, "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"],
+            root,
+        )
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "GitHub default branch unavailable").strip()
+            raise ContinuityError(f"cannot verify the GitHub default branch: {detail}")
+        branch = result.stdout.strip()
+    else:
+        result = run_external(["git", "-C", str(root), "ls-remote", "--symref", "origin", "HEAD"], root)
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "remote HEAD unavailable").strip()
+            raise ContinuityError(f"cannot determine the origin default branch: {detail}")
+        match = re.search(r"^ref: refs/heads/([^\t]+)\tHEAD$", result.stdout, re.MULTILINE)
+        branch = match.group(1) if match else ""
+    if not branch or re.fullmatch(r"[A-Za-z0-9._/-]+", branch) is None:
+        raise ContinuityError("origin did not provide a valid default branch name")
+    return branch
+
+
+def task_exists_on_remote(root: Path, task_path: Path, base_ref: str, task_id: str) -> None:
+    relative = task_path.relative_to(root).as_posix()
+    remote_text = git_run(root, ["show", f"{base_ref}:{relative}"]).stdout
+    meta = extract_marker(remote_text, "task")
+    if meta is None or meta.get("id") != task_id or meta.get("status") != "active":
+        raise ContinuityError(
+            f"task {task_id} must be active in the pushed canonical default branch before creating its worktree"
+        )
+    if task_path.read_text(encoding="utf-8") != remote_text:
+        raise ContinuityError(
+            f"task {task_id} has local-only checkpoint changes; push them before creating its worktree"
+        )
+
+
+def create_managed_worktree(root: Path, task_id: str) -> tuple[Path, bool]:
+    root = canonical_worktree_root(root)
+    config = load_config(root)
+    if workspace_mode(config) != "managed-worktrees":
+        raise ContinuityError(
+            "this project uses strict single-checkout mode; change workspace.mode before creating worktrees"
+        )
+    task_path, meta = task_for_worktree(root, task_id, config)
+    if meta.get("status") != "active":
+        raise ContinuityError(f"task {task_id} is not active")
+    if errors := validate_managed_worktrees(root, config):
+        raise ContinuityError("existing worktree policy violation: " + "; ".join(errors))
+
+    path = managed_worktree_path(root, task_id)
+    branch = branch_for_task(task_path)
+    entries = worktree_inventory(root)
+    for entry in entries:
+        if Path(entry.path).resolve() == path.resolve(strict=False):
+            if entry.branch != f"refs/heads/{branch}":
+                raise ContinuityError(f"managed path is registered to the wrong branch: {entry.path}")
+            return path, True
+        if entry.branch == f"refs/heads/{branch}":
+            raise ContinuityError(f"task branch {branch} is already attached at {entry.path}")
+    if path.exists() or path.is_symlink():
+        raise ContinuityError(f"refusing to overwrite an existing unmanaged path: {path}")
+
+    remote = git_value(root, ["remote", "get-url", "origin"])
+    github_repo = github_repository(remote)
+    base_branch = remote_default_branch(root, github_repo)
+    git_run(root, ["fetch", "origin", base_branch])
+    base_ref = f"origin/{base_branch}"
+    git_value(root, ["rev-parse", "--verify", base_ref])
+    task_exists_on_remote(root, task_path, base_ref, task_id)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_managed_worktree_ignored(root)
+    local_branch = run_external(
+        ["git", "-C", str(root), "show-ref", "--verify", "--quiet", f"refs/heads/{branch}"], root
+    )
+    if local_branch.returncode == 0:
+        git_run(root, ["worktree", "add", str(path), branch])
+    else:
+        remote_branch = run_external(
+            ["git", "-C", str(root), "ls-remote", "--heads", "origin", f"refs/heads/{branch}"], root
+        )
+        if remote_branch.returncode != 0:
+            raise ContinuityError(f"could not inspect remote task branch {branch}")
+        if remote_branch.stdout.strip():
+            git_run(root, ["fetch", "origin", branch])
+            git_run(root, ["worktree", "add", "--track", "-b", branch, str(path), f"origin/{branch}"])
+        else:
+            git_run(root, ["worktree", "add", "-b", branch, str(path), base_ref])
+    return path, False
+
+
+def verify_merged_task(root: Path, path: Path, branch: str, remote: str) -> bool:
+    github_repo = github_repository(remote)
+    if not github_repo:
+        raise ContinuityError(
+            "cannot verify required CI and merged pull-request evidence for this remote; leaving the worktree in place"
+        )
+    base_branch = remote_default_branch(root, github_repo)
+    git_run(root, ["fetch", "origin", base_branch])
+    base_ref = f"origin/{base_branch}"
+    git_value(root, ["rev-parse", "--verify", base_ref])
+    head_oid = git_value(path, ["rev-parse", "HEAD"])
+
+    prs_result = run_external(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--repo",
+            github_repo,
+            "--state",
+            "merged",
+            "--head",
+            branch,
+            "--limit",
+            "100",
+            "--json",
+            "number,headRefName,headRefOid,baseRefName,mergedAt,mergeCommit",
+        ],
+        root,
+    )
+    if prs_result.returncode != 0:
+        detail = (prs_result.stderr or prs_result.stdout or "merged pull request lookup failed").strip()
+        raise ContinuityError(f"cannot verify the merged GitHub pull request: {detail}")
+    try:
+        prs = json.loads(prs_result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("GitHub returned invalid pull request data") from exc
+    matches = [
+        item
+        for item in prs
+        if item.get("headRefName") == branch
+        and item.get("headRefOid") == head_oid
+        and item.get("baseRefName") == base_branch
+        and item.get("mergedAt")
+    ]
+    if len(matches) != 1:
+        raise ContinuityError(
+            f"no uniquely matching merged PR proves that {branch}@{head_oid[:12]} reached {base_branch}"
+        )
+    pr = matches[0]
+    check_result = run_external(
+        ["gh", "pr", "checks", str(pr["number"]), "--repo", github_repo, "--required", "--json", "name,bucket"],
+        root,
+    )
+    if check_result.returncode != 0:
+        detail = (check_result.stderr or check_result.stdout or "required checks are not green").strip()
+        raise ContinuityError(f"cannot verify required GitHub checks: {detail}")
+    try:
+        checks = json.loads(check_result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("GitHub returned invalid required-check data") from exc
+    if not checks or any(item.get("bucket") != "pass" for item in checks):
+        raise ContinuityError("refusing cleanup: the PR has no required checks or not all required checks passed")
+    merge_commit = pr.get("mergeCommit")
+    merge_oid = merge_commit.get("oid") if isinstance(merge_commit, dict) else None
+    if not isinstance(merge_oid, str):
+        raise ContinuityError("GitHub did not provide the pull request's merge commit")
+    ancestor = run_external(["git", "-C", str(root), "merge-base", "--is-ancestor", merge_oid, base_ref], root)
+    if ancestor.returncode != 0:
+        raise ContinuityError("the merged PR commit is not present on the fetched remote default branch")
+    return True
+
+
+def remove_managed_worktree(root: Path, task_id: str) -> Path:
+    root = canonical_worktree_root(root)
+    config = load_config(root)
+    if workspace_mode(config) != "managed-worktrees":
+        raise ContinuityError("this project uses strict single-checkout mode; no managed worktrees may be removed")
+    task_path, _ = task_for_worktree(root, task_id, config)
+    path = managed_worktree_path(root, task_id)
+    branch = branch_for_task(task_path)
+    matches = [entry for entry in worktree_inventory(root) if Path(entry.path).resolve() == path.resolve(strict=False)]
+    if len(matches) != 1 or matches[0].branch != f"refs/heads/{branch}":
+        raise ContinuityError(f"no uniquely registered managed worktree for {task_id} at {path}")
+    status = git_run(path, ["status", "--porcelain", "--untracked-files=all"]).stdout.strip()
+    if status:
+        raise ContinuityError(f"refusing cleanup: managed worktree has uncommitted or untracked work: {path}")
+    remote = git_value(root, ["remote", "get-url", "origin"])
+    github_merge = verify_merged_task(root, path, branch, remote)
+    base_branch = remote_default_branch(root, github_repository(remote))
+    relative_task = task_path.relative_to(root).as_posix()
+    remote_task = git_run(root, ["show", f"origin/{base_branch}:{relative_task}"]).stdout
+    remote_meta = extract_marker(remote_task, "task")
+    if remote_meta is None or remote_meta.get("id") != task_id or remote_meta.get("status") != "completed":
+        raise ContinuityError(f"refusing cleanup: task {task_id} is not marked completed on origin/{base_branch}")
+    git_run(root, ["worktree", "remove", str(path)])
+    branch_delete = run_external(["git", "-C", str(root), "branch", "-d", branch], root)
+    if branch_delete.returncode != 0:
+        if not github_merge:
+            raise ContinuityError(f"worktree removed, but Git refused to delete the task branch: {branch}")
+        # A squash-merged GitHub PR is proven above even though Git cannot see
+        # its original commits as ancestors of the new squash commit.
+        git_run(root, ["branch", "-D", branch])
+    return path
 
 
 def publish_checkpoint(
@@ -1127,6 +1702,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_init.add_argument("--profile", choices=["minimal", "software"], default="minimal")
     p_init.add_argument("--name", default=None)
     p_init.add_argument("--task-prefix", default="TASK")
+    p_init.add_argument("--workspace-mode", choices=sorted(WORKSPACE_MODES), default="managed-worktrees")
     p_init.add_argument(
         "--github-templates",
         action="store_true",
@@ -1177,6 +1753,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_pack.add_argument("--root", default=".")
     p_pack.add_argument("--output", default=None)
 
+    p_worktree = sub.add_parser("worktree")
+    worktree_sub = p_worktree.add_subparsers(dest="worktree_command", required=True)
+    p_worktree_create = worktree_sub.add_parser("create")
+    p_worktree_create.add_argument("task_id")
+    p_worktree_create.add_argument("--root", default=".")
+    p_worktree_remove = worktree_sub.add_parser("remove")
+    p_worktree_remove.add_argument("task_id")
+    p_worktree_remove.add_argument("--root", default=".")
+
     return parser
 
 
@@ -1193,6 +1778,7 @@ def main(argv: list[str] | None = None) -> int:
                 name,
                 args.task_prefix,
                 github_templates=args.github_templates,
+                workspace_mode=args.workspace_mode,
             )
             for line in results:
                 print(line)
@@ -1268,6 +1854,16 @@ def main(argv: list[str] | None = None) -> int:
             output = Path(args.output).resolve() if args.output else None
             path = pack_task(Path(args.root).resolve(), args.task_id, output)
             print(path)
+            return 0
+
+        if args.command == "worktree" and args.worktree_command == "create":
+            path, resumed = create_managed_worktree(Path(args.root).resolve(), args.task_id)
+            print(f"{'RESUMED' if resumed else 'CREATED'}: {path}")
+            return 0
+
+        if args.command == "worktree" and args.worktree_command == "remove":
+            path = remove_managed_worktree(Path(args.root).resolve(), args.task_id)
+            print(f"REMOVED: {path}")
             return 0
 
         parser.error("unhandled command")
