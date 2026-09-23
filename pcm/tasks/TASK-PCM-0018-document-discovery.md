@@ -1,6 +1,6 @@
 # TASK-PCM-0018 — Idempotent checkpoints and fresh-session document discovery
 
-<!-- continuity:task {"acceptance":["Repeating a checkpoint with the same caller-supplied request ID and identical task/payload appends no duplicate and creates no additional commit when already delivered; reusing the ID with different content fails before mutation","Checkpoint publication safely retries after local append, local commit, remote push success, and a lost push response while preserving one event and the original event timestamp","A single machine-readable document inventory is the declared source of truth for a generated human-readable index; initialization/add/update and view rendering are deterministic and validate in CI","Deterministic document lookup finds a registered document from an earlier session and its explicitly related neighboring records; unrelated repository changes do not affect the result","Task-specific context packs include only the standard project/current/task records plus documents explicitly associated with that task, state the exact next action, and bind each source to the commit/content actually read","A changed indexed document is visibly marked needs_review for consumers that depend on it; a changed unrelated file does not mark it stale, and old evidence remains available","Ordinary contract, failure-injection, idempotence/metamorphic, source-view synchronization, and context-pack tests pass; full Ruff, MyPy, compile, Python 3.11/3.12 suites, package build/parity, continuity validation, and required GitHub CI pass","An isolated fresh-session blind baseline and post-fix candidate use the visible issue/repository contract without the hidden diagnosis; the candidate finds the seeded document and neighboring records without duplicating them","Checkpoint/document-catalog overhead is measured on a reproducible fixture and reported; implementation remains a bounded Git/JSON/Markdown tool with no graph database or broad crawler","Implementation and canonical closeout merge through required CI/automatic merge, then issue #33 closes only after current task/checkpoint/handoff state proves acceptance; no unrelated target repository is changed"],"depends_on":["PCM-0015"],"goal":"Let retries safely record one durable checkpoint and let a fresh session reliably find the right prior project documents, notice only relevant staleness, and receive a focused handoff without depending on chat history.","id":"PCM-0018","next_action":"Commit and push the tested candidate for required CI and automatic merge; then run and record separate fresh-session baseline and candidate trials on pinned repository snapshots before final closeout.","owner":"Codex PCM development session; GitHub issue #33","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"A retry can currently append duplicate checkpoint history, and a fresh session has no deterministic way to locate earlier decisions or related files. When later work changes a file, an old handoff may also look current even though its evidence is stale. These gaps waste time and can cause sessions to work from the wrong project state."} -->
+<!-- continuity:task {"acceptance":["Repeating a checkpoint with the same caller-supplied request ID and identical task/payload appends no duplicate and creates no additional commit when already delivered; reusing the ID with different content fails before mutation","Checkpoint publication safely retries after local append, local commit, remote push success, and a lost push response while preserving one event and the original event timestamp","A single machine-readable document inventory is the declared source of truth for a generated human-readable index; initialization/add/update and view rendering are deterministic and validate in CI","Deterministic document lookup finds a registered document from an earlier session and its explicitly related neighboring records; unrelated repository changes do not affect the result","Task-specific context packs include only the standard project/current/task records plus documents explicitly associated with that task, state the exact next action, and bind each source to the commit/content actually read","A changed indexed document is visibly marked needs_review for consumers that depend on it; a changed unrelated file does not mark it stale, and old evidence remains available","Ordinary contract, failure-injection, idempotence/metamorphic, source-view synchronization, and context-pack tests pass; full Ruff, MyPy, compile, Python 3.11/3.12 suites, package build/parity, continuity validation, and required GitHub CI pass","An isolated fresh-session blind baseline and post-fix candidate use the visible issue/repository contract without the hidden diagnosis; the candidate finds the seeded document and neighboring records without duplicating them","Checkpoint/document-catalog overhead is measured on a reproducible fixture and reported; implementation remains a bounded Git/JSON/Markdown tool with no graph database or broad crawler","Implementation and canonical closeout merge through required CI/automatic merge, then issue #33 closes only after current task/checkpoint/handoff state proves acceptance; no unrelated target repository is changed"],"depends_on":["PCM-0015"],"goal":"Let retries safely record one durable checkpoint and let a fresh session reliably find the right prior project documents, notice only relevant staleness, and receive a focused handoff without depending on chat history.","id":"PCM-0018","next_action":"Run separate fresh-session baseline and candidate trials using the same visible prompt on pinned snapshots (baseline 85f13464c466ff277ce319850ce8124c4bc95c52 and merged candidate 98747fce4d5c805670dc3b00bb572e5c02706237); record both reports, objective checks, elapsed time, and cleanup. Keep issue #33 open until all remaining acceptance and a separate merged closeout are complete.","owner":"Codex PCM development session; GitHub issue #33","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"A retry can currently append duplicate checkpoint history, and a fresh session has no deterministic way to locate earlier decisions or related files. When later work changes a file, an old handoff may also look current even though its evidence is stale. These gaps waste time and can cause sessions to work from the wrong project state."} -->
 
 ## Human outcome
 
@@ -240,6 +240,47 @@ Next:
   Record the actual report, model/session, starting revision, objective rubric
   results, elapsed time, and cleanup.
 
+### 2026-09-23 — PR #51 merged and fresh-session handoff
+
+Completed:
+- Merged the PCM-0018 implementation automatically through PR #51 at
+  `98747fce4d5c805670dc3b00bb572e5c02706237` after required hosted checks.
+- Updated the permanent checkout to clean `main` at the merge commit and
+  corrected CURRENT/HANDOFF to reflect the merged implementation and exact
+  remaining trial work.
+- Posted the handoff status and next step to GitHub issue #33.
+
+Evidence:
+- PR #51: https://github.com/Pukujan/project-continuity-modules/pull/51
+- Required hosted jobs all passed: quality, tests on Python 3.11 and 3.12,
+  package build, package parity on Python 3.11 and 3.12, and the auto-merge job.
+- Merge commit: `98747fce4d5c805670dc3b00bb572e5c02706237`; local
+  `git status --short --branch` reported clean `main` at this revision.
+- Issue #33 remains OPEN. Its latest handoff comment is
+  https://github.com/Pukujan/project-continuity-modules/issues/33#issuecomment-5804811179.
+- Neither the baseline nor candidate trial has a verifiable report. The prior
+  claim of a scored baseline lacks a prompt/output, pinned revision, rubric
+  result, elapsed time, and cleanup evidence; it is not counted as a pass.
+
+Decisions:
+- Keep #33 open; merged implementation is not the full task acceptance.
+- Run the same visible prompt independently against baseline `85f13464` and
+  candidate `98747fce`, without diagnosis or prior-run results in the prompts.
+
+Changed:
+- `tasks/TASK-PCM-0018-document-discovery.md`, `checkpoints/CURRENT.md`, and
+  `HANDOFF.md`; added issue #33 handoff comment.
+
+Blocked/uncertain:
+- Both fresh-session trials, recording their evidence/cleanup, and a separate
+  merged closeout PR remain pending.
+
+Next:
+- In fresh sessions, run the task's exact visible prompt once at baseline
+  `85f13464c466ff277ce319850ce8124c4bc95c52` and once at candidate
+  `98747fce4d5c805670dc3b00bb572e5c02706237`; record actual outcomes, objective
+  criteria, timing, and cleanup. Keep #33 open until acceptance and closeout.
+
 ### 2026-09-23 — activation
 
 Completed:
@@ -309,6 +350,29 @@ Blocked/uncertain:
 
 Next:
 - Open an implementation PR for this pushed branch and let required CI auto-merge it; then run the same visible prompt in independent sessions at baseline 85f13464c466ff277ce319850ce8124c4bc95c52 and the merged candidate snapshot, record outcomes and cleanup, and keep #33 open until all acceptance is met.
+
+### 2026-09-23 23:50:23 UTC — Codex PCM-0018 post-merge handoff
+
+<!-- continuity:checkpoint {"agent":"Codex PCM-0018 post-merge handoff","blocked":["Fresh-session baseline and candidate reports, plus final canonical closeout, remain outstanding."],"changed":["HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0018-document-discovery.md; GitHub issue #33 status comment"],"completed":["Recorded the automatic merge of implementation PR #51; updated the permanent handoff and current checkpoint to identify the two pending fresh-session trials and keep issue #33 open."],"decisions":["Do not close issue #33 until the two independent pinned-snapshot trials and a separate merged closeout are complete; the old unsupported baseline claim is not a pass."],"evidence":["PR #51 merged at 98747fce4d5c805670dc3b00bb572e5c02706237 after hosted quality, Python 3.11/3.12 tests, package build, package-parity 3.11/3.12, and auto-merge checks passed. Local main is clean at the merge commit. continuity validate returned VALID and docs render --check returned SYNCHRONIZED. No verifiable baseline or candidate session report is recorded."],"next_action":"Run the same visible prompt in two independent fresh sessions: baseline 85f13464c466ff277ce319850ce8124c4bc95c52 and candidate 98747fce4d5c805670dc3b00bb572e5c02706237. Record prompt, model/session, starting commit, objective results, elapsed time, and cleanup; then complete remaining acceptance and use a separate CI/auto-merged closeout PR before closing #33.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0018","timestamp":"2026-09-23T23:50:23Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"35c066428c55c57a6371399f5016b292f0bb61f457c86752fa0e6cd2bae5c16e","request_id":"ab0b938607c54cb8aaec839bbb86d7be","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0018"} -->
+
+Completed:
+- Recorded the automatic merge of implementation PR #51; updated the permanent handoff and current checkpoint to identify the two pending fresh-session trials and keep issue #33 open.
+
+Evidence:
+- PR #51 merged at 98747fce4d5c805670dc3b00bb572e5c02706237 after hosted quality, Python 3.11/3.12 tests, package build, package-parity 3.11/3.12, and auto-merge checks passed. Local main is clean at the merge commit. continuity validate returned VALID and docs render --check returned SYNCHRONIZED. No verifiable baseline or candidate session report is recorded.
+
+Decisions:
+- Do not close issue #33 until the two independent pinned-snapshot trials and a separate merged closeout are complete; the old unsupported baseline claim is not a pass.
+
+Changed:
+- HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0018-document-discovery.md; GitHub issue #33 status comment
+
+Blocked/uncertain:
+- Fresh-session baseline and candidate reports, plus final canonical closeout, remain outstanding.
+
+Next:
+- Run the same visible prompt in two independent fresh sessions: baseline 85f13464c466ff277ce319850ce8124c4bc95c52 and candidate 98747fce4d5c805670dc3b00bb572e5c02706237. Record prompt, model/session, starting commit, objective results, elapsed time, and cleanup; then complete remaining acceptance and use a separate CI/auto-merged closeout PR before closing #33.
 
 ## Handoff
 
