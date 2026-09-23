@@ -1,8 +1,8 @@
 # TASK-PCM-0023 — Auditable Continuity Records
 
-<!-- continuity:task {"acceptance":["Canonical policy and normative SPEC guidance define the human-first/evidence-backed structure, PCM ownership boundary, proportionality, and what is explicitly out of scope","Issue and PR templates give new sessions useful problem/outcome/scope/evidence prompts, source citations, task/issue/CI links, and conditional reproduction details without creating a long default report","Fresh PCM adopters receive a concise versioned rule in generated AGENTS/HANDOFF guidance; optional GitHub templates install only by explicit opt-in and never silently overwrite existing project files","Deterministic tests verify policy propagation, template content/synchronization, opt-in generation, idempotent reruns, and conflict safety; full lint/type/test/package/continuity gates pass","PCM issue #32 and the resulting PR present a skimmable human outcome with linked, reproducible evidence; no unrelated project-content changes"],"depends_on":[],"goal":"Define and propagate PCM\u2019s human-first, evidence-backed writing contract for continuity issues, updates, pull requests, and PCM-owned human-readable continuity documents, without taking ownership of unrelated product or marketing documentation.","id":"PCM-0023","next_action":"Implement the canonical continuity-record policy, generated guidance, and conflict-safe optional GitHub issue/PR templates; add deterministic tests.","owner":"Codex PCM task session; GitHub issue #32","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Future sessions and projects need records that are understandable to people and auditable by machines: clear problem framing, visible outcome, accurate status, citations for external claims, revision provenance, and reproducible evidence when relevant."} -->
+<!-- continuity:task {"acceptance":["Canonical policy and normative SPEC guidance define the human-first/evidence-backed structure, PCM ownership boundary, proportionality, and what is explicitly out of scope","Issue and PR templates give new sessions useful problem/outcome/scope/evidence prompts, source citations, task/issue/CI links, and conditional reproduction details without creating a long default report","Fresh PCM adopters receive a concise versioned rule in generated AGENTS/HANDOFF guidance; optional GitHub templates install only by explicit opt-in and never silently overwrite existing project files","Deterministic tests verify policy propagation, template content/synchronization, opt-in generation, idempotent reruns, and conflict safety; full lint/type/test/package/continuity gates pass","PCM issue #32 and the resulting PR present a skimmable human outcome with linked, reproducible evidence; no unrelated project-content changes"],"depends_on":[],"goal":"Define and propagate PCM\u2019s human-first, evidence-backed writing contract for continuity issues, updates, pull requests, and PCM-owned human-readable continuity documents, without taking ownership of unrelated product or marketing documentation.","id":"PCM-0023","next_action":"No further action after PCM-0023 closeout PR #44 merges; PR #43 merged successfully at 867e5ae with all required checks passed.","owner":"Codex PCM task session; GitHub issue #32","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Future sessions and projects need records that are understandable to people and auditable by machines: clear problem framing, visible outcome, accurate status, citations for external claims, revision provenance, and reproducible evidence when relevant."} -->
 
-- Status: active
+- Status: completed
 - Owner: Codex PCM task session; GitHub issue #32
 - Priority: P1
 - Depends on: none
@@ -35,11 +35,11 @@ Future sessions and projects need records that are understandable to people and 
 
 ## Acceptance criteria
 
-- [ ] Canonical policy and normative SPEC guidance define the human-first/evidence-backed structure, PCM ownership boundary, proportionality, and what is explicitly out of scope.
-- [ ] Issue and PR templates give new sessions useful problem/outcome/scope/evidence prompts, source citations, task/issue/CI links, and conditional reproduction details without creating a long default report.
-- [ ] Fresh PCM adopters receive a concise versioned rule in generated AGENTS/HANDOFF guidance; optional GitHub templates install only by explicit opt-in and never silently overwrite existing project files.
-- [ ] Deterministic tests verify policy propagation, template content/synchronization, opt-in generation, idempotent reruns, and conflict safety; full lint/type/test/package/continuity gates pass.
-- [ ] PCM issue #32 and the resulting PR present a skimmable human outcome with linked, reproducible evidence; no unrelated project-content changes.
+- [x] Canonical policy and normative SPEC guidance define the human-first/evidence-backed structure, PCM ownership boundary, proportionality, and what is explicitly out of scope.
+- [x] Issue and PR templates give new sessions useful problem/outcome/scope/evidence prompts, source citations, task/issue/CI links, and conditional reproduction details without creating a long default report.
+- [x] Fresh PCM adopters receive a concise versioned rule in generated AGENTS/HANDOFF guidance; optional GitHub templates install only by explicit opt-in and never silently overwrite existing project files.
+- [x] Deterministic tests verify policy propagation, template content/synchronization, opt-in generation, idempotent reruns, and conflict safety; full lint/type/test/package/continuity gates pass.
+- [x] PCM issue #32 and the resulting PR present a skimmable human outcome with linked, reproducible evidence; no unrelated project-content changes.
 
 ## Checkpoint log
 
@@ -103,6 +103,35 @@ Blocked/uncertain:
 
 Next:
 - Commit and publish the tested changes, open the PR linked to issue #32, and verify required CI and automatic merge before closing the issue.
+
+### 2026-09-23 — merged delivery and closeout
+
+Completed:
+- PR #43 merged to `main` as `867e5ae`; its policy, CLI, tests, and documentation are now part of the canonical repository.
+- GitHub Actions passed `quality`, `test (3.11)`, `test (3.12)`, `package`, and `auto-merge`.
+- PCM-0023 acceptance checks are complete. This closeout aligns the task/current/handoff state and closes issue #32.
+
+Evidence:
+- PR #43: https://github.com/Pukujan/project-continuity-modules/pull/43
+- CI run: https://github.com/Pukujan/project-continuity-modules/actions/runs/35900978807 — all required jobs passed.
+- Merge commit: `867e5aeae351591a232866b32082ccbe05bad7cd`.
+- The PR's `Closes #32` text did not close the issue on GitHub; issue closure is performed explicitly after this final checkpoint is merged.
+
+Decisions:
+- Do not mark issue #32 closed until the task status and canonical active-task pointer are updated by this auto-merged closeout.
+- Keep the separate README-image request open for clarification: no matching image assets or source references exist in this PCM checkout or the referenced conversation preview. No images were added to issue logs.
+
+Changed:
+- `tasks/TASK-PCM-0023-auditable-continuity-records.md`
+- `checkpoints/CURRENT.md`
+- `HANDOFF.md`
+- GitHub issue #32 closeout
+
+Blocked/uncertain:
+- The source and intended placement of the user's “old images” remain unidentified. The README is unchanged.
+
+Next:
+- Merge closeout PR #44 through required CI, close issue #32, then leave PCM with no active task until the user selects the next priority.
 
 ## Handoff
 

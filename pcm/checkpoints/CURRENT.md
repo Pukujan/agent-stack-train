@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0023","active_task_file":"tasks/TASK-PCM-0023-auditable-continuity-records.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-On 2026-09-23, the user selected PCM-0023 / issue #32 as the active bounded slice: define and propagate human-first, evidence-backed continuity records for issues, PRs, and PCM-owned continuation documents. PCM-0022 / issue #39 remains open for its corrected-candidate holdout after the separately scoped issue #34; neither is claimed complete by this priority change.
+On 2026-09-23, the user selected PCM-0023 / issue #32 as the active bounded slice. PR #43 delivered the human-first, evidence-backed continuity-record policy and passed all required CI before merging at `867e5ae`. Closeout PR #44 aligns task status and closes #32. No next task has been activated. PCM-0022 / issue #39 remains open for its corrected-candidate holdout after the separately scoped issue #34.
 
 PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; stale issue #17 status was corrected and it closed through PR #37 at `cf76827`. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
@@ -29,10 +29,10 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0010 — degraded continuity bookkeeping, recovery receipts, mandatory checkpoint pushes, and protected CI merge flow merged through PR #18 and PR #16; its release gate and issue #17 closeout are complete.
 - PCM-0014 — delegated-agent lifecycle policy and deterministic cleanup guidance merged automatically in PR #26 at `b9e0f7c`; protected CI passed.
 - PCM-0015 — planning-only versioned memory/adoption proposal merged in PR #29 at `b379ba3`; required CI passed and issue #28 was closed after follow-ups were linked.
+- PCM-0023 — human-first auditable continuity records merged in PR #43 at `867e5ae`; quality, Python 3.11/3.12 tests, package build, and automatic-merge checks passed.
 
-## Active
+## Open but not activated
 
-- PCM-0023 / issue #32 — define and implement the layered human-first/auditable records contract and its propagation to future PCM adopters.
 - PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Keep #39 open for its remaining corrected-candidate holdout, which depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
 - Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
@@ -62,4 +62,4 @@ None known.
 
 ## Next atomic action
 
-Commit and publish PCM-0023's tested policy/templates, open the PR linked to issue #32, and verify required CI and automatic merge. Keep #39's post-#34 holdout and #34 implementation separately tracked.
+No task is active. After closeout PR #44 merges and issue #32 is closed, wait for the user's next bounded priority. Keep #39's post-#34 holdout and #34 implementation separately tracked.

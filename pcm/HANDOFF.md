@@ -4,7 +4,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
-- PCM-0023 / issue #32 is the active task by the user's explicit 2026-09-23 priority selection. Define PCM's human-first, evidence-backed continuity-record contract for issue logs, progress updates, PRs, and PCM-owned continuation documents, and propagate it to future adopters. Read `tasks/TASK-PCM-0023-auditable-continuity-records.md`.
+- PCM-0023 / issue #32 completed in PR #43 at `867e5ae`; closeout PR #44 updates the canonical task status/current pointer and closes #32.
 - PCM-0022 / issue #39 remains open: its policy merged in PR #40, but its corrected-candidate fresh-session rerun depends on the separate issue #34. Read its task file only when resuming that follow-up.
 - PCM-0019 / issue #34 remains open and separate. The #39 corrected-candidate holdout depends on its future implementation; do not implement managed worktrees under PCM-0022.
 
@@ -28,7 +28,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-Commit and publish the tested PCM-0023 policy/templates, open the PR linked to issue #32, and verify required CI and automatic merge. Keep the separate #39 holdout and #34 work out of this delivery.
+After closeout PR #44 merges and issue #32 is closed, activate no work until the user selects the next bounded priority. Keep the #39 holdout dependent on #34.
 
 ## Authority
 
