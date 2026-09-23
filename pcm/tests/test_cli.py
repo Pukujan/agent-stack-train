@@ -113,6 +113,9 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("continuity worktree remove", agents)
         self.assertIn("git worktree lock", agents)
         self.assertIn("git worktree unlock", agents)
+        self.assertIn("expected release date", agents)
+        self.assertIn("completed task's checkpoint", agents)
+        self.assertIn("unlock/remove next action", agents)
         self.assertIn("required CI passes", agents)
         self.assertIn("Reuse package-manager download/build caches", agents)
         self.assertNotIn("Do not create clones, task folders, or linked Git worktrees anywhere", agents)
@@ -124,6 +127,16 @@ class ContinuityTests(unittest.TestCase):
             ["managed-worktrees", "single-checkout"],
         )
         self.assertEqual(validate_repo(root), [])
+
+    def test_minimal_profile_documents_time_bounded_worktree_holds(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-minimal-worktree-policy-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP")
+
+        handoff = (root / "HANDOFF.md").read_text(encoding="utf-8")
+        self.assertIn("expected release date", handoff)
+        self.assertIn("git worktree lock", handoff)
+        self.assertIn("git worktree unlock", handoff)
 
     def test_init_cli_accepts_only_supported_workspace_modes(self) -> None:
         args = build_parser().parse_args(
