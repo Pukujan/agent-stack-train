@@ -126,3 +126,25 @@ Blocked/uncertain:
 
 Next:
 - Open PR for required CI/auto-merge; after #34, rerun the candidate holdout before closing #39.
+
+### 2026-09-23 17:20:38 UTC — Codex PCM-0022 closeout
+
+<!-- continuity:checkpoint {"agent":"Codex PCM-0022 closeout","blocked":[],"changed":["HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0022-agent-facing-holdouts.md; GitHub issue #39"],"completed":["Merged the risk-based testing policy in PR #40; required quality, Python 3.11/3.12 tests, and package checks passed. Updated issue #39 and the handoff to show that the corrected-candidate holdout remains pending #34."],"decisions":["Keep #39 open until the corrected-candidate fresh-session holdout after #34 is recorded and passes."],"evidence":["PR #40 is MERGED at https://github.com/Pukujan/project-continuity-modules/pull/40; required checks quality, test (3.11), test (3.12), and package all succeeded. GitHub issue #39 comment 5799432849 records the partial closeout and remaining dependency."],"next_action":"After #34 is delivered, run the corrected-candidate fresh-session holdout, record objective evidence, and close #39 only if it passes.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0022","timestamp":"2026-09-23T17:20:38Z"} -->
+
+Completed:
+- Merged the risk-based testing policy in PR #40; required quality, Python 3.11/3.12 tests, and package checks passed. Updated issue #39 and the handoff to show that the corrected-candidate holdout remains pending #34.
+
+Evidence:
+- PR #40 is MERGED at https://github.com/Pukujan/project-continuity-modules/pull/40; required checks quality, test (3.11), test (3.12), and package all succeeded. GitHub issue #39 comment 5799432849 records the partial closeout and remaining dependency.
+
+Decisions:
+- Keep #39 open until the corrected-candidate fresh-session holdout after #34 is recorded and passes.
+
+Changed:
+- HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0022-agent-facing-holdouts.md; GitHub issue #39
+
+Blocked/uncertain:
+- none
+
+Next:
+- After #34 is delivered, run the corrected-candidate fresh-session holdout, record objective evidence, and close #39 only if it passes.

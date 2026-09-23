@@ -4,7 +4,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
-- PCM-0022 / issue #39 is the active task by the user's explicit 2026-09-23 priority selection. Its test plan is risk-based: deterministic checks by default, fresh-session holdouts for normative agent-facing promises, and metamorphic/differential tests only where appropriate. Read `tasks/TASK-PCM-0022-agent-facing-holdouts.md`.
+- PCM-0022 / issue #39 is the active task by the user's explicit 2026-09-23 priority selection. Its risk-based testing policy merged in PR #40; #39 remains open only for the corrected-candidate fresh-session rerun after #34. Read `tasks/TASK-PCM-0022-agent-facing-holdouts.md`.
 - PCM-0019 / issue #34 remains open and separate. The #39 corrected-candidate holdout depends on its future implementation; do not implement managed worktrees under PCM-0022.
 
 - PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. Read `tasks/TASK-PCM-0015-versioned-project-memory.md` and `docs/plans/PCM-0015-implementation-plan.md` only when working on those follow-ups. The plan does not mean the proposed capabilities have been implemented.
@@ -27,7 +27,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-Push the validated PCM-0022 policy slice and let required CI/auto-merge run. Keep issue #34 and strict-checkout issue #20 separately scoped; finish the corrected-candidate holdout after #34 is implemented. Keep issue #15's target-repository remediation unperformed; do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+After issue #34 is implemented, run the corrected-candidate fresh-session holdout required by #39 and record objective results before closing #39. Its policy slice is already merged in PR #40 with required CI passing. Keep issue #34 and strict-checkout issue #20 separately scoped; keep issue #15's target-repository remediation unperformed; do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 

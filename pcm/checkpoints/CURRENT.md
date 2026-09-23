@@ -32,7 +32,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Active
 
-- PCM-0022 / issue #39 — define and test a concise, fair, risk-based policy for deterministic tests and fresh-session holdouts. The corrected candidate holdout depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
+- PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Keep #39 open for its remaining corrected-candidate holdout, which depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
 - Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
 ## Prior completed/adopted work
@@ -62,4 +62,4 @@ None known.
 
 ## Next atomic action
 
-Push the validated PCM-0022 / issue #39 policy slice and let required CI/auto-merge run. Keep issue #34 implementation and strict-checkout issue #20 separate; after #34 is corrected, run the candidate holdout required by #39 before closing it.
+After issue #34 is implemented, run and record the corrected-candidate fresh-session holdout required by #39 before closing it. PR #40 already merged the policy slice with all required checks passing. Keep issue #34 implementation and strict-checkout issue #20 separately scoped.
