@@ -1,12 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0019","active_task_file":"tasks/TASK-PCM-0019-managed-worktrees.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-On 2026-09-23, the user activated PCM-0019 / issue #34 to replace the blanket worktree ban with a managed temporary-worktree lifecycle. The candidate keeps one permanent home checkout for sequential work, permits task-scoped temporary linked worktrees when parallelism/isolation is useful, and verifies GitHub checks/merge before cleanup. A Windows NTFS experiment measured 5,243,374 file-storage bytes for the home checkout plus three linked worktrees versus 8,390,584 bytes for the home checkout plus three non-hardlinked clones; full suites pass 43 tests each on Python 3.11 and 3.12. Sources, method, and limitations are recorded in the task. Hosted PR CI, merge, issue closeout, and the separate PCM-0022/#39 holdout remain pending. No unrelated target repository is in scope.
+PCM-0019 / issue #34 is complete in PRs #45–#47, with closeout PR #48 carrying the final task/checkpoint/handoff state and closing issues #20, #34, and #39 after protected CI. The rule is one permanent home checkout for sequential work plus optional task-owned linked worktrees for real parallelism/isolation; verified cleanup follows green required checks, merge, and task completion. A short audit hold must be time-bounded in the task checkpoint and protected with Git's native worktree lock; it is unlocked and normally cleaned up afterward. Final local suites passed 46 tests each on Python 3.11 and 3.12. The Windows C: NTFS fixture used 5,243,374 file-storage bytes for home plus three linked worktrees versus 8,390,584 bytes for home plus three non-hardlinked clones; details and limits are in the task and issue comments. There is no active continuity task. After PR #48 merges, verify issue closure and remove only PCM-0019 local task branches and disposable test clones. No unrelated target repository is in scope.
 
 PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; stale issue #17 status was corrected and it closed through PR #37 at `cf76827`. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
@@ -30,10 +30,10 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0014 — delegated-agent lifecycle policy and deterministic cleanup guidance merged automatically in PR #26 at `b9e0f7c`; protected CI passed.
 - PCM-0015 — planning-only versioned memory/adoption proposal merged in PR #29 at `b379ba3`; required CI passed and issue #28 was closed after follow-ups were linked.
 - PCM-0023 — human-first auditable continuity records merged in PR #43 at `867e5ae`; quality, Python 3.11/3.12 tests, package build, and automatic-merge checks passed.
+- PCM-0019 — managed temporary worktrees, verified cleanup, native lock-based audit holds, measured storage, and independent candidate/variant checks completed through PRs #45–#48; final local suites passed 46 tests on Python 3.11 and 3.12.
 
 ## Open and separately tracked
 
-- PCM-0022 / issue #39 — the risk-based testing policy merged in PR #40 after all required CI passed. Its corrected-candidate holdout depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be mislabeled as this task's evidence.
 - Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
 ## Prior completed/adopted work
@@ -51,10 +51,8 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 - PCM-0017 / issue #31 — version identity and installed-package parity.
 - PCM-0018 / issue #33 — idempotent checkpoints and blind fresh-session document discovery.
-- PCM-0019 / issue #34 — managed worktrees, push/merge/cleanup, and safe dependency-cache reuse.
 - PCM-0020 / issue #35 — safe Codex main-session rotation.
 - PCM-0021 / issue #30 — archive helper conversations while preserving main-session history.
-- PCM-0022 / issue #39 — agent-facing behavior testing and holdout fairness (policy merged; candidate rerun remains pending issue #34).
 
 ## Blockers
 
@@ -62,4 +60,4 @@ None known.
 
 ## Next atomic action
 
-Publish the PCM-0019 candidate for protected CI, then run the separate #39 corrected-candidate holdout and scenario variant before closing issue #34 or selecting another report.
+After PR #48 automatically merges, verify issues #20, #34, and #39 are closed; remove only local PCM-0019 task branches and disposable test clones; confirm the permanent checkout is the only registered worktree. Leave unrelated PCM branches and repositories untouched.

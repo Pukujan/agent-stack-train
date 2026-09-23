@@ -1,6 +1,6 @@
 # TASK-PCM-0019 — Managed temporary worktrees and dependency reuse
 
-<!-- continuity:task {"acceptance":["managed-worktree support is enabled by a validated workspace policy; strict single-checkout remains an explicit opt-out and old configurations remain compatible","the main checkout remains the permanent home base and is used for sequential work; PCM-managed worktrees are created under the canonical project at pcm/worktree/<task-id> only when parallelism/isolation is useful, binding one active task to one task branch","cleanup refuses trees outside the managed root, dirty or untracked work, unpublished commits, and work that is not proven merged into the canonical remote default branch","a pushed, CI-approved and merged task tree can be removed without force; the local task branch is removed only after safe tree removal","cleanup fails closed for non-GitHub remotes until PCM implements a tested CI/merge verifier for those hosts","generated agent instructions explain when to use a worktree, resuming one tree across sessions, push/required-CI/automatic-merge, safe cleanup, and preservation of unfinished trees","dependency guidance reuses immutable pnpm/uv caches and installed runtimes where supported, but never shares mutable node_modules or .venv across incompatible lockfiles or interpreters","deterministic tests cover path/identity safety, creation reuse, rejection cases, and verified cleanup; repeatable disposable runs measure checkout disk use without leaving resources","the #34 corrected-candidate holdout and a fresh scenario variant pass under the separate #39 protocol","full Ruff, MyPy, compile, Python 3.11/3.12 tests, package build, continuity validation, required hosted CI, automatic merge, issue closeout, and local cleanup all succeed","PCM-0009 remains separately scoped and no unrelated target repository is modified","any short intentional hold of a completed task worktree is recorded in the canonical task checkpoint with its reason, expected release date, exact path, and next unlock/remove action; native Git locking prevents cleanup during the hold and normal verified cleanup runs after release"],"depends_on":["PCM-0011","PCM-0012","PCM-0013","PCM-0022"],"goal":"Allow useful parallel task isolation without scattering worktrees or repeatedly storing full dependency payloads, while ensuring every finished task is pushed, checked, merged and cleaned up safely.","id":"PCM-0019","next_action":"Publish the managed-worktree candidate for protected CI, then run the separate #39 corrected-candidate holdout and scenario variant.","owner":"Codex PCM development session; GitHub issue #34","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"A blanket worktree ban blocks safe parallel isolation, while unmanaged worktrees and per-tree environments can accumulate on disk. The intended result is one permanent main checkout, one temporary task-owned tree only when useful, shared immutable package caches, and refusal-first cleanup after verified GitHub delivery."} -->
+<!-- continuity:task {"acceptance":["managed-worktree support is enabled by a validated workspace policy; strict single-checkout remains an explicit opt-out and old configurations remain compatible","the main checkout remains the permanent home base and is used for sequential work; PCM-managed worktrees are created under the canonical project at pcm/worktree/<task-id> only when parallelism/isolation is useful, binding one active task to one task branch","cleanup refuses trees outside the managed root, dirty or untracked work, unpublished commits, and work that is not proven merged into the canonical remote default branch","a pushed, CI-approved and merged task tree can be removed without force; the local task branch is removed only after safe tree removal","cleanup fails closed for non-GitHub remotes until PCM implements a tested CI/merge verifier for those hosts","generated agent instructions explain when to use a worktree, resuming one tree across sessions, push/required-CI/automatic-merge, safe cleanup, and preservation of unfinished trees","dependency guidance reuses immutable pnpm/uv caches and installed runtimes where supported, but never shares mutable node_modules or .venv across incompatible lockfiles or interpreters","deterministic tests cover path/identity safety, creation reuse, rejection cases, and verified cleanup; repeatable disposable runs measure checkout disk use without leaving resources","the #34 corrected-candidate holdout and a fresh scenario variant pass under the separate #39 protocol","full Ruff, MyPy, compile, Python 3.11/3.12 tests, package build, continuity validation, required hosted CI, automatic merge, issue closeout, and local cleanup all succeed","PCM-0009 remains separately scoped and no unrelated target repository is modified","any short intentional hold of a completed task worktree is recorded in the canonical task checkpoint with its reason, expected release date, exact path, and next unlock/remove action; native Git locking prevents cleanup during the hold and normal verified cleanup runs after release"],"depends_on":["PCM-0011","PCM-0012","PCM-0013","PCM-0022"],"goal":"Allow useful parallel task isolation without scattering worktrees or repeatedly storing full dependency payloads, while ensuring every finished task is pushed, checked, merged and cleaned up safely.","id":"PCM-0019","next_action":"After PR #48 passes protected CI and merges, verify the closeout issues and remove only PCM-0019 local task branches and disposable test clones; leave unrelated PCM branches untouched.","owner":"Codex PCM development session; GitHub issue #34","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"A blanket worktree ban blocks safe parallel isolation, while unmanaged worktrees and per-tree environments can accumulate on disk. The intended result is one permanent main checkout, one temporary task-owned tree only when useful, shared immutable package caches, and refusal-first cleanup after verified GitHub delivery."} -->
 
 ## Human outcome
 
@@ -81,39 +81,39 @@ restore or generate README images; #42 remains separately owned and deferred.
 
 ## Acceptance
 
-- [ ] Workspace policy has a clear safe default, explicit managed and strict
+- [x] Workspace policy has a clear safe default, explicit managed and strict
   modes, backward-compatible reading, and generated guidance matching the mode.
-- [ ] A task can create/reuse only its own tree at
+- [x] A task can create/reuse only its own tree at
   `<canonical-root>/pcm/worktree/<TASK-ID>` on its bound branch; no sibling
   clone or arbitrary path is created.
-- [ ] Cleanup is refusal-first and verifies canonical remote identity, exact
+- [x] Cleanup is refusal-first and verifies canonical remote identity, exact
   managed path, task/branch association, clean tracked and untracked state,
   publication, and merge into the protected remote default branch. It never
   uses force removal or deletes dirty, unmerged, pinned, or user-owned trees.
-- [ ] Cleanup fails closed for non-GitHub remotes until PCM implements a tested
+- [x] Cleanup fails closed for non-GitHub remotes until PCM implements a tested
   CI/merge verifier for those hosts.
-- [ ] A short intentional audit hold is recorded in the completed task
+- [x] A short intentional audit hold is recorded in the completed task
   checkpoint with its reason, expected release date, exact path, and
   unlock/remove next action. Git locking makes normal cleanup refuse it; after
   the audit, the operator can unlock it and complete verified cleanup.
-- [ ] Successful cleanup removes the worktree and only then its safely merged
+- [x] Successful cleanup removes the worktree and only then its safely merged
   local task branch. GitHub remains responsible for protected CI, auto-merge,
   and remote branch deletion; PCM must report inability to verify rather than
   pretending a local clean tree proves delivery.
-- [ ] Guidance recommends one tree per active task reused across sessions and
+- [x] Guidance recommends one tree per active task reused across sessions and
   additional trees only for real parallel work. pnpm/uv caches and managed
   runtimes may be reused; `node_modules`/`.venv` remain isolated when lockfiles,
   interpreters, or task-specific dependencies differ. Finished trees and their
   private environments are removed after successful merge.
-- [ ] Deterministic tests cover strict-mode rejection, managed path/identity,
+- [x] Deterministic tests cover strict-mode rejection, managed path/identity,
   idempotent resume, task/branch/path conflicts, dirty/untracked refusal,
   unpublished/unmerged refusal, and successful post-merge cleanup.
-- [ ] Repeated disposable checkouts are measured with a reproducible method and
+- [x] Repeated disposable checkouts are measured with a reproducible method and
   their temporary repositories are removed; do not claim zero disk cost.
-- [ ] Fresh-session baseline/candidate and one visible-requirement variant are
+- [x] Fresh-session baseline/candidate and one visible-requirement variant are
   evaluated under #39 fairness rules; holdout workers are stopped/closed after
   capturing evidence.
-- [ ] Full local gates and required hosted CI pass; a protected PR auto-merges,
+- [x] Full local gates and required hosted CI pass; a protected PR auto-merges,
   issue #34 closes after merge and evidence, CURRENT/HANDOFF/task records agree,
   and no task worktree or branch remains locally.
 
@@ -315,6 +315,40 @@ Blocked/uncertain:
 
 Next:
 - Push this checkpoint and PR #47; after CI/merge, run a fresh local audit of issue #34 on the current merged commit, then a fresh variant that exercises a time-bounded audit hold, without providing a diagnosis or evaluator checklist.
+
+### 2026-09-23 20:21:02 UTC — PCM-0019 final closeout candidate
+
+<!-- continuity:checkpoint {"agent":"Codex PCM-0019 closeout","blocked":[],"changed":["tasks/TASK-PCM-0019-managed-worktrees.md","checkpoints/CURRENT.md","HANDOFF.md","GitHub issue comments #20, #34, and #39"],"completed":["Completed managed-worktree lifecycle, native lock-based audit holds, deterministic safety tests, and time-bounded retention guidance in merged PRs #45, #46, and #47.","Completed the independent corrected-candidate audit and fresh retention variant on main snapshot e5a161b6c734ccca44ffddb10b1c35cd5c6e09cf; both final sessions made no edits and did not publish.","Recorded research provenance, benchmark limitations, issue resolution, and exact holdout prompts/results on GitHub issues #20, #34, and #39."],"decisions":["Keep one permanent project home and use optional task-scoped linked worktrees only for real parallelism or isolation; reuse one tree across sessions.","Run normal verified cleanup after push, green checks, merge, task completion, and clean state; preserve dirty, unmerged, unverifiable, or Git-locked trees without force.","For a short audit hold, record reason, expected release date, exact path, and unlock/remove next action in the task checkpoint; after the hold, unlock and run normal verified cleanup."],"evidence":["Final candidate session 01a0cfe4-a142-70d0-9dda-c83617939cab: gpt-6-luna/low; full suite 46 passed; validation VALID; Ruff, MyPy, compileall, package build, and diff check passed; no files changed.","Final retention variant 01a0cfe6-b7bc-7793-b54a-29e7441ffcc7: gpt-6-luna/low; pinned-cleanup test passed; validation VALID; diff check passed; no files changed.","A prior candidate attempt that stopped without verification is recorded as a non-pass; it was not counted as successful evidence. Exact final prompts and permitted context are documented in issue #39.","Python 3.11.15 and Python 3.12.10 local suites each passed 46 tests. PRs #45, #46, and #47 passed protected package, quality, test (3.11), and test (3.12) checks before automatic merge.","Windows C: NTFS fixture: home plus three linked worktrees 5,243,374 file-storage bytes; home plus three --no-hardlinks clones 8,390,584 bytes. Small synthetic fixture; filesystem metadata and dependency environments excluded.","Sources: https://git-scm.com/docs/git-worktree; https://pnpm.io/; https://docs.astral.sh/uv/concepts/cache/; https://docs.astral.sh/uv/concepts/projects/layout/; https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getcompressedfilesizew."],"next_action":"After PR #48 passes protected CI and merges, verify the closeout issues and remove only PCM-0019 local task branches and disposable test clones; leave unrelated PCM branches untouched.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0019","timestamp":"2026-09-23T20:21:02Z"} -->
+
+Completed:
+- Managed-worktree lifecycle, native Git lock-based audit holds, deterministic safety tests, and time-bounded retention guidance are in merged PRs #45, #46, and #47.
+- The independent corrected-candidate audit and a fresh retention variant both passed on the merged main snapshot. Final agents were archived after evidence capture.
+- Detailed human-readable issue comments with research provenance, storage measurements, limits, exact prompts, and results are posted to #20, #34, and #39. PR #48 will close those three logs after protected CI passes and merges.
+
+Evidence:
+- Candidate session 01a0cfe4-a142-70d0-9dda-c83617939cab, model gpt-6-luna/low, started at e5a161b6c734ccca44ffddb10b1c35cd5c6e09cf: 46 tests passed; continuity validation VALID; Ruff, MyPy, compileall, package build, and diff check passed. No files changed.
+- Variant session 01a0cfe6-b7bc-7793-b54a-29e7441ffcc7, same model and commit: pinned-cleanup regression passed; validation VALID; diff check passed. No files changed.
+- An earlier candidate attempt stopped without running checks. It is explicitly recorded as a non-pass; it was not counted as evidence.
+- Python 3.11.15 and Python 3.12.10 suites each passed 46 tests. PRs #45–#47 passed required protected CI before automatic merge.
+- Windows C: NTFS fixture measured 5,243,374 bytes for home plus three linked worktrees and 8,390,584 bytes for home plus three non-hardlinked clones. This small synthetic result excludes filesystem metadata and package environments.
+- Research sources: [Git worktree docs](https://git-scm.com/docs/git-worktree), [pnpm](https://pnpm.io/), [uv cache](https://docs.astral.sh/uv/concepts/cache/), [uv project layout](https://docs.astral.sh/uv/concepts/projects/layout/), and [Microsoft storage API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getcompressedfilesizew). Method and limitations are documented in the task and issue #34.
+
+Decisions:
+- One permanent project home is the default; task-owned worktrees are temporary tools for real parallelism/isolation, not one per agent or session.
+- Share immutable caches, not incompatible mutable dependency environments.
+- Clean up only after verified push/checks/merge/completion; preserve dirty, unmerged, unverifiable, or time-bounded Git-locked work, then perform normal verified cleanup after unlock.
+
+Changed:
+- `tasks/TASK-PCM-0019-managed-worktrees.md`
+- `checkpoints/CURRENT.md`
+- `HANDOFF.md`
+- GitHub issue comments on #20, #34, and #39
+
+Blocked/uncertain:
+- None for PCM-0019 after this closeout PR merges. Afterward, verify issue closure and remove only the local PCM-0019 branches/disposable clones; do not touch unrelated branches or repositories.
+
+Next:
+- Merge PR #48 after required hosted checks; perform the one-time local PCM-0019 cleanup, then select any future work from the remaining open issues.
 
 ## Handoff
 
