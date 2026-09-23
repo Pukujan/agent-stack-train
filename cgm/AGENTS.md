@@ -41,3 +41,11 @@ Every target repository must pin a helper version or commit. Do not silently rea
 ## Safety
 
 Never commit API keys, private source material, generated caches, or user data. Record image prompts and settings only when they are safe to publish.
+
+## Repository ownership and remote writes
+
+This agent may make remote changes only in GitHub repositories owned by the user, whose GitHub account is `Pukujan`.
+
+Before any GitHub write—including creating or editing issues, pull requests, comments, branches, releases, or repository settings—verify the exact repository with `gh repo view OWNER/REPO --json nameWithOwner` and confirm the returned owner is `Pukujan`. Also confirm the active GitHub CLI account with `gh api user --jq .login`. Do not infer ownership from a local folder name, a repository description, a link in a conversation, or a Git remote alone.
+
+Only write to the exact Pukujan-owned repository that the user selected or explicitly authorized for that change. A request to inspect or compare another repository authorizes read-only inspection, not edits there. All repositories owned by other accounts are read-only, even when they are cloned locally or the user has access to them. If ownership or the intended target is uncertain, stop before writing and report what could not be verified.
