@@ -24,6 +24,7 @@ Before doing work:
 4. the minimum relevant document:
    - normative design: `SPEC.md`
    - handoffs: `docs/HANDOFF_PROTOCOL.md`
+   - delegated-agent lifecycle: `docs/AGENT_LIFECYCLE.md`
    - versioning/migrations: `docs/VERSIONING.md`
 
 Do not scan historical chats for context by default.
@@ -68,6 +69,13 @@ Continuity bookkeeping supports execution but does not gate safe execution. If a
 Normal checkpoint delivery is mandatory: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; a normal checkpoint is not complete while it exists only on a local branch. CI runs on every pushed branch, and pull-request automation merges after the required checks pass. Do not create a second branch or worktree identity to avoid publishing.
 
 If the remote itself is unavailable, use the degraded recovery-receipt path. That is an emergency continuity condition, not a successful normal handoff: record the exact local state, continue only when the task remains safe, and publish/reconcile as soon as the shared Git path is available again.
+
+Delegated agents are temporary workers. Give each one a bounded task, capture its
+result and evidence in the parent task, and close it immediately after the result
+is captured. Completed, interrupted, failed, cancelled, or timed-out workers must
+not be left open; stop and close workers that are no longer needed. Use the
+smallest useful number of workers and do not treat an agent thread as canonical
+project or task state. See `docs/AGENT_LIFECYCLE.md`.
 
 ## Evidence rule
 

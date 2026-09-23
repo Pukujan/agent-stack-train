@@ -110,6 +110,12 @@ Continuity state is important, but writing it is not an execution gate. If a can
 
 The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Every project uses serial task branches in one canonical checkout and one dependency environment. Task clones, task folders, and linked Git worktrees are prohibited. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
 
+Delegated agents are also temporary execution views. After a worker returns, the
+parent records its result and evidence in the task checkpoint and explicitly
+closes the worker. Completed workers are not left open, because a terminal
+completed status can still consume an available agent slot. See
+[`docs/AGENT_LIFECYCLE.md`](docs/AGENT_LIFECYCLE.md).
+
 ## Why Git is the transport
 
 Git already solves several parts of the continuity problem well:

@@ -85,6 +85,16 @@ Record observed evidence, decisions, changes, uncertainty, next action.
 ### Stop/handoff
 Ensure state is committed or dirty state is explicitly recorded, tests/evidence are captured, blockers are named, and next action is singular/unambiguous.
 
+### Delegated agents
+Delegated agents are temporary execution workers, not canonical project or task
+state. The parent MUST give each worker a bounded task, capture its result and
+evidence in the parent task/checkpoint, and explicitly close it immediately after
+the result is captured. This close requirement applies to completed, interrupted,
+failed, cancelled, and timed-out workers. A worker may be reused only for an
+explicit follow-up before it is closed. The parent MUST use the smallest useful
+number of workers and MUST NOT leave completed workers open for possible future
+use. See `docs/AGENT_LIFECYCLE.md`.
+
 ### Degraded continuity
 Execution safety and existing authorization outrank continuity bookkeeping. Failure to read or write canonical continuity state is a degraded condition, not an execution gate, when the underlying task remains safe and recoverable. Continue in an already-authorized alternate checkout or host, write a recovery receipt containing the same repository/task lineage and checkpoint evidence, and reconcile it into canonical state when writable.
 

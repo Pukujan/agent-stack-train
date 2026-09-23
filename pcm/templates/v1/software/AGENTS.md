@@ -25,3 +25,10 @@ Continuity bookkeeping supports execution but does not gate safe execution. If c
 For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it commits the checkpoint and pushes the task branch to `origin`. A normal checkpoint is not complete while it exists only in a local worktree. CI runs on every pushed branch and pull-request automation merges after required checks pass.
 
 If the remote is temporarily unavailable, use the degraded recovery-receipt path and record the exact local state. Do not invent a second canonical branch or worktree; publish and reconcile as soon as the shared Git path is available again.
+
+Delegated agents are temporary workers. Give each worker one bounded task, record
+its result and evidence in the parent task/checkpoint, and explicitly close it
+immediately after the result is captured. This applies to completed, interrupted,
+failed, cancelled, and timed-out workers. Stop and close workers that are no
+longer needed; do not leave completed workers open for possible future use. Use
+the smallest useful number of workers. See `docs/AGENT_LIFECYCLE.md`.

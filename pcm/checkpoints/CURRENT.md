@@ -1,13 +1,13 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0014","active_task_file":"tasks/TASK-PCM-0014-agent-lifecycle.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
 
-No active P0 task. PCM-0013 — prohibit task clones and Git worktrees for all projects — merged in PR #22 at `368273a` after required CI passed.
-PCM-0012's optional linked-worktree mode remains historical; PCM-0013 makes single-checkout mandatory and rejects legacy mode configuration without rewriting it.
+Current P1 task: PCM-0014 — close completed delegated agents and bound concurrency; GitHub issue #24.
+PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
 
 ## Main objective
 
@@ -23,9 +23,12 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0001 — executable v1 schemas/templates/CLI/validator/bootstrap merged;
 - PCM-0002 — fresh minimal end-to-end dogfood merged; 8-test suite passed and final validation was VALID.
 - PCM-0008 — four repository-specific README promotions merged after review; all adapters pin content-generation-modules v0.1.2.
+- PCM-0009 — helper/target identity hardening and cold-start blind acceptance merged in PR #16.
+- PCM-0010 — degraded continuity bookkeeping, recovery receipts, mandatory checkpoint pushes, and protected CI merge flow merged in PR #18 and the protected main delivery.
 
 ## Active
 
+- PCM-0014 — close completed delegated agents and bound concurrency; GitHub issue #24.
 
 ## Prior completed/adopted work
 
@@ -44,4 +47,4 @@ None known.
 
 ## Next atomic action
 
-Fast-forward the canonical checkout to `origin/main`; then activate PCM-0005 when ready to resume the queued adapter work.
+Run PCM-0014's automated lint, typing, compilation, tests, package build, and continuity validation, then push it for protected CI and automatic merge.

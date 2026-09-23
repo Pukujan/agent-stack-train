@@ -26,6 +26,9 @@ Issues/Beads/PRs mirror coordination. Context packs are generated views.
 4. read only the minimum relevant spec/design file;
 5. confirm branch/scope before edits.
 
+If delegated agents are used, read `docs/AGENT_LIFECYCLE.md` as part of the
+relevant handoff contract.
+
 ## Checkpoint format
 
 Append, do not rewrite history:
@@ -72,6 +75,14 @@ Execution safety and existing authorization outrank checkpoint bookkeeping. A te
 Use an already-authorized alternate checkout or host when needed. Record the same task ID, repository identity, branch/ref, source commit, evidence, and next action in a recovery receipt with `continuity checkpoint --recovery-root <alternate-root>`. Do not repair storage merely to force a write, ask again for permission that already exists, treat a physical path as project identity, or create competing continuity state. Reconcile the receipt after the canonical checkout is writable with `continuity recovery reconcile`.
 
 Each task uses the one canonical checkout, with task branches run sequentially. Do not create task clones, task folders, or linked Git worktrees. The pushed task branch is the required durable shared handoff for normal operation. CI runs on every pushed branch, and pull-request automation merges after the required checks pass.
+
+## Delegated-agent cleanup
+
+Delegated agents are temporary workers. Before the parent session moves on, it
+must capture each worker's result in the parent task/checkpoint and explicitly
+close the worker. A terminal `completed` status is not enough: an open completed
+worker still consumes an agent slot. Stop and close workers that are no longer
+needed, including workers that fail, are interrupted, cancelled, or time out.
 
 ## Context packs
 

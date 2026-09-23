@@ -24,7 +24,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-Verify the automatically merged candidate on `main`, then perform release metadata verification for package 0.2.0. Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+Complete PCM-0012 by running the automated lint, typing, compilation, tests, package build, and continuity validation, then push it for protected CI and automatic merge. Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 
