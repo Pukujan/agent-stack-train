@@ -167,7 +167,8 @@ Completed:
 - Closed planning issue #28 after linking the open follow-up issues; no proposed feature is represented as implemented.
 - Opened separate issues for report tracking, package/install parity, memory/discovery proof, managed worktrees and dependency caches, Codex main-session rotation, and archival of completed helper conversations.
 - Added a focused source review to issue #34. Git worktrees enable distinct simultaneous checkouts while sharing repository data; commits/branches are pushed, not folders. Current Codex managed-worktree cleanup is retention/archive-based, not a guarantee of immediate deletion after merge. The issue now requires measured cleanup and disk-use tests.
-- Preserved PCM issue #17 as unresolved; its requested blind behavioral reproduction/fix remains outstanding.
+- Re-read issue #17 and its existing PCM-0010 task record. Verified the baseline CLI failure, the partial physical-path blind signal, the scoped fix, and the successful fresh post-fix blind rerun were already recorded and merged in PRs #18 and #16; this is a status closeout, not a new reproduction.
+- Kept issue #15 open because its broader request includes a target-repository remediation explicitly outside the current authorized scope.
 
 Evidence:
 - PR #29 required checks: `quality`, `test (3.11)`, `test (3.12)`, `package`, and `auto-merge` all passed.
@@ -175,10 +176,10 @@ Evidence:
 - Codex managed-worktree behavior: https://learn.chatgpt.com/docs/environments/git-worktrees
 - pnpm content-addressable store: https://pnpm.io/
 - uv cache and project environments: https://docs.astral.sh/uv/concepts/cache/ and https://docs.astral.sh/uv/concepts/projects/layout/
-- GitHub issues #30-35 remain open; #28 is closed; #17 remains open.
+- GitHub issues #30-35 remain open; #28 is closed; #17 closeout follows this status PR. Issue #15 remains open for out-of-scope target remediation.
 
 Blocked/uncertain:
-- Follow-up implementations have not been started. The hidden scenario requested under issue #17 remains unresolved.
+- Follow-up implementations in #30-35 have not started. Issue #15's target-repository remediation remains unaddressed and outside scope.
 
 Decisions:
 - A worktree is an isolated local working directory, not something Git pushes. Only its committed branch/checkpoints are pushed.
@@ -190,4 +191,4 @@ Changed:
 - `tasks/TASK-PCM-0015-versioned-project-memory.md`; `checkpoints/CURRENT.md`; `HANDOFF.md`; `docs/research/PCM-0015-epistemic-context.md`; `docs/research/PCM-0015-provenance.ttl`.
 
 Next:
-- Review the current open issue list and activate the next authorized task. Keep issue #17's blind failure reproduction distinct from PCM-0015 planning and do not modify unrelated target repositories.
+- Review the current open issue list and activate the next authorized task. Keep PCM-0009 and PCM-0010 histories distinct; do not modify unrelated target repositories.

@@ -6,7 +6,7 @@
 
 Phase: adoption — prove v1 in mature repositories.
 
-PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM issue #17 remains open and its requested blind behavioral reproduction/fix is not complete. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
+PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; issue #17 is being closed with this status correction. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
 
 ## Main objective
@@ -24,13 +24,13 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0002 — fresh minimal end-to-end dogfood merged; 8-test suite passed and final validation was VALID.
 - PCM-0008 — four repository-specific README promotions merged after review; all adapters pin content-generation-modules v0.1.2.
 - PCM-0009 — helper/target identity hardening and cold-start blind acceptance merged in PR #16.
-- PCM-0010 — degraded continuity bookkeeping, recovery receipts, mandatory checkpoint pushes, and protected CI merge flow merged in PR #18 and the protected main delivery.
+- PCM-0010 — degraded continuity bookkeeping, recovery receipts, mandatory checkpoint pushes, and protected CI merge flow merged through PR #18 and PR #16; issue #17's release gate is satisfied and its stale open status is being corrected.
 - PCM-0014 — delegated-agent lifecycle policy and deterministic cleanup guidance merged automatically in PR #26 at `b9e0f7c`; protected CI passed.
 - PCM-0015 — planning-only versioned memory/adoption proposal merged in PR #29 at `b379ba3`; required CI passed and issue #28 was closed after follow-ups were linked.
 
 ## Active
 
-- No PCM task is active in this closeout checkpoint. Issue #17 is still an unresolved user-requested investigation; do not treat the earlier PCM-0010 merge as proof that this newer hidden scenario has been reproduced or fixed.
+- No PCM task is active in this closeout checkpoint. PCM-0010's hidden baseline, fix, and post-fix rerun predate PCM-0015 and are documented in `tasks/TASK-PCM-0010-continuity-bookkeeping.md`; do not repeat or mislabel them as PCM-0015 work. Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
 ## Prior completed/adopted work
 
@@ -58,4 +58,4 @@ None known.
 
 ## Next atomic action
 
-Activate the next authorized task from the open issue list. Issue #17's hidden reproduction/fix remains outstanding; follow its original scope, and keep PCM-0009 historical work separate. Do not start all issues #30-35 together; select one bounded task and record its exact acceptance tests before implementation.
+Prioritize issue #34 (managed worktrees, required pushes/merges, and cleanup) as the latest user report, while keeping the existing strict-checkout case in issue #20 and PCM-0009's target-specific remediation in issue #15 separate. Do not start all issues #30-35 together; select one bounded task and record its exact acceptance tests before implementation.

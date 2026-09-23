@@ -1,9 +1,9 @@
 # TASK-PCM-0010 — Continuity bookkeeping must not become an execution gate
 
-<!-- continuity:task {"acceptance":["blind disposable-repository reproduction is recorded without exposing the suspected root cause to the test agent","execution-versus-bookkeeping and repository-lineage/worktree semantics are normative in the protocol and generated guidance","canonical continuity read/write failures degrade to deterministic diagnostics rather than uncaught crashes","an authorized alternate checkout can receive a validated recovery receipt without creating a competing project identity","recovery receipts can be reconciled into the canonical task once writable","deterministic regression tests cover unavailable state, recovery receipt, reconciliation, and existing checkpoint behavior","a fresh-session blind rerun of the same scenario passes after the fix","normal checkpoint delivery commits and pushes the task branch instead of leaving durable state only in a local worktree","CI validates lint, typing, tests, compilation, and package building on pushed branches","pull-request automation enables merge only after required CI jobs pass","PCM-0009 remains separately scoped and its helper-target boundary work is not silently rewritten","full test suite, self-validation, and continuity state are recorded before handoff"],"depends_on":["PCM-0009"],"goal":"Make continuity bookkeeping degrade gracefully when canonical state is temporarily unavailable, so safe authorized work can continue across one repository/task lineage and an alternate execution checkout.","id":"PCM-0010","next_action":"Push the task branch, open the pull request, and verify all required CI jobs and automatic merge behavior.","owner":"Codex current PCM-0010 implementation session; GitHub issue #17","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Issue #17 records repeated cases where checkpoint/write failures and physical-worktree assumptions blocked otherwise-safe execution. PCM must state that execution outranks bookkeeping and provide a minimal recoverable path when canonical continuity files are unavailable."} -->
+<!-- continuity:task {"acceptance":["blind disposable-repository reproduction is recorded without exposing the suspected root cause to the test agent","execution-versus-bookkeeping and repository-lineage/worktree semantics are normative in the protocol and generated guidance","canonical continuity read/write failures degrade to deterministic diagnostics rather than uncaught crashes","an authorized alternate checkout can receive a validated recovery receipt without creating a competing project identity","recovery receipts can be reconciled into the canonical task once writable","deterministic regression tests cover unavailable state, recovery receipt, reconciliation, and existing checkpoint behavior","a fresh-session blind rerun of the same scenario passes after the fix","normal checkpoint delivery commits and pushes the task branch instead of leaving durable state only in a local worktree","CI validates lint, typing, tests, compilation, and package building on pushed branches","pull-request automation enables merge only after required CI jobs pass","PCM-0009 remains separately scoped and its helper-target boundary work is not silently rewritten","full test suite, self-validation, and continuity state are recorded before handoff"],"depends_on":["PCM-0009"],"goal":"Make continuity bookkeeping degrade gracefully when canonical state is temporarily unavailable, so safe authorized work can continue across one repository/task lineage and an alternate execution checkout.","id":"PCM-0010","next_action":"No further PCM-0010 work. PR #18 was merged into the PCM-0009 candidate branch and integrated into main by PR #16; close issue #17 with the recorded baseline, fix, and blind rerun evidence.","owner":"PCM-0010 implementation and closeout sessions; GitHub issue #17","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Issue #17 records repeated cases where checkpoint/write failures and physical-worktree assumptions blocked otherwise-safe execution. PCM must state that execution outranks bookkeeping and provide a minimal recoverable path when canonical continuity files are unavailable."} -->
 
-- Status: active
-- Owner: Codex current PCM-0010 implementation session; GitHub issue #17
+- Status: completed
+- Owner: PCM-0010 implementation and closeout sessions; GitHub issue #17
 - Priority: P0
 - Depends on: PCM-0009
 - GitHub issue: #17
@@ -45,6 +45,7 @@ Do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-
 - [x] recovery receipts can be reconciled into the canonical task once writable;
 - [x] deterministic regression tests cover unavailable state, recovery receipt, reconciliation, and existing checkpoint behavior;
 - [x] a fresh-session blind rerun of the same scenario passes after the fix;
+- [x] normal checkpoint push, CI quality/test/package gates, and automatic merge behavior are verified;
 - [x] PCM-0009 remains separately scoped and its helper-target boundary work is not silently rewritten;
 - [x] full test suite, self-validation, and continuity state are recorded before handoff.
 
@@ -192,6 +193,35 @@ Blocked/uncertain:
 
 Next:
 - Verify the new hosted run enables automatic merge and observe the final PR state.
+
+### 2026-09-23 — Verified delivery and issue closeout
+
+Completed:
+- Rechecked the original issue and found its implementation, regression tests, and blind results already recorded in the task history; no implementation was repeated.
+- The baseline directly reproduced uncaught `PermissionError` failures in `continuity checkpoint` and `continuity preflight` when canonical task state was unavailable.
+- The baseline blind agent also kept the physical primary checkout as canonical and changed its read-only attribute to force checkpoint availability. The stronger access-denied run only continued in the alternate when explicitly directed; this was correctly recorded as a partial behavioral reproduction, not a stop/permission-loop reproduction.
+- The fix added deterministic degraded-continuity diagnostics, an authorized-alternate recovery receipt, reconciliation, and execution-over-bookkeeping guidance.
+- The fresh post-fix blind agent used the already-authorized alternate, did not repair storage or request permission, wrote a recovery receipt, and reconciled it successfully.
+- Verified PR #18's CI and merge into the PCM-0009 candidate branch; verified PR #16 then integrated that branch into protected `main`.
+
+Evidence:
+- Baseline and post-fix session IDs, expected signals, outcomes, receipt ID, and reconciliation evidence are recorded above.
+- PR #18 merged at `72bd4be` into `fix/PCM-0009-helper-target-boundary`; quality, Python 3.11/3.12 tests, package build, and automatic merge passed.
+- PR #16 merged at `93c0549` into `main`; its quality, Python 3.11/3.12 tests, package build, and automatic merge passed.
+- Current `main` contains the protocol/CLI/tests; original issue #17's release gate is satisfied.
+
+Decisions:
+- Treat the original CLI failure as reproduced and the agent-level behavior as partially reproduced; ship the scoped fix and record the narrower behavioral evidence honestly.
+- Close #17 after this bookkeeping closeout is merged. Keep PCM-0009 separate; its issue #15 stays open because that issue also mentions a target-repository remediation prohibited by the current scope.
+
+Changed:
+- `tasks/TASK-PCM-0010-continuity-bookkeeping.md`; `checkpoints/CURRENT.md`; `HANDOFF.md`.
+
+Blocked/uncertain:
+- The post-fix blind run passed, but the baseline agent did not demonstrate every listed failure signal; only the physical-path/read-only behavior and direct CLI exceptions were observed.
+
+Next:
+- No further PCM-0010 action. Continue with one separately scoped open issue; preserve PCM-0009 history and do not modify target repositories without authorization.
 
 ## Handoff
 

@@ -7,7 +7,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 - PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. Read `tasks/TASK-PCM-0015-versioned-project-memory.md` and `docs/plans/PCM-0015-implementation-plan.md` only when working on those follow-ups. The plan does not mean the proposed capabilities have been implemented.
 - PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`.
 - GitHub issue #24 is closed by PR #26.
-- Open reports are tracked separately: #30-35. Issue #17 remains unresolved; its blind failure reproduction/fix has not been completed.
+- Open reports are tracked separately: #30-35. Issue #17's baseline failure, fix, and blind rerun are already recorded and merged; this closeout corrects its stale status. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Candidate CLI/package version remains: `0.2.0`
 - Protocol version remains: `0.1.0-draft`
@@ -24,7 +24,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-First inspect open issue #17 and its original acceptance. If continuing it, use an isolated disposable PCM-adopted repo and a blind test agent, preserve any already-authorized host/worktree route, record the observed behavior, then fix only if reproduced and rerun the same blind scenario. Do not claim this was done by PCM-0015. Separately prioritize only one issue from #30-35 at a time. Keep queued PCM-0005 separate and do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+Prioritize issue #34, starting from its focused research and the existing conflict with strict-checkout issue #20. Implement only under a separately activated bounded task with mandatory green CI, push/merge, and safe cleanup acceptance. Keep issue #15's target remediation unperformed; do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 
