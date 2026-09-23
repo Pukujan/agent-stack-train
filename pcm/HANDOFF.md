@@ -4,6 +4,9 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
+- PCM-0022 / issue #39 is the active task by the user's explicit 2026-09-23 priority selection. Its test plan is risk-based: deterministic checks by default, fresh-session holdouts for normative agent-facing promises, and metamorphic/differential tests only where appropriate. Read `tasks/TASK-PCM-0022-agent-facing-holdouts.md`.
+- PCM-0019 / issue #34 remains open and separate. The #39 corrected-candidate holdout depends on its future implementation; do not implement managed worktrees under PCM-0022.
+
 - PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. Read `tasks/TASK-PCM-0015-versioned-project-memory.md` and `docs/plans/PCM-0015-implementation-plan.md` only when working on those follow-ups. The plan does not mean the proposed capabilities have been implemented.
 - PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`.
 - GitHub issue #24 is closed by PR #26.
@@ -24,7 +27,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-Prioritize issue #34, starting from its focused research and the existing conflict with strict-checkout issue #20. Implement only under a separately activated bounded task with mandatory green CI, push/merge, and safe cleanup acceptance. Keep issue #15's target remediation unperformed; do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+Push the validated PCM-0022 policy slice and let required CI/auto-merge run. Keep issue #34 and strict-checkout issue #20 separately scoped; finish the corrected-candidate holdout after #34 is implemented. Keep issue #15's target-repository remediation unperformed; do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 

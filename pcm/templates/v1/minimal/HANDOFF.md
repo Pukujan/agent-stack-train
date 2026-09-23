@@ -23,3 +23,7 @@ in the parent task/checkpoint, then explicitly close it immediately. Stop and
 close workers that are no longer needed, including completed, interrupted,
 failed, cancelled, and timed-out workers. Do not leave completed workers open for
 possible future use; see `docs/AGENT_LIFECYCLE.md`.
+
+## Verification
+
+Each task names the useful outcome for a person and the smallest checks that can verify it. Prefer deterministic checks. Use a fresh-session holdout only when the promise is about what a new session can discover or do; judge it against visible requirements, not hidden expectations. A passing test does not replace the promised human-visible result.

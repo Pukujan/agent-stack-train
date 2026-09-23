@@ -88,6 +88,10 @@ Distinguish:
 
 Never promote an unsupported previous-session statement into project fact.
 
+## Verification rule
+
+Name the human-visible outcome and choose checks in proportion to the promise being changed. Deterministic regression tests are the default; fresh-session holdouts are reserved for agent-facing workflow promises and must use the visible-contract fairness rules. Do not add process documents or test-type sub-issues by default. See `docs/TESTING_POLICY.md`.
+
 ## Scope rule
 
 If the task expands materially, update/split the task before doing the expanded work.

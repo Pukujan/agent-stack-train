@@ -1,10 +1,12 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0022","active_task_file":"tasks/TASK-PCM-0022-agent-facing-holdouts.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Program state
 
 Phase: adoption — prove v1 in mature repositories.
+
+On 2026-09-23, the user selected PCM-0022 / issue #39 as the active bounded slice before the previously queued PCM-0019 / issue #34. This is a priority change, not a claim that #34 is complete; its managed-worktree implementation remains separate.
 
 PCM-0015 — plan versioned, verifiable project memory — completed as a planning-only task in PR #29 at `b379ba3`; issue #28 is closed. The plan did not implement the proposed capabilities. Follow-up issues #30-35 now track separate work for report-to-issue closeout, package/install parity, memory/discovery proof, managed worktrees/dependency caches, Codex session rotation, and archiving finished helper conversations. PCM-0010's baseline failure, fix, and post-fix blind rerun were already recorded and merged; stale issue #17 status was corrected and it closed through PR #37 at `cf76827`. PCM-0009's protocol/tooling work is on `main`, but issue #15 remains open because its broader description includes a target-repository remediation not performed here. PCM-0014 — close completed delegated agents and bound concurrency — merged automatically in PR #26 at `b9e0f7c` after protected CI passed.
 PCM-0012 and PCM-0013 are merged workspace-policy deliveries and remain separately recorded in their own task histories.
@@ -30,7 +32,8 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Active
 
-- No PCM task is active in this closeout checkpoint. PCM-0010's hidden baseline, fix, and post-fix rerun predate PCM-0015 and are documented in `tasks/TASK-PCM-0010-continuity-bookkeeping.md`; do not repeat or mislabel them as PCM-0015 work. Issue #15 remains open only for its target-repository remediation, which is outside current scope.
+- PCM-0022 / issue #39 — define and test a concise, fair, risk-based policy for deterministic tests and fresh-session holdouts. The corrected candidate holdout depends on issue #34. The historical PCM-0010 holdout is unrelated and must not be repeated or mislabeled as this task's evidence.
+- Issue #15 remains open only for its target-repository remediation, which is outside current scope.
 
 ## Prior completed/adopted work
 
@@ -51,6 +54,7 @@ Adopt the validated continuity protocol in existing repositories without erasing
 - PCM-0019 / issue #34 — managed worktrees, push/merge/cleanup, and safe dependency-cache reuse.
 - PCM-0020 / issue #35 — safe Codex main-session rotation.
 - PCM-0021 / issue #30 — archive helper conversations while preserving main-session history.
+- PCM-0022 / issue #39 — agent-facing behavior testing and holdout fairness (active).
 
 ## Blockers
 
@@ -58,4 +62,4 @@ None known.
 
 ## Next atomic action
 
-Prioritize issue #34 (managed worktrees, required pushes/merges, and cleanup) as the latest user report, while keeping the existing strict-checkout case in issue #20 and PCM-0009's target-specific remediation in issue #15 separate. Do not start all issues #30-35 together; select one bounded task and record its exact acceptance tests before implementation.
+Push the validated PCM-0022 / issue #39 policy slice and let required CI/auto-merge run. Keep issue #34 implementation and strict-checkout issue #20 separate; after #34 is corrected, run the candidate holdout required by #39 before closing it.

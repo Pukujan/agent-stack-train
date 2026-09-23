@@ -26,6 +26,10 @@ For a normal checkpoint, commit the product change first and then run `continuit
 
 If the remote is temporarily unavailable, use the degraded recovery-receipt path and record the exact local state. Do not invent a second canonical branch or worktree; publish and reconcile as soon as the shared Git path is available again.
 
+## Verification
+
+Each task names its human-visible outcome and proportionate checks. Use deterministic regression tests by default. Add a fresh-session holdout only when the task promises that a new agent can discover or follow repository guidance; its checks must come from visible requirements, and ambiguous criteria are inconclusive. Do not create separate PDD/SDD/TDD paperwork or a sub-issue for every test type.
+
 Delegated agents are temporary workers. Give each worker one bounded task, record
 its result and evidence in the parent task/checkpoint, and explicitly close it
 immediately after the result is captured. This applies to completed, interrupted,
