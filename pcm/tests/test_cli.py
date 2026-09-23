@@ -6,12 +6,18 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from continuity.cli import (
+    ContinuityError,
     checkpoint_task,
     extract_marker,
     init_repo,
+    load_json,
     pack_task,
+    preflight_repo,
+    publish_checkpoint,
+    reconcile_recovery,
     task_new,
     validate_repo,
 )
@@ -53,6 +59,42 @@ class ContinuityTests(unittest.TestCase):
         self.assertFalse((root / ".continuity" / "config.json").exists())
         self.assertEqual((root / "PROJECT.md").read_text(encoding="utf-8"), "user content\n")
 
+    def test_preflight_accepts_explicit_valid_target(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-preflight-target-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Inference Recommendation Engine", "IRE")
+        mode, errors = preflight_repo(root)
+        self.assertEqual(mode, "TARGET_VALID")
+        self.assertEqual(errors, [])
+
+    def test_preflight_rejects_pcm_helper_as_target(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-preflight-helper-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Project Continuity Modules", "PCM")
+        mode, errors = preflight_repo(root)
+        self.assertEqual(mode, "HELPER_REPOSITORY")
+        self.assertTrue(any("helper repository" in error for error in errors), errors)
+
+    def test_preflight_rejects_continuity_looking_but_invalid_target(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-preflight-invalid-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        (root / ".continuity").mkdir(parents=True)
+        (root / ".continuity" / "config.json").write_text(
+            json.dumps({
+                "protocolVersion": "0.1.0",
+                "projectName": "inference-recommendation-engine",
+                "taskPrefix": "IRE",
+                "activeTask": "IRE-0001",
+            }),
+            encoding="utf-8",
+        )
+        validation_errors = validate_repo(root)
+        self.assertTrue(validation_errors)
+        self.assertTrue(any("missing required key" in error for error in validation_errors), validation_errors)
+        mode, errors = preflight_repo(root)
+        self.assertEqual(mode, "INVALID_TARGET")
+        self.assertEqual(errors, validation_errors)
+
     def test_task_new_allocates_stable_next_id(self) -> None:
         root = self.copy_fixture("valid-minimal")
         path = task_new(root, "second task", "Do the second thing.", "Exercise ID allocation.", "agent", "P1")
@@ -82,6 +124,109 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("implemented fixture", updated)
         self.assertEqual(validate_repo(root), [])
 
+    def test_unavailable_canonical_state_is_reported_without_traceback(self) -> None:
+        root = self.copy_fixture("valid-minimal")
+        task = root / "tasks" / "TASK-PCM-0001-example.md"
+        original_read = Path.read_text
+
+        def blocked_read(path: Path, *args, **kwargs):
+            if path.resolve() == task.resolve():
+                raise PermissionError("canonical task temporarily unavailable")
+            return original_read(path, *args, **kwargs)
+
+        with patch.object(Path, "read_text", blocked_read):
+            errors = validate_repo(root)
+            self.assertTrue(any("canonical task unavailable" in error for error in errors), errors)
+            mode, preflight_errors = preflight_repo(root)
+            self.assertEqual(mode, "DEGRADED_TARGET")
+            self.assertEqual(preflight_errors, errors)
+            with self.assertRaisesRegex(ContinuityError, "canonical task unavailable"):
+                checkpoint_task(
+                    root,
+                    "PCM-0001",
+                    "test-agent",
+                    "2026-09-20T18:00:00Z",
+                    ["implemented fixture"],
+                    ["temporary write failure reproduced"],
+                    ["continue safe work"],
+                    ["tests/test_cli.py"],
+                    [],
+                    "run validation",
+                )
+
+    def test_checkpoint_writes_recovery_receipt_and_reconciles(self) -> None:
+        root = self.copy_fixture("valid-minimal")
+        recovery_root = self.copy_fixture("valid-minimal")
+        task = root / "tasks" / "TASK-PCM-0001-example.md"
+        original_write = Path.write_text
+
+        def block_canonical_write(path: Path, data: str, *args, **kwargs):
+            if path.resolve() == task.resolve():
+                raise PermissionError("canonical task temporarily unavailable")
+            return original_write(path, data, *args, **kwargs)
+
+        with patch.object(Path, "write_text", block_canonical_write):
+            receipt_path = checkpoint_task(
+                root,
+                "PCM-0001",
+                "test-agent",
+                "2026-09-20T18:05:00Z",
+                ["implemented fixture"],
+                ["recovery receipt written"],
+                ["continue safe work"],
+                ["tests/test_cli.py"],
+                ["canonical task temporarily unavailable"],
+                "reconcile the receipt when canonical state is writable",
+                recovery_root,
+            )
+
+        receipt = load_json(receipt_path)
+        self.assertEqual(receipt["schema"], "project-continuity.recovery.v1")
+        self.assertEqual(receipt["status"], "pending-reconciliation")
+        self.assertEqual(receipt["checkpoint"]["agent"], "test-agent")
+        self.assertEqual(receipt["checkpoint"]["task_id"], "PCM-0001")
+        self.assertEqual(validate_repo(recovery_root), [])
+
+        output = reconcile_recovery(root, receipt_path)
+        self.assertEqual(output, task)
+        self.assertEqual(validate_repo(root), [])
+        self.assertEqual(load_json(receipt_path)["status"], "reconciled")
+
+    def test_checkpoint_publish_commits_and_pushes_to_origin(self) -> None:
+        root = self.copy_fixture("valid-minimal")
+        remote = Path(tempfile.mkdtemp(prefix="continuity-remote-"))
+        self.addCleanup(shutil.rmtree, remote, True)
+        subprocess.run(["git", "init", "-q", "--bare", remote], check=True)
+        subprocess.run(["git", "-C", root, "init", "-q", "-b", "task/PCM-0001-example"], check=True)
+        subprocess.run(["git", "-C", root, "config", "user.email", "fixture@example.invalid"], check=True)
+        subprocess.run(["git", "-C", root, "config", "user.name", "Fixture"], check=True)
+        subprocess.run(["git", "-C", root, "add", "."], check=True)
+        subprocess.run(["git", "-C", root, "commit", "-qm", "fixture"], check=True)
+        subprocess.run(["git", "-C", root, "remote", "add", "origin", str(remote)], check=True)
+        subprocess.run(["git", "-C", root, "push", "-q", "--set-upstream", "origin", "HEAD"], check=True)
+
+        task = root / "tasks" / "TASK-PCM-0001-example.md"
+        checkpoint_task(
+            root,
+            "PCM-0001",
+            "test-agent",
+            "2026-09-20T18:10:00Z",
+            ["prepared durable delivery"],
+            ["local validation passed"],
+            ["checkpoint delivery is a Git operation"],
+            ["tests/test_cli.py"],
+            [],
+            "open the automated review path",
+        )
+        commit = publish_checkpoint(root, task, "PCM-0001", "open the automated review path")
+
+        self.assertEqual(subprocess.check_output(["git", "-C", root, "rev-parse", "HEAD"], text=True).strip(), commit)
+        remote_commit = subprocess.check_output(
+            ["git", "--git-dir", remote, "rev-parse", "refs/heads/task/PCM-0001-example"], text=True
+        ).strip()
+        self.assertEqual(remote_commit, commit)
+        self.assertEqual(subprocess.check_output(["git", "-C", root, "status", "--porcelain"], text=True), "")
+
     def test_pack_records_git_provenance_and_sources(self) -> None:
         root = self.copy_fixture("valid-minimal")
         subprocess.run(["git", "init", "-q", root], check=True)
@@ -89,7 +234,9 @@ class ContinuityTests(unittest.TestCase):
         subprocess.run(["git", "-C", root, "config", "user.name", "Fixture"], check=True)
         subprocess.run(["git", "-C", root, "add", "."], check=True)
         subprocess.run(["git", "-C", root, "commit", "-qm", "fixture"], check=True)
-        subprocess.run(["git", "-C", root, "remote", "add", "origin", "https://example.invalid/fixture.git"], check=True)
+        subprocess.run(
+            ["git", "-C", root, "remote", "add", "origin", "https://example.invalid/fixture.git"], check=True
+        )
         output = pack_task(root, "PCM-0001", None)
         meta = extract_marker(output.read_text(encoding="utf-8"), "context-pack")
         self.assertEqual(meta["repository"], "https://example.invalid/fixture.git")
@@ -138,7 +285,10 @@ class ContinuityTests(unittest.TestCase):
         subprocess.run(["git", "-C", root, "config", "user.name", "PCM Dogfood"], check=True)
         subprocess.run(["git", "-C", root, "add", "."], check=True)
         subprocess.run(["git", "-C", root, "commit", "-qm", "dogfood source state"], check=True)
-        subprocess.run(["git", "-C", root, "remote", "add", "origin", "https://example.invalid/pcm-minimal-dogfood.git"], check=True)
+        subprocess.run(
+            ["git", "-C", root, "remote", "add", "origin", "https://example.invalid/pcm-minimal-dogfood.git"],
+            check=True,
+        )
 
         output = pack_task(root, "DOG-0001", None)
         meta = extract_marker(output.read_text(encoding="utf-8"), "context-pack")

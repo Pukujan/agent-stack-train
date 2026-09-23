@@ -55,12 +55,23 @@ Next:
 ## Stop-session requirements
 
 Before stopping:
-- commit meaningful work or document dirty state;
+- commit meaningful product work before checkpointing;
+- run `continuity checkpoint`, which commits the checkpoint and pushes the task branch to `origin`;
+- do not call a normal checkpoint complete while it exists only in a local worktree;
+- if the remote is unavailable, use the degraded recovery-receipt path and record the exact local state;
 - record tests/commands/results;
 - record uncertainty rather than guessing;
 - set one exact next action;
 - update CURRENT only when repository-level state changed;
 - link task ID to issue/PR/Beads item when used.
+
+## Degraded continuity
+
+Execution safety and existing authorization outrank checkpoint bookkeeping. A temporary failure to read or write `PROJECT`, `CURRENT`, `TASK`, or `HANDOFF` state is a degraded continuity condition, not an independent reason to stop safe work.
+
+Use an already-authorized alternate checkout or host when needed. Record the same task ID, repository identity, branch/ref, source commit, evidence, and next action in a recovery receipt with `continuity checkpoint --recovery-root <alternate-root>`. Do not repair storage merely to force a write, ask again for permission that already exists, treat a physical path as project identity, or create competing continuity state. Reconcile the receipt after the canonical checkout is writable with `continuity recovery reconcile`.
+
+One authoritative task/repository lineage may have multiple execution worktrees. The worktree is a view; the pushed task branch is the required durable shared handoff for normal operation. CI runs on every pushed branch, and pull-request automation merges after the required checks pass.
 
 ## Context packs
 

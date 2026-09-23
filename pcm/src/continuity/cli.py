@@ -3,10 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
 import subprocess
 import sys
-from datetime import datetime, timezone
+from contextlib import suppress
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -25,13 +25,56 @@ SCHEMA_FILES = {
     "task": "task.schema.json",
     "checkpoint": "checkpoint.schema.json",
     "context-pack": "context-pack.schema.json",
+    "recovery": "recovery.schema.json",
 }
 
 BUILTIN_SCHEMAS = {'config': {'$id': 'https://project-continuity.dev/schema/v1/config.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'canonical': {'additionalProperties': False, 'properties': {'current': {'minLength': 1, 'type': 'string'}, 'project': {'minLength': 1, 'type': 'string'}, 'tasks': {'minLength': 1, 'type': 'string'}}, 'required': ['project', 'current', 'tasks'], 'type': 'object'}, 'profile': {'enum': ['minimal', 'software'], 'type': 'string'}, 'protocol': {'const': 'project-continuity'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.config.v1'}, 'schema_dir': {'const': 'schemas/v1'}, 'task_prefix': {'pattern': '^[A-Z][A-Z0-9]*$', 'type': 'string'}, 'trackers': {'additionalProperties': False, 'properties': {'beads': {'type': 'boolean'}, 'github': {'type': 'boolean'}}, 'required': ['github', 'beads'], 'type': 'object'}}, 'required': ['schema', 'protocol', 'protocol_version', 'profile', 'task_prefix', 'canonical', 'schema_dir', 'trackers'], 'title': 'Project Continuity Config v1', 'type': 'object'}, 'project': {'$id': 'https://project-continuity.dev/schema/v1/project.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'id': {'pattern': '^[a-z0-9][a-z0-9-]*$', 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.project.v1'}, 'title': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'title'], 'title': 'Project metadata v1', 'type': 'object'}, 'current': {'$id': 'https://project-continuity.dev/schema/v1/current.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'active_task': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': ['string', 'null']}, 'active_task_file': {'minLength': 1, 'type': ['string', 'null']}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.current.v1'}}, 'required': ['schema', 'protocol_version', 'active_task', 'active_task_file'], 'title': 'Current checkpoint metadata v1', 'type': 'object'}, 'task': {'$id': 'https://project-continuity.dev/schema/v1/task.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'acceptance': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'depends_on': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'goal': {'minLength': 1, 'type': 'string'}, 'id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'owner': {'minLength': 1, 'type': 'string'}, 'priority': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.task.v1'}, 'status': {'enum': ['queued', 'active', 'blocked', 'completed', 'cancelled'], 'type': 'string'}, 'why': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'id', 'status', 'owner', 'priority', 'depends_on', 'goal', 'why', 'acceptance', 'next_action'], 'title': 'Task metadata v1', 'type': 'object'}, 'checkpoint': {'$id': 'https://project-continuity.dev/schema/v1/checkpoint.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'agent': {'minLength': 1, 'type': 'string'}, 'blocked': {'items': {'minLength': 1, 'type': 'string'}, 'type': 'array'}, 'changed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'completed': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'decisions': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'evidence': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 1, 'type': 'array'}, 'next_action': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.checkpoint.v1'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}, 'timestamp': {'minLength': 1, 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'task_id', 'timestamp', 'agent', 'completed', 'evidence', 'decisions', 'changed', 'blocked', 'next_action'], 'title': 'Checkpoint metadata v1', 'type': 'object'}, 'context-pack': {'$id': 'https://project-continuity.dev/schema/v1/context-pack.schema.json', '$schema': 'https://json-schema.org/draft/2020-12/schema', 'additionalProperties': False, 'properties': {'commit': {'minLength': 1, 'type': 'string'}, 'generated_at': {'minLength': 1, 'type': 'string'}, 'protocol_version': {'minLength': 1, 'type': 'string'}, 'ref': {'minLength': 1, 'type': 'string'}, 'repository': {'minLength': 1, 'type': 'string'}, 'schema': {'const': 'project-continuity.context-pack.v1'}, 'sources': {'items': {'minLength': 1, 'type': 'string'}, 'minItems': 3, 'type': 'array'}, 'task_id': {'pattern': '^[A-Z][A-Z0-9]*-[0-9]{4}$', 'type': 'string'}}, 'required': ['schema', 'protocol_version', 'repository', 'ref', 'commit', 'task_id', 'generated_at', 'sources'], 'title': 'Context pack metadata v1', 'type': 'object'}}
 
 
+BUILTIN_SCHEMAS["recovery"] = {
+    "$id": "https://project-continuity.dev/schema/v1/recovery.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": False,
+    "properties": {
+        "schema": {"const": "project-continuity.recovery.v1"},
+        "protocol_version": {"minLength": 1, "type": "string"},
+        "project_id": {"minLength": 1, "type": "string"},
+        "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+        "canonical_root": {"minLength": 1, "type": "string"},
+        "canonical_task": {"minLength": 1, "type": "string"},
+        "repository": {"minLength": 1, "type": "string"},
+        "ref": {"minLength": 1, "type": "string"},
+        "commit": {"minLength": 1, "type": "string"},
+        "recorded_at": {"minLength": 1, "type": "string"},
+        "status": {"enum": ["pending-reconciliation", "reconciled"], "type": "string"},
+        "checkpoint": {"type": "object"},
+        "reconciled_at": {"minLength": 1, "type": "string"},
+    },
+    "required": [
+        "schema",
+        "protocol_version",
+        "project_id",
+        "task_id",
+        "canonical_root",
+        "canonical_task",
+        "repository",
+        "ref",
+        "commit",
+        "recorded_at",
+        "status",
+        "checkpoint",
+    ],
+    "title": "Continuity recovery receipt v1",
+    "type": "object",
+}
+
+
 class ContinuityError(Exception):
     pass
+
+
+class CanonicalUnavailable(ContinuityError):
+    """Canonical continuity state cannot be read or written right now."""
 
 
 def _json(obj: Any) -> str:
@@ -61,6 +104,8 @@ def load_json(path: Path) -> dict[str, Any]:
         value = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise ContinuityError(f"missing file: {path}") from exc
+    except OSError as exc:
+        raise CanonicalUnavailable(f"file unavailable: {path}: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise ContinuityError(f"invalid JSON: {path}: {exc}") from exc
     if not isinstance(value, dict):
@@ -199,7 +244,10 @@ def handoff_template() -> str:
         "3. `checkpoints/CURRENT.md`\n"
         "4. the active task named by CURRENT\n"
         "5. the minimum relevant specification/design document\n\n"
-        "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n"
+        "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n\n"
+        "## Degraded continuity\n\n"
+        "Execution safety and existing authorization outrank continuity bookkeeping. If a canonical continuity file is temporarily unavailable, do not stop safe work, repair storage just to force a checkpoint, or ask again for an already-authorized host/worktree. Use an authorized alternate checkout and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write a JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint or replace the alternate task file. Reconcile it into the canonical task with `continuity recovery reconcile --root <canonical-root> --file <receipt>` when writable. The repository/task lineage is authoritative; a physical path is not.\n\n"
+        "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; it fails rather than silently leaving a normal checkpoint local. CI runs on the pushed branch and the repository's pull-request automation merges it after required checks pass.\n"
     )
 
 
@@ -211,7 +259,9 @@ def agents_template() -> str:
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
         "## Checkpoint\n\n"
-        "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n"
+        "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n\n"
+        "If canonical continuity state is temporarily unavailable, treat that as degraded continuity rather than an execution blocker: keep safe authorized work moving, use an already-authorized alternate checkout/host, and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> --agent <name> --completed <work> --evidence <result> --next <next-action>` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, treat a physical worktree as project identity, repair storage merely to write a checkpoint, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.\n\n"
+        "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it commits and pushes the checkpoint to the task branch. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.\n"
     )
 
 
@@ -282,15 +332,18 @@ def task_files(root: Path, config: dict[str, Any]) -> list[Path]:
 
 
 def task_metadata(path: Path) -> dict[str, Any] | None:
-    return extract_marker(path.read_text(encoding="utf-8"), "task")
+    try:
+        return extract_marker(path.read_text(encoding="utf-8"), "task")
+    except OSError as exc:
+        raise CanonicalUnavailable(f"canonical task unavailable: {path}: {exc}") from exc
 
 
 def find_task(root: Path, config: dict[str, Any], task_id: str) -> Path:
     for path in task_files(root, config):
+        if path.name.startswith(f"TASK-{task_id}-") or path.name == f"TASK-{task_id}.md":
+            return path
         meta = task_metadata(path)
         if meta and meta.get("id") == task_id:
-            return path
-        if path.name.startswith(f"TASK-{task_id}-") or path.name == f"TASK-{task_id}.md":
             return path
     raise ContinuityError(f"task not found: {task_id}")
 
@@ -309,7 +362,8 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
     config = load_config(root)
     task_id = next_task_id(root, config)
     slug = slugify(slug)
-    path = root / config["canonical"]["tasks"] / f"TASK-{task_id}-{slug}.md"
+    tasks_dir: str = config["canonical"]["tasks"]
+    path = root / tasks_dir / f"TASK-{task_id}-{slug}.md"
     meta = {
         "schema": "project-continuity.task.v1",
         "protocol_version": config["protocol_version"],
@@ -381,10 +435,19 @@ def validate_repo(root: Path) -> list[str]:
         return [str(exc)]
 
     try:
-        errors.extend(f"{config_path}: {e}" for e in validate_schema(config, load_schema(root, "config")))
+        config_errors = [
+            f"{config_path}: {e}"
+            for e in validate_schema(config, load_schema(root, "config"))
+        ]
+        errors.extend(config_errors)
     except ContinuityError as exc:
         errors.append(str(exc))
-        return sorted(errors)
+        return sorted(set(errors))
+
+    # Invalid config is a terminal structural error. Do not index required
+    # keys after schema validation has already established that they are absent.
+    if config_errors:
+        return sorted(set(errors))
 
     canonical = config.get("canonical", {})
     project_path = root / canonical.get("project", "PROJECT.md")
@@ -394,7 +457,11 @@ def validate_repo(root: Path) -> list[str]:
         if not path.exists():
             errors.append(f"missing canonical {kind}: {path}")
             continue
-        text = path.read_text(encoding="utf-8")
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"canonical {kind} unavailable: {path}: {exc}")
+            continue
         try:
             meta = extract_marker(text, kind)
         except ContinuityError as exc:
@@ -413,14 +480,16 @@ def validate_repo(root: Path) -> list[str]:
 
     current_meta = None
     if current_path.exists():
-        try:
+        with suppress(ContinuityError, OSError):
             current_meta = extract_marker(current_path.read_text(encoding="utf-8"), "current")
-        except ContinuityError:
-            pass
 
     tasks_by_id: dict[str, tuple[Path, dict[str, Any]]] = {}
     for path in task_files(root, config):
-        text = path.read_text(encoding="utf-8")
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"canonical task unavailable: {path}: {exc}")
+            continue
         try:
             meta = extract_marker(text, "task")
         except ContinuityError as exc:
@@ -435,7 +504,9 @@ def validate_repo(root: Path) -> list[str]:
             errors.append(str(exc))
             continue
         task_id = meta.get("id")
-        if isinstance(task_id, str) and not task_id.startswith(config["task_prefix"] + "-"):
+        if not isinstance(task_id, str):
+            continue
+        if not task_id.startswith(config["task_prefix"] + "-"):
             errors.append(f"{path}: task id prefix does not match configured task_prefix")
         if task_id in tasks_by_id:
             errors.append(f"duplicate task id: {task_id}")
@@ -447,7 +518,7 @@ def validate_repo(root: Path) -> list[str]:
             errors.append(f"{path}: next_action must be non-empty")
         errors.extend(validate_checkpoint_structure(root, path, text))
 
-    for task_id, (path, meta) in tasks_by_id.items():
+    for _task_id, (path, meta) in tasks_by_id.items():
         for dep in meta.get("depends_on", []):
             if dep.startswith("external:"):
                 continue
@@ -459,7 +530,7 @@ def validate_repo(root: Path) -> list[str]:
         active_file = current_meta.get("active_task_file")
         if (active_id is None) != (active_file is None):
             errors.append(f"{current_path}: active_task and active_task_file must both be null or both set")
-        if active_id is not None:
+        if active_id is not None and isinstance(active_id, str) and isinstance(active_file, str):
             target = root / active_file
             if not target.exists():
                 errors.append(f"{current_path}: active task file does not exist: {active_file}")
@@ -480,6 +551,9 @@ def validate_repo(root: Path) -> list[str]:
         for pack in sorted(packs_dir.glob("*.md")):
             try:
                 meta = extract_marker(pack.read_text(encoding="utf-8"), "context-pack")
+            except OSError as exc:
+                errors.append(f"context pack unavailable: {pack}: {exc}")
+                continue
             except ContinuityError as exc:
                 errors.append(f"{pack}: {exc}")
                 continue
@@ -490,7 +564,186 @@ def validate_repo(root: Path) -> list[str]:
                     errors.extend(f"{pack}: {e}" for e in validate_schema(meta, load_schema(root, "context-pack")))
                 except ContinuityError as exc:
                     errors.append(str(exc))
+    recovery_dir = root / ".continuity" / "recovery"
+    if recovery_dir.exists():
+        for receipt_path in sorted(recovery_dir.glob("*.json")):
+            try:
+                receipt = load_json(receipt_path)
+                errors.extend(
+                    f"{receipt_path}: {error}"
+                    for error in validate_schema(receipt, load_schema(root, "recovery"))
+                )
+            except ContinuityError as exc:
+                errors.append(f"{receipt_path}: {exc}")
     return sorted(set(errors))
+
+
+
+def preflight_repo(root: Path) -> tuple[str, list[str]]:
+    """Classify an explicit target root before an agent relies on PCM state."""
+    root = root.resolve()
+    if not root.exists():
+        return "MISSING_ROOT", [f"target root does not exist: {root}"]
+    if not root.is_dir():
+        return "INVALID_ROOT", [f"target root is not a directory: {root}"]
+
+    project_path = root / "PROJECT.md"
+    if project_path.exists():
+        try:
+            project_meta = extract_marker(project_path.read_text(encoding="utf-8"), "project")
+        except (ContinuityError, OSError):
+            project_meta = None
+        if project_meta and project_meta.get("id") == "project-continuity-modules":
+            return "HELPER_REPOSITORY", [
+                (
+                    "this root is the Project Continuity Modules helper repository; "
+                    "another project's continuity state must live in that target repository"
+                )
+            ]
+
+    config_path = root / ".continuity" / "config.json"
+    if not config_path.exists():
+        return "NOT_ADOPTED", [
+            (
+                "missing .continuity/config.json; initialize a fresh target or follow "
+                "the mature-repository overlay procedure before relying on PCM state"
+            )
+        ]
+
+    errors = validate_repo(root)
+    if errors:
+        if any("unavailable" in error.lower() or "permission denied" in error.lower() for error in errors):
+            return "DEGRADED_TARGET", errors
+        return "INVALID_TARGET", errors
+    return "TARGET_VALID", []
+
+
+def checkpoint_metadata(
+    config: dict[str, Any],
+    task_id: str,
+    agent: str,
+    timestamp: str,
+    completed: list[str],
+    evidence: list[str],
+    decisions: list[str],
+    changed: list[str],
+    blocked: list[str],
+    next_action: str,
+) -> dict[str, Any]:
+    return {
+        "schema": "project-continuity.checkpoint.v1",
+        "protocol_version": config["protocol_version"],
+        "task_id": task_id,
+        "timestamp": timestamp,
+        "agent": agent,
+        "completed": completed,
+        "evidence": evidence,
+        "decisions": decisions,
+        "changed": changed,
+        "blocked": blocked,
+        "next_action": next_action,
+    }
+
+
+def checkpoint_addition(meta: dict[str, Any]) -> str:
+    human_time = meta["timestamp"].replace("T", " ").replace("Z", " UTC")
+    return "\n".join(
+        [
+            "",
+            f"### {human_time} — {meta['agent']}",
+            "",
+            marker("checkpoint", meta),
+            "",
+            "Completed:",
+            *[f"- {item}" for item in meta["completed"]],
+            "",
+            "Evidence:",
+            *[f"- {item}" for item in meta["evidence"]],
+            "",
+            "Decisions:",
+            *[f"- {item}" for item in meta["decisions"]],
+            "",
+            "Changed:",
+            *[f"- {item}" for item in meta["changed"]],
+            "",
+            "Blocked/uncertain:",
+            *[f"- {item}" for item in (meta["blocked"] or ["none"])],
+            "",
+            "Next:",
+            f"- {meta['next_action']}",
+            "",
+        ]
+    )
+
+
+def recovery_path(recovery_root: Path, task_id: str, timestamp: str) -> Path:
+    safe_time = re.sub(r"[^0-9A-Za-z-]", "", timestamp)
+    return recovery_root / ".continuity" / "recovery" / f"{task_id}-{safe_time}.json"
+
+
+def write_recovery_checkpoint(
+    recovery_root: Path,
+    canonical_root: Path,
+    config: dict[str, Any],
+    task_id: str,
+    agent: str,
+    timestamp: str,
+    completed: list[str],
+    evidence: list[str],
+    decisions: list[str],
+    changed: list[str],
+    blocked: list[str],
+    next_action: str,
+    canonical_task: str,
+) -> Path:
+    recovery_root = recovery_root.resolve()
+    canonical_root = canonical_root.resolve()
+    if recovery_root == canonical_root:
+        raise ContinuityError("recovery root must be a different authorized checkout or host")
+
+    checkpoint = checkpoint_metadata(
+        config,
+        task_id,
+        agent,
+        timestamp,
+        completed,
+        evidence,
+        decisions,
+        changed,
+        blocked,
+        next_action,
+    )
+    project_id = recovery_root.name
+    project_path = recovery_root / config["canonical"]["project"]
+    try:
+        project_meta = extract_marker(project_path.read_text(encoding="utf-8"), "project")
+    except (ContinuityError, OSError):
+        project_meta = None
+    if project_meta and isinstance(project_meta.get("id"), str):
+        project_id = project_meta["id"]
+
+    receipt = {
+        "schema": "project-continuity.recovery.v1",
+        "protocol_version": config["protocol_version"],
+        "project_id": project_id,
+        "task_id": task_id,
+        "canonical_root": str(canonical_root),
+        "canonical_task": canonical_task,
+        "repository": git_value(canonical_root, ["config", "--get", "remote.origin.url"], project_id),
+        "ref": git_value(canonical_root, ["rev-parse", "--abbrev-ref", "HEAD"], "unknown"),
+        "commit": git_value(canonical_root, ["rev-parse", "HEAD"], "unknown"),
+        "recorded_at": timestamp,
+        "status": "pending-reconciliation",
+        "checkpoint": checkpoint,
+    }
+    path = recovery_path(recovery_root, task_id, timestamp)
+    content = json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_file_no_overwrite(path, content)
+    except OSError as exc:
+        raise ContinuityError(f"cannot write recovery receipt: {path}: {exc}") from exc
+    return path
 
 
 def checkpoint_task(
@@ -504,59 +757,99 @@ def checkpoint_task(
     changed: list[str],
     blocked: list[str],
     next_action: str,
+    recovery_root: Path | None = None,
 ) -> Path:
-    config = load_config(root)
-    path = find_task(root, config, task_id)
-    original = path.read_text(encoding="utf-8")
-    meta = {
-        "schema": "project-continuity.checkpoint.v1",
-        "protocol_version": config["protocol_version"],
-        "task_id": task_id,
-        "timestamp": timestamp,
-        "agent": agent,
-        "completed": completed,
-        "evidence": evidence,
-        "decisions": decisions,
-        "changed": changed,
-        "blocked": blocked,
-        "next_action": next_action,
-    }
-    human_time = timestamp.replace("T", " ").replace("Z", " UTC")
-    entry = [
-        "",
-        f"### {human_time} — {agent}",
-        "",
-        marker("checkpoint", meta),
-        "",
-        "Completed:",
-        *[f"- {item}" for item in completed],
-        "",
-        "Evidence:",
-        *[f"- {item}" for item in evidence],
-        "",
-        "Decisions:",
-        *[f"- {item}" for item in decisions],
-        "",
-        "Changed:",
-        *[f"- {item}" for item in changed],
-        "",
-        "Blocked/uncertain:",
-        *[f"- {item}" for item in (blocked or ["none"])],
-        "",
-        "Next:",
-        f"- {next_action}",
-        "",
-    ]
-    addition = "\n".join(entry)
-    if "## Handoff" in original:
-        before, after = original.split("## Handoff", 1)
-        new_text = before.rstrip() + "\n" + addition + "\n## Handoff" + after
-    else:
-        new_text = original.rstrip() + "\n" + addition
-    if not new_text.startswith(original.split("## Handoff", 1)[0].rstrip()):
-        raise ContinuityError("checkpoint append invariant failed")
-    path.write_text(new_text, encoding="utf-8")
-    return path
+    config: dict[str, Any] | None = None
+    canonical_task = f"tasks/TASK-{task_id}.md"
+    try:
+        config = load_config(root)
+        path = find_task(root, config, task_id)
+        canonical_task = path.relative_to(root).as_posix()
+        try:
+            original = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise CanonicalUnavailable(f"canonical task unavailable: {path}: {exc}") from exc
+        meta = checkpoint_metadata(
+            config,
+            task_id,
+            agent,
+            timestamp,
+            completed,
+            evidence,
+            decisions,
+            changed,
+            blocked,
+            next_action,
+        )
+        addition = checkpoint_addition(meta)
+        if "## Handoff" in original:
+            before, after = original.split("## Handoff", 1)
+            new_text = before.rstrip() + "\n" + addition + "\n## Handoff" + after
+        else:
+            new_text = original.rstrip() + "\n" + addition
+        if not new_text.startswith(original.split("## Handoff", 1)[0].rstrip()):
+            raise ContinuityError("checkpoint append invariant failed")
+        try:
+            path.write_text(new_text, encoding="utf-8")
+        except OSError as exc:
+            raise CanonicalUnavailable(f"cannot write canonical checkpoint: {path}: {exc}") from exc
+        return path
+    except CanonicalUnavailable:
+        if recovery_root is None:
+            raise
+        if config is None:
+            config = load_config(recovery_root)
+        return write_recovery_checkpoint(
+            recovery_root,
+            root,
+            config,
+            task_id,
+            agent,
+            timestamp,
+            completed,
+            evidence,
+            decisions,
+            changed,
+            blocked,
+            next_action,
+            canonical_task,
+        )
+
+
+def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
+    receipt = load_json(receipt_path)
+    if receipt.get("schema") != "project-continuity.recovery.v1":
+        raise ContinuityError(f"invalid recovery receipt schema: {receipt_path}")
+    if receipt.get("status") == "reconciled":
+        raise ContinuityError(f"recovery receipt is already reconciled: {receipt_path}")
+    checkpoint = receipt.get("checkpoint")
+    if not isinstance(checkpoint, dict):
+        raise ContinuityError(f"recovery receipt has no checkpoint: {receipt_path}")
+    task_id = checkpoint.get("task_id")
+    required = (
+        "task_id", "agent", "timestamp", "completed", "evidence", "decisions", "changed", "blocked", "next_action"
+    )
+    if not all(key in checkpoint for key in required) or not isinstance(task_id, str):
+        raise ContinuityError(f"recovery receipt checkpoint is incomplete: {receipt_path}")
+    output = checkpoint_task(
+        root,
+        task_id,
+        checkpoint["agent"],
+        checkpoint["timestamp"],
+        checkpoint["completed"],
+        checkpoint["evidence"],
+        checkpoint["decisions"],
+        checkpoint["changed"],
+        checkpoint["blocked"],
+        checkpoint["next_action"],
+    )
+    receipt["status"] = "reconciled"
+    receipt["reconciled_at"] = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    try:
+        receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError as exc:
+        raise ContinuityError(f"checkpoint reconciled but receipt could not be updated: {receipt_path}: {exc}") from exc
+    return output
 
 
 def git_value(root: Path, args: list[str], fallback: str | None = None) -> str:
@@ -564,8 +857,7 @@ def git_value(root: Path, args: list[str], fallback: str | None = None) -> str:
         proc = subprocess.run(
             ["git", "-C", str(root), *args],
             check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
         )
         value = proc.stdout.strip()
@@ -578,15 +870,68 @@ def git_value(root: Path, args: list[str], fallback: str | None = None) -> str:
     raise ContinuityError(f"git provenance unavailable for: {' '.join(args)}")
 
 
+def git_run(root: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            ["git", "-C", str(root), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as exc:
+        raise ContinuityError("git is required for checkpoint publishing") from exc
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or exc.stdout or "git command failed").strip()
+        raise ContinuityError(f"git {' '.join(args)} failed: {detail}") from exc
+
+
+def publish_checkpoint(
+    root: Path, checkpoint_path: Path, task_id: str, next_action: str, recovery: bool = False
+) -> str:
+    """Commit and push one checkpoint so the shared branch is the durable handoff."""
+    root = root.resolve()
+    checkpoint_path = checkpoint_path.resolve()
+    try:
+        relative = checkpoint_path.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ContinuityError(f"checkpoint is outside the publishing repository: {checkpoint_path}") from exc
+
+    git_run(root, ["rev-parse", "--show-toplevel"])
+    branch = git_value(root, ["rev-parse", "--abbrev-ref", "HEAD"])
+    if branch == "HEAD":
+        raise ContinuityError("checkpoint publishing requires an attached task branch")
+    remote = git_value(root, ["remote", "get-url", "origin"], None)
+
+    status = git_run(root, ["status", "--porcelain", "--untracked-files=all"]).stdout.splitlines()
+    unexpected = [line for line in status if line[3:] != relative]
+    if unexpected and not recovery:
+        raise ContinuityError(
+            "checkpoint publishing requires product changes to be committed first; "
+            f"uncommitted paths: {', '.join(line[3:] for line in unexpected)}"
+        )
+
+    git_run(root, ["add", "--", relative])
+    staged = git_run(root, ["diff", "--cached", "--name-only"]).stdout.splitlines()
+    if relative not in staged:
+        raise ContinuityError(f"checkpoint produced no staged change: {checkpoint_path}")
+
+    kind = "recovery receipt" if recovery else "checkpoint"
+    message = f"PCM {kind} {task_id}: {next_action}"
+    git_run(root, ["commit", "-m", message])
+    commit = git_value(root, ["rev-parse", "HEAD"])
+    git_run(root, ["push", "--set-upstream", remote, f"HEAD:{branch}"])
+    return commit
+
+
 def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     config = load_config(root)
     task_path = find_task(root, config, task_id)
     project_path = root / config["canonical"]["project"]
     current_path = root / config["canonical"]["current"]
     sources = [
-        str(project_path.relative_to(root)),
-        str(current_path.relative_to(root)),
-        str(task_path.relative_to(root)),
+        project_path.relative_to(root).as_posix(),
+        current_path.relative_to(root).as_posix(),
+        task_path.relative_to(root).as_posix(),
     ]
     for optional in ("SPEC.md", "AGENTS.md"):
         if (root / optional).exists():
@@ -594,7 +939,7 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     repo = git_value(root, ["config", "--get", "remote.origin.url"], root.name)
     ref = git_value(root, ["rev-parse", "--abbrev-ref", "HEAD"])
     commit = git_value(root, ["rev-parse", "HEAD"])
-    generated = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    generated = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     meta = {
         "schema": "project-continuity.context-pack.v1",
         "protocol_version": config["protocol_version"],
@@ -635,6 +980,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_validate = sub.add_parser("validate")
     p_validate.add_argument("--root", default=".")
 
+    p_preflight = sub.add_parser("preflight")
+    p_preflight.add_argument("--root", required=True)
+
     p_task = sub.add_parser("task")
     task_sub = p_task.add_subparsers(dest="task_command", required=True)
     p_task_new = task_sub.add_parser("new")
@@ -656,6 +1004,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--changed", action="append", default=[])
     p_checkpoint.add_argument("--blocked", action="append", default=[])
     p_checkpoint.add_argument("--next", dest="next_action", required=True)
+    p_checkpoint.add_argument(
+        "--recovery-root",
+        default=None,
+        help="authorized alternate checkout/host for a recovery receipt if canonical state is unavailable",
+    )
+
+    p_recovery = sub.add_parser("recovery")
+    recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
+    p_reconcile = recovery_sub.add_parser("reconcile")
+    p_reconcile.add_argument("--root", required=True)
+    p_reconcile.add_argument("--file", required=True)
 
     p_pack = sub.add_parser("pack")
     p_pack.add_argument("task_id")
@@ -688,6 +1047,18 @@ def main(argv: list[str] | None = None) -> int:
             print("VALID")
             return 0
 
+        if args.command == "preflight":
+            root = Path(args.root).resolve()
+            mode, errors = preflight_repo(root)
+            print(f"ROOT: {root}")
+            print(f"MODE: {mode}")
+            if mode == "TARGET_VALID":
+                print("VALID")
+                return 0
+            for error in errors:
+                print(f"ERROR: {error}")
+            return 1 if mode == "INVALID_TARGET" else 2
+
         if args.command == "task" and args.task_command == "new":
             path = task_new(
                 Path(args.root).resolve(),
@@ -701,7 +1072,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         if args.command == "checkpoint":
-            timestamp = args.time or datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            timestamp = args.time or datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            recovery_root = Path(args.recovery_root).resolve() if args.recovery_root else None
             path = checkpoint_task(
                 Path(args.root).resolve(),
                 args.task_id,
@@ -713,7 +1085,20 @@ def main(argv: list[str] | None = None) -> int:
                 args.changed or ["none"],
                 args.blocked,
                 args.next_action,
+                recovery_root,
             )
+            if recovery_root is not None and path.is_relative_to(recovery_root / ".continuity" / "recovery"):
+                commit = publish_checkpoint(recovery_root, path, args.task_id, args.next_action, recovery=True)
+                print(f"DEGRADED_CONTINUITY: canonical checkpoint unavailable; recovery receipt written: {path}")
+                print(f"PUSHED: {commit}")
+            else:
+                commit = publish_checkpoint(Path(args.root).resolve(), path, args.task_id, args.next_action)
+                print(path)
+                print(f"PUSHED: {commit}")
+            return 0
+
+        if args.command == "recovery" and args.recovery_command == "reconcile":
+            path = reconcile_recovery(Path(args.root).resolve(), Path(args.file).resolve())
             print(path)
             return 0
 

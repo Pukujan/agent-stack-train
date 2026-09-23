@@ -89,7 +89,7 @@ A typical cycle is:
 3. It performs only that bounded work.
 4. It runs whatever tests, experiments, or validation the task requires.
 5. Before stopping, it writes a checkpoint containing the important evidence, decisions, blockers, changed files, and one concrete next action.
-6. It commits and pushes that state to Git.
+6. It commits and pushes that state to the task branch. A normal checkpoint is not complete while it exists only in a local worktree.
 7. The session can disappear completely.
 8. A new session resumes from the repository rather than reconstructing the old conversation.
 
@@ -103,6 +103,12 @@ That means the project can continue across:
 - interruptions lasting days or months.
 
 The goal is not to preserve every sentence an agent ever produced. The goal is to preserve the **minimum trustworthy state needed to continue the work correctly**.
+
+### Execution versus bookkeeping
+
+Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue through an already-authorized alternate worktree or host and record a small recovery receipt with `--recovery-root`. Reconcile that receipt into the canonical task when it becomes writable.
+
+The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. A local worktree is only an execution view. PCM therefore permits disposable or migrated worktrees, while keeping one authoritative task branch and avoiding competing continuity state. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
 
 ## Why Git is the transport
 
@@ -166,6 +172,28 @@ The main roles are:
 - `schemas/v1/` — machine-readable continuity contracts;
 - `.continuity/packs/` — generated context bundles that can be discarded and regenerated.
 
+## Using PCM as a helper for another repository
+
+When PCM is supplied to an agent as a helper, **the PCM checkout is not the target project**. Project state belongs in the repository the user is actually working on.
+
+Make the target root explicit and preflight it before relying on continuity state:
+
+```bash
+continuity preflight --root /path/to/target
+```
+
+A healthy preflight prints `MODE: TARGET_VALID`. `DEGRADED_TARGET` means the target's PCM shape is present but a canonical file is temporarily unavailable; keep the task moving only through the recovery-receipt path and do not claim the target is fully validated until reconciliation. If it reports `HELPER_REPOSITORY`, `NOT_ADOPTED`, or `INVALID_TARGET`, stop treating that root as a continuity-enabled target and correct the integration first.
+
+Do not create a second continuity repository and do not store target PROJECT/CURRENT/TASK state in the PCM source repository.
+
+For an existing repository whose PROJECT, AGENTS, README, or HANDOFF files must be preserved, use the non-destructive overlay procedure in [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md). A target is considered integrated only after:
+
+```bash
+continuity validate --root /path/to/target
+```
+
+returns `VALID`.
+
 ## Using PCM in a new project
 
 Python 3.11+ is currently the only runtime requirement.
@@ -202,7 +230,20 @@ continuity checkpoint APP-0001 \
   --next "Open the review PR and verify CI."
 ```
 
-Then commit and push the resulting repository state.
+If the canonical task file cannot be written but safe work can continue, use an authorized alternate checkout:
+
+```bash
+continuity checkpoint APP-0001 \
+  --root /path/to/canonical-checkout \
+  --recovery-root /path/to/authorized-alternate \
+  --agent "agent-or-person-name" \
+  --evidence "canonical task temporarily unavailable; product check passed" \
+  --next "Reconcile the recovery receipt when the canonical checkout is writable."
+```
+
+The command exits successfully after writing a recovery receipt under `.continuity/recovery/`. Later, reconcile that receipt into the canonical task with `continuity recovery reconcile`.
+
+Commit the product change first, then run `continuity checkpoint`. The command commits the checkpoint and pushes the task branch. CI runs on the pushed branch and pull-request automation merges it after the required checks pass.
 
 A future session should be able to continue without needing the previous conversation.
 
@@ -239,7 +280,7 @@ It is a small protocol for making project state durable enough that work can cro
 
 ## Current status
 
-PCM is currently `0.1.0-draft`.
+The continuity protocol is currently `0.1.0-draft`; the CLI package is `0.2.0`.
 
 The implemented core includes:
 
@@ -247,6 +288,7 @@ The implemented core includes:
 - minimal and software initialization profiles;
 - non-destructive `init`;
 - deterministic `validate`;
+- explicit target/helper `preflight`;
 - task creation;
 - append-only checkpointing;
 - Git-provenance context-pack generation;
