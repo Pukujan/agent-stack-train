@@ -7,7 +7,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 - PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. Read `tasks/TASK-PCM-0015-versioned-project-memory.md` and `docs/plans/PCM-0015-implementation-plan.md` only when working on those follow-ups. The plan does not mean the proposed capabilities have been implemented.
 - PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`.
 - GitHub issue #24 is closed by PR #26.
-- Open reports are tracked separately: #30-35. Issue #17's baseline failure, fix, and blind rerun are already recorded and merged; this closeout corrects its stale status. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope.
+- Open reports are tracked separately: #30-35. Issue #17's baseline failure, fix, and blind rerun are recorded; it closed after status correction in PR #37. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Candidate CLI/package version remains: `0.2.0`
 - Protocol version remains: `0.1.0-draft`

@@ -176,7 +176,7 @@ Evidence:
 - Codex managed-worktree behavior: https://learn.chatgpt.com/docs/environments/git-worktrees
 - pnpm content-addressable store: https://pnpm.io/
 - uv cache and project environments: https://docs.astral.sh/uv/concepts/cache/ and https://docs.astral.sh/uv/concepts/projects/layout/
-- GitHub issues #30-35 remain open; #28 is closed; #17 closeout follows this status PR. Issue #15 remains open for out-of-scope target remediation.
+- GitHub issues #30-35 remain open; #28 is closed; #17 was closed through PR #37. Issue #15 remains open for out-of-scope target remediation.
 
 Blocked/uncertain:
 - Follow-up implementations in #30-35 have not started. Issue #15's target-repository remediation remains unaddressed and outside scope.
