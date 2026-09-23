@@ -111,6 +111,8 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("one per independent active task, not one per session or agent", agents)
         self.assertIn("pcm/worktree/<TASK-ID>", agents)
         self.assertIn("continuity worktree remove", agents)
+        self.assertIn("git worktree lock", agents)
+        self.assertIn("git worktree unlock", agents)
         self.assertIn("required CI passes", agents)
         self.assertIn("Reuse package-manager download/build caches", agents)
         self.assertNotIn("Do not create clones, task folders, or linked Git worktrees anywhere", agents)

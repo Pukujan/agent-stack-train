@@ -251,6 +251,7 @@ class CanonicalUnavailable(ContinuityError):
 class GitWorktree:
     path: str
     branch: str | None
+    locked: bool = False
 
 
 def _json(obj: Any) -> str:
@@ -433,7 +434,7 @@ def workspace_policy_text(workspace_mode: str) -> str:
         "at `<canonical-root>/pcm/worktree/<TASK-ID>`. Use one per independent active task, not one per session or agent; "
         "a new session continuing that task resumes the same tree. Do not create sibling clones or arbitrary worktree paths.\n\n"
         "After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. "
-        "Removal verifies the GitHub PR, required checks, and merged commit; it refuses dirty, untracked, unpublished, unmerged, or unverifiable work. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
+        "Removal verifies the GitHub PR, required checks, and merged commit; it refuses locked/pinned, dirty, untracked, unpublished, unmerged, or unverifiable work. To keep a tree intentionally, use `git worktree lock --reason \"<reason>\" <path>`; later use `git worktree unlock <path>` before cleanup. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
         "Linked worktrees share the repository's Git object store; they are not full repository clones. Reuse package-manager download/build caches and installed runtimes where supported. "
         "Keep mutable `node_modules` and `.venv` environments separate when lockfiles or interpreters differ; store dependency changes in tracked manifests/lockfiles or patch files, not as hidden edits inside an installed environment. "
         "Remove the task worktree after verified merge and completion.\n\n"
@@ -771,19 +772,24 @@ def parse_git_worktrees(output: str) -> list[GitWorktree]:
     entries: list[GitWorktree] = []
     path: str | None = None
     branch: str | None = None
+    locked = False
     for line in [*output.splitlines(), ""]:
         if not line:
             if path is not None:
-                entries.append(GitWorktree(path, branch))
+                entries.append(GitWorktree(path, branch, locked))
             path = None
             branch = None
+            locked = False
         elif line.startswith("worktree "):
             if path is not None:
-                entries.append(GitWorktree(path, branch))
+                entries.append(GitWorktree(path, branch, locked))
             path = line.removeprefix("worktree ")
             branch = None
+            locked = False
         elif line.startswith("branch "):
             branch = line.removeprefix("branch ")
+        elif line == "locked" or line.startswith("locked "):
+            locked = True
     return entries
 
 
@@ -1589,9 +1595,14 @@ def remove_managed_worktree(root: Path, task_id: str) -> Path:
     matches = [entry for entry in worktree_inventory(root) if Path(entry.path).resolve() == path.resolve(strict=False)]
     if len(matches) != 1 or matches[0].branch != f"refs/heads/{branch}":
         raise ContinuityError(f"no uniquely registered managed worktree for {task_id} at {path}")
+    if matches[0].locked:
+        raise ContinuityError(f"refusing cleanup: managed worktree for {task_id} is pinned/locked: {path}")
     status = git_run(path, ["status", "--porcelain", "--untracked-files=all"]).stdout.strip()
     if status:
         raise ContinuityError(f"refusing cleanup: managed worktree has uncommitted or untracked work: {path}")
+    registered_root = Path(git_value(path, ["rev-parse", "--show-toplevel"])).resolve()
+    if registered_root != path.resolve():
+        raise ContinuityError(f"refusing cleanup: registered worktree identity changed: {path}")
     remote = git_value(root, ["remote", "get-url", "origin"])
     github_merge = verify_merged_task(root, path, branch, remote)
     base_branch = remote_default_branch(root, github_repository(remote))
@@ -1600,6 +1611,18 @@ def remove_managed_worktree(root: Path, task_id: str) -> Path:
     remote_meta = extract_marker(remote_task, "task")
     if remote_meta is None or remote_meta.get("id") != task_id or remote_meta.get("status") != "completed":
         raise ContinuityError(f"refusing cleanup: task {task_id} is not marked completed on origin/{base_branch}")
+    try:
+        remote_config = json.loads(git_run(root, ["show", f"origin/{base_branch}:.continuity/config.json"]).stdout)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError(f"refusing cleanup: invalid canonical config on origin/{base_branch}") from exc
+    canonical_paths = config.get("canonical")
+    if (
+        not isinstance(canonical_paths, dict)
+        or not canonical_paths
+        or not isinstance(remote_config, dict)
+        or remote_config.get("canonical") != canonical_paths
+    ):
+        raise ContinuityError(f"refusing cleanup: canonical continuity paths differ on origin/{base_branch}")
     git_run(root, ["worktree", "remove", str(path)])
     branch_delete = run_external(["git", "-C", str(root), "branch", "-d", branch], root)
     if branch_delete.returncode != 0:

@@ -143,6 +143,13 @@ class ManagedWorktreeTests(unittest.TestCase):
             remove_managed_worktree(self.root, self.task_id)
         self.assertTrue(path.exists())
 
+    def test_cleanup_refuses_pinned_worktree(self) -> None:
+        path, _ = create_managed_worktree(self.root, self.task_id)
+        self.git(["git", "worktree", "lock", "--reason", "user requested hold", str(path)])
+        with self.assertRaisesRegex(ContinuityError, "pinned/locked"):
+            remove_managed_worktree(self.root, self.task_id)
+        self.assertTrue(path.exists())
+
     def test_cleanup_refuses_pushed_but_unmerged_branch(self) -> None:
         path, _ = create_managed_worktree(self.root, self.task_id)
         (path / "README.md").write_text("Task work\n", encoding="utf-8")
@@ -169,6 +176,27 @@ class ManagedWorktreeTests(unittest.TestCase):
         path, _ = create_managed_worktree(self.root, self.task_id)
         self.complete_task_on_main()
         with self.assertRaisesRegex(ContinuityError, "cannot verify required CI"):
+            remove_managed_worktree(self.root, self.task_id)
+        self.assertTrue(path.exists())
+
+    def test_cleanup_refuses_remote_canonical_path_mismatch(self) -> None:
+        path, _ = create_managed_worktree(self.root, self.task_id)
+        self.complete_task_on_main()
+        config_path = self.root / ".continuity" / "config.json"
+        original_config = config_path.read_text(encoding="utf-8")
+        changed_config = json.loads(original_config)
+        changed_config["canonical"]["current"] = "alternate/CURRENT.md"
+        config_path.write_text(json.dumps(changed_config), encoding="utf-8")
+        self.commit_all("change canonical continuity path")
+        self.git(["git", "push", "origin", "main"])
+        self.git(["git", "fetch", "origin", "main"])
+        config_path.write_text(original_config, encoding="utf-8")
+
+        with (
+            patch("continuity.cli.verify_merged_task", return_value=True),
+            patch("continuity.cli.remote_default_branch", return_value="main"),
+            self.assertRaisesRegex(ContinuityError, "canonical continuity paths differ"),
+        ):
             remove_managed_worktree(self.root, self.task_id)
         self.assertTrue(path.exists())
 

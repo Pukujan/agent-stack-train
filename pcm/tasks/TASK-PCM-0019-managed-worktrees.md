@@ -260,6 +260,32 @@ Next:
 - Publish the checkpoint and candidate PR; then run #39's separate holdout and
   scenario variant before closing issue #34.
 
+### 2026-09-23 19:54:47 UTC — Codex PCM-0019 follow-up
+
+<!-- continuity:checkpoint {"agent":"Codex PCM-0019 follow-up","blocked":["Issue #39 corrected-candidate and fresh variant holdouts, hosted CI and merge, issue #34/#20 closeout, and local branch cleanup remain pending."],"changed":["src/continuity/cli.py, tests/test_worktrees.py, tests/test_cli.py, .gitignore, AGENTS.md, HANDOFF.md, README.md, SPEC.md, docs/HANDOFF_PROTOCOL.md, templates/v1/minimal/HANDOFF.md, templates/v1/software/AGENTS.md"],"completed":["Rechecked merged PR #45 in an independent Luna session; the blind candidate review found missing protection for intentionally pinned worktrees and a path-identity normalization gap.","Added explicit refusal for Git-locked worktrees, canonical continuity-path comparison against origin default, normalized worktree root identity checks, and user-facing lock/unlock guidance."],"decisions":["One permanent checkout remains the project home; use linked worktrees only for real isolation/parallel tasks, reuse one tree across sessions, and remove only after remote merge/CI/completion proof.","Use native git worktree lock/unlock for intentional retention; no custom pin-state format or extra pin CLI is needed."],"evidence":["Fresh independent session completed without child agents or external publication; it reported no changes outside its disposable checkout. Session 01a0cfc7-0c07-7131-8dff-f6261b6baeb6 was archived after evidence capture.","Python 3.11.15 and Python 3.12.10 full suites: 45 tests passed each; Ruff, MyPy, compileall, package build, continuity validation, and diff checks passed.","Windows NTFS fixture repeated: 5,243,374 bytes for home checkout plus three linked worktrees and 8,390,584 bytes for home plus three no-hardlinks clones; excludes filesystem metadata and package environments."],"next_action":"Push this checkpoint and candidate PR, wait for protected CI/automatic merge, then run independent corrected-candidate and fresh-variant holdouts before closing #34 and reconciling #20.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0019","timestamp":"2026-09-23T19:54:47Z"} -->
+
+Completed:
+- Rechecked merged PR #45 in an independent Luna session; the blind candidate review found missing protection for intentionally pinned worktrees and a path-identity normalization gap.
+- Added explicit refusal for Git-locked worktrees, canonical continuity-path comparison against origin default, normalized worktree root identity checks, and user-facing lock/unlock guidance.
+
+Evidence:
+- Fresh independent session completed without child agents or external publication; it reported no changes outside its disposable checkout. Session 01a0cfc7-0c07-7131-8dff-f6261b6baeb6 was archived after evidence capture.
+- Python 3.11.15 and Python 3.12.10 full suites: 45 tests passed each; Ruff, MyPy, compileall, package build, continuity validation, and diff checks passed.
+- Windows NTFS fixture repeated: 5,243,374 bytes for home checkout plus three linked worktrees and 8,390,584 bytes for home plus three no-hardlinks clones; excludes filesystem metadata and package environments.
+
+Decisions:
+- One permanent checkout remains the project home; use linked worktrees only for real isolation/parallel tasks, reuse one tree across sessions, and remove only after remote merge/CI/completion proof.
+- Use native git worktree lock/unlock for intentional retention; no custom pin-state format or extra pin CLI is needed.
+
+Changed:
+- src/continuity/cli.py, tests/test_worktrees.py, tests/test_cli.py, .gitignore, AGENTS.md, HANDOFF.md, README.md, SPEC.md, docs/HANDOFF_PROTOCOL.md, templates/v1/minimal/HANDOFF.md, templates/v1/software/AGENTS.md
+
+Blocked/uncertain:
+- Issue #39 corrected-candidate and fresh variant holdouts, hosted CI and merge, issue #34/#20 closeout, and local branch cleanup remain pending.
+
+Next:
+- Push this checkpoint and candidate PR, wait for protected CI/automatic merge, then run independent corrected-candidate and fresh-variant holdouts before closing #34 and reconciling #20.
+
 ## Handoff
 
 Read `PROJECT.md` → `checkpoints/CURRENT.md` → this task → `AGENTS.md` →
