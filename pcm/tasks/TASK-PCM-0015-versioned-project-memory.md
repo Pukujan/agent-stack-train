@@ -1,8 +1,8 @@
 # TASK-PCM-0015 — Plan versioned, verifiable project memory
 
-<!-- continuity:task {"acceptance":["A durable implementation plan separates minimal core from optional adapters and defines explicit slice boundaries, non-goals, stop/split rules, and acceptance gates","The plan answers how PCM package and protocol versions relate, how Python and Node consumers would install/update, and what the current repository actually manages","The plan defines idempotency and a human-readable plus machine-readable state pattern with one authoritative source and generated/validated views","The plan defines document inventory/discovery, linked claims and evidence, freshness/supersession, and task ownership without assuming a graph database is required","The plan makes ordinary checkpoint cost proportional and specifies which operations happen on every checkpoint versus major handoff/release","The plan includes deterministic tests and a fresh-session blind end-to-end experiment proving an old document is found and not duplicated","The plan labels facts, user requirements, recommendations, inferences, and unresolved decisions; links evidence; and preserves Git as canonical","No implementation beyond this planning task is started"],"depends_on":[],"goal":"Produce a reviewable, evidence-based, sliced plan for testing and incrementally extending PCM with safe versioned adoption, idempotent documentation updates, durable document discovery, and fresh-session handoffs.","id":"PCM-0015","next_action":"GPT-6 Luna reviews the Astra plan, runs repository validation and full tests, then publishes the planning-only result through the normal CI/auto-merge path; implementation requires a separate bounded task.","owner":"GPT-6 Luna parent session (integration, evidence, and delivery)","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Fresh sessions reduce accumulated chat context but have repeatedly failed to discover earlier durable documents, causing duplicate work and incomplete context. PCM needs a small, verifiable, versioned memory and handoff workflow whose actual benefit and overhead are measured before it becomes policy."} -->
+<!-- continuity:task {"acceptance":["A durable implementation plan separates minimal core from optional adapters and defines explicit slice boundaries, non-goals, stop/split rules, and acceptance gates","The plan answers how PCM package and protocol versions relate, how Python and Node consumers would install/update, and what the current repository actually manages","The plan defines idempotency and a human-readable plus machine-readable state pattern with one authoritative source and generated/validated views","The plan defines document inventory/discovery, linked claims and evidence, freshness/supersession, and task ownership without assuming a graph database is required","The plan makes ordinary checkpoint cost proportional and specifies which operations happen on every checkpoint versus major handoff/release","The plan includes deterministic tests and a fresh-session blind end-to-end experiment proving an old document is found and not duplicated","The plan labels facts, user requirements, recommendations, inferences, and unresolved decisions; links evidence; and preserves Git as canonical","No implementation beyond this planning task is started"],"depends_on":[],"goal":"Produce a reviewable, evidence-based, sliced plan for testing and incrementally extending PCM with safe versioned adoption, idempotent documentation updates, durable document discovery, and fresh-session handoffs.","id":"PCM-0015","next_action":"No further PCM-0015 action. The plan merged in PR #29; implementation work is tracked separately in open issues #30-35.","owner":"GPT-6 Luna parent session (integration, evidence, and delivery)","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Fresh sessions reduce accumulated chat context but have repeatedly failed to discover earlier durable documents, causing duplicate work and incomplete context. PCM needs a small, verifiable, versioned memory and handoff workflow whose actual benefit and overhead are measured before it becomes policy."} -->
 
-- Status: active; planning only
+- Status: completed; planning only
 - Owner: GPT-6 Luna parent session (integration, evidence, and delivery); GPT-6 Astra's bounded plan result is captured below
 - Priority: P1
 - Depends on: none
@@ -53,6 +53,21 @@ Do not implement the proposed feature set in this planning task. The result is o
 - [x] Each slice has scope, files/components, required tests, exit criteria, migration story, and a clear defer/stop condition.
 - [x] Checkpoint flow remains concise for routine work and reserves expanded handoff/context-pack generation for meaningful checkpoints or task rotation.
 - [x] No implementation is started as part of PCM-0015.
+
+## Delivery and separately tracked follow-ups
+
+The planning-only outcome merged in [PR #29](https://github.com/Pukujan/project-continuity-modules/pull/29) at `b379ba3`. Required CI passed: quality, tests on Python 3.11 and 3.12, package build, and auto-merge. GitHub issue [#28](https://github.com/Pukujan/project-continuity-modules/issues/28) is closed as completed. The plan itself did not implement the proposed capabilities.
+
+New user reports were split into open, separately scoped issues:
+
+- [#32 — PCM-0016: Track user reports through verified GitHub issue closeout](https://github.com/Pukujan/project-continuity-modules/issues/32)
+- [#31 — PCM-0017: Prove PCM version identity and installed-package parity](https://github.com/Pukujan/project-continuity-modules/issues/31)
+- [#33 — PCM-0018: Prove idempotent checkpoints and fresh-session document discovery](https://github.com/Pukujan/project-continuity-modules/issues/33)
+- [#34 — PCM-0019: Replace blanket worktree prohibition with managed temporary worktrees](https://github.com/Pukujan/project-continuity-modules/issues/34)
+- [#35 — PCM-0020: Safely rotate long-running Codex main sessions](https://github.com/Pukujan/project-continuity-modules/issues/35)
+- [#30 — PCM-0021: Archive completed subagent conversations without hiding the main session](https://github.com/Pukujan/project-continuity-modules/issues/30)
+
+These issues are open proposals/tasks, not completed PCM behavior. Existing issue [#17](https://github.com/Pukujan/project-continuity-modules/issues/17) also remains open; its requested hidden reproduction and behavioral fix have not been performed by PCM-0015.
 
 ## Evidence record
 
@@ -143,4 +158,36 @@ Blocked/uncertain:
 - Proposed features still require separate bounded implementation tasks and deterministic plus fresh-session acceptance.
 
 Next:
-- Create the planning-only PR; verify required CI and automatic merge; then close the plan issue without beginning implementation.
+- No further PCM-0015 action; closeout is recorded below.
+
+### 2026-09-23 — Planning task closeout and follow-up triage
+
+Completed:
+- Confirmed PR #29 merged at `b379ba3` and all required checks passed.
+- Closed planning issue #28 after linking the open follow-up issues; no proposed feature is represented as implemented.
+- Opened separate issues for report tracking, package/install parity, memory/discovery proof, managed worktrees and dependency caches, Codex main-session rotation, and archival of completed helper conversations.
+- Added a focused source review to issue #34. Git worktrees enable distinct simultaneous checkouts while sharing repository data; commits/branches are pushed, not folders. Current Codex managed-worktree cleanup is retention/archive-based, not a guarantee of immediate deletion after merge. The issue now requires measured cleanup and disk-use tests.
+- Preserved PCM issue #17 as unresolved; its requested blind behavioral reproduction/fix remains outstanding.
+
+Evidence:
+- PR #29 required checks: `quality`, `test (3.11)`, `test (3.12)`, `package`, and `auto-merge` all passed.
+- Git worktree documentation: https://git-scm.com/docs/git-worktree
+- Codex managed-worktree behavior: https://learn.chatgpt.com/docs/environments/git-worktrees
+- pnpm content-addressable store: https://pnpm.io/
+- uv cache and project environments: https://docs.astral.sh/uv/concepts/cache/ and https://docs.astral.sh/uv/concepts/projects/layout/
+- GitHub issues #30-35 remain open; #28 is closed; #17 remains open.
+
+Blocked/uncertain:
+- Follow-up implementations have not been started. The hidden scenario requested under issue #17 remains unresolved.
+
+Decisions:
+- A worktree is an isolated local working directory, not something Git pushes. Only its committed branch/checkpoints are pushed.
+- Do not remove a worktree before successful checks and verified merge; never force-delete dirty or unmerged work.
+- Share immutable dependency caches where supported, but do not share one mutable environment across conflicting lockfiles.
+- Archive finished helper chats rather than permanently deleting their records by default; preserve the main conversation.
+
+Changed:
+- `tasks/TASK-PCM-0015-versioned-project-memory.md`; `checkpoints/CURRENT.md`; `HANDOFF.md`; `docs/research/PCM-0015-epistemic-context.md`; `docs/research/PCM-0015-provenance.ttl`.
+
+Next:
+- Review the current open issue list and activate the next authorized task. Keep issue #17's blind failure reproduction distinct from PCM-0015 planning and do not modify unrelated target repositories.

@@ -167,3 +167,29 @@ pcm:proposedMemoryArchitecture a prov:Entity ;
 pcm:openQuestions a prov:Entity ;
     pcm:epistemicStatus "unresolved; planning agent must analyze and classify decisions" ;
     dct:description "Distribution surfaces and package managers; Python/Node version compatibility; source of truth for paired docs; size/cost of ordinary checkpoints; whether PROV is stored natively or exported; task claims and lease semantics; migration conflict handling; slice boundaries and minimum efficacy tests." .
+
+pcm:postPlanUserReports a prov:Entity ;
+    pcm:epistemicStatus "user_requirement; verbatim follow-up recorded after the PCM-0015 plan merged" ;
+    dct:description "User requests durable issue tracking, package and documentation follow-ups, Codex main-session rotation, archival of finished subagent conversations, and managed temporary worktrees with mandatory push, green checks, merge, and safe cleanup." ;
+    prov:wasDerivedFrom pcm:researchContext .
+
+pcm:worktreeResearch a prov:Entity ;
+    pcm:epistemicStatus "external_source; official documentation checked 2026-09-23; recommendation still requires implementation tests" ;
+    dct:description "Git worktrees allow concurrent branch checkouts with shared repository data; Codex managed worktree cleanup is retention/archive-based; pnpm and uv can share immutable caches while project dependency layouts/environments remain distinct." ;
+    prov:hadPrimarySource <https://git-scm.com/docs/git-worktree>,
+        <https://learn.chatgpt.com/docs/environments/git-worktrees>,
+        <https://pnpm.io/>,
+        <https://docs.astral.sh/uv/concepts/cache/>,
+        <https://docs.astral.sh/uv/concepts/projects/layout/> .
+
+pcm:followUpTriage a prov:Activity ;
+    dct:description "Split post-plan user reports into separately scoped open GitHub issues and record focused worktree research." ;
+    prov:used pcm:postPlanUserReports,
+        pcm:worktreeResearch,
+        pcm:planningTask ;
+    prov:wasAssociatedWith pcm:luna .
+
+pcm:followUpIssues a prov:Entity ;
+    pcm:epistemicStatus "open follow-up issue records; proposals, not implemented behavior" ;
+    dct:description "GitHub issues #30-35: archive helper conversations; package/install parity; document discovery and idempotent checkpoint proof; managed worktrees and dependency caches; safe main-session rotation; and durable report-to-issue closeout." ;
+    prov:wasGeneratedBy pcm:followUpTriage .

@@ -4,9 +4,10 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Active work
 
-- PCM-0015 is active as a planning-only task. Read `tasks/TASK-PCM-0015-versioned-project-memory.md`, `docs/research/PCM-0015-epistemic-context.md`, and `docs/plans/PCM-0015-implementation-plan.md`. The discussion transcript distinguishes user requirements, repository facts, prior proposals, and open questions; the adjacent PROV-O graph records provenance. The plan proposes only a small proof path first; its later slices are conditional, and it authorizes no implementation.
+- PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. Read `tasks/TASK-PCM-0015-versioned-project-memory.md` and `docs/plans/PCM-0015-implementation-plan.md` only when working on those follow-ups. The plan does not mean the proposed capabilities have been implemented.
 - PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`.
 - GitHub issue #24 is closed by PR #26.
+- Open reports are tracked separately: #30-35. Issue #17 remains unresolved; its blind failure reproduction/fix has not been completed.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Candidate CLI/package version remains: `0.2.0`
 - Protocol version remains: `0.1.0-draft`
@@ -23,7 +24,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-Finish parent review and run repository validation/full tests for the planning-only PCM-0015 changes, then use the normal pushed-branch/required-CI/auto-merge delivery path. Capture Astra's result and close the worker. After merge, decide separately whether to open only the first bounded proof slice. Keep PCM-0005 separate and do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
+First inspect open issue #17 and its original acceptance. If continuing it, use an isolated disposable PCM-adopted repo and a blind test agent, preserve any already-authorized host/worktree route, record the observed behavior, then fix only if reproduced and rerun the same blind scenario. Do not claim this was done by PCM-0015. Separately prioritize only one issue from #30-35 at a time. Keep queued PCM-0005 separate and do not modify Eval Lab, hades-v2, harness-on-steroids, inference-recommendation-engine, or any unrelated target repository.
 
 ## Authority
 

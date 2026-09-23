@@ -588,3 +588,49 @@ Do not silently upgrade any `prior_agent_proposal` or `inference` into a PCM req
 ## Provenance interpretation
 
 `PCM-0015-provenance.ttl` uses W3C PROV-O to connect source dialogue and inspected repository state to this planning record. The local `pcm:epistemicStatus` annotations are PCM-specific labels; they are not terms standardized by W3C PROV and do not establish truth. Claims still need resolvable evidence and validation.
+
+## Post-plan user follow-up (verbatim)
+
+These user messages arrived after the PCM-0015 plan was merged. They are new requirements/questions, not claims that the proposed work has been implemented.
+
+### User: requested coverage and automatic fresh-session takeover
+
+> i don’t get it
+>
+> so is it gonna auto address most of my problems
+>
+> doc update requirement
+> subagent bot closures
+> worktree clean ups
+> pnpm and uv
+> continuous ci cd and merges
+> ci check for them?
+>
+> and github being the main authorative?
+>
+> what about checkpoint handoff and continuous work system
+>
+> i also wanted auto new session system for codex specially if the work has been long, so the main agent morphs into a new session , closes the old one , new one continuous the goal while stopping the one old running the goal, rather than letting same session work for hours non stop, and making this system automated did we even research this on atleast?
+
+### User: completed helper conversations in the sidebar
+
+> oh yeah another issue in noticing from chatgpt is multiple chat sessions when subagents are spawned i don’t think i need that either is prefer if they are archived or deleting while only preserving main agent sessions even after they morph to new one
+
+### User: durable issue logs
+
+> do u wanna atleast write durable issue logs on every one of my report in our github issue list n close them after u answer refer or handle them? so issue log acts like jira tickets and keeps track of all tasks done on them too?
+
+### User: managed worktrees, pushes, merges, and cleanup
+
+> i mean are worktrees necessary for real parellism and isolation? if so we should allow worktrees but make sure they are cleaned up and pushed after they’re done so they don’t silent keep living 1000 of worktree in my valuable pc  and pushes and merges and fix d is mandatory? didn’t w eresearch on this?
+
+## Worktree research added after the follow-up
+
+Focused research was not completed in the original PCM-0015 plan. The sources below were checked on 2026-09-23 and are linked to open issue #34 for the implementation work:
+
+- Git documents multiple working trees attached to one repository so multiple branches can be checked out at once; each worktree has separate files/index/HEAD, while repository data is shared. `git worktree remove` normally refuses to remove dirty or untracked work, while `--force` overrides that protection. This supports safe parallel branch isolation, but does not mean all files or dependency environments are shared. Source: <https://git-scm.com/docs/git-worktree>.
+- Codex desktop's managed worktrees use a configurable root, keep the most recent 15 by default, and are deleted on chat archive or when exceeding the retention limit; pinned, in-progress, and permanent worktrees are excluded. This is not an immediate-after-merge cleanup guarantee. Source: <https://learn.chatgpt.com/docs/environments/git-worktrees>.
+- pnpm stores package contents in a content-addressable store and hard-links them into each checkout's `node_modules`; the project still has its own dependency layout. Source: <https://pnpm.io/>.
+- uv reuses a thread-safe download/build cache, but normally creates a project-specific `.venv`; centralized project environments are documented as a preview capability. Share caches, not one mutable environment across incompatible lockfiles. Sources: <https://docs.astral.sh/uv/concepts/cache/> and <https://docs.astral.sh/uv/concepts/projects/layout/>.
+
+Conclusion: worktrees are a standard and convenient way to isolate parallel branches in the same repository, but not the only possible architecture. Git pushes commits/branches, not local worktree folders. The proposed lifecycle is: checkpoint, commit and push; run tests and required CI; fix failures and rerun; merge only when green; verify the merge reached canonical `main`; then remove the clean local worktree and its local branch. Never force-remove dirty or unmerged work. This is a researched recommendation and an acceptance target for issue #34, not current PCM behavior.
