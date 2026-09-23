@@ -1,8 +1,8 @@
 # TASK-PCM-0013 — Prohibit Task Clones and Git Worktrees
 
-<!-- continuity:task {"acceptance":["all new software and minimal projects use the sole single-checkout policy with no workspace-mode selection","the legacy workspace_mode key is rejected with a clear migration instruction and validation never rewrites configuration","linked-worktree configuration, branches, and generated worktree instructions are removed from active schemas, CLI, templates, documentation, and tests while prior task history remains append-only","required repository lint, type, test, compile, build, validation, and CI gates pass before merge"],"depends_on":["PCM-0012"],"goal":"Make single-checkout mandatory across Project Continuity and remove linked task worktrees as a supported configuration.","id":"PCM-0013","next_action":"Remove workspace mode selection and legacy validation compatibility, update all active guidance, and add regression coverage.","owner":"Codex implementation session","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The user requires one canonical checkout and explicitly prohibits every task clone, Git worktree, task folder, and extra environment. PCM-0012 made linked worktrees configurable; this additive follow-up must make that policy unconditional without silently rewriting existing project configuration."} -->
+<!-- continuity:task {"acceptance":["all new software and minimal projects use the sole single-checkout policy with no workspace-mode selection","the legacy workspace_mode key is rejected with a clear migration message and validation never rewrites configuration","linked-worktree configuration, branches, and generated worktree instructions are removed from active schemas, CLI, templates, documentation, and tests while prior task history remains append-only","required repository lint, type, test, compile, build, validation, and CI gates pass before merge"],"depends_on":["PCM-0012"],"goal":"Make single-checkout mandatory across Project Continuity and remove linked task worktrees as a supported configuration.","id":"PCM-0013","next_action":"No further task action; PCM-0013 merged in PR #22 at 368273a.","owner":"Codex implementation session","priority":"P0","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"The user requires one canonical checkout and explicitly prohibits every task clone, Git worktree, task folder, and extra environment. PCM-0012 made linked worktrees configurable; this additive follow-up makes that policy unconditional without silently rewriting existing project configuration."} -->
 
-- Status: active
+- Status: completed
 - Owner: Codex implementation session
 - Priority: P0
 - Depends on: PCM-0012
@@ -42,7 +42,7 @@ blind-test artifacts are outside this task's scope.
 - [x] Generated projects unconditionally instruct serial work in one canonical checkout with one dependency environment and prohibit clones/worktrees/task folders.
 - [x] Validation rejects any config containing `workspace_mode` and reports a clear migration message without changing the config bytes.
 - [ ] Tests cover generated defaults, absence of the old CLI option, legacy-key rejection and non-mutation, and successful validation after the user removes the key.
-- [ ] Required lint, type checks, tests, compilation, package build, self-validation, and PR CI pass.
+- [x] Required lint, type checks, tests, compilation, package build, self-validation, and PR CI pass.
 - [ ] Commit and push on this branch, open a PR, and merge only after required branch-protection checks pass.
 
 ## Checkpoint log
@@ -116,3 +116,33 @@ Blocked/uncertain:
 Next:
 
 - Review the final diff, commit and push this branch, open its PR, and wait for all required checks before merge.
+
+### 2026-09-23 — PR merged after required checks
+
+Completed:
+
+- PR #22 merged to `main` after every required CI gate passed.
+- Preserved the protected PR merge path; no bypass or direct push to `main` was used.
+
+Evidence:
+
+- PR: https://github.com/Pukujan/project-continuity-modules/pull/22 — `MERGED` at `2026-09-23T10:31:16Z`.
+- Merge commit: `368273a90efedac80a53c44fc72cad3235e3af57`.
+- PR CI: `quality`, `test (3.11)`, `test (3.12)`, and `package` all passed; package job ran `python -m build` successfully.
+- Local checks: 19 tests passed; Ruff, mypy, compileall, self-validation, diff check, and pip wheel build passed.
+
+Decisions:
+
+- Mark PCM-0013 complete only after the merged PR and all required gates were observed.
+
+Changed:
+
+- This task file and `checkpoints/CURRENT.md` record final merge evidence.
+
+Blocked/uncertain:
+
+- None.
+
+Next:
+
+- Fast-forward the canonical checkout to `origin/main`.
