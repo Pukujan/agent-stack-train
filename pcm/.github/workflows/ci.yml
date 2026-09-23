@@ -50,12 +50,27 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: python -m build
 
+  package-parity:
+    name: package parity (${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: python tests/package_smoke.py --root .
+
   auto-merge:
     name: auto-merge
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository
-    needs: [quality, test, package]
+    needs: [quality, test, package, package-parity]
     runs-on: ubuntu-latest
     permissions:
       contents: write

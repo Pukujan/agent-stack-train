@@ -35,6 +35,15 @@ PCM-0010 keeps the repository protocol at **0.1.0-draft**. Recovery receipts are
 
 ## Project declaration
 
+The Python distribution's version has one source of truth in
+`src/continuity/__init__.py`. Setuptools reads that value into build metadata,
+and `continuity --version` reports the installed module version. CI installs
+both wheel and source archive outside the checkout on each supported Python
+version and checks their CLI and generated-project output against the source.
+This verifies build/install behavior; it does **not** publish a public package
+or prove a PyPI release exists. The repository protocol version remains an
+independent value.
+
 A participating repository declares the protocol version in `.continuity/config.json`. The PCM-0001 executable draft uses config schema `project-continuity.config.v1`, protocol version `0.1.0-draft`, and JSON Schema contracts under `schemas/v1/`.
 
 ## Migration rule

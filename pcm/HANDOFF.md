@@ -4,16 +4,17 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Current status
 
-- No active PCM task. PCM-0019's managed-worktree implementation, cleanup safeguards, and time-bounded audit holds are in merged PRs #45–#47; final task/checkpoint/handoff closeout is PR #48. After it merges, verify issues #20, #34, and #39 close, then remove only PCM-0019 local task branches and disposable test clones.
+- Active task: PCM-0017 / issue #31, version identity and installed-package parity. At task start, `pyproject.toml` declares `0.2.0` while `src/continuity/__init__.py` reports `0.1.0`. Fix the source of truth, expose a runtime version diagnostic, and prove wheel and source-archive installs outside the checkout on Python 3.11 and 3.12. Do not publish to PyPI or change protocol version `0.1.0-draft`.
+- PCM-0019's managed-worktree implementation, cleanup safeguards, and time-bounded audit holds are in merged PRs #45–#47; final task/checkpoint/handoff closeout is PR #48. Issues #20, #34, and #39 are closed after protected CI; the PCM-0019 task branches are removed and the permanent main checkout is the only registered worktree. Five disposable holdout clone folders remain outside the repository because the local recursive-deletion operation was blocked; they are not registered worktrees.
 - The final independent candidate and retention-variant audits passed on the merged snapshot; full suites passed 46 tests each on Python 3.11 and 3.12. Detailed evidence, exact prompts, research citations, and measurement limits are in `tasks/TASK-PCM-0019-managed-worktrees.md` and GitHub issue comments #34/#39.
 - #42 README image recovery remains deferred; do not search for or generate images until the user provides the promised plan.
 - PCM-0023 / issue #32 completed in PR #43 at `867e5ae`; closeout PR #44 updated the canonical task status and closed #32.
 - PCM-0015 is complete as a planning-only task. Its plan merged in PR #29 at `b379ba3`; issue #28 is closed. The plan does not mean the proposed capabilities have been implemented.
 - PCM-0014 is complete and merged automatically in PR #26 at `b9e0f7c`; issue #24 is closed.
-- Issue #17's baseline failure, fix, and blind rerun are recorded; it closed after status correction in PR #37. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope.
+- Issue #17's baseline failure, fix, and blind rerun are recorded; it closed after status correction in PR #37. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope. Issue #42 remains deferred until the user provides the promised image plan; do not search for or generate images.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Other reports stay separately scoped; consult GitHub for the current open list before selecting new work.
-- Candidate CLI/package version remains: `0.2.0`
+- Candidate CLI/package version is declared as `0.2.0`; the current runtime reports `0.1.0`. PCM-0017 owns reconciling and proving these values.
 - Protocol version remains: `0.1.0-draft`
 
 ## Read exactly this first
@@ -28,7 +29,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Exact next action
 
-After PR #48 passes protected CI and merges, verify issues #20/#34/#39 are closed, remove the local PCM-0019 task branches and disposable test clones, and confirm the permanent checkout is the only registered worktree. Leave unrelated branches and repositories untouched.
+Complete PCM-0017's version source, CLI diagnostic, and isolated wheel/sdist install parity tests on Python 3.11 and 3.12; include the new check in the auto-merge gate. Then run full local checks, continuity validation, and hosted CI before closing #31. Leave #15/#42 open for their explicit scope constraints and other tickets separately owned.
 
 ## Authority
 

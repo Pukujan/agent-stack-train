@@ -303,6 +303,7 @@ It is a small protocol for making project state durable enough that work can cro
 ## Current status
 
 The continuity protocol is currently `0.1.0-draft`; the CLI package is `0.2.0`.
+Run `continuity --version` to see the package version installed in the active environment. Building or testing the package does not publish a public release.
 
 The implemented core includes:
 

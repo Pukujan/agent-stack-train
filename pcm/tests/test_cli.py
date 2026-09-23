@@ -5,9 +5,12 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
+from continuity import __version__
 from continuity.cli import (
     ContinuityError,
     build_parser,
@@ -35,6 +38,14 @@ class ContinuityTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, tmp, True)
         shutil.copytree(FIXTURES / name, tmp, dirs_exist_ok=True)
         return tmp
+
+    def test_cli_version_matches_package_version(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as raised:
+            main(["--version"])
+
+        self.assertEqual(raised.exception.code, 0)
+        self.assertEqual(output.getvalue(), f"continuity {__version__}\n")
 
     def test_github_templates_are_opt_in_idempotent_and_valid(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="continuity-github-templates-"))

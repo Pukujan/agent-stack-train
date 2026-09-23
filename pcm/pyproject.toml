@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "project-continuity"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Repository-native project continuity protocol and CLI"
 requires-python = ">=3.11"
 dependencies = []
@@ -21,6 +21,9 @@ continuity = "continuity.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "continuity.__version__"}
 
 [tool.ruff]
 target-version = "py311"

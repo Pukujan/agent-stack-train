@@ -11,6 +11,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from . import __version__
+
 PROTOCOL_VERSION = "0.1.0-draft"
 CONTINUITY_RECORDS_POLICY_MARKER = (
     '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
@@ -1718,6 +1720,7 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="continuity")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_init = sub.add_parser("init")
