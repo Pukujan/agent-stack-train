@@ -10,7 +10,7 @@ description: Produce human-oriented README, marketing, UX, and product language 
 Use this sequence unless the format has a strong reason not to:
 
 1. recognizable human situation;
-2. problem and consequence;
+2. concrete example of the problem and consequence;
 3. what the project is;
 4. how it works;
 5. evidence and examples;
@@ -41,6 +41,8 @@ Each important paragraph should contain:
 - an interpretation that explains why it matters;
 - evidence, example, or boundary.
 
+At least one early example should show the problem unfolding for the target reader. Ground it in target-repository evidence or label it clearly as hypothetical. A section heading and a list of capabilities do not replace the explanation.
+
 ## Human-language rules
 
 - prefer active verbs and concrete nouns;
@@ -69,5 +71,7 @@ Use [`docs/CONTENT_RESEARCH.md`](../../docs/CONTENT_RESEARCH.md) as the research
 ## Final review
 
 Ask what a first-time reader can repeat after twenty seconds. If the answer is only a category (“an AI-powered evaluation platform”), the copy needs a more concrete situation and mechanism.
+
+For helper `0.4.x`, also ask: does each material claim explain what its cited source supports, what remains unproven, which exact revision was inspected, and when this evidence record was recorded? Keep valid-time bounds separate for claims that only apply during a known period. Put direct citations beside important public claims. A citation provides traceability, not a truth guarantee.
 
 Also ask: can the reader find why the project exists, see one visual idea, understand how that visual was generated and should be used, find prior reviewed examples, and reach a useful next action without reading the technical appendix?

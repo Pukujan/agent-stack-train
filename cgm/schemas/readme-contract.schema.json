@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "content-generation.readme-contract.v1",
+  "$id": "content-generation.readme-contract.v2",
   "type": "object",
   "required": [
     "schema_version",
@@ -8,11 +8,13 @@
     "required_sections",
     "required_references",
     "scanability_policy",
+    "story_policy",
+    "evidence_policy",
     "visual_policy",
     "review_questions"
   ],
   "properties": {
-    "schema_version": {"const": "content-generation.readme-contract.v1"},
+    "schema_version": {"const": "content-generation.readme-contract.v2"},
     "purpose": {"type": "string", "minLength": 1},
     "required_sections": {
       "type": "array",
@@ -41,6 +43,28 @@
         "bolding_rule": {"type": "string", "minLength": 1},
         "scan_test": {"type": "string", "minLength": 1},
         "accessibility_rule": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "story_policy": {
+      "type": "object",
+      "required": ["sequence", "worked_example", "reader_paths"],
+      "properties": {
+        "sequence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "worked_example": {"type": "string", "minLength": 1},
+        "reader_paths": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "evidence_policy": {
+      "type": "object",
+      "required": ["claim_fields", "supports_rule", "limits_rule", "citation_rule", "truth_boundary"],
+      "properties": {
+        "claim_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "supports_rule": {"type": "string", "minLength": 1},
+        "limits_rule": {"type": "string", "minLength": 1},
+        "citation_rule": {"type": "string", "minLength": 1},
+        "truth_boundary": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     },

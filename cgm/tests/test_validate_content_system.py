@@ -4,10 +4,67 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_content_system import check, check_adapter, check_readme
+from scripts.validate_content_system import check, check_adapter, check_project_brief_v2, check_readme
 
 
 ROOT = Path(__file__).resolve().parents[1]
+MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "visual-direction", "image-generation", "html-demo"})
+COMMIT = "a" * 40
+SOURCE_URI = f"https://github.com/Pukujan/demo/blob/{COMMIT}/src/app.py#L2-L6"
+
+
+def sample_evidence(**overrides):
+    item = {
+        "claim": "The command writes a report.",
+        "source": "The command implementation and its test.",
+        "status": "shipped",
+        "supports": "The test confirms that this command writes a report for the sample input.",
+        "limits": "The test does not establish performance or behavior for every input.",
+        "recorded_at": "2026-09-23T12:00:00Z",
+        "source_revision": {
+            "kind": "repository_artifact",
+            "reference": "Implementation and unit test",
+            "repository": "Pukujan/demo",
+            "commit": COMMIT,
+            "path": "src/app.py",
+            "locator": "lines 2-6",
+            "uri": SOURCE_URI,
+        },
+        "cite_in_readme": False,
+    }
+    item.update(overrides)
+    return item
+
+
+def write_adapter(adapter: Path, brief_version="v2"):
+    project_schema = f"content-generation.project-brief.{brief_version}"
+    evidence = sample_evidence()
+    if brief_version == "v1":
+        evidence = {"claim": evidence["claim"], "source": evidence["source"]}
+    files = {
+        "system-version.json": {
+            "schema_version": "content-generation.adapter.v1",
+            "helper_repository": "https://github.com/Pukujan/content-generation-modules",
+            "helper_version": "0.4.0",
+            "helper_commit": COMMIT,
+            "modules": MODULES,
+        },
+        "project-brief.json": {
+            "schema_version": project_schema,
+            "project": "Demo",
+            "audience": ["people"],
+            "problem": "A concrete reader problem.",
+            "solution": "A useful response.",
+            "evidence": [evidence],
+            "boundaries": ["One explicit limitation."],
+        },
+        "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "A useful promise", "avoid": ["hype"]},
+        "visual-style.json": {"schema_version": "content-generation.visual-style.v1", "reference_asset": "hero.png", "generation_workflow": "built-in image_gen", "narrative_roles": ["hero", "problem", "supporting"], "palette": {"background": "#000"}, "roles": {"hero": {}}, "reject_when": ["busy"]},
+        "asset-manifest.json": {"schema_version": "content-generation.asset-manifest.v1", "system_version": "0.4.0", "assets": [{"path": "diagram.png", "role": "diagram"}]},
+        "review-rubric.json": {"schema_version": "content-generation.review-rubric.v1", "dimensions": [{"id": "clarity", "question": "clear?"}], "decision_rule": "human review"},
+    }
+    for name, value in files.items():
+        (adapter / name).write_text(json.dumps(value), encoding="utf-8")
 
 
 class ContentSystemValidationTests(unittest.TestCase):
@@ -114,6 +171,51 @@ class ContentSystemValidationTests(unittest.TestCase):
             (project_root / "IMAGE_NOTES.md").write_text("prompt record", encoding="utf-8")
             errors = check_adapter(adapter, project_root)
             self.assertTrue(any("must be a raster image" in error for error in errors))
+
+    def test_v2_claim_record_requires_bounded_revision_pinned_evidence(self):
+        evidence = sample_evidence()
+        readme = f"The report is generated. [Implementation]({SOURCE_URI})"
+        brief = {"schema_version": "content-generation.project-brief.v2", "evidence": [evidence]}
+        self.assertEqual(check_project_brief_v2(brief, readme), [])
+        bounded = sample_evidence(valid_time={"start": "2026-09-20T00:00:00Z", "end": "2026-09-23T12:00:00Z"})
+        self.assertEqual(check_project_brief_v2({**brief, "evidence": [bounded]}, readme), [])
+
+        cases = [
+            ({**evidence, "supports": ""}, "missing non-empty supports"),
+            ({**evidence, "limits": ""}, "missing non-empty limits"),
+            ({**evidence, "recorded_at": "2026-09-23T12:00:00"}, "recorded_at must be an RFC 3339 timestamp"),
+            ({**evidence, "valid_time": {"start": "2026-09-23T12:00:00Z", "end": "2026-09-22T12:00:00Z"}}, "must not follow"),
+            ({**evidence, "status": []}, "has invalid status"),
+            ({**evidence, "source_revision": {**evidence["source_revision"], "uri": "https://github.com/Pukujan/demo/blob/main/src/app.py"}}, "immutable web permalink"),
+            ({**evidence, "source_revision": {**evidence["source_revision"], "uri": "https://[invalid"}}, "immutable web permalink"),
+            ({**evidence, "cite_in_readme": True}, "not linked in the target README"),
+            ({**evidence, "status": "shipped", "source_revision": {"kind": "unknown_search", "reference": "Searched the available repository", "observed_at": "2026-09-23"}}, "cannot label a claim shipped"),
+        ]
+        for invalid, expected in cases:
+            with self.subTest(expected=expected):
+                target_readme = "" if expected == "not linked in the target README" else readme
+                errors = check_project_brief_v2({**brief, "evidence": [invalid]}, target_readme)
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_v2_claim_order_is_metamorphically_invariant(self):
+        first = sample_evidence()
+        second = sample_evidence(claim="The same implementation has a defined entry point.")
+        brief = {"schema_version": "content-generation.project-brief.v2", "evidence": [first, second]}
+        readme = ""
+        self.assertEqual(check_project_brief_v2(brief, readme), [])
+        brief["evidence"].reverse()
+        self.assertEqual(check_project_brief_v2(brief, readme), [])
+
+    def test_04_adapter_requires_v2_brief_and_accepts_valid_v2(self):
+        with tempfile.TemporaryDirectory() as directory:
+            adapter = Path(directory) / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, "v2")
+            self.assertEqual(check_adapter(adapter), [])
+
+            write_adapter(adapter, "v1")
+            errors = check_adapter(adapter)
+            self.assertTrue(any("require project-brief.v2" in error for error in errors), errors)
 
 
 if __name__ == "__main__":

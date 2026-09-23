@@ -1,5 +1,5 @@
 {
-  "schema_version": "content-generation.readme-contract.v1",
+  "schema_version": "content-generation.readme-contract.v2",
   "purpose": "Make README and human-facing project documentation welcoming before technical details become necessary.",
   "required_sections": [
     {"id": "why_this_exists", "heading": "Why this exists", "question": "What human situation and consequence make this project matter?"},
@@ -20,6 +20,12 @@
     "docs/PRIOR_WORK.md",
     "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.3.md",
+    "docs/MIGRATING_TO_0.4.md",
+    "docs/README_QUALITY_PDD.md",
+    "docs/README_QUALITY_SDD.md",
+    "docs/README_QUALITY_TDD.md",
+    "docs/PROVENANCE_AND_CITATION.md",
+    "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
     "docs/MIGRATING_TO_0.2.md",
     "templates/README.template.md"
   ],
@@ -28,6 +34,18 @@
     "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
     "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
     "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
+  },
+  "story_policy": {
+    "sequence": ["reader_situation", "friction_and_consequence", "project_response", "plain_language_mechanism", "evidence_and_limits", "next_action"],
+    "worked_example": "Include at least one concrete example grounded in the target repository; label hypothetical examples clearly.",
+    "reader_paths": "Explain for the primary human reader first; add a distinct developer or researcher path when it helps them act or reproduce the work."
+  },
+  "evidence_policy": {
+    "claim_fields": ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"],
+    "supports_rule": "Say what the cited source establishes in plain language.",
+    "limits_rule": "Say what the same source leaves unproven; do not claim more than its evidence supports.",
+    "citation_rule": "Link important public claims directly to immutable repository evidence or a direct external source near the claim.",
+    "truth_boundary": "A valid citation establishes traceability, not truth; preserve source quality limits and human review."
   },
   "visual_policy": {
     "use_when": "the target repository has a visual contract, committed narrative assets, or a request for visual direction",
@@ -39,6 +57,8 @@
     "Can a first-time reader explain why the project exists after twenty seconds?",
     "Does the first screen feel welcoming before it becomes technical?",
     "Can the reader distinguish shipped evidence from plans and unknowns?",
+    "Can a reviewer see what the evidence supports and what it does not establish?",
+    "Can a fresh agent reproduce the source trail from the target repository and this pinned contract?",
     "Do the visuals clarify one human idea and remain useful when stacked on a narrow screen?",
     "Can another maintainer regenerate or reuse each visual from the recorded guide?"
   ]

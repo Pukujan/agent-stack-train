@@ -12,6 +12,8 @@ After the title, lead sentence, and first visual, a first-time reader should be 
 
 If the reader can only repeat a category such as “an AI-powered framework,” the story is still too abstract. If the reader sees commands and folder names before understanding the reason to care, move the technical details down.
 
+Do not stop after naming the problem. Develop one concrete, repository-grounded example: what the person is trying to do, what gets in the way, what consequence follows, and why the project's response helps. Then show what its evidence can and cannot establish. Label hypothetical examples as hypothetical.
+
 ## Read the target repository first
 
 Before drafting:
@@ -21,6 +23,7 @@ Before drafting:
 3. Search for shipped behavior, tests, screenshots, examples, prompt records, and review artifacts.
 4. Find earlier content-system previews or README promotions in the target repository. Preserve what was reviewed; change only what the new evidence requires.
 5. Separate shipped facts, experiments, plans, and unknowns before writing a promise.
+6. Record what each material source actually supports, what it leaves open, and the exact revision/locator before turning it into public wording.
 
 The helper method does not supply product facts. The target repository does.
 
@@ -78,9 +81,13 @@ Use the target repository's visual contract first. When the target inherits the 
 For each important claim, record:
 
 - the claim in plain language;
-- the source file, test, run, data artifact, or reviewed output;
+- the source file, test, run, data artifact, or reviewed output at an exact revision and locator;
+- what the evidence supports, in plain language;
+- what that evidence does not establish, in plain language;
 - one status: `shipped`, `experimentally_supported`, `planned`, or `unknown`;
 - the boundary that prevents the claim from becoming a promise it cannot support.
+
+For helper `0.4.x`, record what evidence `supports` and what it `limits`, its `source_revision`, and a timezone-aware `recorded_at` timestamp on each material evidence item. For a time-bound claim, record `valid_time` separately. Link important public claims near the sentence they support. Repository links should pin the inspected commit; external sources should link directly and record an access date when the page can change. A reference makes the claim traceable, not automatically true.
 
 Model-assisted scores can help a person review a draft. They do not override deterministic checks, repository evidence, or human judgment.
 
@@ -94,6 +101,7 @@ Before opening a PR, ask:
 4. Are the visuals readable, purposeful, and useful when stacked on mobile?
 5. Can another person regenerate or reuse every committed image from the recorded prompt and guide?
 6. Can every strong claim be traced to evidence?
-7. Is the next action obvious?
+7. Can a reviewer explain what the cited evidence supports and what it leaves unproven?
+8. Is the next action obvious?
 
 Run the deterministic validator after this human review. The validator catches missing contract structure; it cannot decide whether the story feels honest or welcoming.

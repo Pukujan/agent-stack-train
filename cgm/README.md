@@ -8,6 +8,8 @@
 
 **A full repository can still leave readers guessing.** The useful truth may be spread across code, tests, screenshots, research notes, prompts, and unfinished drafts. Content Generation Modules helps an agent or maintainer find the human situation, shape the story, create supporting visuals, and keep every important claim tied to evidence.
 
+A new reader still needs answers the folder tree cannot give: **Who is this for? What problem does it change? What is already real? Which source supports that promise? Where can I begin?** CGM gives a fresh writing session a path through those questions.
+
 If you are trying to make a project understandable, this repository gives you a repeatable starting point:
 
 - **Start with the reader’s problem.**
@@ -20,6 +22,8 @@ If you are trying to make a project understandable, this repository gives you a 
 **Technical completeness does not automatically create understanding.** A project can have working code, careful tests, and valuable research while its README still makes a new person reverse-engineer what matters.
 
 The failure is familiar: an agent sees a folder tree, produces confident copy, adds a generic hero, and moves on before checking whether the result tells a human why the project exists. The output may be grammatically correct while the product story remains invisible.
+
+The reader is left to connect the dots: a test proves one behavior, a plan describes another, and a polished README can make both sound equally finished. The problem is not solved by a heading alone. The explanation needs a concrete example, a clear consequence, and evidence that shows where the promise stops.
 
 This repository exists to make that work deliberate. It gives the writer a story order, the visual designer a role and review record, the agent a pinned source contract, and the maintainer a clear point at which human judgment still matters.
 
@@ -79,6 +83,8 @@ brief -> brand -> writing / visual / image / HTML direction
 
 The helper contract is **shipped as repository structure and guidance**: six module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
 
+For each important claim, the new v2 brief makes the explanation explicit: **what does this source support, and what does it leave unproven?** Repository evidence points to an exact revision and useful locator; external claims use direct citations. A citation makes the path inspectable—it does not certify that the source is correct.
+
 The scan-first rules are grounded in usability and accessibility research. Nielsen Norman Group’s study of 51 users found better measured usability when content was concise, scannable, and objective, including descriptive headings, bullets, bold keywords, captions, and shorter sections. The study is useful directional evidence, not a universal conversion promise. The full sources and operational rules are in [`docs/CONTENT_RESEARCH.md`](docs/CONTENT_RESEARCH.md).
 
 **Human review remains authoritative for subjective quality.** Deterministic checks can catch missing sections, files, paths, and version fields. They cannot decide whether a visual feels appropriate, a claim is persuasive, or a story is honest.
@@ -98,12 +104,16 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/CONTENT_RESEARCH.md`](docs/CONTENT_RESEARCH.md) records the UX, accessibility, and marketing research behind scan-first writing.
 - [`docs/BRAND_DIRECTION.md`](docs/BRAND_DIRECTION.md) defines the Story Loop brand direction and prior-work visual analysis.
 - [`docs/README_PLAYBOOK.md`](docs/README_PLAYBOOK.md) explains the twenty-second test, welcoming language, selective emphasis, evidence status, and human review.
+- [`docs/PROVENANCE_AND_CITATION.md`](docs/PROVENANCE_AND_CITATION.md) explains how to connect a claim to an exact source and state its limits.
+- [`docs/README_QUALITY_PDD.md`](docs/README_QUALITY_PDD.md), [`docs/README_QUALITY_SDD.md`](docs/README_QUALITY_SDD.md), and [`docs/README_QUALITY_TDD.md`](docs/README_QUALITY_TDD.md) define the reader problem, claim-evidence contract, and acceptance tests.
+- [`docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md`](docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md) records what CGM adopts from PCM's explanation and provenance, alongside what Eval Lab and Harness contribute to the story and visuals.
 - [`docs/IMAGE_GUIDE.md`](docs/IMAGE_GUIDE.md) explains image roles, prompt structure, exact in-image copy, responsive crops, alt text, manifests, and rejection rules.
 - [`docs/HOLDOUT_EVALUATION.md`](docs/HOLDOUT_EVALUATION.md) explains how to test repeatability on private, unseen target repositories.
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) explains how existing `0.1.x` target repositories adopted the human-facing contract.
 - [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) explains how existing `0.2.x` target repositories adopt the scan-first and anime-inspired visual direction.
+- [`docs/MIGRATING_TO_0.4.md`](docs/MIGRATING_TO_0.4.md) explains how to add bounded claim explanations and revision-pinned citations while preserving the target's image contract.
 - [`templates/`](templates/) contains starter project, brand, visual, image, asset, review, and README files.
-- [`schemas/`](schemas/) defines the project brief, asset manifest, review rubric, and README contract shapes.
+- [`schemas/`](schemas/) defines both project-brief versions, the asset manifest, review rubric, and README contract shapes.
 
 ## Prior work and references
 
@@ -142,8 +152,8 @@ For a target project, add this adapter:
 └── review-rubric.json
 ```
 
-Then pin the helper release or commit, read the playbook and image guide, inspect prior reviewed outputs, fill the templates from repository evidence, run the validator, and complete the twenty-second scan test.
+Then pin the helper release or commit, read the playbook and image guide, inspect prior reviewed outputs, fill the v2 claim records from repository evidence, write what each source supports and leaves unproven, add direct citations, run the validator, and complete the twenty-second scan test. A new ChatGPT session should be able to follow these steps from the target repo and pinned helper without relying on earlier chat.
 
 ## Current version
 
-The current helper contract is `0.3.1` (`v0.3.1`). It adds the durable scan-first content research, the Story Loop brand direction, the prior-work visual analysis, anime-inspired README assets with documented generation and use, deterministic narrative-image provenance checks, and a private holdout evaluation protocol. Existing target repositories pinned to `v0.2.0` remain on that earlier contract until they deliberately migrate.
+The current helper contract is `0.4.0` (`v0.4.0`). It adds a versioned claim record (`supports`, `limits`, `source_revision`, and record time), optional valid-time intervals for time-bound claims, citation and provenance guidance, and PDD/SDD/TDD acceptance criteria. The story order, brand, generated visuals, narrative-raster rules, prompt records, and image review requirements continue from `0.3.1` unchanged. Existing target repositories remain on their pinned contract until they deliberately migrate.

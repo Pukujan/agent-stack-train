@@ -6,7 +6,7 @@
 
 ## Why this exists
 
-Start with a situation the reader recognizes. Explain what becomes hard, costly, risky, or confusing, and why this project deserves to exist.
+Start with a situation the reader recognizes. Show one concrete example of what the person is trying to do, where the current path breaks, and what consequence follows. Explain why this project deserves to exist. Ground the example in repository evidence or label it as hypothetical.
 
 **Use one short bold anchor when it helps a skimming reader retain the point.** Keep the paragraph readable without the styling.
 
@@ -26,7 +26,11 @@ Explain the mechanism in reader-sized steps. Introduce technical terms at the mo
 
 ## Evidence and boundaries
 
-Link important claims to code, tests, data, committed artifacts, or reviewed examples. Label work as shipped, experimentally supported, planned, or unknown. State what the project does not claim.
+Link important claims directly to code, tests, data, committed artifacts, experiments, or external sources. Label work as shipped, experimentally supported, planned, or unknown. State what the cited evidence supports, what it leaves unproven, and what the project does not claim. Pin repository citations to the inspected commit and useful path/line or heading; use direct external links.
+
+| Claim | What the evidence supports | What it does not establish | Source |
+| --- | --- | --- | --- |
+| [One material claim] | [A plain-language description] | [Its boundary] | [Direct citation] |
 
 ## Image generation and use
 
@@ -42,7 +46,7 @@ Link to reviewed examples, earlier projects, or source research that shaped the 
 
 ## Try it
 
-Give the smallest useful path to a first result, then link to the technical setup and full documentation.
+Give the smallest useful path to a first result, then link to the technical setup and full documentation. Add a separate build/reproduce path when developers or researchers need different steps from the primary reader.
 
 ### Scan test
 

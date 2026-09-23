@@ -8,7 +8,9 @@ import hashlib
 import json
 import re
 import sys
+from datetime import date, datetime
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 
 EXPECTED_MODULES = {
@@ -50,6 +52,12 @@ REQUIRED_HELPER_DOCS = (
     "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.2.md",
+    "docs/MIGRATING_TO_0.4.md",
+    "docs/README_QUALITY_PDD.md",
+    "docs/README_QUALITY_SDD.md",
+    "docs/README_QUALITY_TDD.md",
+    "docs/PROVENANCE_AND_CITATION.md",
+    "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
 )
 
 
@@ -70,6 +78,190 @@ def _version_tuple(value: object) -> tuple[int, int, int]:
     if not match:
         return (0, 0, 0)
     return tuple(int(part) for part in match.groups())
+
+
+def _valid_date(value: object) -> bool:
+    try:
+        date.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
+def _parse_aware_datetime(value: object) -> datetime | None:
+    if not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})",
+        str(value or ""),
+    ):
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.utcoffset() is not None else None
+
+
+def _valid_web_uri(value: object) -> bool:
+    try:
+        parsed = urlparse(str(value or ""))
+    except ValueError:
+        return False
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _valid_repository_permalink(uri: object, repository: str, commit: str, source_path: str) -> bool:
+    try:
+        parsed = urlparse(str(uri or ""))
+    except ValueError:
+        return False
+    if parsed.scheme != "https" or not parsed.netloc:
+        return False
+    parts = [unquote(part) for part in parsed.path.split("/") if part]
+    repository_parts = repository.split("/")
+    repo_index = next(
+        (index for index in range(len(parts) - len(repository_parts) + 1)
+         if parts[index:index + len(repository_parts)] == repository_parts),
+        None,
+    )
+    if repo_index is None:
+        return False
+    commit_index = next(
+        (index for index in range(repo_index + len(repository_parts), len(parts))
+         if parts[index].lower() == commit.lower()),
+        None,
+    )
+    if commit_index is None:
+        return False
+    linked_path = "/".join(parts[commit_index + 1:])
+    return linked_path == source_path or linked_path.startswith(f"{source_path}/")
+
+
+def check_project_brief_v2(project: dict, readme_text: str | None = None) -> list[str]:
+    """Check claim explanations and the source identity needed to reproduce them."""
+    errors: list[str] = []
+    if project.get("schema_version") != "content-generation.project-brief.v2":
+        errors.append("project brief must declare content-generation.project-brief.v2")
+    evidence = project.get("evidence")
+    if not isinstance(evidence, list) or not evidence:
+        errors.append("project-brief v2 must contain at least one evidence item")
+        return errors
+
+    allowed_statuses = {"shipped", "experimentally_supported", "planned", "unknown"}
+    allowed_kinds = {
+        "repository_artifact",
+        "external_source",
+        "user_observation",
+        "owner_decision",
+        "experiment_result",
+        "unknown_search",
+    }
+    repo_kinds = {"repository_artifact"}
+
+    for index, item in enumerate(evidence, start=1):
+        label = f"project-brief evidence item {index}"
+        if not isinstance(item, dict):
+            errors.append(f"{label} must be an object")
+            continue
+
+        for field in ("claim", "source", "supports", "limits"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                errors.append(f"{label} missing non-empty {field}")
+        if item.get("supports") == item.get("limits") and item.get("supports"):
+            errors.append(f"{label} supports and limits must explain different things")
+        if _parse_aware_datetime(item.get("recorded_at")) is None:
+            errors.append(f"{label} recorded_at must be an RFC 3339 timestamp with a timezone")
+
+        valid_time = item.get("valid_time")
+        if valid_time is not None:
+            if not isinstance(valid_time, dict) or set(valid_time) != {"start", "end"}:
+                errors.append(f"{label} valid_time must contain start and end")
+            else:
+                start_value, end_value = valid_time["start"], valid_time["end"]
+                start = _parse_aware_datetime(start_value) if start_value is not None else None
+                end = _parse_aware_datetime(end_value) if end_value is not None else None
+                if start_value is not None and start is None:
+                    errors.append(f"{label} valid_time.start must be a timezone-aware RFC 3339 timestamp")
+                if end_value is not None and end is None:
+                    errors.append(f"{label} valid_time.end must be a timezone-aware RFC 3339 timestamp")
+                if start_value is None and end_value is None:
+                    errors.append(f"{label} valid_time must have at least one bounded endpoint")
+                if start is not None and end is not None and start > end:
+                    errors.append(f"{label} valid_time.start must not follow valid_time.end")
+
+        status = item.get("status")
+        if not isinstance(status, str) or status not in allowed_statuses:
+            errors.append(f"{label} has invalid status: {status}")
+        cite_in_readme = item.get("cite_in_readme")
+        if not isinstance(cite_in_readme, bool):
+            errors.append(f"{label} cite_in_readme must be a boolean")
+
+        revision = item.get("source_revision")
+        if not isinstance(revision, dict):
+            errors.append(f"{label} missing source_revision object")
+            continue
+
+        kind = revision.get("kind")
+        if not isinstance(kind, str) or kind not in allowed_kinds:
+            errors.append(f"{label} has unsupported source_revision kind: {kind}")
+            continue
+
+        if not isinstance(revision.get("reference"), str) or not revision["reference"].strip():
+            errors.append(f"{label} source_revision missing reference")
+
+        if kind in repo_kinds:
+            repository = str(revision.get("repository", ""))
+            if not re.fullmatch(r"[^/\s]+/[^/\s]+", repository):
+                errors.append(f"{label} repository source needs owner/repository")
+            commit = str(revision.get("commit", ""))
+            if not re.fullmatch(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})", commit):
+                errors.append(f"{label} repository source needs a full commit ID")
+            source_path = str(revision.get("path", ""))
+            if (
+                not source_path
+                or "\\" in source_path
+                or Path(source_path).is_absolute()
+                or ".." in Path(source_path).parts
+            ):
+                errors.append(f"{label} repository source needs a repository-relative path")
+            if not isinstance(revision.get("locator"), str) or not revision["locator"].strip():
+                errors.append(f"{label} repository source needs a line, heading, or record locator")
+            if not _valid_repository_permalink(revision.get("uri"), repository, commit, source_path):
+                errors.append(
+                    f"{label} repository source needs an immutable web permalink containing its repository, full commit ID, and path"
+                )
+        elif kind in {"external_source", "experiment_result"}:
+            if not _valid_web_uri(revision.get("uri")):
+                errors.append(f"{label} {kind} source needs a direct HTTP(S) URI")
+            if not _valid_date(revision.get("accessed_at")):
+                errors.append(f"{label} {kind} source needs accessed_at in YYYY-MM-DD form")
+            if kind == "experiment_result" and not revision.get("locator"):
+                errors.append(f"{label} experiment source needs a run or artifact locator")
+        elif kind in {"user_observation", "owner_decision", "unknown_search"}:
+            if not _valid_date(revision.get("observed_at")):
+                errors.append(f"{label} {kind} source needs observed_at in YYYY-MM-DD form")
+        if revision.get("uri") and not _valid_web_uri(revision["uri"]):
+            errors.append(f"{label} source_revision URI must use HTTP(S)")
+        if revision.get("observed_at") and not _valid_date(revision["observed_at"]):
+            errors.append(f"{label} observed_at must use YYYY-MM-DD form")
+        if revision.get("published_at") and not _valid_date(revision["published_at"]):
+            errors.append(f"{label} published_at must use YYYY-MM-DD form")
+        if revision.get("accessed_at") and not _valid_date(revision["accessed_at"]):
+            errors.append(f"{label} accessed_at must use YYYY-MM-DD form")
+        if revision.get("sha256") and not re.fullmatch(r"[0-9a-fA-F]{64}", str(revision["sha256"])):
+            errors.append(f"{label} sha256 must be a SHA-256 digest")
+
+        if status != "unknown" and kind == "unknown_search":
+            errors.append(f"{label} cannot label a claim {status} when its only source is an unknown search")
+        if cite_in_readme:
+            uri = revision.get("uri")
+            if not _valid_web_uri(uri):
+                errors.append(f"{label} requires a public citation URI")
+            elif readme_text is None:
+                errors.append(f"{label} citation check requires the target README")
+            elif str(uri) not in readme_text:
+                errors.append(f"{label} citation URI is not linked in the target README")
+
+    return errors
 
 
 def check_narrative_assets(
@@ -159,6 +351,16 @@ def check_readme(root: Path) -> list[str]:
         if reference not in text:
             errors.append(f"README missing required reference: {reference}")
 
+    expected_claim_fields = ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"]
+    if contract.get("schema_version") != "content-generation.readme-contract.v2":
+        errors.append("README contract must declare content-generation.readme-contract.v2")
+    story_policy = contract.get("story_policy", {})
+    if not story_policy.get("sequence") or not story_policy.get("worked_example") or not story_policy.get("reader_paths"):
+        errors.append("README contract must define its story sequence, worked example, and reader paths")
+    evidence_policy = contract.get("evidence_policy", {})
+    if evidence_policy.get("claim_fields") != expected_claim_fields:
+        errors.append("README contract must require the v2 claim fields in order")
+
     if contract.get("scanability_policy"):
         if not re.search(r"\*\*[^*\n]+\*\*", text):
             errors.append("README must include at least one meaningful bold scan anchor")
@@ -201,8 +403,8 @@ def check(root: Path) -> list[str]:
     if modules != EXPECTED_MODULES:
         errors.append(f"system modules must be exactly {sorted(EXPECTED_MODULES)}")
     human_output = version.get("human_output_contract", {})
-    if human_output.get("version") != "content-generation.readme-contract.v1":
-        errors.append("system-version.json must declare content-generation.readme-contract.v1")
+    if human_output.get("version") != "content-generation.readme-contract.v2":
+        errors.append("system-version.json must declare content-generation.readme-contract.v2")
     for field in ("template", "playbook", "image_guide", "prior_work"):
         if not human_output.get(field):
             errors.append(f"system-version.json human_output_contract missing {field}")
@@ -210,6 +412,21 @@ def check(root: Path) -> list[str]:
         errors.append("system-version.json human_output_contract missing research")
     if not human_output.get("brand_direction"):
         errors.append("system-version.json human_output_contract missing brand_direction")
+    for field in ("product_definition", "system_design", "test_design", "provenance", "reverse_analysis"):
+        if not human_output.get(field):
+            errors.append(f"system-version.json human_output_contract missing {field}")
+    claim_contract = version.get("claim_explanation_contract", {})
+    if claim_contract.get("version") != "content-generation.claim-evidence.v2":
+        errors.append("system-version.json must declare content-generation.claim-evidence.v2")
+    expected_claim_fields = ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"]
+    if claim_contract.get("fields") != expected_claim_fields:
+        errors.append("system-version.json claim_explanation_contract fields do not match the v2 contract")
+    if claim_contract.get("truth_boundary") != "citation establishes traceability, not truth":
+        errors.append("system-version.json claim_explanation_contract must preserve the citation truth boundary")
+    if claim_contract.get("required_for_helper_version") != "0.4.0":
+        errors.append("system-version.json claim_explanation_contract must be required from 0.4.0")
+    if claim_contract.get("optional_fields") != ["valid_time"] or not claim_contract.get("temporal_model"):
+        errors.append("system-version.json claim_explanation_contract must define the valid-time model")
     scanability = version.get("scanability_contract", {})
     if scanability.get("version") != "content-generation.scanability.v1":
         errors.append("system-version.json must declare content-generation.scanability.v1")
@@ -225,6 +442,7 @@ def check(root: Path) -> list[str]:
 
     required_schemas = {
         "project-brief.schema.json",
+        "project-brief.v2.schema.json",
         "asset-manifest.schema.json",
         "review-rubric.schema.json",
         "readme-contract.schema.json",
@@ -238,6 +456,10 @@ def check(root: Path) -> list[str]:
             continue
         if "$schema" not in schema or "$id" not in schema:
             errors.append(f"schema missing $schema or $id: {path.relative_to(root)}")
+
+    for relative_path in version.get("helper_contract_files", []):
+        if not (root / relative_path).is_file():
+            errors.append(f"missing versioned helper contract file: {relative_path}")
 
     for name in (
         "project-brief.json",
@@ -263,7 +485,6 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
     errors: list[str] = []
     required = {
         "system-version.json": "content-generation.adapter.v1",
-        "project-brief.json": "content-generation.project-brief.v1",
         "brand-language.json": "content-generation.brand-language.v1",
         "visual-style.json": "content-generation.visual-style.v1",
         "asset-manifest.json": "content-generation.asset-manifest.v1",
@@ -288,9 +509,25 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
         errors.append("adapter system-version.json modules do not match the helper contract")
 
     project = values.get("project-brief.json", {})
+    project_path = adapter / "project-brief.json"
+    try:
+        project = load_json(project_path)
+    except ValueError as exc:
+        errors.append(str(exc))
+    helper_version = _version_tuple(system.get("helper_version"))
+    brief_version = project.get("schema_version")
+    if brief_version not in {"content-generation.project-brief.v1", "content-generation.project-brief.v2"}:
+        errors.append("project-brief.json must declare content-generation.project-brief.v1 or v2")
+    if helper_version >= (0, 4, 0) and brief_version != "content-generation.project-brief.v2":
+        errors.append("helper versions 0.4.0 and later require project-brief.v2")
     for field in ("project", "audience", "problem", "solution", "evidence", "boundaries"):
         if not project.get(field):
             errors.append(f"adapter project-brief.json missing {field}")
+    if brief_version == "content-generation.project-brief.v2":
+        readme_text = None
+        if project_root and (project_root / "README.md").is_file():
+            readme_text = (project_root / "README.md").read_text(encoding="utf-8")
+        errors.extend(check_project_brief_v2(project, readme_text))
 
     brand = values.get("brand-language.json", {})
     for field in ("name", "personality", "promise", "avoid"):
@@ -311,7 +548,7 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
             asset_path = asset.get("path")
             if asset_path and not (project_root / asset_path).is_file():
                 errors.append(f"asset does not exist under project root: {asset_path}")
-    if _version_tuple(system.get("helper_version")) >= (0, 3, 0):
+    if helper_version >= (0, 3, 0):
         errors.extend(check_narrative_assets(visual, manifest, project_root))
     return errors
 

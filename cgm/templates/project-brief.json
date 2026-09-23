@@ -1,5 +1,5 @@
 {
-  "schema_version": "content-generation.project-brief.v1",
+  "schema_version": "content-generation.project-brief.v2",
   "project": "",
   "audience": [],
   "problem": "",
@@ -7,9 +7,18 @@
   "mechanism": [],
   "evidence": [
     {
-      "claim": "",
-      "source": "",
-      "status": "shipped"
+      "claim": "Replace with a material, bounded claim about the project.",
+      "source": "Name the test, implementation, decision, or publication inspected.",
+      "status": "unknown",
+      "supports": "State what the inspected evidence establishes in plain language.",
+      "limits": "State what this evidence does not establish in plain language.",
+      "recorded_at": "YYYY-MM-DDThh:mm:ssZ",
+      "source_revision": {
+        "kind": "unknown_search",
+        "reference": "Record the search scope that did not establish this claim.",
+        "observed_at": "YYYY-MM-DD"
+      },
+      "cite_in_readme": false
     }
   ],
   "boundaries": [],

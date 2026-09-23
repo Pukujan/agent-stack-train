@@ -7,6 +7,7 @@ The public validator proves that a target adapter contains the expected files an
 Run the same content-generation task against target repositories that are excluded from the public examples. The task should ask for a story-first README and its narrative visuals using the target adapter. The evaluator should score two layers:
 
 - **Contract layer:** the README leads with the human situation; headings and bold anchors pass the scan test; narrative assets are PNG, JPEG, or WebP; each has exact title and subtitle fields, a prompt record, provider provenance, a review decision, and a matching SHA-256 hash; the README does not substitute hand-authored SVGs for requested narrative images.
+- **Evidence layer:** every material claim has a status, a plain-language statement of what its evidence supports and leaves unproven, a timezone-aware record timestamp, and a resolvable source revision and locator. Time-bound claims record when they apply separately from when the record was entered. Repository citations pin a full commit; external sources link directly and record access dates. Removing a claim's only source must weaken, remove, or mark that claim unknown.
 - **Quality layer:** an independent reviewer or vision-capable evaluator checks that the image explains the target repository, keeps the required visual identity, uses readable copy, survives wide and narrow crops, and avoids generic cyberpunk, dashboard, route-signal, or decorative imagery that does not answer the reader’s question.
 
 The contract layer is deterministic. The quality layer must remain independent because a file can satisfy metadata checks while still being the wrong visual.
@@ -53,7 +54,7 @@ clean agent run x3
 failure-class report and release decision
 ```
 
-The public helper now provides the structural gate used by that flow. For `0.3.x` adapters it rejects narrative SVGs, missing built-in image-generation provenance, missing exact title or subtitle records, missing prompt records, and hashes that do not match the committed image. It does not claim to replace human review of taste, clarity, or brand fit.
+The public helper provides the structural gate used by that flow. For `0.3.x` adapters it rejects narrative SVGs, missing built-in image-generation provenance, missing exact title or subtitle records, missing prompt records, and hashes that do not match the committed image. For `0.4.x` adapters it also requires project-brief v2, bounded claim explanations, and revision-pinned source records. It does not claim to replace human review of taste, clarity, evidence quality, or brand fit.
 
 ## What this catches from the previous failure
 

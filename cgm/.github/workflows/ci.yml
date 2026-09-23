@@ -14,6 +14,53 @@ permissions:
   contents: read
 
 jobs:
+  tracked-issue:
+    name: Tracked issue and acceptance
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Require an open issue with acceptance criteria
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const match = body.match(/^\s*(?:Refs|Tracks|Tracking issue)\s*:?\s*#(\d+)\b/im);
+            if (!match) {
+              core.setFailed("PR body must identify its tracking issue, for example: Refs #123.");
+              return;
+            }
+
+            const issueNumber = Number(match[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            if (issue.pull_request) {
+              core.setFailed(`#${issueNumber} is a pull request, not a tracking issue.`);
+              return;
+            }
+            if (issue.state !== "open") {
+              core.setFailed(`#${issueNumber} must remain open while its change is under review.`);
+              return;
+            }
+            const authorizedOwner = "Pukujan".toLowerCase();
+            const ownerOpenedIssue = issue.user.login.toLowerCase() === authorizedOwner;
+            const ownerAssignedIssue = (issue.assignees || []).some(
+              (assignee) => assignee.login.toLowerCase() === authorizedOwner
+            );
+            if (!ownerOpenedIssue && !ownerAssignedIssue) {
+              core.setFailed(`#${issueNumber} must be opened by or assigned to the repository owner.`);
+              return;
+            }
+            if (!/^#{2,3}\s+.*(?:acceptance|delivery plan|success criteria)/im.test(issue.body || "")) {
+              core.setFailed(`#${issueNumber} must state acceptance or delivery criteria before its PR can merge.`);
+            }
+
   contract:
     runs-on: ubuntu-latest
     strategy:
