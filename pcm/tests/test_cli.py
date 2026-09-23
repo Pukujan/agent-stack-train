@@ -128,6 +128,9 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("completed task's checkpoint", agents)
         self.assertIn("unlock/remove next action", agents)
         self.assertIn("required CI passes", agents)
+        self.assertIn("every fresh session or task takeover/resumption must consult it", agents)
+        self.assertIn("issue title and task-objective terms", agents)
+        self.assertIn("read the returned matches and declared neighbors", agents)
         self.assertIn("Reuse package-manager download/build caches", agents)
         self.assertNotIn("Do not create clones, task folders, or linked Git worktrees anywhere", agents)
         config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
@@ -148,6 +151,9 @@ class ContinuityTests(unittest.TestCase):
         self.assertIn("expected release date", handoff)
         self.assertIn("git worktree lock", handoff)
         self.assertIn("git worktree unlock", handoff)
+        self.assertIn("Every fresh session or task takeover/resumption must consult the inventory", handoff)
+        self.assertIn("issue title and task-objective terms", handoff)
+        self.assertIn("read matching records and their declared neighbors", handoff)
 
     def test_init_cli_accepts_only_supported_workspace_modes(self) -> None:
         args = build_parser().parse_args(
@@ -362,6 +368,11 @@ class ContinuityTests(unittest.TestCase):
         self.assertEqual(output, task)
         self.assertEqual(validate_repo(root), [])
         self.assertEqual(load_json(receipt_path)["status"], "reconciled")
+        task_after_first_reconcile = task.read_bytes()
+        receipt_after_first_reconcile = receipt_path.read_bytes()
+        self.assertEqual(reconcile_recovery(root, receipt_path), task)
+        self.assertEqual(task.read_bytes(), task_after_first_reconcile)
+        self.assertEqual(receipt_path.read_bytes(), receipt_after_first_reconcile)
 
     def test_checkpoint_publish_commits_and_pushes_to_origin(self) -> None:
         root = self.copy_fixture("valid-minimal")

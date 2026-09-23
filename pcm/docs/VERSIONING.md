@@ -29,9 +29,11 @@ The CLI/package also follows semantic versioning:
 - MINOR: backward-compatible commands or safety capabilities, such as target preflight.
 - MAJOR: incompatible CLI/API changes.
 
-PCM-0009 therefore releases as CLI/package **0.2.0** because it adds the backward-compatible `preflight` command and adoption contract. The repository protocol remains **0.1.0-draft** because no required canonical object or schema meaning changes.
+PCM-0009 therefore sets the CLI/package source version to **0.2.0** because it adds the backward-compatible `preflight` command and adoption contract. This is version metadata, not evidence that a public package was published. The repository protocol remains **0.1.0-draft** because no required canonical object or schema meaning changes.
 
 PCM-0010 keeps the repository protocol at **0.1.0-draft**. Recovery receipts are optional, backward-compatible evidence outside the required canonical lifecycle; they do not replace or weaken existing PROJECT/CURRENT/TASK/CHECKPOINT schemas. The CLI/package remains on the 0.2.x compatibility line while it adds degraded-continuity handling and recovery reconciliation.
+
+PCM-0018 sets the backward-compatible CLI/package source version to **0.3.0**: checkpoint request IDs are an optional extension marker, and a document catalog is an optional capability. Existing checkpoint history stays readable, repositories need not adopt a catalog, and old validators can ignore the extension marker and unrecognized catalog files. This does not publish a package. The protocol remains **0.1.0-draft** because no new canonical object is required for every repository.
 
 ## Project declaration
 

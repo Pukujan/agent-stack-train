@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
 import sys
+import uuid
 from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import quote
 
 from . import __version__
 
@@ -30,7 +33,9 @@ SCHEMA_FILES = {
     "current": "current.schema.json",
     "task": "task.schema.json",
     "checkpoint": "checkpoint.schema.json",
+    "checkpoint-operation": "checkpoint-operation.schema.json",
     "context-pack": "context-pack.schema.json",
+    "documents": "documents.schema.json",
     "recovery": "recovery.schema.json",
 }
 
@@ -178,6 +183,20 @@ BUILTIN_SCHEMAS = {
         "title": "Checkpoint metadata v1",
         "type": "object",
     },
+    "checkpoint-operation": {
+        "$id": "https://project-continuity.dev/schema/v1/checkpoint-operation.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "payload_sha256": {"pattern": "^[a-f0-9]{64}$", "type": "string"},
+            "request_id": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$", "type": "string"},
+            "schema": {"const": "project-continuity.checkpoint-operation.v1"},
+            "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+        },
+        "required": ["schema", "task_id", "request_id", "payload_sha256"],
+        "title": "Checkpoint operation identity v1",
+        "type": "object",
+    },
     "context-pack": {
         "$id": "https://project-continuity.dev/schema/v1/context-pack.schema.json",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -194,6 +213,46 @@ BUILTIN_SCHEMAS = {
         },
         "required": ["schema", "protocol_version", "repository", "ref", "commit", "task_id", "generated_at", "sources"],
         "title": "Context pack metadata v1",
+        "type": "object",
+    },
+    "documents": {
+        "$id": "https://project-continuity.dev/schema/v1/documents.schema.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": False,
+        "properties": {
+            "documents": {
+                "items": {
+                    "additionalProperties": False,
+                    "properties": {
+                        "id": {"pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
+                        "keywords": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
+                        "path": {"minLength": 1, "type": "string"},
+                        "related": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
+                        "reviewed_commit": {"pattern": "^(uncommitted|[a-f0-9]{40,64})$", "type": "string"},
+                        "reviewed_sha256": {"pattern": "^[a-f0-9]{64}$", "type": "string"},
+                        "summary": {"minLength": 1, "type": "string"},
+                        "tasks": {"items": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"}, "type": "array"},
+                        "title": {"minLength": 1, "type": "string"},
+                    },
+                    "required": [
+                        "id",
+                        "path",
+                        "title",
+                        "summary",
+                        "keywords",
+                        "related",
+                        "tasks",
+                        "reviewed_commit",
+                        "reviewed_sha256",
+                    ],
+                    "type": "object",
+                },
+                "type": "array",
+            },
+            "schema": {"const": "project-continuity.documents.v1"},
+        },
+        "required": ["schema", "documents"],
+        "title": "Continuity document inventory v1",
         "type": "object",
     },
 }
@@ -455,12 +514,14 @@ def handoff_template(workspace_mode: str) -> str:
         "5. the minimum relevant specification/design document\n\n"
         "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n\n"
         + workspace_policy_text(workspace_mode)
+        + "## Finding earlier project documents\n\n"
+        "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
         + "## Continuity records\n\n"
         f"{CONTINUITY_RECORDS_POLICY_MARKER}\n\n"
         "Write continuity issues, updates, pull requests, and project-state documents so a fresh reader can understand the problem, human outcome, scope, evidence, and next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when needed to verify the claim. Keep PR openings skimmable; link long logs. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
         "## Degraded continuity\n\n"
         "Execution safety and existing authorization outrank continuity bookkeeping. If a canonical continuity file is temporarily unavailable, do not stop safe work, repair storage just to force a checkpoint, or ask again for an already-authorized host/worktree. Use an authorized alternate checkout and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write a JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint or replace the alternate task file. Reconcile it into the canonical task with `continuity recovery reconcile --root <canonical-root> --file <receipt>` when writable. The repository/task lineage is authoritative; a physical path is not.\n\n"
-        "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command commits the canonical checkpoint and pushes the task branch to `origin`; it fails rather than silently leaving a normal checkpoint local. CI runs on the pushed branch and the repository's pull-request automation merges it after required checks pass.\n"
+        "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). A local-only checkpoint is not durable. CI and pull-request automation merge the pushed state after required checks pass.\n"
     )
 
 
@@ -478,7 +539,8 @@ def agents_template(workspace_mode: str) -> str:
         + "## Checkpoint\n\n"
         "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n\n"
         "If canonical continuity state is temporarily unavailable, treat that as degraded continuity rather than an execution blocker: keep safe authorized work moving, use an already-authorized alternate checkout/host, and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> --agent <name> --completed <work> --evidence <result> --next <next-action>` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, treat a physical worktree as project identity, repair storage merely to write a checkpoint, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.\n\n"
-        "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it commits and pushes the checkpoint to the task branch. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.\n"
+        "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it prints a stable `REQUEST_ID`, commits, and pushes the checkpoint to the task branch. If interrupted, retry with the same `--request-id`; the same payload is a no-op and a different payload is rejected. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.\n\n"
+        "If `.continuity/documents.json` exists, every fresh session or task takeover/resumption must consult it before deciding the next action, not only before writing documentation. Run `git fetch origin`, then `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>`; read the returned matches and declared neighbors before deciding that prior work is missing or creating/replacing a document. Investigate `NEEDS_REVIEW`/`REMOTE_UNKNOWN` before relying on old evidence. The generated human view is checked by `continuity validate`.\n"
     )
 
 
@@ -708,6 +770,7 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
 
 def validate_checkpoint_structure(root: Path, task_path: Path, text: str) -> list[str]:
     errors: list[str] = []
+    request_ids: set[str] = set()
     if "## Checkpoint log" not in text:
         return [f"{task_path}: missing '## Checkpoint log'"]
     log = text.split("## Checkpoint log", 1)[1]
@@ -738,7 +801,424 @@ def validate_checkpoint_structure(root: Path, task_path: Path, text: str) -> lis
         if meta is not None:
             for err in validate_schema(meta, load_schema(root, "checkpoint")):
                 errors.append(f"{task_path}: checkpoint {index}: {err}")
+        operation = extract_marker(body, "checkpoint-operation")
+        if operation is not None:
+            for err in validate_schema(operation, load_schema(root, "checkpoint-operation")):
+                errors.append(f"{task_path}: checkpoint {index} operation: {err}")
+            request_id = operation.get("request_id")
+            if isinstance(request_id, str):
+                if request_id in request_ids:
+                    errors.append(f"{task_path}: duplicate checkpoint request ID: {request_id}")
+                request_ids.add(request_id)
+            if meta is None:
+                errors.append(f"{task_path}: checkpoint {index} has an operation ID but no checkpoint metadata")
+            else:
+                if operation.get("task_id") != meta.get("task_id"):
+                    errors.append(f"{task_path}: checkpoint {index} operation task ID does not match checkpoint")
+                if operation.get("payload_sha256") != checkpoint_payload_sha256(meta):
+                    errors.append(f"{task_path}: checkpoint {index} payload digest does not match checkpoint content")
     return errors
+
+
+DOCUMENT_CATALOG_PATH = ".continuity/documents.json"
+DOCUMENT_INDEX_PATH = "docs/CONTINUITY_INDEX.md"
+
+
+def document_path(root: Path, value: str) -> Path:
+    if "\\" in value or "\n" in value or "\r" in value:
+        raise ContinuityError(f"document paths must use single-line repository-relative forward slashes: {value}")
+    relative = PurePosixPath(value)
+    if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+        raise ContinuityError(f"document path must stay inside the repository: {value}")
+    normalized = relative.as_posix()
+    if normalized != value:
+        raise ContinuityError(f"document path must be normalized and repository-relative: {value}")
+    if normalized in {DOCUMENT_CATALOG_PATH, DOCUMENT_INDEX_PATH}:
+        raise ContinuityError(f"the inventory and generated view cannot index themselves: {value}")
+    resolved_root = root.resolve()
+    candidate = resolved_root / Path(*relative.parts)
+    if candidate.is_symlink():
+        raise ContinuityError(f"indexed document paths cannot be symlinks: {value}")
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise ContinuityError(f"document path escapes the repository through a symlink: {value}")
+    return resolved
+
+
+def managed_output_path(root: Path, rel: str) -> Path:
+    resolved_root = root.resolve()
+    candidate = resolved_root / Path(*PurePosixPath(rel).parts)
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise ContinuityError(f"managed document output escapes the repository: {rel}")
+    return candidate
+
+
+def sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def sha256_document_bytes(value: bytes) -> str:
+    try:
+        text = value.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ContinuityError("indexed documents must be UTF-8 text") from exc
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return sha256_bytes(normalized)
+
+
+def document_sha256(root: Path, record: dict[str, Any]) -> str | None:
+    try:
+        return sha256_document_bytes(document_path(root, record["path"]).read_bytes())
+    except (ContinuityError, OSError, KeyError, TypeError):
+        return None
+
+
+def document_review_commit(root: Path, rel_path: str, source: Path) -> str:
+    head = git_value(root, ["rev-parse", "HEAD"], "uncommitted")
+    if head == "uncommitted":
+        return "uncommitted"
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "show", f"{head}:{rel_path}"],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return "uncommitted"
+    return head if sha256_document_bytes(result.stdout) == sha256_document_bytes(source.read_bytes()) else "uncommitted"
+
+
+def remote_tracking_head(root: Path) -> tuple[str, str] | None:
+    ref = git_value(root, ["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], "")
+    if not ref:
+        return None
+    commit = git_value(root, ["rev-parse", ref], "")
+    return (ref, commit) if commit else None
+
+
+def remote_document_hashes(root: Path, remote_ref: str, paths: list[str]) -> dict[str, str | None] | None:
+    unique_paths = list(dict.fromkeys(paths))
+    if not unique_paths:
+        return {}
+    requests = "".join(f"{remote_ref}:{path}\n" for path in unique_paths).encode("utf-8")
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "--batch"],
+            input=requests,
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    snapshots: dict[str, str | None] = {}
+    content = result.stdout
+    cursor = 0
+    for rel_path in unique_paths:
+        header_end = content.find(b"\n", cursor)
+        if header_end < 0:
+            return None
+        header = content[cursor:header_end].split()
+        cursor = header_end + 1
+        if len(header) == 2 and header[1] == b"missing":
+            snapshots[rel_path] = None
+            continue
+        if len(header) != 3 or header[1] != b"blob":
+            return None
+        try:
+            size = int(header[2])
+        except ValueError:
+            return None
+        end = cursor + size
+        if end >= len(content) or content[end : end + 1] != b"\n":
+            return None
+        try:
+            snapshots[rel_path] = sha256_document_bytes(content[cursor:end])
+        except ContinuityError:
+            snapshots[rel_path] = None
+        cursor = end + 1
+    if cursor != len(content):
+        return None
+    return snapshots
+
+
+def document_freshness(
+    root: Path,
+    record: dict[str, Any],
+    include_remote: bool = False,
+    remote_hashes: dict[str, str | None] | None = None,
+) -> tuple[str, str | None]:
+    current = document_sha256(root, record)
+    if current is None:
+        return "MISSING", None
+    reviewed = record.get("reviewed_sha256")
+    if current != reviewed:
+        return "NEEDS_REVIEW", current
+    if include_remote:
+        if remote_hashes is None or record["path"] not in remote_hashes:
+            return "REMOTE_UNKNOWN", current
+        remote_hash = remote_hashes[record["path"]]
+        if remote_hash is None:
+            return "NEEDS_REVIEW", None
+        if remote_hash != reviewed:
+            return "NEEDS_REVIEW", remote_hash
+    return "CURRENT", current
+
+
+def load_document_catalog(root: Path) -> dict[str, Any]:
+    path = managed_output_path(root, DOCUMENT_CATALOG_PATH)
+    catalog = load_json(path)
+    errors = validate_schema(catalog, load_schema(root, "documents"))
+    if errors:
+        raise ContinuityError(f"{path}: " + "; ".join(errors))
+    return catalog
+
+
+def validate_document_catalog_data(
+    root: Path, catalog: dict[str, Any], known_task_ids: set[str]
+) -> list[str]:
+    errors = [f"{root / DOCUMENT_CATALOG_PATH}: {e}" for e in validate_schema(catalog, load_schema(root, "documents"))]
+    if errors:
+        return errors
+    documents = catalog["documents"]
+    ids: set[str] = set()
+    paths: dict[str, str] = {}
+    for record in documents:
+        doc_id = record["id"]
+        rel = record["path"]
+        for field in ("keywords", "related", "tasks"):
+            values = record[field]
+            if len(values) != len(set(values)):
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document {doc_id} has duplicate {field}")
+        if doc_id in ids:
+            errors.append(f"{root / DOCUMENT_CATALOG_PATH}: duplicate document ID: {doc_id}")
+        ids.add(doc_id)
+        if rel in paths:
+            errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document path is assigned to both {paths[rel]} and {doc_id}: {rel}")
+        paths[rel] = doc_id
+        try:
+            source = document_path(root, rel)
+        except ContinuityError as exc:
+            errors.append(str(exc))
+            continue
+        if not source.is_file():
+            errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document source is missing: {rel}")
+        for task_id in record["tasks"]:
+            if task_id not in known_task_ids:
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document {doc_id} references unknown task {task_id}")
+    for record in documents:
+        for related_id in record["related"]:
+            if related_id not in ids:
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document {record['id']} references unknown neighbor {related_id}")
+            if related_id == record["id"]:
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document cannot be related to itself: {related_id}")
+    return errors
+
+
+def _plain_text(value: str) -> str:
+    return " ".join(value.replace("|", "\\|").split())
+
+
+def render_document_index(root: Path, catalog: dict[str, Any]) -> str:
+    catalog_digest = hashlib.sha256(_json(catalog).encode("utf-8")).hexdigest()
+    lines = [
+        "# Continuity Document Index",
+        "",
+        marker(
+            "documents-index",
+            {"schema": "project-continuity.documents-index.v1", "catalog_sha256": catalog_digest},
+        ),
+        "",
+        f"> Generated from `{DOCUMENT_CATALOG_PATH}`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.",
+        "> Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.",
+        "",
+    ]
+    documents = sorted(catalog.get("documents", []), key=lambda record: record.get("id", ""))
+    if not documents:
+        lines.extend(["No documents are registered yet.", ""])
+    for record in documents:
+        freshness, current_hash = document_freshness(root, record)
+        lines.extend(
+            [
+                f"## {_plain_text(record['title'])} (`{record['id']}`)",
+                "",
+                f"- File: [`{record['path']}`](../{quote(record['path'], safe='/-._~')})",
+                f"- Local content status: **{freshness}**",
+                f"- Last reviewed at commit: `{record['reviewed_commit']}`",
+                f"- Reviewed SHA-256: `{record['reviewed_sha256']}`",
+                f"- Current SHA-256: `{current_hash or 'unavailable'}`",
+                f"- Summary: {_plain_text(record['summary'])}",
+                f"- Search terms: {', '.join(f'`{_plain_text(term)}`' for term in sorted(record['keywords'])) or 'none'}",
+                f"- Neighboring records: {', '.join(f'`{item}`' for item in sorted(record['related'])) or 'none'}",
+                f"- Task associations: {', '.join(f'`{item}`' for item in sorted(record['tasks'])) or 'none'}",
+                "",
+            ]
+        )
+    return "\n".join(lines)
+
+
+def document_task_ids(root: Path, config: dict[str, Any]) -> set[str]:
+    result: set[str] = set()
+    for task_path in task_files(root, config):
+        meta = task_metadata(task_path)
+        if meta and isinstance(meta.get("id"), str):
+            result.add(meta["id"])
+    return result
+
+
+def write_document_catalog(root: Path, catalog: dict[str, Any], known_task_ids: set[str]) -> None:
+    errors = validate_document_catalog_data(root, catalog, known_task_ids)
+    if errors:
+        raise ContinuityError("document inventory is invalid: " + "; ".join(errors))
+    normalized = {"schema": "project-continuity.documents.v1", "documents": sorted(catalog["documents"], key=lambda item: item["id"])}
+    content = json.dumps(normalized, indent=2, sort_keys=True) + "\n"
+    catalog_path = managed_output_path(root, DOCUMENT_CATALOG_PATH)
+    view_path = managed_output_path(root, DOCUMENT_INDEX_PATH)
+    try:
+        catalog_path.parent.mkdir(parents=True, exist_ok=True)
+        view_path.parent.mkdir(parents=True, exist_ok=True)
+        catalog_path.write_text(content, encoding="utf-8")
+        view_path.write_text(render_document_index(root, normalized), encoding="utf-8")
+    except OSError as exc:
+        raise ContinuityError(f"cannot update document inventory/view: {exc}") from exc
+
+
+def initialize_document_catalog(root: Path) -> tuple[Path, Path]:
+    catalog_path = managed_output_path(root, DOCUMENT_CATALOG_PATH)
+    view_path = managed_output_path(root, DOCUMENT_INDEX_PATH)
+    if not catalog_path.exists():
+        if view_path.exists():
+            raise ContinuityError(f"refusing to replace existing human document index without its inventory: {view_path}")
+        catalog = {"schema": "project-continuity.documents.v1", "documents": []}
+        write_document_catalog(root, catalog, document_task_ids(root, load_config(root)))
+    else:
+        catalog = load_document_catalog(root)
+        write_document_catalog(root, catalog, document_task_ids(root, load_config(root)))
+    return catalog_path, view_path
+
+
+def upsert_document(
+    root: Path,
+    doc_id: str,
+    rel_path: str,
+    title: str,
+    summary: str,
+    keywords: list[str],
+    related: list[str],
+    tasks: list[str],
+) -> dict[str, Any]:
+    if re.fullmatch(r"[a-z0-9][a-z0-9._-]*", doc_id) is None:
+        raise ContinuityError("document ID must use lowercase letters, digits, '.', '_' or '-' and start alphanumeric")
+    source = document_path(root, rel_path)
+    if not source.is_file():
+        raise ContinuityError(f"document source does not exist: {rel_path}")
+    catalog = load_document_catalog(root)
+    records = catalog["documents"]
+    existing = next((record for record in records if record["id"] == doc_id), None)
+    if existing and existing["path"] != PurePosixPath(rel_path).as_posix():
+        raise ContinuityError(f"document ID {doc_id!r} already owns path {existing['path']!r}; IDs cannot be reassigned")
+    record = {
+        "id": doc_id,
+        "path": PurePosixPath(rel_path).as_posix(),
+        "title": title,
+        "summary": summary,
+        "keywords": sorted(set(keywords)),
+        "related": sorted(set(related)),
+        "tasks": sorted(set(tasks)),
+        "reviewed_commit": existing["reviewed_commit"] if existing else document_review_commit(root, rel_path, source),
+        "reviewed_sha256": existing["reviewed_sha256"] if existing else sha256_document_bytes(source.read_bytes()),
+    }
+    updated = [item for item in records if item["id"] != doc_id] + [record]
+    catalog["documents"] = updated
+    config = load_config(root)
+    write_document_catalog(root, catalog, document_task_ids(root, config))
+    return {str(key): value for key, value in record.items()}
+
+
+def refresh_document(root: Path, doc_id: str) -> dict[str, Any]:
+    catalog = load_document_catalog(root)
+    record = next((item for item in catalog["documents"] if item["id"] == doc_id), None)
+    if record is None:
+        raise ContinuityError(f"document ID not found: {doc_id}")
+    source = document_path(root, record["path"])
+    if not source.is_file():
+        raise ContinuityError(f"document source does not exist: {record['path']}")
+    record["reviewed_sha256"] = sha256_document_bytes(source.read_bytes())
+    record["reviewed_commit"] = document_review_commit(root, record["path"], source)
+    write_document_catalog(root, catalog, document_task_ids(root, load_config(root)))
+    return {str(key): value for key, value in record.items()}
+
+
+def document_neighbors(catalog: dict[str, Any], doc_id: str) -> list[dict[str, Any]]:
+    records = catalog["documents"]
+    by_id = {record["id"]: record for record in records}
+    neighbor_ids = {
+        record["id"]
+        for record in records
+        if doc_id in record["related"] or record["id"] in by_id[doc_id]["related"]
+    }
+    neighbor_ids.discard(doc_id)
+    return [by_id[item] for item in sorted(neighbor_ids)]
+
+
+def search_document_catalog(
+    root: Path, catalog: dict[str, Any], query: str, task_id: str | None = None
+) -> list[tuple[int, dict[str, Any]]]:
+    terms = sorted(set(re.findall(r"[a-z0-9][a-z0-9._-]*", query.casefold())))
+    if not terms:
+        raise ContinuityError("document search query must contain letters or numbers")
+    records = catalog["documents"]
+    eligible_ids: set[str] | None = None
+    if task_id:
+        eligible_ids = {record["id"] for record in records if task_id in record["tasks"]}
+        for direct_id in list(eligible_ids):
+            eligible_ids.update(record["id"] for record in document_neighbors(catalog, direct_id))
+    matches: list[tuple[int, dict[str, Any]]] = []
+    for record in records:
+        if eligible_ids is not None and record["id"] not in eligible_ids:
+            continue
+        fields = [
+            (record["title"].casefold(), 5),
+            (" ".join(record["keywords"]).casefold(), 4),
+            (record["summary"].casefold(), 2),
+            ((record["path"] + " " + record["id"]).casefold(), 1),
+        ]
+        score = sum(weight for term in terms for value, weight in fields if term in value)
+        if score:
+            matches.append((score, record))
+    return sorted(matches, key=lambda item: (-item[0], item[1]["id"]))
+
+
+def validate_document_catalog(root: Path, known_task_ids: set[str]) -> list[str]:
+    try:
+        catalog_path = managed_output_path(root, DOCUMENT_CATALOG_PATH)
+        view_path = managed_output_path(root, DOCUMENT_INDEX_PATH)
+    except ContinuityError as exc:
+        return [str(exc)]
+    if not catalog_path.exists():
+        return [f"{view_path}: generated document index exists without {catalog_path}"] if view_path.exists() else []
+    try:
+        catalog = load_document_catalog(root)
+    except ContinuityError as exc:
+        return [str(exc)]
+    errors = validate_document_catalog_data(root, catalog, known_task_ids)
+    try:
+        rendered = render_document_index(root, catalog)
+        actual = view_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return errors + [f"generated document index unavailable: {view_path}: {exc}"]
+    if actual != rendered:
+        errors.append(f"generated document index is out of date: run `continuity docs render --root {root}`")
+    return errors
+
+
+def context_documents_for_task(catalog: dict[str, Any], task_id: str) -> list[dict[str, Any]]:
+    direct = {record["id"] for record in catalog["documents"] if task_id in record["tasks"]}
+    selected = set(direct)
+    for doc_id in direct:
+        selected.update(record["id"] for record in document_neighbors(catalog, doc_id))
+    return [record for record in sorted(catalog["documents"], key=lambda item: item["id"]) if record["id"] in selected]
 
 
 def validate_single_checkout(root: Path) -> list[str]:
@@ -968,6 +1448,8 @@ def validate_repo(root: Path) -> list[str]:
             if dep not in tasks_by_id:
                 errors.append(f"{path}: dependency does not resolve: {dep}")
 
+    errors.extend(validate_document_catalog(root, set(tasks_by_id)))
+
     if current_meta:
         active_id = current_meta.get("active_task")
         active_file = current_meta.get("active_task_file")
@@ -1086,14 +1568,67 @@ def checkpoint_metadata(
     }
 
 
-def checkpoint_addition(meta: dict[str, Any]) -> str:
+def checkpoint_payload_sha256(meta: dict[str, Any]) -> str:
+    """Hash the requested checkpoint content, excluding its first-write timestamp."""
+    payload = {
+        key: meta[key]
+        for key in (
+            "protocol_version",
+            "task_id",
+            "agent",
+            "completed",
+            "evidence",
+            "decisions",
+            "changed",
+            "blocked",
+            "next_action",
+        )
+    }
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def checkpoint_operation_metadata(meta: dict[str, Any], request_id: str) -> dict[str, str]:
+    return {
+        "schema": "project-continuity.checkpoint-operation.v1",
+        "task_id": meta["task_id"],
+        "request_id": request_id,
+        "payload_sha256": checkpoint_payload_sha256(meta),
+    }
+
+
+def checkpoint_records(text: str) -> list[tuple[dict[str, Any] | None, dict[str, Any] | None]]:
+    if "## Checkpoint log" not in text:
+        return []
+    log = text.split("## Checkpoint log", 1)[1]
+    if "## Handoff" in log:
+        log = log.split("## Handoff", 1)[0]
+    entries: list[list[str]] = []
+    current: list[str] = []
+    for line in log.splitlines():
+        if CHECKPOINT_HEADING_RE.match(line):
+            if current:
+                entries.append(current)
+            current = [line]
+        elif current:
+            current.append(line)
+    if current:
+        entries.append(current)
+    return [
+        (extract_marker("\n".join(entry), "checkpoint"), extract_marker("\n".join(entry), "checkpoint-operation"))
+        for entry in entries
+    ]
+
+
+def checkpoint_addition(meta: dict[str, Any], request_id: str) -> str:
     human_time = meta["timestamp"].replace("T", " ").replace("Z", " UTC")
+    operation = checkpoint_operation_metadata(meta, request_id)
     return "\n".join(
         [
             "",
             f"### {human_time} — {meta['agent']}",
             "",
             marker("checkpoint", meta),
+            marker("checkpoint-operation", operation),
             "",
             "Completed:",
             *[f"- {item}" for item in meta["completed"]],
@@ -1117,9 +1652,10 @@ def checkpoint_addition(meta: dict[str, Any]) -> str:
     )
 
 
-def recovery_path(recovery_root: Path, task_id: str, timestamp: str) -> Path:
-    safe_time = re.sub(r"[^0-9A-Za-z-]", "", timestamp)
-    return recovery_root / ".continuity" / "recovery" / f"{task_id}-{safe_time}.json"
+def recovery_path(recovery_root: Path, task_id: str, request_id: str) -> Path:
+    safe_request_id = re.sub(r"[^0-9A-Za-z._-]", "-", request_id)
+    request_hash = hashlib.sha256(request_id.encode("utf-8")).hexdigest()[:12]
+    return recovery_root / ".continuity" / "recovery" / f"{task_id}-{safe_request_id}-{request_hash}.json"
 
 
 def write_recovery_checkpoint(
@@ -1136,6 +1672,7 @@ def write_recovery_checkpoint(
     blocked: list[str],
     next_action: str,
     canonical_task: str,
+    request_id: str,
 ) -> Path:
     recovery_root = recovery_root.resolve()
     canonical_root = canonical_root.resolve()
@@ -1154,6 +1691,9 @@ def write_recovery_checkpoint(
         blocked,
         next_action,
     )
+    operation = checkpoint_operation_metadata(checkpoint, request_id)
+    checkpoint["request_id"] = operation["request_id"]
+    checkpoint["payload_sha256"] = operation["payload_sha256"]
     project_id = recovery_root.name
     project_path = recovery_root / config["canonical"]["project"]
     try:
@@ -1177,10 +1717,20 @@ def write_recovery_checkpoint(
         "status": "pending-reconciliation",
         "checkpoint": checkpoint,
     }
-    path = recovery_path(recovery_root, task_id, timestamp)
+    path = recovery_path(recovery_root, task_id, request_id)
     content = json.dumps(receipt, indent=2, sort_keys=True) + "\n"
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            existing = load_json(path)
+            existing_checkpoint = existing.get("checkpoint", {})
+            if (
+                not isinstance(existing_checkpoint, dict)
+                or existing_checkpoint.get("request_id") != request_id
+                or existing_checkpoint.get("payload_sha256") != operation["payload_sha256"]
+            ):
+                raise ContinuityError(f"recovery request ID {request_id!r} was reused with different content")
+            return path
         write_file_no_overwrite(path, content)
     except OSError as exc:
         raise ContinuityError(f"cannot write recovery receipt: {path}: {exc}") from exc
@@ -1199,7 +1749,12 @@ def checkpoint_task(
     blocked: list[str],
     next_action: str,
     recovery_root: Path | None = None,
+    request_id: str | None = None,
 ) -> Path:
+    if request_id is None:
+        request_id = uuid.uuid4().hex
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", request_id):
+        raise ContinuityError("checkpoint request ID must be 1-128 safe ASCII letters, digits, '.', '_', ':' or '-'")
     config: dict[str, Any] | None = None
     canonical_task = f"tasks/TASK-{task_id}.md"
     try:
@@ -1222,7 +1777,14 @@ def checkpoint_task(
             blocked,
             next_action,
         )
-        addition = checkpoint_addition(meta)
+        operation = checkpoint_operation_metadata(meta, request_id)
+        for prior_meta, prior_operation in checkpoint_records(original):
+            if not prior_operation or prior_operation.get("request_id") != request_id:
+                continue
+            if prior_meta is None or prior_operation.get("payload_sha256") != operation["payload_sha256"]:
+                raise ContinuityError(f"checkpoint request ID {request_id!r} was reused with different checkpoint payload")
+            return path
+        addition = checkpoint_addition(meta, request_id)
         if "## Handoff" in original:
             before, after = original.split("## Handoff", 1)
             new_text = before.rstrip() + "\n" + addition + "\n## Handoff" + after
@@ -1254,6 +1816,7 @@ def checkpoint_task(
             blocked,
             next_action,
             canonical_task,
+            request_id,
         )
 
 
@@ -1261,8 +1824,6 @@ def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
     receipt = load_json(receipt_path)
     if receipt.get("schema") != "project-continuity.recovery.v1":
         raise ContinuityError(f"invalid recovery receipt schema: {receipt_path}")
-    if receipt.get("status") == "reconciled":
-        raise ContinuityError(f"recovery receipt is already reconciled: {receipt_path}")
     checkpoint = receipt.get("checkpoint")
     if not isinstance(checkpoint, dict):
         raise ContinuityError(f"recovery receipt has no checkpoint: {receipt_path}")
@@ -1280,6 +1841,9 @@ def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
     )
     if not all(key in checkpoint for key in required) or not isinstance(task_id, str):
         raise ContinuityError(f"recovery receipt checkpoint is incomplete: {receipt_path}")
+    request_id = checkpoint.get("request_id")
+    if receipt.get("status") == "reconciled" and not isinstance(request_id, str):
+        raise ContinuityError(f"legacy recovery receipt is already reconciled: {receipt_path}")
     output = checkpoint_task(
         root,
         task_id,
@@ -1291,7 +1855,10 @@ def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
         checkpoint["changed"],
         checkpoint["blocked"],
         checkpoint["next_action"],
+        request_id=request_id if isinstance(request_id, str) else None,
     )
+    if receipt.get("status") == "reconciled":
+        return output
     receipt["status"] = "reconciled"
     receipt["reconciled_at"] = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     try:
@@ -1637,7 +2204,12 @@ def remove_managed_worktree(root: Path, task_id: str) -> Path:
 
 
 def publish_checkpoint(
-    root: Path, checkpoint_path: Path, task_id: str, next_action: str, recovery: bool = False
+    root: Path,
+    checkpoint_path: Path,
+    task_id: str,
+    next_action: str,
+    recovery: bool = False,
+    request_id: str | None = None,
 ) -> str:
     """Commit and push one checkpoint so the shared branch is the durable handoff."""
     root = root.resolve()
@@ -1663,20 +2235,62 @@ def publish_checkpoint(
 
     git_run(root, ["add", "--", relative])
     staged = git_run(root, ["diff", "--cached", "--name-only"]).stdout.splitlines()
-    if relative not in staged:
-        raise ContinuityError(f"checkpoint produced no staged change: {checkpoint_path}")
+    if relative in staged:
+        kind = "recovery receipt" if recovery else "checkpoint"
+        message = f"PCM {kind} {task_id}: {next_action}"
+        git_run(root, ["commit", "-m", message])
+    else:
+        # A previous invocation may already have committed the checkpoint, or
+        # pushed it successfully while losing the server response. In either
+        # case, verify the current commit contains this checkpoint before
+        # retrying the same push rather than inventing another commit.
+        head_text = git_run(root, ["show", f"HEAD:{relative}"]).stdout
+        if recovery:
+            try:
+                head_receipt = json.loads(head_text)
+            except json.JSONDecodeError as exc:
+                raise ContinuityError(f"committed recovery receipt is invalid: {relative}") from exc
+            committed = (
+                head_receipt.get("schema") == "project-continuity.recovery.v1"
+                and head_receipt.get("task_id") == task_id
+                and (request_id is None or head_receipt.get("checkpoint", {}).get("request_id") == request_id)
+            )
+        else:
+            committed = any(
+                meta
+                and meta.get("task_id") == task_id
+                and (request_id is None or (operation and operation.get("request_id") == request_id))
+                for meta, operation in checkpoint_records(head_text)
+            )
+        if not committed:
+            raise ContinuityError(f"checkpoint produced no staged change and is absent from HEAD: {checkpoint_path}")
 
-    kind = "recovery receipt" if recovery else "checkpoint"
-    message = f"PCM {kind} {task_id}: {next_action}"
-    git_run(root, ["commit", "-m", message])
     commit = git_value(root, ["rev-parse", "HEAD"])
     git_run(root, ["push", "--set-upstream", remote, f"HEAD:{branch}"])
     return commit
 
 
+def committed_file(root: Path, commit: str, rel: str) -> bytes:
+    dirty = git_run(root, ["status", "--porcelain", "--untracked-files=all", "--", rel]).stdout.strip()
+    if dirty:
+        raise ContinuityError(f"context source is not a clean committed snapshot: {rel}; commit or checkpoint it first")
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "show", f"{commit}:{rel}"],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ContinuityError(f"context source is absent from commit {commit}: {rel}") from exc
+    return result.stdout
+
+
 def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     config = load_config(root)
     task_path = find_task(root, config, task_id)
+    task_meta = task_metadata(task_path)
+    if task_meta is None:
+        raise ContinuityError(f"task metadata is missing: {task_path}")
     project_path = root / config["canonical"]["project"]
     current_path = root / config["canonical"]["current"]
     sources = [
@@ -1684,12 +2298,33 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
         current_path.relative_to(root).as_posix(),
         task_path.relative_to(root).as_posix(),
     ]
-    for optional in ("SPEC.md", "AGENTS.md"):
-        if (root / optional).exists():
-            sources.append(optional)
+    selected_documents: list[dict[str, Any]] = []
+    selection_sources: list[str] = []
+    catalog_path = root / DOCUMENT_CATALOG_PATH
+    if catalog_path.exists():
+        catalog = load_document_catalog(root)
+        errors = validate_document_catalog(root, document_task_ids(root, config))
+        if errors:
+            raise ContinuityError("document inventory is invalid: " + "; ".join(errors))
+        selected_documents = context_documents_for_task(catalog, task_id)
+        sources.extend(record["path"] for record in selected_documents)
+        selection_sources = [DOCUMENT_CATALOG_PATH, DOCUMENT_INDEX_PATH]
+    else:
+        # Keep the established behavior for repositories that have not opted
+        # into the optional, task-scoped document inventory.
+        for optional in ("SPEC.md", "AGENTS.md"):
+            if (root / optional).exists():
+                sources.append(optional)
+    sources = list(dict.fromkeys(sources))
     repo = git_value(root, ["config", "--get", "remote.origin.url"], root.name)
     ref = git_value(root, ["rev-parse", "--abbrev-ref", "HEAD"])
     commit = git_value(root, ["rev-parse", "HEAD"])
+    remote = remote_tracking_head(root) if selected_documents else None
+    remote_hashes = (
+        remote_document_hashes(root, remote[0], [record["path"] for record in selected_documents])
+        if remote
+        else None
+    )
     generated = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     meta = {
         "schema": "project-continuity.context-pack.v1",
@@ -1708,9 +2343,46 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
         "",
         "> Derived convenience view. Canonical source files remain authoritative.",
         "",
+        "## Exact next action",
+        "",
+        str(task_meta["next_action"]),
+        "",
     ]
+    if selection_sources:
+        chunks.extend(["## Document selection provenance", ""])
+        for rel in selection_sources:
+            content = committed_file(root, commit, rel)
+            chunks.append(f"- `{rel}` at `{commit}`; SHA-256 `{sha256_bytes(content)}`")
+        chunks.append("")
     for rel in sources:
-        chunks += [f"## Source: `{rel}`", "", (root / rel).read_text(encoding="utf-8").rstrip(), ""]
+        content = committed_file(root, commit, rel)
+        try:
+            text_content = content.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ContinuityError(f"context source is not UTF-8 text: {rel}") from exc
+        details = f"; SHA-256 `{sha256_bytes(content)}`"
+        record = next((item for item in selected_documents if item["path"] == rel), None)
+        if record is not None:
+            freshness, current_hash = document_freshness(
+                root, record, include_remote=True, remote_hashes=remote_hashes
+            )
+            details += f"; review status `{freshness}`"
+            if freshness == "NEEDS_REVIEW":
+                chunks.extend(
+                    [
+                        f"> **Needs review:** `{rel}` differs from the content previously reviewed ({record['reviewed_sha256']}); current SHA-256 is `{current_hash}`. Preserve the old checkpoint as history and reconcile this source before relying on it.",
+                        "",
+                    ]
+                )
+            elif freshness == "REMOTE_UNKNOWN":
+                chunks.extend(
+                    [
+                        f"> **Remote freshness unknown:** `{rel}` could not be compared with a descendant of its recorded review commit. Fetch `origin` and verify the current file before relying on it.",
+                        "",
+                    ]
+                )
+        blob = git_value(root, ["rev-parse", f"{commit}:{rel}"])
+        chunks += [f"## Source: `{rel}`", "", f"> Git blob `{blob}`{details}", "", text_content.rstrip(), ""]
     if output is None:
         output = root / ".continuity" / "packs" / f"{task_id}.md"
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -1756,6 +2428,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--root", default=".")
     p_checkpoint.add_argument("--agent", required=True)
     p_checkpoint.add_argument("--time", default=None)
+    p_checkpoint.add_argument(
+        "--request-id",
+        default=None,
+        help="stable retry key; reuse the printed ID if a checkpoint command is interrupted",
+    )
     p_checkpoint.add_argument("--completed", action="append", default=[])
     p_checkpoint.add_argument("--evidence", action="append", default=[])
     p_checkpoint.add_argument("--decision", action="append", default=[])
@@ -1773,6 +2450,30 @@ def build_parser() -> argparse.ArgumentParser:
     p_reconcile = recovery_sub.add_parser("reconcile")
     p_reconcile.add_argument("--root", required=True)
     p_reconcile.add_argument("--file", required=True)
+
+    p_docs = sub.add_parser("docs")
+    docs_sub = p_docs.add_subparsers(dest="docs_command", required=True)
+    p_docs_init = docs_sub.add_parser("init")
+    p_docs_init.add_argument("--root", default=".")
+    p_docs_add = docs_sub.add_parser("add")
+    p_docs_add.add_argument("document_id")
+    p_docs_add.add_argument("--root", default=".")
+    p_docs_add.add_argument("--path", required=True)
+    p_docs_add.add_argument("--title", required=True)
+    p_docs_add.add_argument("--summary", required=True)
+    p_docs_add.add_argument("--keyword", action="append", default=[])
+    p_docs_add.add_argument("--related", action="append", default=[])
+    p_docs_add.add_argument("--task", action="append", default=[])
+    p_docs_find = docs_sub.add_parser("find")
+    p_docs_find.add_argument("query")
+    p_docs_find.add_argument("--root", default=".")
+    p_docs_find.add_argument("--task", default=None)
+    p_docs_refresh = docs_sub.add_parser("refresh")
+    p_docs_refresh.add_argument("document_id")
+    p_docs_refresh.add_argument("--root", default=".")
+    p_docs_render = docs_sub.add_parser("render")
+    p_docs_render.add_argument("--root", default=".")
+    p_docs_render.add_argument("--check", action="store_true")
 
     p_pack = sub.add_parser("pack")
     p_pack.add_argument("task_id")
@@ -1847,6 +2548,8 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.command == "checkpoint":
             timestamp = args.time or datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            request_id = args.request_id or uuid.uuid4().hex
+            print(f"REQUEST_ID: {request_id}", flush=True)
             recovery_root = Path(args.recovery_root).resolve() if args.recovery_root else None
             path = checkpoint_task(
                 Path(args.root).resolve(),
@@ -1860,13 +2563,18 @@ def main(argv: list[str] | None = None) -> int:
                 args.blocked,
                 args.next_action,
                 recovery_root,
+                request_id,
             )
             if recovery_root is not None and path.is_relative_to(recovery_root / ".continuity" / "recovery"):
-                commit = publish_checkpoint(recovery_root, path, args.task_id, args.next_action, recovery=True)
+                commit = publish_checkpoint(
+                    recovery_root, path, args.task_id, args.next_action, recovery=True, request_id=request_id
+                )
                 print(f"DEGRADED_CONTINUITY: canonical checkpoint unavailable; recovery receipt written: {path}")
                 print(f"PUSHED: {commit}")
             else:
-                commit = publish_checkpoint(Path(args.root).resolve(), path, args.task_id, args.next_action)
+                commit = publish_checkpoint(
+                    Path(args.root).resolve(), path, args.task_id, args.next_action, request_id=request_id
+                )
                 print(path)
                 print(f"PUSHED: {commit}")
             return 0
@@ -1875,6 +2583,108 @@ def main(argv: list[str] | None = None) -> int:
             path = reconcile_recovery(Path(args.root).resolve(), Path(args.file).resolve())
             print(path)
             return 0
+
+        if args.command == "docs":
+            root = Path(args.root).resolve()
+            if args.docs_command == "init":
+                catalog_path, view_path = initialize_document_catalog(root)
+                print(f"INVENTORY: {catalog_path}")
+                print(f"HUMAN_VIEW: {view_path}")
+                return 0
+
+            if args.docs_command == "add":
+                record = upsert_document(
+                    root,
+                    args.document_id,
+                    args.path,
+                    args.title,
+                    args.summary,
+                    args.keyword,
+                    args.related,
+                    args.task,
+                )
+                print(f"REGISTERED: {record['id']} -> {record['path']}")
+                return 0
+
+            if args.docs_command == "find":
+                catalog = load_document_catalog(root)
+                errors = validate_document_catalog_data(root, catalog, document_task_ids(root, load_config(root)))
+                if errors:
+                    raise ContinuityError("document inventory is invalid: " + "; ".join(errors))
+                if args.task and args.task not in document_task_ids(root, load_config(root)):
+                    raise ContinuityError(f"task not found: {args.task}")
+                matches = search_document_catalog(root, catalog, args.query, args.task)
+                if not matches:
+                    print(f"NO_MATCHES: {args.query}")
+                    return 1
+                print(f"QUERY: {args.query}")
+                remote = remote_tracking_head(root)
+                if remote:
+                    print(
+                        f"REMOTE_TRACKING: {remote[0]} @ {remote[1]} (cached ref; run `git fetch origin` before relying on freshness)"
+                    )
+                else:
+                    print("REMOTE_TRACKING: unavailable; freshness is limited to the local checkout")
+                matched_ids = {record["id"] for _, record in matches}
+                neighbor_ids: set[str] = set()
+                by_id = {record["id"]: record for record in catalog["documents"]}
+                for _, record in matches:
+                    neighbor_ids.update(item["id"] for item in document_neighbors(catalog, record["id"]))
+                selected_ids = matched_ids | neighbor_ids
+                remote_hashes = (
+                    remote_document_hashes(
+                        root,
+                        remote[0],
+                        [by_id[doc_id]["path"] for doc_id in sorted(selected_ids)],
+                    )
+                    if remote
+                    else None
+                )
+                for score, record in matches:
+                    freshness, _ = document_freshness(
+                        root, record, include_remote=True, remote_hashes=remote_hashes
+                    )
+                    print(f"MATCH {record['id']} [{freshness}] score={score}")
+                    print(f"  FILE: {record['path']}")
+                    print(f"  TITLE: {record['title']}")
+                    print(f"  SUMMARY: {record['summary']}")
+                    print(f"  REVIEWED_AT: {record['reviewed_commit']} sha256={record['reviewed_sha256']}")
+                for neighbor_id in sorted(neighbor_ids - matched_ids):
+                    record = by_id[neighbor_id]
+                    freshness, _ = document_freshness(
+                        root, record, include_remote=True, remote_hashes=remote_hashes
+                    )
+                    print(f"RELATED {neighbor_id} [{freshness}]")
+                    print(f"  FILE: {record['path']}")
+                    print(f"  TITLE: {record['title']}")
+                return 0
+
+            if args.docs_command == "refresh":
+                record = refresh_document(root, args.document_id)
+                print(f"REVIEWED: {record['id']} at {record['reviewed_commit']} sha256={record['reviewed_sha256']}")
+                return 0
+
+            if args.docs_command == "render":
+                catalog = load_document_catalog(root)
+                errors = validate_document_catalog_data(root, catalog, document_task_ids(root, load_config(root)))
+                if errors:
+                    raise ContinuityError("document inventory is invalid: " + "; ".join(errors))
+                view_path = managed_output_path(root, DOCUMENT_INDEX_PATH)
+                expected = render_document_index(root, catalog)
+                if args.check:
+                    try:
+                        actual = view_path.read_text(encoding="utf-8")
+                    except OSError:
+                        actual = ""
+                    if actual != expected:
+                        print(f"OUT_OF_DATE: {view_path}")
+                        return 1
+                    print(f"SYNCHRONIZED: {view_path}")
+                    return 0
+                view_path.parent.mkdir(parents=True, exist_ok=True)
+                view_path.write_text(expected, encoding="utf-8")
+                print(f"RENDERED: {view_path}")
+                return 0
 
         if args.command == "pack":
             output = Path(args.output).resolve() if args.output else None

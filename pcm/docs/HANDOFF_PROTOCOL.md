@@ -68,6 +68,11 @@ Before stopping:
 - update CURRENT only when repository-level state changed;
 - link task ID to issue/PR/Beads item when used.
 
+If an operation may be retried, preserve its printed checkpoint `REQUEST_ID`
+and reuse it with the identical payload. PCM treats the same ID and content as
+one event, rejects changed content under that ID, and preserves the first
+timestamp.
+
 ## Degraded continuity
 
 Execution safety and existing authorization outrank checkpoint bookkeeping. A temporary failure to read or write `PROJECT`, `CURRENT`, `TASK`, or `HANDOFF` state is a degraded continuity condition, not an independent reason to stop safe work.
@@ -79,6 +84,19 @@ The Git repository, remote, task ID, branch/ref, and commit history define task 
 After the task's commits/checkpoints are pushed, required CI passes, its PR is merged, its task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. The command verifies the GitHub PR, required checks, and merged commit, and refuses locked/pinned, dirty, or unproven cleanup; never force-remove unfinished or user-modified work. For a short audit hold, record the reason, expected release date, exact path, and unlock/remove next action in the completed task's checkpoint, then lock the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. A lock causes normal cleanup to refuse the tree; it does not replace the cleanup record. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, then `continuity worktree remove <TASK-ID>` to finish normal verified cleanup ([Git documentation](https://git-scm.com/docs/git-worktree)). Until another host has a tested CI/merge verifier, cleanup for non-GitHub remotes fails closed and leaves the worktree intact. A worktree shares Git repository data, but mutable dependencies are not automatically shared: reuse safe package download/build caches, and keep environments separate when lockfiles or runtimes differ. Projects that require stricter disk minimization may select `workspace.mode: single-checkout`.
 
 Normal checkpoints still need to be pushed; worktrees do not create a second project identity. If checkpoint storage is unavailable, use only an already-authorized alternate environment and the recovery-receipt path above, not a newly created worktree as a workaround.
+
+When `.continuity/documents.json` exists, it owns the document catalog;
+`docs/CONTINUITY_INDEX.md` is a generated human view. On every fresh session or
+task takeover/resumption, before deciding the next action, fetch `origin` and
+run `continuity docs find "<issue title and task-objective terms>" --task
+<TASK-ID>`. Read the matching records and their declared neighbors before
+concluding that prior work is missing or creating/recreating documentation.
+The command reads cached remote-tracking state and does not fetch. Treat
+`NEEDS_REVIEW` as targeted staleness and `REMOTE_UNKNOWN` as unverified, not
+current. After inspecting a source change, refresh its explicit review hash and
+regenerate the human view. Context packs include task-associated records and
+declared neighbors only; their Git commit/blob/hash provenance identifies
+exactly what was read.
 
 ## Delegated-agent cleanup
 

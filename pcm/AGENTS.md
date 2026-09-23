@@ -69,6 +69,10 @@ Continuity bookkeeping supports execution but does not gate safe execution. If a
 
 Normal checkpoint delivery is mandatory: commit the product change first, then run `continuity checkpoint`. The command commits the checkpoint and pushes the task branch to `origin`; a normal checkpoint is not complete while it exists only locally. CI runs on every pushed branch, and pull-request automation merges after required checks pass. A managed worktree uses the same task/repository identity and is never a substitute for publishing.
 
+The checkpoint command prints a `REQUEST_ID` before it writes. If the command is interrupted, retry the identical payload with the same `--request-id`; the recorded event and push are idempotent. A changed payload under that ID is a conflict and must use a new ID only if it is genuinely a new checkpoint.
+
+If `.continuity/documents.json` exists, every fresh session or task takeover/resumption must consult it before deciding the next action, not only before writing documentation. Run `git fetch origin`, then `continuity docs find "<issue title and task-objective terms>" --task <TASK-ID>`; read the returned matches and declared neighbors before deciding that prior work is missing or creating/replacing a document. The command compares indexed content with the cached `origin/HEAD` when that comparison is provable and labels changed records `NEEDS_REVIEW`. `REMOTE_UNKNOWN` is not proof of freshness. The inventory is canonical and `docs/CONTINUITY_INDEX.md` is generated; run `continuity docs render` after source changes, and use `continuity docs refresh <ID>` only after reviewing the changed source. This lookup is deterministic metadata search, not a semantic crawler.
+
 If the remote itself is unavailable, use the degraded recovery-receipt path. That is an emergency continuity condition, not a successful normal handoff: record the exact local state, continue only when the task remains safe, and publish/reconcile as soon as the shared Git path is available again.
 
 Delegated agents are temporary workers. Give each one a bounded task, capture its

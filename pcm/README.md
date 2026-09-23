@@ -165,7 +165,10 @@ tasks/
   TASK-APP-0001-example.md
 .continuity/
   config.json
+  documents.json   # optional; canonical document inventory
   packs/
+docs/
+  CONTINUITY_INDEX.md  # optional generated human view
 schemas/
   v1/
 ```
@@ -267,6 +270,11 @@ The command exits successfully after writing a recovery receipt under `.continui
 
 Commit the product change first, then run `continuity checkpoint`. The command commits the checkpoint and pushes the task branch. CI runs on the pushed branch and pull-request automation merges it after the required checks pass.
 
+The command prints a `REQUEST_ID` before writing. If it is interrupted, reuse
+that ID with the identical payload; PCM recognizes the existing event and
+retries delivery without adding another checkpoint or commit. Reusing the ID
+with different content is rejected.
+
 A future session should be able to continue without needing the previous conversation.
 
 ## Non-destructive initialization
@@ -285,6 +293,37 @@ It records Git provenance such as repository, ref, and commit and includes the s
 
 Context packs are **derived**, not authoritative. If a context pack disagrees with the canonical files in the repository, the repository files win.
 
+## Finding earlier documents
+
+Projects that want an explicit document directory can opt in with
+`continuity docs init`. The machine-readable source is
+`.continuity/documents.json`; `docs/CONTINUITY_INDEX.md` is generated from it
+and checked by `continuity validate`. Register stable IDs and concise search
+terms with `continuity docs add`, then find prior work with:
+
+```bash
+git fetch origin
+continuity docs find "checkpoint retries document discovery" --task APP-0004
+continuity pack APP-0004
+```
+
+When a catalog exists, each fresh session or task takeover should do this
+lookup before choosing its next action—not only before writing a document.
+Read the matching records and their declared neighbors before concluding that
+prior work is missing or creating another copy.
+
+Search uses declared titles, summaries, keywords, paths, and neighboring-record
+links; it does not crawl or semantically understand every repository file.
+Freshness checks compare the reviewed file hash with the local checkout and
+the locally cached `origin/HEAD`; the content comparison remains useful after
+squash merges, while the recorded commit remains provenance. The lookup does
+not fetch on its own, so fetch first. `NEEDS_REVIEW` means the local or remote
+file bytes changed; `REMOTE_UNKNOWN` means no current comparison could be
+proved. Neither changes or erases old evidence. After reviewing a changed source, run
+`continuity docs refresh <DOCUMENT-ID>` and `continuity docs render`.
+Task-specific packs include only associated records and their declared
+neighbors, and identify each committed source by Git blob and SHA-256.
+
 ## What PCM is not
 
 PCM is not:
@@ -302,7 +341,7 @@ It is a small protocol for making project state durable enough that work can cro
 
 ## Current status
 
-The continuity protocol is currently `0.1.0-draft`; the CLI package is `0.2.0`.
+The continuity protocol is currently `0.1.0-draft`; the CLI package is `0.3.0`.
 Run `continuity --version` to see the package version installed in the active environment. Building or testing the package does not publish a public release.
 
 The implemented core includes:
@@ -314,6 +353,8 @@ The implemented core includes:
 - explicit target/helper `preflight`;
 - task creation;
 - append-only checkpointing;
+- request-keyed idempotent checkpoint retries;
+- optional machine-readable document catalog with generated human index, deterministic lookup, freshness warnings, and task-scoped packs;
 - Git-provenance context-pack generation;
 - fixture and end-to-end tests.
 

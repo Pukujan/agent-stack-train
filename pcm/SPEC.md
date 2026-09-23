@@ -64,8 +64,10 @@ A continuity-compliant repository must allow deterministic validation of at leas
 - task ID/status/goal/why/acceptance/next-action fields exist;
 - task dependencies reference valid task IDs or use an `external:` dependency identifier;
 - checkpoint structure is valid; v1 checkpoint metadata is validated when present;
+- checkpoint-operation extension markers, when present, identify one request key per task and match the checkpoint payload digest;
 - completed tasks are not marked active;
 - context packs identify source repository/ref/commit/protocol version/source files and are treated as derived;
+- an optional `.continuity/documents.json` inventory validates and its generated human index matches the canonical inventory and current local source state;
 - no secret material is required inside continuity state;
 - tracker references are optional and cannot be the only copy of task context.
 
@@ -110,17 +112,21 @@ Use immutable package download/build caches where supported, but do not share a 
 
 `continuity task new` allocates the next four-digit task ID from the configured prefix and writes one bounded task file.
 
-`continuity checkpoint` adds a checkpoint entry without deleting or replacing prior checkpoint history, then commits and pushes it to the task branch. It must fail visibly if the normal push cannot be completed.
+`continuity checkpoint` adds a checkpoint entry without deleting or replacing prior checkpoint history, then commits and pushes it to the task branch. It prints a request ID before mutation. Repeating an identical request with the same ID is a no-op; reusing that ID with different content fails before a write. The first event timestamp is preserved. The publisher can retry both a local commit whose push failed and a push accepted remotely whose response was lost, without creating another event or commit. Older checkpoint entries without operation IDs remain valid.
 
 `continuity checkpoint --recovery-root <alternate>` preserves a minimal recovery receipt in an authorized alternate checkout when canonical checkpoint state is temporarily unavailable. `continuity recovery reconcile` appends that receipt to the canonical task once it is writable.
 
 `continuity worktree create <TASK-ID>` creates or resumes the task's managed linked worktree from the pushed default/task branch. `continuity worktree remove <TASK-ID>` removes only the registered task worktree after checking that the task is complete, the tree is unlocked and clean, and remote merge/CI evidence is sufficient for the configured remote.
 
-`continuity pack` creates a derived Markdown view with repository/ref/commit/protocol/task/generation/source metadata.
+`continuity docs init` opts a repository into the optional document catalog. `.continuity/documents.json` is the sole machine-readable source for stable document IDs, paths, human summaries, search terms, declared neighboring records, task associations, and the content/commit last reviewed. `docs/CONTINUITY_INDEX.md` is generated from that inventory and deterministic freshness checks; CI validation rejects a manually or accidentally divergent view. `continuity docs add`, `find`, `refresh`, and `render` register/update records, search metadata deterministically, explicitly acknowledge reviewed content, and regenerate/check the human view. Search is not semantic whole-repository search and does not infer document truth.
+
+Before freshness-sensitive retrieval, a session fetches `origin`. `continuity docs find` compares the indexed file's content hash with the local checkout and, when `origin/HEAD` exists, that cached remote-tracking tree. The content comparison is independent of commit ancestry, so a squash merge does not make unchanged documents appear unknown; the recorded review commit remains provenance. The command does not fetch or make network requests itself. If relevant bytes changed, the record is `NEEDS_REVIEW`; if remote comparison cannot be proven, it is `REMOTE_UNKNOWN`; an unrelated file change does not invalidate the record. Hashes are over UTF-8 text normalized to LF, so Windows line endings do not create false drift. Freshness is provenance, not truth: old checkpoints remain historical evidence and are never rewritten.
+
+`continuity pack` creates a derived Markdown view with repository/ref/commit/protocol/task/generation/source metadata and the exact next action. For a repository with a document inventory it contains PROJECT, CURRENT, TASK, and only documents explicitly associated with the task plus their declared one-hop neighbors. For a repository without the optional catalog, existing SPEC/AGENTS inclusion remains for compatibility. Each included source is read from a clean committed Git snapshot and records its Git blob and content SHA-256; packs do not label dirty working-tree content as HEAD. Selected evidence is marked when it needs review or cannot be compared to the cached remote.
 
 ## 7. Versioning
 
-Projects declare a protocol version in `.continuity/config.json`. Backward-compatible optional additions are minor versions; incompatible required-state changes are major versions. Migrations must preserve historical checkpoint evidence.
+Projects declare a protocol version in `.continuity/config.json`. Backward-compatible optional additions are minor versions; incompatible required-state changes are major versions. The checkpoint request marker and document catalog are optional capabilities, so they do not change the required core objects or the `0.1.0-draft` declaration. Migrations must preserve historical checkpoint evidence.
 
 ## 8. Authority
 

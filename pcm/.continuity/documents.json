@@ -1,0 +1,132 @@
+{
+  "documents": [
+    {
+      "id": "agent-lifecycle",
+      "keywords": [
+        "agent",
+        "cleanup",
+        "lifecycle"
+      ],
+      "path": "docs/AGENT_LIFECYCLE.md",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "b223423603ffaa0534c936754c4dedcd97f81955963b64b4912585f9b54f7eb3",
+      "summary": "Capture results and close completed helper agents while retaining useful history.",
+      "tasks": [],
+      "title": "Agent lifecycle policy"
+    },
+    {
+      "id": "checkpoint-schema",
+      "keywords": [
+        "checkpoint",
+        "schema",
+        "validation"
+      ],
+      "path": "schemas/v1/checkpoint.schema.json",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "3bd75a9bf81a7cf4738ddb49e358e7a79b59cd07caa2be76684fd4cbc74bf755",
+      "summary": "Machine-readable checkpoint fields and validation contract.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Checkpoint schema"
+    },
+    {
+      "id": "context-pack-schema",
+      "keywords": [
+        "context pack",
+        "provenance",
+        "schema"
+      ],
+      "path": "schemas/v1/context-pack.schema.json",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "74092c2ef616a8b641862dcc7e9af12661aa4e0bada81997eb61b7196271c88d",
+      "summary": "Machine-readable provenance fields for a task-specific context pack.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Context-pack schema"
+    },
+    {
+      "id": "continuity-records-policy",
+      "keywords": [
+        "issue logs",
+        "provenance",
+        "records"
+      ],
+      "path": "docs/CONTINUITY_RECORDS_POLICY.md",
+      "related": [
+        "pcm-0015-research"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "a8468c14f7a14870532c8981f447875410baa896e323bed2c2431ee2cccc39c9",
+      "summary": "Human-readable and machine-verifiable issue, task, checkpoint and handoff records.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Continuity records policy"
+    },
+    {
+      "id": "pcm-0015-plan",
+      "keywords": [
+        "epistemic context",
+        "handoff planning",
+        "knowledge discovery"
+      ],
+      "path": "docs/plans/PCM-0015-implementation-plan.md",
+      "related": [
+        "pcm-0015-research",
+        "testing-policy"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "dfe970f11964ecf93e78ba72281f7ac37283ff3afc2ebba7d192ddc1472d5e1c",
+      "summary": "Prior bounded plan for provenance-backed continuity, focused context and long-running project work.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "PCM-0015 implementation plan"
+    },
+    {
+      "id": "pcm-0015-research",
+      "keywords": [
+        "epistemic",
+        "provenance",
+        "research"
+      ],
+      "path": "docs/research/PCM-0015-epistemic-context.md",
+      "related": [
+        "continuity-records-policy",
+        "pcm-0015-plan"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "fee42b083be2e5740f6945844ec4a7aa5c530c2eb293eb8e7b28a30236c18ed7",
+      "summary": "Research notes and provenance about reliable evidence, decision records and future-session discovery.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "PCM-0015 epistemic context research"
+    },
+    {
+      "id": "testing-policy",
+      "keywords": [
+        "blind",
+        "oracle",
+        "testing"
+      ],
+      "path": "docs/TESTING_POLICY.md",
+      "related": [
+        "pcm-0015-plan"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "ca5186385c1a4f4f4c18f2400fb6e2d11b15323b9428b50c6e75b9ab3e238611",
+      "summary": "How PCM selects deterministic, blind and other evidence-producing tests without turning governance into the task.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Testing policy"
+    }
+  ],
+  "schema": "project-continuity.documents.v1"
+}

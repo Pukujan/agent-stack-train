@@ -4,7 +4,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 ## Current status
 
-- No active continuity task after the PCM-0017 implementation merged. PR #49 delivered package/runtime version identity and isolated wheel/sdist generated-output parity on Python 3.11 and 3.12. This closeout PR updates the canonical task/checkpoint state and closes issue #31 only after its six required checks pass and it merges.
+- PCM-0017 is complete: PR #49 delivered package/runtime version identity and isolated wheel/sdist generated-output parity on Python 3.11 and 3.12; PR #50 completed canonical closeout, and issue #31 is closed. The active task is PCM-0018 / [GitHub issue #33](https://github.com/Pukujan/project-continuity-modules/issues/33) on branch `task/PCM-0018-document-discovery` in the permanent checkout. The 0.3.0 code/docs/tests and seeded document catalog are committed locally but not pushed; no PCM-0018 PR exists yet. Local quality checks and both 64-test Python suites pass, as do wheel/sdist feature smoke tests on both runtimes and `continuity validate`. Neither fresh-session trial is complete: a previous note claimed a baseline score without recording its prompt/output, starting revision, score, timing, or cleanup, so it is unverified.
 - PCM-0019's managed-worktree implementation, cleanup safeguards, and time-bounded audit holds are in merged PRs #45–#47; final task/checkpoint/handoff closeout is PR #48. Issues #20, #34, and #39 are closed after protected CI; the PCM-0019 task branches are removed and the permanent main checkout is the only registered worktree. Five disposable holdout clone folders remain outside the repository because the local recursive-deletion operation was blocked; they are not registered worktrees.
 - The final independent candidate and retention-variant audits passed on the merged snapshot; full suites passed 46 tests each on Python 3.11 and 3.12. Detailed evidence, exact prompts, research citations, and measurement limits are in `tasks/TASK-PCM-0019-managed-worktrees.md` and GitHub issue comments #34/#39.
 - #42 README image recovery remains deferred; do not search for or generate images until the user provides the promised plan.
@@ -14,7 +14,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 - Issue #17's baseline failure, fix, and blind rerun are recorded; it closed after status correction in PR #37. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope. Issue #42 remains deferred until the user provides the promised image plan; do not search for or generate images.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Other reports stay separately scoped; consult GitHub for the current open list before selecting new work.
-- Candidate CLI/package version and runtime diagnostic now both report `0.2.0`, sourced from `continuity.__version__`. Protocol version remains independent at `0.1.0-draft`. Artifact verification does not publish to PyPI.
+- The PCM-0018 source candidate is `0.3.0`, sourced from `continuity.__version__`; it has not been published. Protocol version remains independent at `0.1.0-draft`.
 - Protocol version remains: `0.1.0-draft`
 
 ## Read exactly this first
@@ -22,14 +22,23 @@ This repository is ready for a fresh PCM development session without prior chat 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `SPEC.md`
-5. `docs/HANDOFF_PROTOCOL.md`
-6. `docs/AGENT_LIFECYCLE.md`
-7. `docs/VERSIONING.md`
+4. `tasks/TASK-PCM-0018-document-discovery.md`
+5. `SPEC.md`
+6. `docs/HANDOFF_PROTOCOL.md`
+7. `docs/TESTING_POLICY.md`
+8. `docs/AGENT_LIFECYCLE.md`
+9. `docs/VERSIONING.md`
+
+On every task takeover/resumption, use the optional catalog before choosing
+the next action: run `git fetch origin`, then `continuity docs find "<issue
+title and task-objective terms>" --task PCM-0018` and read matching records and
+their declared neighbors. The catalog and generated human index are
+`.continuity/documents.json` and `docs/CONTINUITY_INDEX.md`; do not invent
+another index when the catalog is present.
 
 ## Exact next action
 
-After this closeout PR passes the six protected checks and merges, verify issue #31 is closed; then start PCM-0018 / issue #33 as the next separately scoped task. Issues #15 and #42 stay open for the out-of-scope target repair and deferred image plan; do not alter those repositories or search/generate the images.
+Use the canonical task [tasks/TASK-PCM-0018-document-discovery.md](tasks/TASK-PCM-0018-document-discovery.md) and `checkpoints/CURRENT.md`. First publish the current candidate branch and let required CI auto-merge it. Then run the task's same visible prompt in two independent fresh sessions, pinned to baseline `85f13464c466ff277ce319850ce8124c4bc95c52` and the merged candidate snapshot; record the real reports and cleanup. Keep issue #33 open until all acceptance is evidenced and a separate merged closeout records the final task/checkpoint/handoff state. Leave issues #15 and #42 open for their explicit scope constraints; do not modify excluded target repositories or search/generate the images.
 
 ## Authority
 
