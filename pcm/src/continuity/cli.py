@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tarfile
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -2553,6 +2553,35 @@ def recover_receipt(
         if parsed is not None and parsed.marker == marker:
             comments.append(parsed)
     return decide_receipt_retry(comments, marker, payload_sha256, lookup_complete=lookup_complete)
+
+
+def post_receipt_if_absent(
+    bodies: list[str],
+    marker: str,
+    payload_sha256: str,
+    *,
+    lookup_complete: bool,
+    post: Callable[[], object],
+) -> str:
+    """Post only when lookup proves the marker is absent. Never posts on uncertainty."""
+    decision = recover_receipt(
+        bodies,
+        marker,
+        payload_sha256,
+        lookup_complete=lookup_complete,
+    )
+    if decision == "post":
+        post()
+    return decision
+
+
+def github_issue_comment_path(repository: str, issue_number: str) -> str:
+    owner, separator, name = repository.partition("/")
+    if not separator or not owner or not name or "/" in name or ".." in repository:
+        raise ContinuityError(f"receipt repository must be owner/name: {repository}")
+    if not issue_number.isdecimal():
+        raise ContinuityError(f"receipt issue number must be numeric: {issue_number}")
+    return f"repos/{repository}/issues/{issue_number}/comments"
 
 
 def publish_checkpoint(
