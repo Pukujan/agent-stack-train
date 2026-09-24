@@ -2539,6 +2539,22 @@ def parse_receipt_marker(body: str) -> ReceiptComment | None:
     return ReceiptComment(marker=marker, payload_sha256=values["payload"])
 
 
+def recover_receipt(
+    bodies: list[str],
+    marker: str,
+    payload_sha256: str,
+    *,
+    lookup_complete: bool,
+) -> str:
+    """Decide from fetched comment bodies. This does not post a comment."""
+    comments = []
+    for body in bodies:
+        parsed = parse_receipt_marker(body)
+        if parsed is not None and parsed.marker == marker:
+            comments.append(parsed)
+    return decide_receipt_retry(comments, marker, payload_sha256, lookup_complete=lookup_complete)
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
