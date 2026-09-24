@@ -2547,6 +2547,13 @@ def receipt_retry_command(task_id: str, request_id: str, repository: str, issue_
     )
 
 
+def authenticated_actor(login: str) -> str:
+    actor = login.strip()
+    if not actor or any(char in actor for char in " /\t\r\n"):
+        raise ContinuityError("authenticated actor is missing; refusing to post")
+    return actor
+
+
 def render_receipt_body(
     marker: str,
     *,
@@ -3322,9 +3329,18 @@ def main(argv: list[str] | None = None) -> int:
                         kind="leaf",
                         payload_sha256=payload_sha,
                     )
+                    actor_result = run_external(
+                        ["gh", "api", "user", "--jq", ".login"],
+                        Path(args.root).resolve(),
+                    )
+                    if actor_result.returncode != 0:
+                        detail = (actor_result.stderr or actor_result.stdout or "GitHub login unavailable").strip()
+                        retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
+                        raise ContinuityError(f"{receipt_failure_message(commit, detail)}; retry: {retry}")
+                    actor = authenticated_actor(actor_result.stdout)
                     receipt_body = render_receipt_body(
                         marker,
-                        actor="unverified",
+                        actor=actor,
                         parent="issue 53",
                         tests="mocked receipt tests",
                         next_action=args.next_action,
