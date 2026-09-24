@@ -109,6 +109,29 @@
       "title": "PCM-0015 epistemic context research"
     },
     {
+      "id": "pcm-0024-github-authority",
+      "keywords": [
+        "GitHub authority",
+        "automatic merge",
+        "fresh session",
+        "issue lifecycle",
+        "large repository"
+      ],
+      "path": "tasks/TASK-PCM-0024-github-authority.md",
+      "related": [
+        "continuity-records-policy",
+        "testing-policy"
+      ],
+      "reviewed_commit": "1b47b4f055892f33539ea2ed5e3be5449b423281",
+      "reviewed_sha256": "d6b21eb9a3830f52a8ece37a137c932d399c692f570dff71599e6ac25e93d6ea",
+      "summary": "Queued policy to make GitHub authoritative for PCM task tracking and prove fresh-session delivery and continuity.",
+      "tasks": [
+        "PCM-0018",
+        "PCM-0024"
+      ],
+      "title": "PCM-0024 GitHub authority"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

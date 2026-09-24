@@ -46,13 +46,15 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Queued
 
-1. PCM-0005 — GitHub Issue adapter and bidirectional consistency checks.
-2. PCM-0006 — optional Beads adapter.
-3. PCM-0007 — protocol v1.0 release/migration contract.
+1. PCM-0024 / issue #53 — make GitHub authoritative and prove reliable continuation; queued behind the active PCM-0018 / issue #33, not yet implemented.
+2. PCM-0005 — GitHub Issue adapter and bidirectional consistency checks.
+3. PCM-0006 — optional Beads adapter.
+4. PCM-0007 — protocol v1.0 release/migration contract.
 
 ## Other open reports
 
 - PCM-0018 / issue #33 — active: idempotent checkpoints and blind fresh-session document discovery with targeted stale-file detection.
+- PCM-0024 / issue #53 — queued behind #33: make GitHub authoritative and prove end-to-end continuation; its policy and tests are not implemented yet.
 - PCM-0020 / issue #35 — safe Codex main-session rotation.
 - PCM-0021 / issue #30 — archive helper conversations while preserving main-session history.
 - Issue #15 remains open for its required target-repository remediation; that repository is explicitly outside the active scope.

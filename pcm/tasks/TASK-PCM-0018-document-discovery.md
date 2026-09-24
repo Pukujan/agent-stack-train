@@ -374,6 +374,54 @@ Blocked/uncertain:
 Next:
 - Run the same visible prompt in two independent fresh sessions: baseline 85f13464c466ff277ce319850ce8124c4bc95c52 and candidate 98747fce4d5c805670dc3b00bb572e5c02706237. Record prompt, model/session, starting commit, objective results, elapsed time, and cleanup; then complete remaining acceptance and use a separate CI/auto-merged closeout PR before closing #33.
 
+### 2026-09-24 00:29:35 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":[],"changed":["tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; HANDOFF.md; .continuity/documents.json; docs/CONTINUITY_INDEX.md"],"completed":["Recorded GitHub issue #53 and registered PCM-0024 as the queued follow-up; preserved PCM-0018 / #33 as the active task."],"decisions":["Do not claim the GitHub-authority policy is implemented; complete the #33 baseline/candidate fresh-session trials and closeout before activating PCM-0024."],"evidence":["Issue #53 is OPEN and links the GitHub-authority policy and missing proof work.","continuity validate -> VALID; docs render --check -> SYNCHRONIZED; document lookup returns PCM-0024 from the active PCM-0018 task.","Python 3.12 unittest suite -> 64 passed; Ruff, MyPy, compileall, and git diff --check passed."],"next_action":"Run separate fresh-session baseline and candidate trials using the same visible prompt at commits 85f13464c466ff277ce319850ce8124c4bc95c52 and 98747fce4d5c8056703329e243d49065e4741806; record the real reports, objective checks, elapsed time, and cleanup before closing #33.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0018","timestamp":"2026-09-24T00:29:35Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"432ef514d2a592050314af27a20eb63177e0b6860ca0843b8c0d524d6e57e91f","request_id":"6cfd942eb36347dda51dab0a4cffece1","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0018"} -->
+
+Completed:
+- Recorded GitHub issue #53 and registered PCM-0024 as the queued follow-up; preserved PCM-0018 / #33 as the active task.
+
+Evidence:
+- Issue #53 is OPEN and links the GitHub-authority policy and missing proof work.
+- continuity validate -> VALID; docs render --check -> SYNCHRONIZED; document lookup returns PCM-0024 from the active PCM-0018 task.
+- Python 3.12 unittest suite -> 64 passed; Ruff, MyPy, compileall, and git diff --check passed.
+
+Decisions:
+- Do not claim the GitHub-authority policy is implemented; complete the #33 baseline/candidate fresh-session trials and closeout before activating PCM-0024.
+
+Changed:
+- tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; HANDOFF.md; .continuity/documents.json; docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Run separate fresh-session baseline and candidate trials using the same visible prompt at commits 85f13464c466ff277ce319850ce8124c4bc95c52 and 98747fce4d5c8056703329e243d49065e4741806; record the real reports, objective checks, elapsed time, and cleanup before closing #33.
+
+### 2026-09-24 00:29:57 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":[],"changed":["tasks/TASK-PCM-0018-document-discovery.md"],"completed":["Corrected the fresh-session candidate commit reference in the next action without rewriting the earlier checkpoint."],"decisions":["The previous checkpoint had a mistyped SHA; use the verified PR #51 merge commit for the candidate trial."],"evidence":["PCM-0018 task and merged PR #51 identify the candidate as 98747fce4d5c805670dc3b00bb572e5c02706237."],"next_action":"Run separate fresh-session baseline and candidate trials using the same visible prompt at commits 85f13464c466ff277ce319850ce8124c4bc95c52 and 98747fce4d5c805670dc3b00bb572e5c02706237; record the real reports, objective checks, elapsed time, and cleanup before closing #33.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0018","timestamp":"2026-09-24T00:29:57Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"c76284c6d5d45971d357570f59bca32007b514f43a5e17b4e1905dd9c86d4e43","request_id":"d712d18929d049a69cb3afcf01f7e2b8","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0018"} -->
+
+Completed:
+- Corrected the fresh-session candidate commit reference in the next action without rewriting the earlier checkpoint.
+
+Evidence:
+- PCM-0018 task and merged PR #51 identify the candidate as 98747fce4d5c805670dc3b00bb572e5c02706237.
+
+Decisions:
+- The previous checkpoint had a mistyped SHA; use the verified PR #51 merge commit for the candidate trial.
+
+Changed:
+- tasks/TASK-PCM-0018-document-discovery.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Run separate fresh-session baseline and candidate trials using the same visible prompt at commits 85f13464c466ff277ce319850ce8124c4bc95c52 and 98747fce4d5c805670dc3b00bb572e5c02706237; record the real reports, objective checks, elapsed time, and cleanup before closing #33.
+
 ## Handoff
 
 Read `PROJECT.md`, `AGENTS.md`, `checkpoints/CURRENT.md`, this task, `SPEC.md`,
