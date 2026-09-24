@@ -2584,6 +2584,37 @@ def github_issue_comment_path(repository: str, issue_number: str) -> str:
     return f"repos/{repository}/issues/{issue_number}/comments"
 
 
+def publish_issue_receipt(
+    bodies: list[str],
+    marker: str,
+    payload_sha256: str,
+    *,
+    lookup_complete: bool,
+    repository: str,
+    issue_number: str,
+    body: str,
+    run: Callable[[list[str], str], subprocess.CompletedProcess[str]],
+) -> str:
+    """Post through an injected runner only after lookup proves the marker is absent."""
+
+    def post() -> None:
+        if marker not in body:
+            raise ContinuityError("receipt body is missing its marker")
+        path = github_issue_comment_path(repository, issue_number)
+        result = run(["gh", "api", "--method", "POST", path, "--input", "-"], body)
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "GitHub comment post failed").strip()
+            raise ContinuityError(f"receipt post failed; do not retry without a new lookup: {detail}")
+
+    return post_receipt_if_absent(
+        bodies,
+        marker,
+        payload_sha256,
+        lookup_complete=lookup_complete,
+        post=post,
+    )
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
