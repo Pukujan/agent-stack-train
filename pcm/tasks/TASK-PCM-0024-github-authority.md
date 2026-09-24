@@ -302,6 +302,29 @@ Blocked/uncertain:
 Next:
 - Publish the reconciled post-merge task/current/handoff checkpoint through a PR without closing #53; then arrange the independent issue-53 holdouts and real two-user adoption.
 
+### 2026-09-24 04:52:43 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Independent no-history issue-53 holdouts and actual two-user/separate-drive adoption still need an independent session and second authenticated collaborator/device."],"changed":["PR #58 description; issue #53 status and correction comment"],"completed":["PR #58 merged the post-merge task/current/handoff reconciliation. GitHub briefly auto-closed issue #53 because PR prose contained the phrase 'does not close #53'; the issue was reopened immediately and the merged PR description was corrected."],"decisions":["Avoid negated close-keyword phrases around issue references in PR descriptions; use explicit status wording and verify the issue after every merge. Do not claim PCM-0024 complete."],"evidence":["PR #58 merged at dffa814317358870ccba0be7716f511b9b0f5d5a after all six required checks passed. Issue #53 is currently OPEN (verified with gh issue view and continuity issue verify); the correction and reason are documented in issue comment https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5807908634."],"next_action":"Arrange an authorized collaborator on a separate device/drive and authorize independent no-history issue-53 holdouts; then run the remaining proof, reconcile all evidence, and only close #53 after full acceptance.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T04:52:43Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"274ca16095ba14e9fa5ee36d24993217812cd5d5f93d82ba6bbada5c32117215","request_id":"23ed54e496ab4dfa94973e3af1cfa55b","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- PR #58 merged the post-merge task/current/handoff reconciliation. GitHub briefly auto-closed issue #53 because PR prose contained the phrase 'does not close #53'; the issue was reopened immediately and the merged PR description was corrected.
+
+Evidence:
+- PR #58 merged at dffa814317358870ccba0be7716f511b9b0f5d5a after all six required checks passed. Issue #53 is currently OPEN (verified with gh issue view and continuity issue verify); the correction and reason are documented in issue comment https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5807908634.
+
+Decisions:
+- Avoid negated close-keyword phrases around issue references in PR descriptions; use explicit status wording and verify the issue after every merge. Do not claim PCM-0024 complete.
+
+Changed:
+- PR #58 description; issue #53 status and correction comment
+
+Blocked/uncertain:
+- Independent no-history issue-53 holdouts and actual two-user/separate-drive adoption still need an independent session and second authenticated collaborator/device.
+
+Next:
+- Arrange an authorized collaborator on a separate device/drive and authorize independent no-history issue-53 holdouts; then run the remaining proof, reconcile all evidence, and only close #53 after full acceptance.
+
 ## Handoff
 
 Read issue #53, PROJECT, CURRENT, this task, and only relevant policy/test records. Confirm current GitHub state; do not rely on prior chat. Issue #33 remains open for cleanup/closeout, but does not block this owner-directed task.
