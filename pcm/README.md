@@ -281,6 +281,8 @@ that ID with the identical payload; PCM recognizes the existing event and
 retries delivery without adding another checkpoint or commit. Reusing the ID
 with different content is rejected.
 
+Opt-in GitHub receipts are separate from that Git retry. Add `--receipt-repo OWNER/NAME` and `--receipt-issue N` only when you want a comment after the push. PCM lists comments first. A full page, a failed lookup, a secret-like body, or another writer's marker does not post. `--receipt-parent N` runs only after the leaf receipt succeeds; a parent failure leaves the leaf and the push in place. Omitting the flags keeps the old checkpoint behavior, and manual receipts remain mandatory. This is not an atomic lock and not an exactly-once guarantee. Issue #67 remains the open tracker for the remaining publisher work.
+
 A future session should be able to continue without needing the previous conversation.
 
 ## Non-destructive initialization
