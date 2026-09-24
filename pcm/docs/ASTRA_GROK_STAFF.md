@@ -16,11 +16,19 @@ Astra does not spawn Codex or Luna subagents for this project.
 
 Helpers must be in-session subagents, not new Agent Manager sessions.
 
-[`docs/AGENT_LIFECYCLE.md`](AGENT_LIFECYCLE.md) requires the parent to capture the result and close the worker immediately. A completed worker left open still consumes a slot.
+A helper that the parent does not need before continuing must be started with `background: true`. A foreground `task` makes the parent wait until the child finishes, which stops the main project. That is what blocked the 2026-09-24 staff-doc turn. Kilo's documented split is: foreground when the next step depends on the child; background when the parent should keep moving and receive the result later. Do not poll a background child. Do not edit the same files it is editing.
 
-Only the Astra Codex process stays alive until its goal finishes.
+Agent Manager sessions are a separate layer. They do not block this chat, but they open extra tabs and do not auto-close. They are not Astra's staff.
+
+[`docs/AGENT_LIFECYCLE.md`](AGENT_LIFECYCLE.md) requires the parent to capture the result and close the worker immediately. A completed worker left open still consumes a slot. That policy is local operating guidance. It is not a live GitHub registry of open agents. GitHub Issues own task scope and lifecycle. The checkpoint, pushed branch, CI result, and merge own the durable record. The policy file has no `policy_version` of its own. The catalog id is `agent-lifecycle`, reviewed at `85f1346`, with no task id on that catalog row. The task that created the policy is PCM-0014, issue #24, completed in PR #26. Its checkpoint timestamp is 2026-09-23T13:34:48Z and its protocol version is `0.1.0-draft`.
+
+Only the Astra Codex process stays alive until its goal finishes. Astra itself runs as a background process, not as a chat turn that holds this session.
 
 Extra Agent Manager sessions opened on 2026-09-24 for citation research and this document were a lifecycle miss and were stopped.
+
+## Worktrees
+
+`docs/AGENT_LIFECYCLE.md` does not mention worktrees. A `task` subagent does not create a git worktree. Worktree removal is a separate rule: after required checks pass, the PR is merged, the task is complete, and the tree is clean, run `continuity worktree remove <TASK-ID>`. Do not leave a task worktree open after that point. The staff-doc worktree used to publish this file was removed after the branch was pushed and the tree was clean. Do not create one worktree per agent.
 
 ## Full privilege
 
@@ -68,7 +76,7 @@ Worker files name the spec section, properties, tests, allowed files, and stop b
 
 ## Assignment loop
 
-Astra writes `astra-plan.md` and `TASK` files in the inbox. The parent Kilo session spawns one in-session subagent per task, records the result, and closes that subagent.
+Astra writes `astra-plan.md` and `TASK` files in the inbox. The parent Kilo session spawns one background in-session subagent per task (`background: true`), records the result when it arrives, and closes that subagent. It does not wait on the child before Astra's own planning continues.
 
 Do not repeat receipts that are already on GitHub. [Issue #66 comment 5818370226](https://github.com/Pukujan/project-continuity-modules/issues/66#issuecomment-5818370226) and [issue #53 comment 5818370504](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5818370504) already record merge `9328f363a56d46290904b786eb43cff87e23c2b4`.
 
