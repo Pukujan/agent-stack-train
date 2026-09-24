@@ -80,6 +80,28 @@ Astra writes `astra-plan.md` and `TASK` files in the inbox. The parent Kilo sess
 
 Do not repeat receipts that are already on GitHub. [Issue #66 comment 5818370226](https://github.com/Pukujan/project-continuity-modules/issues/66#issuecomment-5818370226) and [issue #53 comment 5818370504](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5818370504) already record merge `9328f363a56d46290904b786eb43cff87e23c2b4`.
 
+## Failure recovery
+
+A down Astra is not permission to implement the next slice. It is also not a reason to stop.
+
+On 2026-09-24 a Kilo goal said to record the attempt and stop after a provider parameter rejection or after tools may have run, and that a status report was the correct result while waiting. The owner rejected that rule the same day. Stopping left the owner down. Inspect the receipt, event log, and working tree, then repair the failure and get Astra running again.
+
+The inference-engine note says to inspect before retrying once tools may have run, then prefer `codex exec resume`. That check is the repair step. It is not a stop. Source: "Retry, resume, and handoff" in `docs/INFERHUB-API-SETUP.md` of Pukujan/inference-recommendation-engine, read 2026-09-24.
+
+- A local timeout that kills an accepted resume is not a provider failure. Resume the same session again with a timeout long enough to finish. The 19:09 UTC resume of session `01a0d488-bef3-72e0-88bf-8684fb9da197` was accepted and had started tools when a 180 second shell limit killed it. The same session was resumed without that limit and exited 0 after writing the review decision.
+- A provider parameter rejection means adjust the request and retry. The 17:17 UTC run exited 1 with InferHub HTTP 400 `model_param_invalid` after a long tool turn. Do not replay that payload. Start a fresh shorter turn that carries the last accepted state.
+- A clean `codex exec` exit means that turn finished. If the owner still has open work, resume or launch the next owner turn. Staff still do not choose the next product slice.
+
+Replacement goal text:
+
+```text
+Astra owns planning, research, verification, and acceptance for project-continuity-modules. Kilo and Grok execute only an unconsumed TASK file Astra released in the private inbox. If none exists, do not edit the product, do not open a product pull request, and do not choose the next slice.
+
+A quiet, idle, exited, rejected, or interrupted Astra is not permission to implement. It is also not a reason to stop. Inspect the receipt, event log, and working tree, then repair the failure and get Astra running again. A local timeout after an accepted resume means resume that same session with a timeout long enough to finish. A provider parameter rejection means adjust the request and retry, using a fresh shorter turn if the old payload is invalid. A status report is not the finished result while Astra is down.
+
+After a released task is done, write the result file, return it to Astra, and keep Astra working until Astra writes the next task.
+```
+
 ## Boundaries
 
 Staff still do not choose the next slice. This record does not implement PCM-0026 and does not close issues #53, #66, or #67. Catalog registration for this file was not required for `continuity validate` to accept an unregistered document, so that registration is a follow-up rather than part of this change.

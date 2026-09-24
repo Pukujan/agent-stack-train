@@ -20,6 +20,7 @@
       "keywords": [
         "Astra",
         "background helper",
+        "failure recovery",
         "Grok staff"
       ],
       "path": "docs/ASTRA_GROK_STAFF.md",
@@ -28,7 +29,7 @@
       ],
       "reviewed_commit": "1eeac1d94790df132e38e8c990fdd97adfcf284c",
       "reviewed_sha256": "e6a55f797d2e7b457ae4edc4f2cac7c29eba5f5ecf5c2c6aed96761c15ec51d8",
-      "summary": "Astra owns planning and verification. Kilo staff execute assigned tasks as background in-session helpers.",
+      "summary": "Astra owns planning and verification. A failure is repaired and Astra is restored. Staff execute assigned tasks and do not choose the next slice.",
       "tasks": [],
       "title": "Astra owner and Grok staff operating model"
     },

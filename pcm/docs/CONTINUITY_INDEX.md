@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"893b69b54f93d5362ad070e7c8b08da2126bfee746b7f8f63b532cb8f31b7dc0","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"957f0191ed15bc73b93ebd5670c208ed5eb334bccafeb30ea9515ac5e33c6a85","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -23,9 +23,9 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `1eeac1d94790df132e38e8c990fdd97adfcf284c`
 - Reviewed SHA-256: `e6a55f797d2e7b457ae4edc4f2cac7c29eba5f5ecf5c2c6aed96761c15ec51d8`
-- Current SHA-256: `65dff837eabff881afa60ec03d8c8c3a7e0834f4e323448c5cdc208fbad48086`
-- Summary: Astra owns planning and verification. Kilo staff execute assigned tasks as background in-session helpers.
-- Search terms: `Astra`, `Grok staff`, `background helper`
+- Current SHA-256: `be911bb409ef3be361422c9cd91fb9b99f424e7ecc220220e91e3446fb5e1a05`
+- Summary: Astra owns planning and verification. A failure is repaired and Astra is restored. Staff execute assigned tasks and do not choose the next slice.
+- Search terms: `Astra`, `Grok staff`, `background helper`, `failure recovery`
 - Neighboring records: `agent-lifecycle`
 - Task associations: none
 
