@@ -2471,6 +2471,29 @@ class ReceiptComment:
     payload_sha256: str
 
 
+@dataclass(frozen=True)
+class ReceiptSighting:
+    marker: str
+    actor: str
+    url: str
+
+
+def stop_on_concurrent_markers(sightings: list[ReceiptSighting], marker: str, actor: str | None = None) -> None:
+    """Stop when another writer may already own the marker. This is not an atomic lock."""
+    matches = [item for item in sightings if item.marker == marker]
+    if len(matches) > 1:
+        links = ", ".join(item.url for item in matches if item.url)
+        raise ContinuityError(
+            "concurrent receipt writers left multiple markers; refusing to post; "
+            f"issue prose is not an atomic lock; {links}"
+        )
+    if actor and len(matches) == 1 and matches[0].actor != actor:
+        raise ContinuityError(
+            "receipt marker is owned by another actor; refusing to post; "
+            f"issue prose is not an atomic lock; {matches[0].url}"
+        )
+
+
 def decide_receipt_retry(
     comments: list[ReceiptComment],
     marker: str,
@@ -2718,6 +2741,28 @@ def deliver_leaf_then_parent(leaf: Callable[[], str], parent: Callable[[], str])
             f"RECEIPT_PARENT_PARTIAL: leaf receipt stands; parent was not posted; do not roll back; {exc}"
         ) from exc
     return leaf_result
+
+
+def _receipt_sightings(payload: str) -> list[ReceiptSighting]:
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("receipt lookup returned invalid JSON") from exc
+    if not isinstance(data, list):
+        return []
+    sightings: list[ReceiptSighting] = []
+    for item in data:
+        if not isinstance(item, dict) or not isinstance(item.get("body"), str):
+            continue
+        parsed = parse_receipt_marker(item["body"])
+        if parsed is None:
+            continue
+        raw_user = item.get("user")
+        user = raw_user if isinstance(raw_user, dict) else {}
+        actor = str(user.get("login") or "unknown")
+        url = str(item.get("html_url") or "")
+        sightings.append(ReceiptSighting(parsed.marker, actor, url))
+    return sightings
 
 
 def comment_bodies(payload: str) -> list[str]:
@@ -3264,6 +3309,7 @@ def main(argv: list[str] | None = None) -> int:
                             raise ContinuityError(f"could not run {command[0]}: {exc}") from exc
 
                     try:
+                        stop_on_concurrent_markers(_receipt_sightings(fetched.stdout), marker)
                         decision = maybe_post_from_page(
                             fetched.stdout,
                             100,
