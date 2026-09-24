@@ -16,6 +16,23 @@
       "title": "Agent lifecycle policy"
     },
     {
+      "id": "astra-grok-staff",
+      "keywords": [
+        "Astra",
+        "background helper",
+        "Grok staff"
+      ],
+      "path": "docs/ASTRA_GROK_STAFF.md",
+      "related": [
+        "agent-lifecycle"
+      ],
+      "reviewed_commit": "1eeac1d94790df132e38e8c990fdd97adfcf284c",
+      "reviewed_sha256": "e6a55f797d2e7b457ae4edc4f2cac7c29eba5f5ecf5c2c6aed96761c15ec51d8",
+      "summary": "Astra owns planning and verification. Kilo staff execute assigned tasks as background in-session helpers.",
+      "tasks": [],
+      "title": "Astra owner and Grok staff operating model"
+    },
+    {
       "id": "checkpoint-schema",
       "keywords": [
         "checkpoint",

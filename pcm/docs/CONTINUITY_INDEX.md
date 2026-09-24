@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"aa8ab90912cf40eb5d8ae50f6891c8725652eae13074802d6bb0f523ecc0469d","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"893b69b54f93d5362ad070e7c8b08da2126bfee746b7f8f63b532cb8f31b7dc0","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -15,6 +15,18 @@
 - Summary: Capture results and close completed helper agents while retaining useful history.
 - Search terms: `agent`, `cleanup`, `lifecycle`
 - Neighboring records: none
+- Task associations: none
+
+## Astra owner and Grok staff operating model (`astra-grok-staff`)
+
+- File: [`docs/ASTRA_GROK_STAFF.md`](../docs/ASTRA_GROK_STAFF.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `1eeac1d94790df132e38e8c990fdd97adfcf284c`
+- Reviewed SHA-256: `e6a55f797d2e7b457ae4edc4f2cac7c29eba5f5ecf5c2c6aed96761c15ec51d8`
+- Current SHA-256: `65dff837eabff881afa60ec03d8c8c3a7e0834f4e323448c5cdc208fbad48086`
+- Summary: Astra owns planning and verification. Kilo staff execute assigned tasks as background in-session helpers.
+- Search terms: `Astra`, `Grok staff`, `background helper`
+- Neighboring records: `agent-lifecycle`
 - Task associations: none
 
 ## Checkpoint schema (`checkpoint-schema`)
