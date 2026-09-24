@@ -2667,6 +2667,46 @@ def page_is_complete(count: int, page_size: int) -> bool:
     return count < page_size
 
 
+def comment_bodies(payload: str) -> list[str]:
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("receipt lookup returned invalid JSON") from exc
+    if not isinstance(data, list):
+        raise ContinuityError("receipt lookup did not return a list")
+    bodies: list[str] = []
+    for item in data:
+        if not isinstance(item, dict) or not isinstance(item.get("body"), str):
+            raise ContinuityError("receipt lookup is missing a comment body")
+        bodies.append(item["body"])
+    return bodies
+
+
+def maybe_post_from_page(
+    payload: str,
+    page_size: int,
+    *,
+    marker: str,
+    payload_sha256: str,
+    repository: str,
+    issue_number: str,
+    run: Callable[[list[str], str], subprocess.CompletedProcess[str]],
+) -> str:
+    bodies = comment_bodies(payload)
+    if not page_is_complete(len(bodies), page_size):
+        raise ContinuityError("receipt lookup is not proven complete; refusing to post")
+    return publish_issue_receipt(
+        bodies,
+        marker,
+        payload_sha256,
+        lookup_complete=True,
+        repository=repository,
+        issue_number=issue_number,
+        body=marker,
+        run=run,
+    )
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
@@ -3135,10 +3175,53 @@ def main(argv: list[str] | None = None) -> int:
                 print(path)
                 print(f"PUSHED: {commit}")
                 if receipt_pair is not None:
-                    print(
-                        "RECEIPT_UNRECONCILED: push stands; comment lookup is not proven complete; "
-                        "do not post until a bounded lookup finishes"
+                    repository, issue_number = receipt_pair
+                    comment_path = github_issue_comment_path(repository, issue_number)
+                    fetched = run_external(
+                        ["gh", "api", "--method", "GET", f"{comment_path}?per_page=100"],
+                        Path(args.root).resolve(),
                     )
+                    if fetched.returncode != 0:
+                        detail = (fetched.stderr or fetched.stdout or "GitHub comment lookup failed").strip()
+                        raise ContinuityError(f"receipt lookup failed; push {commit} stands; do not post: {detail}")
+                    payload_sha = hashlib.sha256(f"{args.task_id}\n{request_id}\n{commit}".encode()).hexdigest()
+                    marker = render_receipt_marker(
+                        repository=repository,
+                        task_id=args.task_id,
+                        request_id=request_id,
+                        pushed_sha=commit,
+                        destination=issue_number,
+                        kind="leaf",
+                        payload_sha256=payload_sha,
+                    )
+
+                    def run_post(command: list[str], body: str) -> subprocess.CompletedProcess[str]:
+                        try:
+                            return subprocess.run(
+                                command,
+                                input=body,
+                                cwd=Path(args.root).resolve(),
+                                capture_output=True,
+                                text=True,
+                                encoding="utf-8",
+                                check=False,
+                            )
+                        except OSError as exc:
+                            raise ContinuityError(f"could not run {command[0]}: {exc}") from exc
+
+                    try:
+                        decision = maybe_post_from_page(
+                            fetched.stdout,
+                            100,
+                            marker=marker,
+                            payload_sha256=payload_sha,
+                            repository=repository,
+                            issue_number=issue_number,
+                            run=run_post,
+                        )
+                    except ContinuityError as exc:
+                        raise ContinuityError(f"{exc}; push {commit} stands") from exc
+                    print(f"RECEIPT: {decision}")
             return 0
 
         if args.command == "recovery" and args.recovery_command == "reconcile":
