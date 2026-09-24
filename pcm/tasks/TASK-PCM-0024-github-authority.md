@@ -371,6 +371,52 @@ Blocked/uncertain:
 Next:
 - Publish the issue-lifecycle wording safeguard PR with auto-merge gated by required checks; then ask the owner to designate an independently authenticated collaborator/device and authorize the remaining holdouts.
 
+### 2026-09-24 05:13:30 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Need owner-designated independent GitHub collaborator/device and independent no-history baseline/candidate holdouts."],"changed":["checkpoints/CURRENT.md; HANDOFF.md"],"completed":["PR #61 merged the lifecycle-language guardrail into canonical and generated adopter guidance. Updated CURRENT and HANDOFF with merged state and the remaining acceptance action."],"decisions":["The issue-state safeguard is now normative and generated for adopters; same-user simulations remain distinct from the required two-user proof."],"evidence":["PR #61 merged automatically at 18e262d250634f8297391391ec793ed91c49a5ee after all six required checks and the auto-merge job passed. It has no closingIssuesReferences; continuity issue verify reports #53 OPEN. Local 73-test suite, Ruff, MyPy, compileall, validation, and Python 3.12 wheel/sdist parity passed. The candidate holdout revision is 18e262d; pre-implementation baseline is 5304bfa."],"next_action":"Ask the owner to designate an independently authenticated collaborator on a separate device/drive and authorize no-history holdouts at 5304bfa and 18e262d; then run the remaining two-user and fresh-session acceptance proof.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T05:13:30Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"9b49eaef847881d7ff840f28689a34ef1dd9f90166b97595276a5545f4056ea5","request_id":"1e8f077c6cbb4c6a8b55f211a88a05e4","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- PR #61 merged the lifecycle-language guardrail into canonical and generated adopter guidance. Updated CURRENT and HANDOFF with merged state and the remaining acceptance action.
+
+Evidence:
+- PR #61 merged automatically at 18e262d250634f8297391391ec793ed91c49a5ee after all six required checks and the auto-merge job passed. It has no closingIssuesReferences; continuity issue verify reports #53 OPEN. Local 73-test suite, Ruff, MyPy, compileall, validation, and Python 3.12 wheel/sdist parity passed. The candidate holdout revision is 18e262d; pre-implementation baseline is 5304bfa.
+
+Decisions:
+- The issue-state safeguard is now normative and generated for adopters; same-user simulations remain distinct from the required two-user proof.
+
+Changed:
+- checkpoints/CURRENT.md; HANDOFF.md
+
+Blocked/uncertain:
+- Need owner-designated independent GitHub collaborator/device and independent no-history baseline/candidate holdouts.
+
+Next:
+- Ask the owner to designate an independently authenticated collaborator on a separate device/drive and authorize no-history holdouts at 5304bfa and 18e262d; then run the remaining two-user and fresh-session acceptance proof.
+
+### 2026-09-24 05:16:50 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":[],"changed":["docs/CONTINUITY_INDEX.md; tasks/TASK-PCM-0024-github-authority.md"],"completed":["Refreshed the generated continuity document index after final handoff reconciliation."],"decisions":["no new decisions"],"evidence":["The prior checkpoint request 1e8f077c6cbb4c6a8b55f211a88a05e4 is recorded and pushed to origin; docs render and continuity validate both pass; issue #53 remains OPEN."],"next_action":"Wait for an owner-designated independently authenticated collaborator on a separate device/drive and authorization for the baseline/candidate no-history holdouts; then complete the remaining multi-user and fresh-session acceptance proof.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T05:16:50Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"5d44841b084ae5bbdc82a9d197d5378f7902964b745b99f423cd453ff1e9949e","request_id":"5db24a81f0d5465c92f1d1c209c0ac79","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Refreshed the generated continuity document index after final handoff reconciliation.
+
+Evidence:
+- The prior checkpoint request 1e8f077c6cbb4c6a8b55f211a88a05e4 is recorded and pushed to origin; docs render and continuity validate both pass; issue #53 remains OPEN.
+
+Decisions:
+- no new decisions
+
+Changed:
+- docs/CONTINUITY_INDEX.md; tasks/TASK-PCM-0024-github-authority.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Wait for an owner-designated independently authenticated collaborator on a separate device/drive and authorization for the baseline/candidate no-history holdouts; then complete the remaining multi-user and fresh-session acceptance proof.
+
 ## Handoff
 
 Read issue #53, PROJECT, CURRENT, this task, and only relevant policy/test records. Confirm current GitHub state; do not rely on prior chat. Issue #33 remains open for cleanup/closeout, but does not block this owner-directed task.
