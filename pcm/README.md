@@ -1,384 +1,166 @@
 # Project Continuity Modules
 
-Project Continuity Modules (PCM) is a Git-native continuity system for long-running work with AI agents.
+> **Projects outlast agent sessions. Keep the project's state in the repository so any fresh session can pick up where the last one stopped.**
 
-It exists for a simple reason: **a project can last for months, but an agent session does not.**
+<p align="center">
+  <img src="docs/content-system-assets/pcm-hero-continuity.png" alt="An anime-inspired developer and a small lantern-shaped companion robot open a repository notebook whose pages show the project, the current state, the active task, and the last checkpoint, so a new session can continue the work." width="100%">
+</p>
 
-## The problem PCM is trying to solve
+Project Continuity Modules (PCM) is a protocol and a small Python CLI (`continuity`). Together they store a project's working memory as ordinary Markdown and JSON files in Git: what it is, where it stands, what task is active, and what the last session proved.
 
-Working with capable agents is easy when the task fits inside one conversation. Long-running projects are different.
+## Why this exists
 
-Over time, important context gets spread across chat histories, local notes, branches, issue comments, generated summaries, and the memory of whichever person or agent was working last. Eventually the project starts depending on a particular session still being available and correctly remembered.
+**A project can last for months, but an agent session does not.** Context windows fill up. Chats end. Models change. A person comes back two weeks later. If the only record of "what we were doing" is the last conversation, the project stops making sense when that conversation is gone.
 
-That creates a few recurring problems.
+Here is how that goes wrong in practice. Suppose one session reports an evaluation score of 71.4% and a later session reports 74.2%. *(Illustrative numbers, not a PCM result.)* That comparison only means something if you can recover the conditions behind each number: the commit, the dataset revision, the model and prompt version, the commands that ran, and the failures that were excluded. When those details live only in chat history, the next session can compare incompatible runs, repeat an old mistake, or report a result nobody can reproduce.
 
-### Context rot
+<p align="center">
+  <img src="docs/content-system-assets/pcm-problem-lost-context.png" alt="An anime-inspired developer faces a desk scattered with old chat windows, sticky notes, and loose test results, while a small lantern-shaped companion robot holds up a single question: what is the current state?" width="100%">
+</p>
 
-Long conversations gradually become poor project memory.
+The same failure shows up in everyday work. Early decisions drop out of context. Summaries lose the detail that later matters. Agents redo work they cannot see. Every handoff turns into reconstructing history instead of continuing from a known state.
 
-Early decisions fall out of the active context window. Summaries compress away details that later turn out to matter. Agents repeat work because they cannot see what was already tried. A new session may infer why something was done instead of reading the evidence that originally justified it.
+PCM does not make research or code correct. **It makes the state and evidence around the work durable enough to inspect, reproduce, and challenge later.**
 
-Even when a conversation is technically still available, the useful project state is mixed together with brainstorming, abandoned ideas, corrections, and incidental discussion.
+## What this project is
 
-The longer the project runs, the harder it becomes to answer basic questions reliably:
+**PCM is the toolkit and protocol. Your project repository owns its own state.** You install the CLI once. Then, inside each project you want to keep resumable, it creates and checks a small set of continuity files. You do not rely on PCM's own history to remember your project.
 
-- What are we actually building?
-- What is the current state?
-- What task is active right now?
-- What has already been completed?
-- Which commands and tests were actually run?
-- What decisions were made, and why?
-- What is blocked?
-- What is the exact next action?
+It is for people and agents who run long projects across many sessions: developers, researchers, and anyone who hands work between agent sessions, different models or tools, and colleagues.
 
-### Session dependence
+PCM is **not**:
 
-A project should not stop making sense because a chat ended, a context window filled up, a different model takes over, or a human returns two weeks later.
+- a replacement for Git, or a hosted memory database;
+- an autonomous project manager or polling agent;
+- a substitute for tests or experimental rigor;
+- a promise that anything an agent writes is true;
+- a reason to keep every chat transcript.
 
-If the only durable record is "the previous agent knew what was going on," the project has no real continuity.
+## What you can make or use
 
-This is especially painful when several agents or people work on the same repository. Each handoff becomes an exercise in reconstructing history instead of continuing from a known state.
+- **A resumable project skeleton.** `continuity init` adds `PROJECT.md`, `HANDOFF.md`, `checkpoints/CURRENT.md`, `.continuity/config.json`, and versioned schemas. The `software` profile also adds `AGENTS.md` and a README.
+- **Bounded task files.** Each unit of work gets its own `tasks/TASK-<PREFIX>-NNNN-*.md`, linked to its GitHub issue when the project uses GitHub.
+- **Append-only checkpoints.** Each session records what it completed, the evidence, decisions, blockers, and one exact next action. A retry with the same request ID does not add a duplicate.
+- **A validator.** `continuity validate` catches problems that are expensive to find later: a missing current-task file, a duplicated task ID, or a checkpoint without evidence.
+- **Context packs.** A disposable bundle of the relevant files, stamped with Git provenance, for a fresh session.
+- **An optional document catalog** (`continuity docs`), so a new session finds earlier work before it writes a duplicate.
 
-### Research numbers become harder to trust
+## How it works
 
-Continuity is also a reproducibility problem.
+Each session follows the same short cycle:
 
-Suppose one session reports an evaluation score of 71.4% and a later session reports 74.2%. Those numbers are only meaningful if the project can recover the conditions that produced them:
+<p align="center">
+  <img src="docs/content-system-assets/pcm-cycle-square.png" alt="An anime-inspired developer and a lantern-shaped companion robot pass a glowing notebook around a four-step loop: read the state, do one bounded task, write a checkpoint, and let the next session resume." width="520">
+</p>
 
-- exact code and commit;
-- dataset or source revision;
-- split and sample definition;
-- model and configuration;
-- prompt or rubric version;
-- seeds and calibration state;
-- commands that were run;
-- test and validation results;
-- known failures or exclusions.
+1. **Read the state.** A fresh session opens the repository, reads `HANDOFF.md` and `checkpoints/CURRENT.md`, and checks the live GitHub issue that owns the task.
+2. **Do one bounded task.** It works only on that task, on that task's branch.
+3. **Record the evidence.** Before stopping, it appends a checkpoint with what changed, which commands and tests ran, what is blocked, and the next action.
+4. **Publish it.** It commits the work, then `continuity checkpoint` commits and pushes the checkpoint. The PR goes through required CI and GitHub auto-merge.
+5. **Resume later.** The next session, in any tool or model, starts again from step 1. It does not need the old conversation.
 
-If those details live only in transient chat context, later sessions can accidentally compare incompatible runs, repeat an old mistake, use a moving dataset revision, or report a result without being able to reproduce how it was obtained.
+**Who owns what** is spelled out so records do not compete. For GitHub projects, the GitHub issue owns task scope, priority, dependencies, and lifecycle. Every progress update names the leaf issue that owns the work and its parent. Merged history owns accepted code and documents. PR checks and merge records own delivery facts. The Markdown task and checkpoint files are versioned projections of that state, not a second source of truth. Context packs are derived and can be regenerated. See [SPEC section 8](SPEC.md#8-authority).
 
-PCM does not make research correct by itself. It makes the **state and evidence around the work durable enough to inspect, reproduce, and challenge later**.
+**Git is the transport** because it already provides durable versions, exact commits, branches for bounded work, reviewable diffs, and conflict detection. PCM builds on that instead of adding a separate memory service.
 
-## The idea
+## Evidence and boundaries
 
-PCM treats continuity as part of the repository instead of part of the conversation.
+**What is real today:** the protocol is `0.1.0-draft`, and the CLI package source is version `0.4.0`, which **has not been published** to any package index. Building or testing the package does not publish it. Everything below was checked at commit [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/).
 
-GitHub Issues own task scope, acceptance, priority, ownership, dependencies, lifecycle and durable project progression. Merged history owns accepted code and normative/domain documents; PR/check/merge records own delivery facts. The checkout is transient editing/execution space.
+| Claim | Status | What the evidence supports | What it does not establish | Source |
+| --- | --- | --- | --- | --- |
+| CLI package version is 0.4.0 | shipped (source only) | The installed CLI reports `continuity 0.4.0` | That a public release exists. PyPI returned 404 for `project-continuity` on 2026-09-24 | [`src/continuity/__init__.py`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/__init__.py#L1), [`docs/VERSIONING.md`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/docs/VERSIONING.md#L24-L38) |
+| Protocol version is 0.1.0-draft | shipped | The CLI and every profile declare this version | Stability. Draft versions may change | [`cli.py` L24](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/cli.py#L24), [`templates/v1/software/profile.json`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1/software/profile.json) |
+| Two init profiles: `minimal` and `software` | shipped | `software` extends `minimal` with `AGENTS.md` and `README.md` | Fit for non-software projects beyond the minimal files | [`templates/v1/`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1), [`minimal/profile.json`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1/minimal/profile.json) |
+| `init` is non-destructive | shipped | It refuses before writing if a planned path holds different content | Semantic merging of your existing docs. Use [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md) for mature repositories | [`cli.py` L462](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/cli.py#L462) |
+| Preflight distinguishes helper from target | shipped | Modes `TARGET_VALID`, `DEGRADED_TARGET`, `INVALID_TARGET`, `NOT_ADOPTED`, `HELPER_REPOSITORY` | That a target's content is correct, only that its shape is | [`cli.py` L1632–1653](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/cli.py#L1632-L1653) |
+| Checkpoint retries are idempotent by request ID | shipped | Reusing an ID with the same payload does not duplicate. A changed payload is rejected | Exactly-once delivery across machines | [`tests/test_checkpoint_retries.py`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/tests/test_checkpoint_retries.py) |
+| Opt-in GitHub issue receipts | experimentally_supported | `--receipt-repo` / `--receipt-issue` post a receipt after a push, with lookup-before-post safeguards | That manual receipts are no longer needed. They are still mandatory. It is not an atomic lock | [#67](https://github.com/Pukujan/project-continuity-modules/issues/67) (open), [`tests/test_receipt_post.py`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/tests/test_receipt_post.py) |
+| Automatic issue-comment synchronization | planned | Tracked as remaining publisher work | Any current implementation | [#67](https://github.com/Pukujan/project-continuity-modules/issues/67) |
+| The test suite and self-validation pass | shipped | 138 unit tests passed and `continuity validate --root .` printed `VALID` on Python 3.13 at `0b3be9c`. CI runs 3.11 and 3.12 | Behavior in untested environments, or that fresh agents follow the protocol unprompted | [`.github/workflows/ci.yml`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/.github/workflows/ci.yml) |
 
-A participating project MUST keep synchronized versioned documents. Their task fields are as-of projections linked to GitHub, never a competing local source of truth:
+**Boundaries that matter when you decide whether to use it:**
 
-- **PROJECT** — What is this project, what are its goals, and what should remain stable?
-- **CURRENT** — Where is the project right now?
-- **TASK** — What bounded unit of work is active?
-- **CHECKPOINT** — What was completed, what evidence exists, what changed, what is blocked, and what comes next?
-- **Git history** — What exact revisions carried those state changes?
-- **CONTEXT PACK** — A disposable convenience view derived from the canonical repository state.
+- Python 3.11+ is the only runtime requirement. The package has no runtime dependencies ([`pyproject.toml`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/pyproject.toml)).
+- GitHub is the only host with a tested CI/merge verifier for worktree cleanup. On other hosts PCM leaves worktrees in place.
+- A citation or a checkpoint makes a claim traceable. It does not make it true.
+- Deterministic tests cannot prove how a fresh agent behaves. [`docs/TESTING_POLICY.md`](docs/TESTING_POLICY.md) explains when a fresh-session blind test is needed, and [`docs/BLIND_TEST.md`](docs/BLIND_TEST.md) is one such protocol.
 
-The important distinction is that **PCM is the toolkit and protocol; the target project repository owns the actual project state**.
+## Image generation and use
 
-You do not depend on the PCM repository's own development history to remember your project. You use PCM to initialize and maintain continuity files inside your project.
+The three images in this README are new, generated narrative illustrations. They follow the [Content Generation Modules](https://github.com/Pukujan/content-generation-modules) image guide pinned at [`f85e88b`](https://github.com/Pukujan/content-generation-modules/blob/f85e88bc00362c53061d95ac7811bd9c6ada8e32/docs/IMAGE_GUIDE.md). PCM has no visual contract of its own, so they use that helper's default direction: anime-inspired editorial scenes, a recurring human and companion, blue-violet evening light, and warm accents. The characters are original to PCM (a developer and a lantern-shaped companion robot) and depict no real people.
 
-## What continuity looks like in practice
+| File | Role | Size | Placement |
+| --- | --- | --- | --- |
+| [`pcm-hero-continuity.png`](docs/content-system-assets/pcm-hero-continuity.png) | hero | 1536×1024 | below the title |
+| [`pcm-problem-lost-context.png`](docs/content-system-assets/pcm-problem-lost-context.png) | problem | 1536×1024 | in "Why this exists" |
+| [`pcm-cycle-square.png`](docs/content-system-assets/pcm-cycle-square.png) | supporting (system) | 1024×1024 | in "How it works", shown at 520px |
 
-A long-running project might involve dozens or hundreds of sessions.
+Exact title and subtitle copy, prompts, alt text, crop rules, rejection conditions, review decisions, and SHA-256 hashes are recorded in [`docs/content-system-assets/IMAGE_NOTES.md`](docs/content-system-assets/IMAGE_NOTES.md). To replace an image, regenerate it from that record, keep the same role and size, and update its hash.
 
-A typical cycle is:
+## Templates and guides
 
-1. A fresh human or agent opens the repository.
-2. It reads the project's handoff/current projection and verifies the live owning leaf issue, parent ancestry and dependencies.
-3. It performs only that bounded work.
-4. It runs whatever tests, experiments, or validation the task requires.
-5. Before stopping, it writes a checkpoint containing the important evidence, decisions, blockers, changed files, and one concrete next action.
-6. It synchronizes applicable docs/catalog/index before each push, commits product/docs, then runs the synchronous checkpoint commit/push.
-7. It records a request-ID/SHA receipt on the leaf issue and links the parent update, opens/updates the PR and enables mandatory GitHub auto-merge behind required CI/reviews. Missing, failed or unverified gates prohibit completion/cleanup.
-8. After verified merge, it records exact CI/merge/live-status evidence on GitHub and corrects material doc drift through another synchronized increment. Receipt-only transitions need no recursive doc commit; as-of/pending docs link to the live issue.
-9. A new session resumes from GitHub and repository projections, without reconstructing the old conversation.
+**Start here if you want to go deeper:**
 
-That means the project can continue across:
+- [`SPEC.md`](SPEC.md): the normative protocol, record authority, and publication rules.
+- [`docs/HANDOFF_PROTOCOL.md`](docs/HANDOFF_PROTOCOL.md): start-session and stop-session procedures, checkpoint format, degraded continuity, and context packs.
+- [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md): adding PCM to an existing repository without overwriting its own docs.
+- [`AGENTS.md`](AGENTS.md): the full agent operating contract, including worktrees, workspace registry, receipts, and the document catalog.
+- [`docs/VERSIONING.md`](docs/VERSIONING.md): protocol and package version rules and migration.
+- [`docs/CONTINUITY_RECORDS_POLICY.md`](docs/CONTINUITY_RECORDS_POLICY.md): how to write issues and records a human can follow.
+- [`docs/AGENT_LIFECYCLE.md`](docs/AGENT_LIFECYCLE.md): closing delegated agents after they return.
+- [`templates/v1/`](templates/v1): the files each profile installs. [`schemas/v1/`](schemas/v1): the machine-readable contracts.
+- [`docs/CONTINUITY_INDEX.md`](docs/CONTINUITY_INDEX.md): the generated catalog of this repository's own records.
 
-- context-window limits;
-- new ChatGPT sessions;
-- different models or agent products;
-- different developers or researchers;
-- local and cloud execution environments;
-- interruptions lasting days or months.
+## Prior work and references
 
-The goal is not to preserve every sentence an agent ever produced. The goal is to preserve the **minimum trustworthy state needed to continue the work correctly**.
+- **This repository dogfoods itself.** PCM's own tasks, checkpoints, and handoffs live in [`tasks/`](tasks), [`checkpoints/CURRENT.md`](checkpoints/CURRENT.md), and [`HANDOFF.md`](HANDOFF.md). The first external dogfood run is in [`examples/minimal-dogfood/`](examples/minimal-dogfood/README.md).
+- **Earlier README story.** The problem-first narrative, covering session dependence, context rot, and research reproducibility, comes from the previous version of this README. Content Generation Modules later cited it as a reference pattern in its [reverse analysis](https://github.com/Pukujan/content-generation-modules/blob/f85e88bc00362c53061d95ac7811bd9c6ada8e32/docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md). This rewrite keeps that story and moves the operational detail into the linked docs.
+- **Structure and images** follow the Content Generation Modules README contract ([`readme-contract.json`](https://github.com/Pukujan/content-generation-modules/blob/f85e88bc00362c53061d95ac7811bd9c6ada8e32/templates/readme-contract.json), [playbook](https://github.com/Pukujan/content-generation-modules/blob/f85e88bc00362c53061d95ac7811bd9c6ada8e32/docs/README_PLAYBOOK.md)), pinned at `f85e88b`.
+- **Git worktrees** are used as documented in [Git's worktree reference](https://git-scm.com/docs/git-worktree). Issue linking follows [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
-### Execution versus bookkeeping
+## Try it
 
-Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue only through an already-authorized alternate environment and record a small recovery receipt with `--recovery-root`. Do not create a clone or worktree as a workaround. Reconcile that receipt into the canonical task when it becomes writable.
-
-The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Keep one permanent project folder as the home base and use it for sequential tasks. When simultaneous work or isolation genuinely helps, create a temporary managed worktree for that task under `pcm/worktree/<TASK-ID>`; reuse it across sessions rather than making one per agent. Do not create sibling clones. Git worktrees share repository data, so they are lighter than separate clones, though each still has its own checked-out files and may have its own dependency environment. After changes are pushed, required checks pass, GitHub merges the PR, and the task is complete, run `continuity worktree remove <TASK-ID>`; PCM verifies the result before removing the clean worktree. Other Git hosts stay untouched until PCM has a tested CI/merge verifier for them. Unfinished or dirty work is kept, never force-deleted. For a short audit hold, record the reason, expected release date, private workspace ID, and unlock/remove next action in the completed task's checkpoint, then pin the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. This blocks ordinary cleanup while keeping the hold visible in durable task state. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, and run `continuity worktree remove <TASK-ID>` for normal verified cleanup. See [Git's worktree lock/unlock rules](https://git-scm.com/docs/git-worktree).
-
-Dependency downloads/build artifacts should use the package manager's shared cache where supported. pnpm documents a shared content store whose package files are linked into each `node_modules` ([pnpm storage model](https://pnpm.io/)); uv documents a reusable, thread-safe cache ([uv cache](https://docs.astral.sh/uv/concepts/cache/)), while normally keeping a project-specific `.venv` ([uv project layout](https://docs.astral.sh/uv/concepts/projects/layout/)). The goal is to avoid downloading/building the same dependencies repeatedly without allowing one task's dependency edits to disrupt another. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
-
-Delegated agents are also temporary execution views. After a worker returns, the
-parent records its result and evidence in the task checkpoint and explicitly
-closes the worker. Completed workers are not left open, because a terminal
-completed status can still consume an available agent slot. See
-[`docs/AGENT_LIFECYCLE.md`](docs/AGENT_LIFECYCLE.md).
-
-## Why Git is the transport
-
-Git already solves several parts of the continuity problem well:
-
-- durable versioned state;
-- exact commits;
-- branches for bounded work;
-- reviewable diffs;
-- distributed copies;
-- chronological history;
-- conflict detection;
-- reproducible references to earlier states.
-
-PCM builds on that instead of introducing a separate project-memory service.
-
-For GitHub-governed repositories, GitHub Issues own task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge evidence own delivery. PCM task files cache a concise working view linked to the authoritative issue. Before resuming, verify current issue state. Local absolute checkout paths belong in a private per-device registry, never shared handoffs.
-
-PR descriptions and commit messages can change issue state. Use GitHub's closing keywords only when merging should complete the referenced issue; negation does not cancel the directive. Use `Refs #<number>` for progress-only PRs and verify issue state after merges. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
-
-## Human-readable first, machine-checkable second
-
-The continuity files are ordinary Markdown and JSON. A person should be able to open them and understand the project without special software.
-
-PCM also adds small machine-readable metadata markers and versioned schemas so basic continuity invariants can be checked automatically.
-
-For example, validation can detect cases such as:
-
-- the declared current task file does not exist;
-- a task ID is malformed or duplicated;
-- a completed task is still marked active;
-- required continuity files are missing;
-- a checkpoint is missing required evidence or next-action fields;
-- a generated context pack lacks Git provenance.
-
-The purpose of validation is not bureaucracy. It is to catch the kinds of continuity errors that become expensive several sessions later.
-
-## Core repository layout
-
-A PCM-enabled project typically contains:
-
-```text
-PROJECT.md
-HANDOFF.md
-checkpoints/
-  CURRENT.md
-tasks/
-  TASK-APP-0001-example.md
-.continuity/
-  config.json
-  documents.json   # optional; canonical document inventory
-  packs/
-docs/
-  CONTINUITY_INDEX.md  # optional generated human view
-schemas/
-  v1/
-```
-
-The main roles are:
-
-- `PROJECT.md` — stable project contract and scope;
-- `checkpoints/CURRENT.md` — present program/repository state;
-- `tasks/TASK-*.md` — bounded tasks and their checkpoint history;
-- `HANDOFF.md` — simple cold-start entrypoint for a fresh session;
-- `.continuity/config.json` — protocol/profile/task-prefix configuration;
-- `schemas/v1/` — machine-readable continuity contracts;
-- `.continuity/packs/` — generated context bundles that can be discarded and regenerated.
-
-## Using PCM as a helper for another repository
-
-When PCM is supplied to an agent as a helper, **the PCM checkout is not the target project**. Project state belongs in the repository the user is actually working on.
-
-Make the target root explicit and preflight it before relying on continuity state:
+**The smallest useful path: install from source, initialize a project, and validate it.** No package has been published, so install from a checkout:
 
 ```bash
-continuity preflight --root /path/to/target
-```
-
-A healthy preflight prints `MODE: TARGET_VALID`. `DEGRADED_TARGET` means the target's PCM shape is present but a canonical file is temporarily unavailable; keep the task moving only through the recovery-receipt path and do not claim the target is fully validated until reconciliation. If it reports `HELPER_REPOSITORY`, `NOT_ADOPTED`, or `INVALID_TARGET`, stop treating that root as a continuity-enabled target and correct the integration first.
-
-Do not create a second continuity repository and do not store target PROJECT/CURRENT/TASK state in the PCM source repository.
-
-For an existing repository whose PROJECT, AGENTS, README, or HANDOFF files must be preserved, use the non-destructive overlay procedure in [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md). A target is considered integrated only after:
-
-```bash
-continuity validate --root /path/to/target
-```
-
-returns `VALID`.
-
-## Using PCM in a new project
-
-Python 3.11+ is currently the only runtime requirement.
-
-From a PCM source checkout:
-
-```bash
+git clone https://github.com/Pukujan/project-continuity-modules.git
+cd project-continuity-modules
 python -m pip install -e .
+continuity --version        # continuity 0.4.0
 ```
 
-Then, inside the project you want to make resumable:
+Then, inside the Git repository you want to make resumable:
 
 ```bash
 continuity init --profile software --name "My Project" --task-prefix APP
-continuity validate
+continuity validate                 # VALID
+continuity preflight --root .       # MODE: TARGET_VALID
 ```
 
-Software initialization defaults to managed temporary task worktrees. Use the
-main checkout for sequential work; create a worktree only when isolation or
-parallelism helps, then run `continuity worktree remove <TASK-ID>` after the
-task is merged, complete, and clean. For a short audit hold, record the reason,
-release date, private workspace ID, and cleanup action in the task checkpoint, then pin it
-with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`; after
-the audit, unlock it explicitly before verified cleanup. Choose
-`--workspace-mode single-checkout`
-to prohibit worktrees. The old scalar `workspace_mode` config key is not
-supported; replace it with a `workspace` object such as
-`"workspace": {"mode": "managed-worktrees"}` or
-`"workspace": {"mode": "single-checkout"}`. Validation explains this
-migration and does not modify existing configuration.
+`init` lists every file it creates and refuses to overwrite different existing content. For a repository that already has its own `PROJECT.md`, `AGENTS.md`, or `HANDOFF.md`, follow [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md) instead.
 
-Create a bounded task:
+**Next steps in a real project:**
 
 ```bash
-continuity task new \
-  --slug first-task \
+continuity task new --slug first-task \
   --goal "Implement the first bounded piece of work." \
   --why "This is the next dependency in the project." \
-  --issue https://github.com/OWNER/REPO/issues/123
-```
+  --issue https://github.com/OWNER/REPO/issues/123   # required when GitHub tracking is on
 
-GitHub repositories use Issues as the required task authority. Verify the live issue before resuming with `continuity issue verify APP-0001`. Register checkouts on additional drives with `continuity workspace register --root <checkout>`; `continuity workspace list` and `unregister` manage this private device-only registry. Worktree creation checks registered roots and reuses a single clean, unlocked matching task branch. It stops before creating a duplicate when a match is dirty, locked, conflicting, or ambiguous. PCM does not scan drives, and registry paths do not enter shared handoffs.
-
-Before a session ends, append a checkpoint:
-
-```bash
-continuity checkpoint APP-0001 \
-  --agent "agent-or-person-name" \
+continuity checkpoint APP-0001 --agent "your-name" \
   --completed "Implemented the bounded change." \
   --evidence "pytest -q -> 42 passed" \
   --next "Open the review PR and verify CI."
 ```
 
-If the canonical task file cannot be written but safe work can continue, use an authorized alternate checkout:
+`checkpoint` commits and pushes, so run it on a task branch with a remote. The full flags for recovery receipts, worktrees, the document catalog, and opt-in issue receipts are in `continuity <command> --help` and [`AGENTS.md`](AGENTS.md).
 
-```bash
-continuity checkpoint APP-0001 \
-  --root /path/to/canonical-checkout \
-  --recovery-root /path/to/authorized-alternate \
-  --agent "agent-or-person-name" \
-  --evidence "canonical task temporarily unavailable; product check passed" \
-  --next "Reconcile the recovery receipt when the canonical checkout is writable."
-```
-
-The command exits successfully after writing a recovery receipt under `.continuity/recovery/`. Later, reconcile that receipt into the canonical task with `continuity recovery reconcile`.
-
-Commit the product change first, then run `continuity checkpoint`. The command commits the checkpoint and pushes the task branch. CI runs on the pushed branch and pull-request automation merges it after the required checks pass.
-
-The command prints a `REQUEST_ID` before writing. If it is interrupted, reuse
-that ID with the identical payload; PCM recognizes the existing event and
-retries delivery without adding another checkpoint or commit. Reusing the ID
-with different content is rejected.
-
-Opt-in GitHub receipts are separate from that Git retry. Add `--receipt-repo OWNER/NAME` and `--receipt-issue N` only when you want a comment after the push. PCM lists comments first. A full page, a failed lookup, a secret-like body, or another writer's marker does not post. `--receipt-parent N` runs only after the leaf receipt succeeds; a parent failure leaves the leaf and the push in place. Omitting the flags keeps the old checkpoint behavior, and manual receipts remain mandatory. This is not an atomic lock and not an exactly-once guarantee. Issue #67 remains the open tracker for the remaining publisher work.
-
-A future session should be able to continue without needing the previous conversation.
-
-## Non-destructive initialization
-
-`continuity init` is intentionally conservative.
-
-It writes continuity-managed files only when they are absent or already byte-identical to what PCM expects. If an existing planned path contains different user content, initialization refuses before writing anything.
-
-The intent is to help an existing project adopt continuity without silently replacing its own project documentation.
-
-## Context packs
-
-A context pack is a generated view for convenience when a fresh session needs a compact bundle of the relevant project state.
-
-It records Git provenance such as repository, ref, and commit and includes the selected canonical source files.
-
-Context packs are **derived**, not authoritative. Resolve conflicts by record type: live issues own task/progression fields, merged source documents own accepted content, and PR/check records own delivery facts. See [SPEC section 8](SPEC.md#8-authority).
-
-## Finding earlier documents
-
-Projects that want an explicit document directory can opt in with
-`continuity docs init`. The machine-readable source is
-`.continuity/documents.json`; `docs/CONTINUITY_INDEX.md` is generated from it
-and checked by `continuity validate`. Register stable IDs and concise search
-terms with `continuity docs add`, then find prior work with:
-
-```bash
-git fetch origin
-continuity docs find "checkpoint retries document discovery" --task APP-0004
-continuity pack APP-0004
-```
-
-When a catalog exists, each fresh session or task takeover should do this
-lookup before choosing its next action—not only before writing a document.
-Read the matching records and their declared neighbors before concluding that
-prior work is missing or creating another copy.
-
-Search uses declared titles, summaries, keywords, paths, and neighboring-record
-links; it does not crawl or semantically understand every repository file.
-Freshness checks compare the reviewed file hash with the local checkout and
-the locally cached `origin/HEAD`; the content comparison remains useful after
-squash merges, while the recorded commit remains provenance. The lookup does
-not fetch on its own, so fetch first. `NEEDS_REVIEW` means the local or remote
-file bytes changed; `REMOTE_UNKNOWN` means no current comparison could be
-proved. Neither changes or erases old evidence. After reviewing a changed source, run
-`continuity docs refresh <DOCUMENT-ID>` and `continuity docs render`.
-Task-specific packs include only associated records and their declared
-neighbors, and identify each committed source by Git blob and SHA-256.
-
-## What PCM is not
-
-PCM is not:
-
-- a replacement for Git;
-- an autonomous project manager;
-- a requirement to keep one agent running forever;
-- a hosted memory database;
-- a substitute for tests or experimental rigor;
-- a promise that an agent's written claim is true;
-- a reason to preserve every chat transcript;
-- a requirement to use GitHub, Beads, Jira, or any particular agent vendor.
-
-It is a small protocol for making project state durable enough that work can cross session boundaries without losing its identity.
-
-## Current status
-
-The continuity protocol is currently `0.1.0-draft`; the active CLI source candidate is `0.4.0` and has not been published.
-Run `continuity --version` to see the package version installed in the active environment. Building or testing the package does not publish a public release.
-
-The implemented core includes:
-
-- versioned continuity schemas;
-- minimal and software initialization profiles;
-- non-destructive `init`;
-- deterministic `validate`;
-- explicit target/helper `preflight`;
-- task creation;
-- append-only checkpointing;
-- request-keyed idempotent checkpoint retries;
-- optional machine-readable document catalog with generated human index, deterministic lookup, freshness warnings, and task-scoped packs;
-- Git-provenance context-pack generation;
-- fixture and end-to-end tests.
-
-Manual GitHub issue receipts after every push and merge are mandatory today. Retry-safe comment automation is separately tracked in [#67](https://github.com/Pukujan/project-continuity-modules/issues/67), dependent on policy [#66](https://github.com/Pukujan/project-continuity-modules/issues/66), both children of [#53](https://github.com/Pukujan/project-continuity-modules/issues/53). No autonomous polling agent is required.
-
-## Development validation
-
-For PCM itself:
+**Developing PCM itself:**
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
 PYTHONPATH=src python -m continuity validate --root .
 ```
 
-The long-term success criterion is straightforward:
-
-> A project should remain understandable and resumable even if every previous agent session disappears.
-
-The [authority/conflict rules](SPEC.md#81-conflict-ownership-and-lineage) require owner corrections to be recorded on GitHub, one primary task writer and coordinated shared-document edits, and explicit disputed/unknown evidence. Upstream corrections pause affected descendants for re-planning and revalidation. Every issue update links its leaf/parent/dependency lineage; children represent independently deliverable scopes, never individual comments. [The finite publication protocol](SPEC.md#82-finite-publication-and-reconciliation) defines exactly what belongs before and after each push.
+The long-term test is simple: **a project should remain understandable and resumable even if every previous agent session disappears.**
