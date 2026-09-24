@@ -2567,6 +2567,17 @@ def require_issue_identity(payload: str, *, issue_number: str, task_id: str) -> 
         raise ContinuityError(f"receipt issue does not name {task_id}; refusing to post")
 
 
+def receipt_parent_url(repository: str, parent_issue: str | None) -> str:
+    if not parent_issue:
+        return "not supplied"
+    return f"https://github.com/{repository}/issues/{parent_issue}"
+
+
+def receipt_test_line(evidence: list[str]) -> str:
+    cleaned = [item.strip() for item in evidence if item.strip()]
+    return "; ".join(cleaned) if cleaned else "not supplied"
+
+
 def render_receipt_body(
     marker: str,
     *,
@@ -3367,8 +3378,8 @@ def main(argv: list[str] | None = None) -> int:
                     receipt_body = render_receipt_body(
                         marker,
                         actor=actor,
-                        parent="issue 53",
-                        tests="mocked receipt tests",
+                        parent=receipt_parent_url(repository, args.receipt_parent),
+                        tests=receipt_test_line(args.evidence or []),
                         next_action=args.next_action,
                     )
 
