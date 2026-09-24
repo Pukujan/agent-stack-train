@@ -2495,6 +2495,50 @@ def decide_receipt_retry(
     return "recovered"
 
 
+_RECEIPT_V2_PREFIX = "<!-- pcm:receipt-v2 "
+
+
+def render_receipt_marker(
+    *,
+    repository: str,
+    task_id: str,
+    request_id: str,
+    pushed_sha: str,
+    destination: str,
+    kind: str,
+    payload_sha256: str,
+) -> str:
+    """Render the application marker. This is not a GitHub uniqueness constraint."""
+    return (
+        f"{_RECEIPT_V2_PREFIX}"
+        f"repository={repository} task={task_id} request={request_id} "
+        f"sha={pushed_sha} destination={destination} kind={kind} "
+        f"payload={payload_sha256} -->"
+    )
+
+
+def parse_receipt_marker(body: str) -> ReceiptComment | None:
+    """Read a v2 marker. Historical pcm:receipt comments are left unchanged."""
+    start = body.find(_RECEIPT_V2_PREFIX)
+    if start < 0:
+        return None
+    end = body.find("-->", start)
+    if end < 0:
+        return None
+    fields = body[start + len(_RECEIPT_V2_PREFIX) : end].split()
+    values = {}
+    for field in fields:
+        if "=" not in field:
+            return None
+        key, value = field.split("=", 1)
+        values[key] = value
+    required = ("repository", "task", "request", "sha", "destination", "kind", "payload")
+    if any(key not in values or not values[key] for key in required):
+        return None
+    marker = body[start : end + 3]
+    return ReceiptComment(marker=marker, payload_sha256=values["payload"])
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
