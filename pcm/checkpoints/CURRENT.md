@@ -6,7 +6,7 @@
 
 Phase: adoption — prove v1 in mature repositories.
 
-Current active delivery is PCM-0024 / issue #53 on branch `task/PCM-0024-github-authority`. The local source candidate is now CLI 0.4.0; it adds required issue links for GitHub-governed active tasks, read-only issue verification, and a private per-device checkout registry consulted before creating worktrees. This candidate is not yet committed, pushed, or hosted-CI verified. PCM-0018 / #33 remains open on its cleanup blocker; it was not silently closed as complete.
+Current active delivery is PCM-0024 / issue #53 on branch `task/PCM-0024-github-authority`. The authority, private per-device checkout registry, existing-checkout/worktree reuse, and live issue-verification slice merged in PR #56 at `4033b49`; hosted quality, Python 3.11/3.12, package, and package-parity checks passed. The CLI source version is 0.4.0 and remains unpublished. The follow-up stress profile, stale-writer rejection, registered checkout reuse across drives, independent task worktrees, full 72-test suite, and Python 3.12 wheel/sdist parity now pass locally. Issue #53 remains open: an actual second authorized user and independent no-history issue-53 holdouts are not yet available/completed. PCM-0018 / #33 remains open on its cleanup blocker; it was not silently closed as complete.
 
 PCM-0019 / issue #34 is complete in PRs #45–#47, with closeout PR #48 carrying the final task/checkpoint/handoff state and closing issues #20, #34, and #39 after protected CI. The rule is one permanent home checkout for sequential work plus optional task-owned linked worktrees for real parallelism/isolation; verified cleanup follows green required checks, merge, and task completion. A short audit hold must be time-bounded in the task checkpoint and protected with Git's native worktree lock; it is unlocked and normally cleaned up afterward. Final local suites passed 46 tests each on Python 3.11 and 3.12. The Windows C: NTFS fixture used 5,243,374 file-storage bytes for home plus three linked worktrees versus 8,390,584 bytes for home plus three non-hardlinked clones; details and limits are in the task and issue comments. PR #48 is merged, issues #20/#34/#39 are closed, PCM-0019 task branches are removed, and the permanent main checkout is the only registered worktree. Five disposable holdout clone folders remain outside the repository because the local recursive-deletion operation was blocked; they are not registered worktrees. PCM-0017 / issue #31 merged as PR #49 and its canonical closeout as PR #50; issue #31 is CLOSED. The version on main remains 0.2.0; the local PCM-0018 source candidate is 0.3.0 and has not merged or been published. Both versions derive from `continuity.__version__`; the protocol remains `0.1.0-draft`. CI verifies wheel/sdist installs and generated-file parity on Python 3.11/3.12; main requires all six quality/test/package/parity checks. PCM-0018 / issue #33 remains open and is blocked on owner cleanup of disposable trial-copy residue; its baseline/candidate reports are recorded and interim PR #55 is merged. Per the owner’s direction, PCM-0024 / issue #53 is now active in the existing checkout on `task/PCM-0024-github-authority`; no new worktree was created. No unrelated target repository is in scope.
 
@@ -48,15 +48,14 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 ## Queued
 
-1. PCM-0024 / issue #53 — make GitHub authoritative and prove reliable continuation; queued behind the active PCM-0018 / issue #33, not yet implemented.
-2. PCM-0005 — GitHub Issue adapter and bidirectional consistency checks.
-3. PCM-0006 — optional Beads adapter.
-4. PCM-0007 — protocol v1.0 release/migration contract.
+1. PCM-0005 — GitHub Issue adapter and bidirectional consistency checks.
+2. PCM-0006 — optional Beads adapter.
+3. PCM-0007 — protocol v1.0 release/migration contract.
 
 ## Other open reports
 
-- PCM-0018 / issue #33 — active: idempotent checkpoints and blind fresh-session document discovery with targeted stale-file detection.
-- PCM-0024 / issue #53 — queued behind #33: make GitHub authoritative and prove end-to-end continuation; its policy and tests are not implemented yet.
+- PCM-0018 / issue #33 — open and blocked on owner cleanup of disposable trial-copy residue and separate canonical closeout; implementation PR #51 is merged and fresh-session evidence is recorded.
+- PCM-0024 / issue #53 — active; implementation slice merged in PR #56, follow-up stress and collaboration evidence remains open.
 - PCM-0020 / issue #35 — safe Codex main-session rotation.
 - PCM-0021 / issue #30 — archive helper conversations while preserving main-session history.
 - Issue #15 remains open for its required target-repository remediation; that repository is explicitly outside the active scope.
@@ -68,4 +67,4 @@ None known.
 
 ## Next atomic action
 
-Continue PCM-0018 / issue #33. The implementation merged automatically in PR #51 at `98747fce4d5c805670dc3b00bb572e5c02706237`; local `main` is clean and at that commit. Run separate fresh sessions with the task's same visible prompt at baseline `85f13464c466ff277ce319850ce8124c4bc95c52` and merged candidate `98747fce4d5c805670dc3b00bb572e5c02706237`. The earlier note claiming a scored baseline has no recorded result and must not be counted. Record both real reports, model/session and starting revision, objective rubric checks, elapsed time, and resource cleanup in the task. Keep #33 open until all acceptance and a separate merged closeout are complete; leave #15 and #42 open for their explicit scope constraints.
+Commit and push the verified PCM-0024 follow-up, then publish a PR linked to issue #53 without closing it. After merge, complete independent no-history issue-53 holdouts and arrange a real two-user adoption on separate drives using an independently authenticated collaborator; verify branch protection, required checks, auto-merge, issue reconciliation, and cleanup. This session has only the repository owner's GitHub account. Keep #53 open until all acceptance and a canonical closeout are complete; keep #33 open for the owner's separately tracked cleanup and closeout.

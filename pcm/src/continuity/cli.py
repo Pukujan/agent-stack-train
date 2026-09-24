@@ -3,11 +3,13 @@ from __future__ import annotations
 import argparse
 import difflib
 import hashlib
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import tarfile
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
@@ -999,7 +1001,10 @@ def load_document_catalog(root: Path) -> dict[str, Any]:
 
 
 def validate_document_catalog_data(
-    root: Path, catalog: dict[str, Any], known_task_ids: set[str]
+    root: Path,
+    catalog: dict[str, Any],
+    known_task_ids: set[str],
+    verify_source_paths: set[str] | None = None,
 ) -> list[str]:
     errors = [f"{root / DOCUMENT_CATALOG_PATH}: {e}" for e in validate_schema(catalog, load_schema(root, "documents"))]
     if errors:
@@ -1020,13 +1025,25 @@ def validate_document_catalog_data(
         if rel in paths:
             errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document path is assigned to both {paths[rel]} and {doc_id}: {rel}")
         paths[rel] = doc_id
-        try:
-            source = document_path(root, rel)
-        except ContinuityError as exc:
-            errors.append(str(exc))
-            continue
-        if not source.is_file():
-            errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document source is missing: {rel}")
+        verify_source = verify_source_paths is None or rel in verify_source_paths
+        if verify_source:
+            try:
+                source = document_path(root, rel)
+            except ContinuityError as exc:
+                errors.append(str(exc))
+                continue
+            if not source.is_file():
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document source is missing: {rel}")
+        else:
+            relative_path = PurePosixPath(rel)
+            if (
+                relative_path.is_absolute()
+                or ".." in relative_path.parts
+                or not relative_path.parts
+                or relative_path.as_posix() != rel
+                or rel in {DOCUMENT_CATALOG_PATH, DOCUMENT_INDEX_PATH}
+            ):
+                errors.append(f"{root / DOCUMENT_CATALOG_PATH}: invalid repository-relative document path: {rel}")
         for task_id in record["tasks"]:
             if task_id not in known_task_ids:
                 errors.append(f"{root / DOCUMENT_CATALOG_PATH}: document {doc_id} references unknown task {task_id}")
@@ -2492,6 +2509,38 @@ def committed_file(root: Path, commit: str, rel: str) -> bytes:
     return result.stdout
 
 
+def committed_files(root: Path, commit: str, relatives: list[str]) -> dict[str, bytes]:
+    """Read a clean committed source set with one status and one archive operation."""
+    relatives = list(dict.fromkeys(relatives))
+    dirty = git_run(root, ["status", "--porcelain", "--untracked-files=all", "--", *relatives]).stdout.strip()
+    if dirty:
+        raise ContinuityError("context sources are not a clean committed snapshot; commit or checkpoint them first")
+    try:
+        archive = subprocess.run(
+            ["git", "-C", str(root), "archive", "--format=tar", commit, "--", *relatives],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        detail = exc.stderr.decode("utf-8", errors="replace").strip() if isinstance(exc, subprocess.CalledProcessError) else str(exc)
+        raise ContinuityError(f"could not read committed context sources: {detail}") from exc
+    result: dict[str, bytes] = {}
+    try:
+        with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:") as bundle:
+            for member in bundle.getmembers():
+                if not member.isfile():
+                    continue
+                source = bundle.extractfile(member)
+                if source is not None:
+                    result[member.name] = source.read()
+    except tarfile.TarError as exc:
+        raise ContinuityError("Git returned an invalid committed context archive") from exc
+    missing = sorted(set(relatives) - result.keys())
+    if missing:
+        raise ContinuityError(f"context source is absent from commit {commit}: {', '.join(missing)}")
+    return result
+
+
 def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     config = load_config(root)
     task_path = find_task(root, config, task_id)
@@ -2510,12 +2559,17 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
     catalog_path = root / DOCUMENT_CATALOG_PATH
     if catalog_path.exists():
         catalog = load_document_catalog(root)
-        errors = validate_document_catalog(root, document_task_ids(root, config))
+        selected_documents = context_documents_for_task(catalog, task_id)
+        errors = validate_document_catalog_data(
+            root,
+            catalog,
+            document_task_ids(root, config),
+            {record["path"] for record in selected_documents},
+        )
         if errors:
             raise ContinuityError("document inventory is invalid: " + "; ".join(errors))
-        selected_documents = context_documents_for_task(catalog, task_id)
         sources.extend(record["path"] for record in selected_documents)
-        selection_sources = [DOCUMENT_CATALOG_PATH, DOCUMENT_INDEX_PATH]
+        selection_sources = [DOCUMENT_CATALOG_PATH]
     else:
         # Keep the established behavior for repositories that have not opted
         # into the optional, task-scoped document inventory.
@@ -2555,14 +2609,15 @@ def pack_task(root: Path, task_id: str, output: Path | None) -> Path:
         str(task_meta["next_action"]),
         "",
     ]
+    source_contents = committed_files(root, commit, sources + selection_sources)
     if selection_sources:
         chunks.extend(["## Document selection provenance", ""])
         for rel in selection_sources:
-            content = committed_file(root, commit, rel)
+            content = source_contents[rel]
             chunks.append(f"- `{rel}` at `{commit}`; SHA-256 `{sha256_bytes(content)}`")
         chunks.append("")
     for rel in sources:
-        content = committed_file(root, commit, rel)
+        content = source_contents[rel]
         try:
             text_content = content.decode("utf-8")
         except UnicodeDecodeError as exc:

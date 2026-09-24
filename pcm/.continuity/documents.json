@@ -122,14 +122,31 @@
         "continuity-records-policy",
         "testing-policy"
       ],
-      "reviewed_commit": "f4daa60d563ac29bcf6f60d9807e0715a8c77361",
-      "reviewed_sha256": "770b82321effcd91310b39b9e791baf6b05e82fb4fd41779b2169dd6d210da4d",
+      "reviewed_commit": "08bbf500ddfc2109f833c60f45fba8505c9a88fa",
+      "reviewed_sha256": "d2b3cb6a5cd94a31be6abd2a4816ec702cf0e2491746f0ce2d577c254cca9331",
       "summary": "Queued policy to make GitHub authoritative for PCM task tracking and prove fresh-session delivery and continuity.",
       "tasks": [
         "PCM-0018",
         "PCM-0024"
       ],
       "title": "PCM-0024 GitHub authority"
+    },
+    {
+      "id": "pcm-0024-stress-profile",
+      "keywords": [
+        "benchmark",
+        "context-pack",
+        "stress"
+      ],
+      "path": "docs/benchmarks/PCM-0024-stress-profile.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "be206563b7b93bc0bee48300ee3707c234a6bdc93ae1cf95be6fa1d5af474ed8",
+      "summary": "Reproducible synthetic benchmark for lookup, checkpoint append, context-pack latency, storage, and Python-traced memory.",
+      "tasks": [
+        "PCM-0024"
+      ],
+      "title": "PCM-0024 large-repository stress profile"
     },
     {
       "id": "testing-policy",

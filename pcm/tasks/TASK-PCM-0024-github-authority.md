@@ -1,6 +1,6 @@
 # TASK-PCM-0024 — Make GitHub authoritative and prove reliable continuation
 
-<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"Resolve the hosted Linux MyPy and generated-index failures on PR #56, then complete the two-user adoption, fresh-session holdouts, stress profile, and closeout evidence.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
+<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"Complete independent no-history issue-53 holdouts and a real two-user, separate-drive adoption; verify checkout reuse, writer arbitration, required checks, auto-merge and cleanup. Use an independently authenticated collaborator; this session has only the owner account.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
 
 - Status: active per owner direction; PCM-0018 / #33 cleanup remains separately blocked
 - Owner: Codex PCM session; GitHub issue #53
@@ -14,15 +14,15 @@ A new session should be able to identify the authorized work from GitHub, resume
 ## Scope and boundaries
 
 - Issue [#53](https://github.com/Pukujan/project-continuity-modules/issues/53) owns the full scope and acceptance criteria.
-- This task is active, but GitHub authority is **not implemented yet**. Do not describe the policy as shipped until its implementation merges.
+- GitHub authority, private per-device checkout registration, safe existing-checkout reuse, writer serialization, and delivery guidance merged in PR #56 at `4033b49`. This issue remains open because multi-user and fresh-session acceptance evidence is incomplete.
 - PCM-0018 / issue #33 has recorded its pinned baseline/candidate evidence. Its residual disposable-copy cleanup and closeout remain open; do not represent #33 as completed.
 - Retain the existing human-first issue policy (#32), fresh-session fairness policy (#39), and bounded worktree lifecycle. Do not create an issue per test type or modify unrelated target repositories.
 
 ## Acceptance criteria
 
-- [ ] Implement and test the GitHub authority and delivery contract in the normative spec and generated adopter guidance.
+- [x] Implement and test the GitHub authority and delivery contract in the normative spec and generated adopter guidance (PR #56, merged at `4033b49`; hosted required checks passed).
 - [ ] Verify the policy and end-to-end issue → checkpoint/push → required CI → automatic merge → issue closeout → safe cleanup path in a disposable adoption.
-- [ ] Record independent no-history fresh-session results and a reproducible large-repository stress measurement; label what a single run cannot establish.
+- [ ] Record independent no-history fresh-session results for the GitHub-authority promise and a reproducible large-repository stress measurement; label what a single run cannot establish. A local stress profile and measurement are recorded; the no-history issue-53 holdouts remain outstanding.
 - [ ] Run local and hosted quality gates, merge automatically, then reconcile task/current/handoff state and clean task-owned resources before closing #53.
 
 ## Related records
@@ -33,6 +33,34 @@ A new session should be able to identify the authorized work from GitHub, resume
 - Fresh-session holdout method: [#39](https://github.com/Pukujan/project-continuity-modules/issues/39)
 
 ## Checkpoint log
+
+### 2026-09-24 — stress, stale-writer, and multi-task follow-up
+
+Completed:
+- Added a reproducible synthetic profile for 5,000 indexed documents and 2,000 checkpoint records, plus provisional human-usable latency, size, storage, and memory guardrails.
+- Optimized context-pack source retrieval with a single clean-state check and batched Git archive; pack validation checks selected files while validating all catalog records' schema, task links, and path shape.
+- Added regression tests proving a stale writer cannot overwrite the remote checkpoint, one registered checkout on another drive is reused, and distinct task IDs receive separate task worktrees.
+
+Evidence:
+- `python tests/pcm0024_stress_profile.py` (Python 3.12.10, Windows 11, 5,000 docs, 2,000 seed checkpoints, 40 repetitions): lookup p95 77.637 ms; checkpoint append p95 461.396 ms; context pack 6,916.171 ms / 1,905,540 bytes; traced Python peak 31,686,050 bytes; fixture file storage excluding `.git` 9,532,017 bytes. Full reproduction and limits: `docs/benchmarks/PCM-0024-stress-profile.md`.
+- `python -m unittest discover -s tests -v`: 72 passed in 75.679 seconds. Targeted checkpoint (6), worktree (18), and document-catalog (12) suites also passed. Ruff, MyPy, compileall, and `continuity validate --root .` passed.
+- `python tests/package_smoke.py --root .`: wheel and source archive both passed minimal/software generation and PCM-0018 feature parity on Python 3.12.
+- GitHub branch protection requires `quality`, Python 3.11/3.12 tests, package, and Python 3.11/3.12 package-parity checks; enforce-admins is enabled. `gh auth status` exposes only the owner's active account in this session, so the second-user adoption cannot be claimed.
+
+Decisions:
+- Keep issue #53 open until independent fresh-session proof and an actual second authorized user on a separate drive exercise the hosted collaboration/merge/cleanup path. Same-user, separate-root tests do not substitute for that acceptance criterion.
+- Keep stress thresholds provisional and out of timing-sensitive CI; this is a one-machine synthetic baseline, not a repeatability or production-scale claim.
+
+Changed:
+- `src/continuity/cli.py`; `tests/test_checkpoint_retries.py`; `tests/test_worktrees.py`; `tests/pcm0024_stress_profile.py`; `docs/benchmarks/PCM-0024-stress-profile.md`; document catalog and index.
+
+Blocked/uncertain:
+- A second independently authenticated collaborator/device is not available in the current session; no second-user race or separate-drive hosted adoption is claimed.
+- Independent no-history holdouts specifically for issue #53 remain outstanding. Existing #33 baseline/candidate evidence is linked but does not prove the GitHub-authority promise.
+- Full suite, wheel/sdist package parity, and local static/continuity checks passed.
+
+Next:
+- Commit and push this follow-up on the existing PCM task branch, then open a PR linked to #53 without closing it. After merge, run independent issue-53 holdouts and arrange the real two-user adoption using an authorized collaborator.
 
 ### 2026-09-24 — cross-platform CI failure follow-up
 
@@ -204,6 +232,52 @@ Blocked/uncertain:
 
 Next:
 - Inspect PR #56 hosted Linux index diff and resolve the true source of platform divergence before enabling merge.
+
+### 2026-09-24 04:41:43 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["A second independently authenticated collaborator and independent no-history issue-53 holdouts remain outstanding."],"changed":["src/continuity/cli.py; tests/test_checkpoint_retries.py; tests/test_worktrees.py; tests/pcm0024_stress_profile.py; docs/benchmarks/PCM-0024-stress-profile.md; PROJECT.md; HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0024-github-authority.md; docs/CONTINUITY_INDEX.md; .continuity/documents.json"],"completed":["Merged PR #56 enforcement was followed by large-repository optimization and a reproducible stress profile; added stale-writer and multi-task worktree regression coverage."],"decisions":["Keep #53 open; local separate-root tests do not claim the issue's required real two-user hosted adoption. Stress guardrails are provisional and one-machine only."],"evidence":["Full suite: 72 passed; Ruff, MyPy, compileall, continuity validation, git diff check, and Python 3.12 wheel/sdist package parity passed. Stress profile: 5000 docs, 2000 checkpoints, lookup p95 77.637 ms, append p95 461.396 ms, pack 6916.171 ms / 1905540 bytes, Python traced peak 31686050 bytes; see docs/benchmarks/PCM-0024-stress-profile.md. Issue #53 is OPEN. Branch protection requires six CI checks and enforce-admins is enabled. This session has only one authenticated GitHub identity."],"next_action":"Open a PR for the committed follow-up and enable auto-merge behind required checks without closing issue #53; then arrange independent issue-53 holdouts and the real two-user, separate-drive adoption.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T04:41:43Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"2d058ee0950f809c0c5f778bd72fc1ad1c759389c098e891093934c513eb2178","request_id":"f16bcb7eeb95455ab5822528d0ab13f0","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Merged PR #56 enforcement was followed by large-repository optimization and a reproducible stress profile; added stale-writer and multi-task worktree regression coverage.
+
+Evidence:
+- Full suite: 72 passed; Ruff, MyPy, compileall, continuity validation, git diff check, and Python 3.12 wheel/sdist package parity passed. Stress profile: 5000 docs, 2000 checkpoints, lookup p95 77.637 ms, append p95 461.396 ms, pack 6916.171 ms / 1905540 bytes, Python traced peak 31686050 bytes; see docs/benchmarks/PCM-0024-stress-profile.md. Issue #53 is OPEN. Branch protection requires six CI checks and enforce-admins is enabled. This session has only one authenticated GitHub identity.
+
+Decisions:
+- Keep #53 open; local separate-root tests do not claim the issue's required real two-user hosted adoption. Stress guardrails are provisional and one-machine only.
+
+Changed:
+- src/continuity/cli.py; tests/test_checkpoint_retries.py; tests/test_worktrees.py; tests/pcm0024_stress_profile.py; docs/benchmarks/PCM-0024-stress-profile.md; PROJECT.md; HANDOFF.md; checkpoints/CURRENT.md; tasks/TASK-PCM-0024-github-authority.md; docs/CONTINUITY_INDEX.md; .continuity/documents.json
+
+Blocked/uncertain:
+- A second independently authenticated collaborator and independent no-history issue-53 holdouts remain outstanding.
+
+Next:
+- Open a PR for the committed follow-up and enable auto-merge behind required checks without closing issue #53; then arrange independent issue-53 holdouts and the real two-user, separate-drive adoption.
+
+### 2026-09-24 04:44:14 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Hosted rerun of PR #57 is pending; issue #53's real two-user adoption and independent no-history holdouts remain outstanding."],"changed":["tests/test_worktrees.py; .continuity/documents.json; docs/CONTINUITY_INDEX.md"],"completed":["Fixed PR #57's first hosted CI failure: the cross-drive checkout-reuse test now falls back to a writable temporary root on Unix while retaining cross-volume coverage on Windows."],"decisions":["Treat same-volume Unix fallback as root-reuse coverage only; do not describe it as cross-drive proof. Windows local run exercised different volumes."],"evidence":["First PR #57 workflow run 35956749486 failed only in tests.test_worktrees.ManagedWorktreeTests.test_create_reuses_registered_checkout_on_another_drive because the hosted Unix account cannot create a directory under '/'. The corrected targeted test passed on local Windows; Ruff and continuity validation passed."],"next_action":"Confirm the new required CI runs pass for PR #57; keep issue #53 open and auto-merge gated on the complete required check set.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T04:44:14Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"bc5875f7c857525c2f869898d2d63dd2c32fcdf72ab2d72dde3be8e2885bb09c","request_id":"d81cdfea897f4076ba70eeee23b5afb6","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Fixed PR #57's first hosted CI failure: the cross-drive checkout-reuse test now falls back to a writable temporary root on Unix while retaining cross-volume coverage on Windows.
+
+Evidence:
+- First PR #57 workflow run 35956749486 failed only in tests.test_worktrees.ManagedWorktreeTests.test_create_reuses_registered_checkout_on_another_drive because the hosted Unix account cannot create a directory under '/'. The corrected targeted test passed on local Windows; Ruff and continuity validation passed.
+
+Decisions:
+- Treat same-volume Unix fallback as root-reuse coverage only; do not describe it as cross-drive proof. Windows local run exercised different volumes.
+
+Changed:
+- tests/test_worktrees.py; .continuity/documents.json; docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- Hosted rerun of PR #57 is pending; issue #53's real two-user adoption and independent no-history holdouts remain outstanding.
+
+Next:
+- Confirm the new required CI runs pass for PR #57; keep issue #53 open and auto-merge gated on the complete required check set.
 
 ## Handoff
 

@@ -133,11 +133,24 @@ class ManagedWorktreeTests(unittest.TestCase):
         self.git(["git", "checkout", "-b", branch])
         self.assertEqual((self.root, True), create_managed_worktree(self.root, self.task_id))
 
-    def test_create_reuses_registered_checkout_on_another_root(self) -> None:
+    def test_create_reuses_registered_checkout_on_another_drive(self) -> None:
         from continuity.cli import register_local_workspace
 
-        other = self.base / "other-drive-checkout"
-        self.git(["git", "clone", str(self.remote), str(other)])
+        try:
+            other_volume = tempfile.TemporaryDirectory(dir=Path(__file__).resolve().anchor)
+        except PermissionError:
+            # Hosted Unix runners generally cannot create temporary roots at `/`.
+            # Keep a separate-root reuse test there; Windows exercises another volume.
+            other_volume = tempfile.TemporaryDirectory()
+        self.addCleanup(other_volume.cleanup)
+        other = Path(other_volume.name) / "other-drive-checkout"
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(other)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
         subprocess.run(["git", "-C", str(other), "config", "user.name", "PCM Test"], check=True)
         subprocess.run(["git", "-C", str(other), "config", "user.email", "pcm-test@example.invalid"], check=True)
         branch = "task/DPT-0001-safe-cleanup"
@@ -168,6 +181,20 @@ class ManagedWorktreeTests(unittest.TestCase):
         with self.assertRaisesRegex(ContinuityError, "existing task checkout is dirty"):
             create_managed_worktree(self.root, self.task_id)
         self.assertFalse((self.root / "pcm" / "worktree" / self.task_id).exists())
+
+    def test_distinct_task_ids_get_independent_worktrees(self) -> None:
+        task_new(self.root, "parallel-task", "Proceed independently", "Parallel work test", "other", "P2")
+        self.commit_all("add second task")
+        self.git(["git", "push", "origin", "main"])
+        first_path, _ = create_managed_worktree(self.root, self.task_id)
+        second_path, _ = create_managed_worktree(self.root, "DPT-0002")
+        self.assertEqual(self.root / "pcm" / "worktree" / self.task_id, first_path)
+        self.assertEqual(self.root / "pcm" / "worktree" / "DPT-0002", second_path)
+        self.assertNotEqual(first_path, second_path)
+        first_branch = self.git(["git", "-C", str(first_path), "branch", "--show-current"]).stdout.strip()
+        second_branch = self.git(["git", "-C", str(second_path), "branch", "--show-current"]).stdout.strip()
+        self.assertEqual("task/DPT-0001-safe-cleanup", first_branch)
+        self.assertEqual("task/DPT-0002-parallel-task", second_branch)
 
     def test_local_lock_rejects_a_second_concurrent_resolver(self) -> None:
         with (

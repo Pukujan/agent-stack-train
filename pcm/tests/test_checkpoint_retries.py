@@ -137,6 +137,32 @@ class CheckpointRetryTests(unittest.TestCase):
             local_commit,
         )
 
+    def test_stale_writer_is_rejected_without_overwriting_remote_checkpoint(self) -> None:
+        root, remote = self.make_repo()
+        other = Path(tempfile.mkdtemp(prefix="continuity-stale-writer-"))
+        self.addCleanup(shutil.rmtree, other, True)
+        subprocess.run(
+            ["git", "clone", "-q", "-b", "task/PCM-0001-retry", str(remote), str(other)], check=True
+        )
+        subprocess.run(["git", "-C", other, "config", "user.email", "other@example.invalid"], check=True)
+        subprocess.run(["git", "-C", other, "config", "user.name", "Other writer"], check=True)
+
+        first_task = self.add_checkpoint(root, request_id="writer-one", completed="first writer")
+        publish_checkpoint(root, first_task, "PCM-0001", "run the full suite", request_id="writer-one")
+        remote_after_first = subprocess.check_output(
+            ["git", "--git-dir", str(remote), "rev-parse", "refs/heads/task/PCM-0001-retry"], text=True
+        ).strip()
+
+        other_task = self.add_checkpoint(other, request_id="writer-two", completed="stale writer")
+        with self.assertRaisesRegex(ContinuityError, "rejected"):
+            publish_checkpoint(other, other_task, "PCM-0001", "run the full suite", request_id="writer-two")
+
+        remote_after_stale = subprocess.check_output(
+            ["git", "--git-dir", str(remote), "rev-parse", "refs/heads/task/PCM-0001-retry"], text=True
+        ).strip()
+        self.assertEqual(remote_after_first, remote_after_stale)
+        self.assertIn('"request_id":"writer-two"', other_task.read_text(encoding="utf-8"))
+
     def test_cli_replay_with_printed_request_id_creates_one_remote_checkpoint(self) -> None:
         from contextlib import redirect_stdout
         from io import StringIO

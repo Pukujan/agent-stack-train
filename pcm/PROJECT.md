@@ -34,7 +34,7 @@ Canonical continuity state is layered:
 - evidence-aware;
 - minimal enough for small projects but extensible through profiles;
 - context packs derived from canonical state, never replacing it;
-- issue trackers/adapters optional;
+- GitHub is authoritative for task lifecycle in PCM-governed GitHub repositories; host-specific adapter tooling remains modular;
 - project protocol must be able to manage its own development.
 
 ## v1 target capabilities
