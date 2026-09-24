@@ -279,6 +279,29 @@ Blocked/uncertain:
 Next:
 - Confirm the new required CI runs pass for PR #57; keep issue #53 open and auto-merge gated on the complete required check set.
 
+### 2026-09-24 04:49:08 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Need an independently authenticated collaborator/device on a separate drive for the two-user adoption, plus independent no-history sessions specifically for issue #53."],"changed":["tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; HANDOFF.md"],"completed":["PR #57 auto-merged the large-repository stress profile, context-pack optimization, stale-writer safeguard, and task-specific worktree tests."],"decisions":["PR #57 proves required CI and automatic merge for this slice, but does not satisfy the issue's two-user adoption or independent fresh-session holdouts. Leave #53 open."],"evidence":["PR #57 merged at b9a23f7612b41902e2b5c10c1da086e33888ef22. Latest head checks in workflow 35956947124: quality, test 3.11, test 3.12, package, package parity 3.11, and package parity 3.12 all passed; auto-merge job passed. continuity issue verify PCM-0024 --root . reports issue #53 OPEN. Local full suite 72 passed; wheel/sdist parity passed. The cross-drive checkout test passed on two Windows volumes; Unix hosted fallback uses a separate writable root."],"next_action":"Publish the reconciled post-merge task/current/handoff checkpoint through a PR without closing #53; then arrange the independent issue-53 holdouts and real two-user adoption.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T04:49:08Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3ca00f63cf3bfe14a7db235d46c8a78ef50be08e6f287a85bfee9623e82c3460","request_id":"50d304f042974f56b5670435a46af79e","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- PR #57 auto-merged the large-repository stress profile, context-pack optimization, stale-writer safeguard, and task-specific worktree tests.
+
+Evidence:
+- PR #57 merged at b9a23f7612b41902e2b5c10c1da086e33888ef22. Latest head checks in workflow 35956947124: quality, test 3.11, test 3.12, package, package parity 3.11, and package parity 3.12 all passed; auto-merge job passed. continuity issue verify PCM-0024 --root . reports issue #53 OPEN. Local full suite 72 passed; wheel/sdist parity passed. The cross-drive checkout test passed on two Windows volumes; Unix hosted fallback uses a separate writable root.
+
+Decisions:
+- PR #57 proves required CI and automatic merge for this slice, but does not satisfy the issue's two-user adoption or independent fresh-session holdouts. Leave #53 open.
+
+Changed:
+- tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; HANDOFF.md
+
+Blocked/uncertain:
+- Need an independently authenticated collaborator/device on a separate drive for the two-user adoption, plus independent no-history sessions specifically for issue #53.
+
+Next:
+- Publish the reconciled post-merge task/current/handoff checkpoint through a PR without closing #53; then arrange the independent issue-53 holdouts and real two-user adoption.
+
 ## Handoff
 
 Read issue #53, PROJECT, CURRENT, this task, and only relevant policy/test records. Confirm current GitHub state; do not rely on prior chat. Issue #33 remains open for cleanup/closeout, but does not block this owner-directed task.
