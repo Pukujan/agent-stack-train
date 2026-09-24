@@ -2585,6 +2585,13 @@ def receipt_pr_line(pull_request: str | None) -> str:
     return pull_request
 
 
+def receipt_checkpoint_line(root: Path, checkpoint_path: Path) -> str:
+    try:
+        return checkpoint_path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return "not supplied"
+
+
 def receipt_test_line(evidence: list[str]) -> str:
     cleaned = [item.strip() for item in evidence if item.strip()]
     return "; ".join(cleaned) if cleaned else "not supplied"
@@ -2599,12 +2606,14 @@ def render_receipt_body(
     next_action: str,
     commit_url: str = "not supplied",
     pull_request: str = "not supplied",
+    checkpoint: str = "not supplied",
 ) -> str:
     return "\n".join(
         [
             marker,
             f"Actor: {actor}",
             f"Commit: {commit_url}",
+            f"Checkpoint: {checkpoint}",
             f"Pull: {pull_request}",
             f"Parent: {parent}",
             f"Tests: {tests}",
@@ -3400,6 +3409,7 @@ def main(argv: list[str] | None = None) -> int:
                         next_action=args.next_action,
                         commit_url=receipt_commit_url(repository, commit),
                         pull_request=receipt_pr_line(args.receipt_pr),
+                        checkpoint=receipt_checkpoint_line(Path(args.root).resolve(), path),
                     )
 
                     def run_post(command: list[str], body: str) -> subprocess.CompletedProcess[str]:
