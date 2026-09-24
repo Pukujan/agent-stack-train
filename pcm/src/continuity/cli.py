@@ -2605,6 +2605,11 @@ def receipt_checkpoint_line(root: Path, checkpoint_path: Path) -> str:
         return "not supplied"
 
 
+def receipt_dependency_line(dependencies: list[str]) -> str:
+    cleaned = [item.strip() for item in dependencies if item.strip()]
+    return ", ".join(cleaned) if cleaned else "not supplied"
+
+
 def receipt_test_line(evidence: list[str]) -> str:
     cleaned = [item.strip() for item in evidence if item.strip()]
     return "; ".join(cleaned) if cleaned else "not supplied"
@@ -2620,6 +2625,7 @@ def render_receipt_body(
     commit_url: str = "not supplied",
     pull_request: str = "not supplied",
     checkpoint: str = "not supplied",
+    dependencies: str = "not supplied",
 ) -> str:
     return "\n".join(
         [
@@ -2628,6 +2634,7 @@ def render_receipt_body(
             f"Commit: {commit_url}",
             f"Checkpoint: {checkpoint}",
             f"Pull: {pull_request}",
+            f"Depends: {dependencies}",
             f"Parent: {parent}",
             f"Tests: {tests}",
             f"Next: {next_action}",
@@ -3193,6 +3200,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--receipt-issue", default=None, help="opt-in issue number for a GitHub receipt")
     p_checkpoint.add_argument("--receipt-parent", default=None, help="opt-in parent issue number")
     p_checkpoint.add_argument("--receipt-pr", default=None, help="optional GitHub pull request URL")
+    p_checkpoint.add_argument("--receipt-depends", action="append", default=None, help="optional dependency link")
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3424,6 +3432,7 @@ def main(argv: list[str] | None = None) -> int:
                         commit_url=receipt_commit_url(repository, commit),
                         pull_request=receipt_pr_line(args.receipt_pr),
                         checkpoint=receipt_checkpoint_line(Path(args.root).resolve(), path),
+                        dependencies=receipt_dependency_line(args.receipt_depends or []),
                     )
 
                     def run_post(command: list[str], body: str) -> subprocess.CompletedProcess[str]:
