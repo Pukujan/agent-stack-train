@@ -2554,6 +2554,19 @@ def authenticated_actor(login: str) -> str:
     return actor
 
 
+def require_issue_identity(payload: str, *, issue_number: str, task_id: str) -> None:
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("receipt issue identity returned invalid JSON") from exc
+    if not isinstance(data, dict) or str(data.get("number") or "") != issue_number:
+        raise ContinuityError("receipt issue number does not match; refusing to post")
+    title = str(data.get("title") or "")
+    body = str(data.get("body") or "")
+    if task_id not in title and task_id not in body:
+        raise ContinuityError(f"receipt issue does not name {task_id}; refusing to post")
+
+
 def render_receipt_body(
     marker: str,
     *,
@@ -3338,6 +3351,19 @@ def main(argv: list[str] | None = None) -> int:
                         retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
                         raise ContinuityError(f"{receipt_failure_message(commit, detail)}; retry: {retry}")
                     actor = authenticated_actor(actor_result.stdout)
+                    identity = run_external(
+                        ["gh", "api", f"repos/{repository}/issues/{issue_number}"],
+                        Path(args.root).resolve(),
+                    )
+                    if identity.returncode != 0:
+                        detail = (identity.stderr or identity.stdout or "GitHub issue identity unavailable").strip()
+                        retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
+                        raise ContinuityError(f"{receipt_failure_message(commit, detail)}; retry: {retry}")
+                    try:
+                        require_issue_identity(identity.stdout, issue_number=issue_number, task_id=args.task_id)
+                    except ContinuityError as exc:
+                        retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
+                        raise ContinuityError(f"{exc}; push {commit} stands; retry: {retry}") from exc
                     receipt_body = render_receipt_body(
                         marker,
                         actor=actor,
