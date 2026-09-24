@@ -2615,6 +2615,44 @@ def publish_issue_receipt(
     )
 
 
+def publish_then_receipt(
+    publish: Callable[[], str],
+    bodies: list[str],
+    *,
+    repository: str,
+    task_id: str,
+    request_id: str,
+    destination: str,
+    kind: str,
+    payload_sha256: str,
+    lookup_complete: bool,
+    issue_number: str,
+    run: Callable[[list[str], str], subprocess.CompletedProcess[str]],
+) -> str:
+    """Run the receipt path only after publish returns a confirmed commit."""
+    commit = publish()
+    marker = render_receipt_marker(
+        repository=repository,
+        task_id=task_id,
+        request_id=request_id,
+        pushed_sha=commit,
+        destination=destination,
+        kind=kind,
+        payload_sha256=payload_sha256,
+    )
+    publish_issue_receipt(
+        bodies,
+        marker,
+        payload_sha256,
+        lookup_complete=lookup_complete,
+        repository=repository,
+        issue_number=issue_number,
+        body=marker,
+        run=run,
+    )
+    return commit
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
