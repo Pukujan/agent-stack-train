@@ -2667,6 +2667,23 @@ def page_is_complete(count: int, page_size: int) -> bool:
     return count < page_size
 
 
+def classify_receipt_failure(detail: str) -> str:
+    text = detail.lower()
+    if any(token in text for token in ("401", "403", "authentication", "permission", "forbidden")):
+        return "permission"
+    if any(token in text for token in ("404", "not found")):
+        return "wrong-target"
+    return "unavailable"
+
+
+def receipt_failure_message(commit: str, detail: str) -> str:
+    kind = classify_receipt_failure(detail)
+    return (
+        f"RECEIPT_{kind.upper().replace('-', '_')}: push {commit} stands; "
+        f"do not roll back and do not post again until a new lookup succeeds; {detail}"
+    )
+
+
 def comment_bodies(payload: str) -> list[str]:
     try:
         data = json.loads(payload)
@@ -3183,7 +3200,7 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     if fetched.returncode != 0:
                         detail = (fetched.stderr or fetched.stdout or "GitHub comment lookup failed").strip()
-                        raise ContinuityError(f"receipt lookup failed; push {commit} stands; do not post: {detail}")
+                        raise ContinuityError(receipt_failure_message(commit, detail))
                     payload_sha = hashlib.sha256(f"{args.task_id}\n{request_id}\n{commit}".encode()).hexdigest()
                     marker = render_receipt_marker(
                         repository=repository,
