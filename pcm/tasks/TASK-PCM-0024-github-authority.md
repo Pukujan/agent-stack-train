@@ -308,7 +308,7 @@ Next:
 <!-- continuity:checkpoint-operation {"payload_sha256":"274ca16095ba14e9fa5ee36d24993217812cd5d5f93d82ba6bbada5c32117215","request_id":"23ed54e496ab4dfa94973e3af1cfa55b","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
 
 Completed:
-- PR #58 merged the post-merge task/current/handoff reconciliation. GitHub briefly auto-closed issue #53 because PR prose contained the phrase 'does not close #53'; the issue was reopened immediately and the merged PR description was corrected.
+- PR #58 merged the post-merge task/current/handoff reconciliation. GitHub briefly changed issue #53's state because PR prose contained a negated lifecycle directive; the issue was reopened immediately and the merged PR description was corrected.
 
 Evidence:
 - PR #58 merged at dffa814317358870ccba0be7716f511b9b0f5d5a after all six required checks passed. Issue #53 is currently OPEN (verified with gh issue view and continuity issue verify); the correction and reason are documented in issue comment https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5807908634.
@@ -323,7 +323,30 @@ Blocked/uncertain:
 - Independent no-history issue-53 holdouts and actual two-user/separate-drive adoption still need an independent session and second authenticated collaborator/device.
 
 Next:
-- Arrange an authorized collaborator on a separate device/drive and authorize independent no-history issue-53 holdouts; then run the remaining proof, reconcile all evidence, and only close #53 after full acceptance.
+- Arrange an authorized collaborator on a separate device/drive and authorize independent no-history issue-53 holdouts; then run the remaining proof, reconcile all evidence, and mark issue #53 complete only after full acceptance.
+
+### 2026-09-24 04:57:00 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Independent no-history issue-53 holdouts and actual two-user/separate-drive adoption still need an independent session and second authenticated collaborator/device."],"changed":["tasks/TASK-PCM-0024-github-authority.md; issue #53 progress comment"],"completed":["Reopened issue #53 after two consecutive unintended lifecycle transitions tied to merged commit directives; updated the task's exact next action to use neutral completion wording and documented the event on the issue."],"decisions":["Use positive lifecycle wording in checkpoint next actions and verify the live issue state after every merge."],"evidence":["PR #59 merged at 1066cec402ca7fcd76eda16146984ee464726625 with all six required checks and no PR closingIssuesReferences. The close event cites that merge commit; its squash message copied the task checkpoint next_action text 'only close #53 after full acceptance'. Issue #53 is OPEN again after gh issue reopen. Issue comment https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5807908634 records the earlier wording event; this second trigger is now understood."],"next_action":"Ask the owner to designate an independently authenticated collaborator/device and authorize independent no-history holdouts; run the required collaboration and fresh-session proof, then mark the issue complete only after every acceptance criterion passes.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T04:57:00Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"9cea536d9ccf76f3c39356d1968a9f3f486a5bd6253a12f99264acbe726c922c","request_id":"417d831970eb4d858d618296e154a464","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Reopened issue #53 after two consecutive unintended lifecycle transitions tied to merged commit directives; updated the task's exact next action to use neutral completion wording and documented the event on the issue.
+
+Evidence:
+- PR #59 merged at 1066cec402ca7fcd76eda16146984ee464726625 with all six required checks and no PR closingIssuesReferences. The close event cites that merge commit; its squash message copied the task checkpoint next_action text 'only close #53 after full acceptance'. Issue #53 is OPEN again after gh issue reopen. Issue comment https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5807908634 records the earlier wording event; this second trigger is now understood.
+
+Decisions:
+- Use positive lifecycle wording in checkpoint next actions and verify the live issue state after every merge.
+
+Changed:
+- tasks/TASK-PCM-0024-github-authority.md; issue #53 progress comment
+
+Blocked/uncertain:
+- Independent no-history issue-53 holdouts and actual two-user/separate-drive adoption still need an independent session and second authenticated collaborator/device.
+
+Next:
+- Ask the owner to designate an independently authenticated collaborator/device and authorize independent no-history holdouts; run the required collaboration and fresh-session proof, then mark the issue complete only after every acceptance criterion passes.
 
 ## Handoff
 
