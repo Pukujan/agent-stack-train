@@ -2653,6 +2653,20 @@ def publish_then_receipt(
     return commit
 
 
+def require_receipt_pair(repository: str | None, issue_number: str | None) -> tuple[str, str] | None:
+    if repository is None and issue_number is None:
+        return None
+    if not repository or not issue_number:
+        raise ContinuityError("receipt automation requires both --receipt-repo and --receipt-issue")
+    return repository, issue_number
+
+
+def page_is_complete(count: int, page_size: int) -> bool:
+    if page_size < 1:
+        raise ContinuityError("receipt page size must be positive")
+    return count < page_size
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
@@ -2940,6 +2954,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="authorized alternate checkout/host for a recovery receipt if canonical state is unavailable",
     )
+    p_checkpoint.add_argument("--receipt-repo", default=None, help="opt-in owner/name for a GitHub receipt")
+    p_checkpoint.add_argument("--receipt-issue", default=None, help="opt-in issue number for a GitHub receipt")
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3090,6 +3106,7 @@ def main(argv: list[str] | None = None) -> int:
             timestamp = args.time or datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
             request_id = args.request_id or uuid.uuid4().hex
             print(f"REQUEST_ID: {request_id}", flush=True)
+            receipt_pair = require_receipt_pair(args.receipt_repo, args.receipt_issue)
             recovery_root = Path(args.recovery_root).resolve() if args.recovery_root else None
             path = checkpoint_task(
                 Path(args.root).resolve(),
@@ -3117,6 +3134,11 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 print(path)
                 print(f"PUSHED: {commit}")
+                if receipt_pair is not None:
+                    print(
+                        "RECEIPT_UNRECONCILED: push stands; comment lookup is not proven complete; "
+                        "do not post until a bounded lookup finishes"
+                    )
             return 0
 
         if args.command == "recovery" and args.recovery_command == "reconcile":
