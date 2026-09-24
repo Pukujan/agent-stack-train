@@ -12,11 +12,13 @@ Start from repository state, not prior chat history.
 
 ## Authority
 
-Canonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.
+For GitHub repositories, Issues are authoritative for task scope, priority, ownership, dependencies, acceptance, and lifecycle. The linked task file is a compact working cache. Merged default-branch history owns accepted code, and PR checks/merge evidence own delivery. Verify the live issue with `continuity issue verify <TASK-ID>` before resuming.
 
 ## Workspace lifecycle
 
 Keep one permanent main checkout as the project's home base and use it for sequential work. When genuine parallelism or isolation is useful, create one managed linked worktree per independent active task under `<canonical-root>/pcm/worktree/<TASK-ID>`, not one per session or agent; resume it across sessions. Do not create sibling clones or arbitrary worktree paths.
+
+Before creating a tree, PCM checks Git's registered worktrees and its private per-device workspace registry. Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths stay local and must never be copied into shared records.
 
 After required checks pass, the PR is merged, the task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. It verifies the GitHub PR, required checks, and merged commit and refuses locked/pinned, dirty, or unproven cleanup; never force-remove unfinished or user-modified work. For a short audit hold, record the reason, expected release date, exact path, and unlock/remove next action in the completed task's checkpoint, then pin the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. When the audit ends, unlock it and run normal verified cleanup. Other Git hosts remain unsupported for cleanup until PCM has a tested CI/merge verifier for them. `workspace.mode: single-checkout` is available when strict one-checkout behavior is preferred.
 
@@ -30,7 +32,7 @@ When `.continuity/documents.json` is present, it is the machine-readable invento
 
 Execution safety and existing authorization outrank continuity bookkeeping. If canonical continuity state is temporarily unavailable, do not stop safe work or repair storage merely to force a write. Use an already-authorized alternate checkout/host and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write the JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint under `checkpoints/` or replace the alternate task file. Reconcile it later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`. The repository/task lineage is authoritative; a physical worktree is not.
 
-Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). A local-only checkpoint is not durable. CI and pull-request automation merge the pushed state after required checks pass.
+Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and synchronously pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). Open or update a PR after pushing. GitHub CI and auto-merge then run asynchronously, gated by required reviews/checks and any merge queue. Confirm the merge before marking complete or removing the worktree.
 
 Delegated agents are temporary workers. Capture each worker's result and evidence
 in the parent task/checkpoint, then explicitly close it immediately. Stop and

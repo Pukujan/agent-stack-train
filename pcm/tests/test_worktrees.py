@@ -17,6 +17,7 @@ from continuity.cli import (
     extract_marker,
     github_repository,
     init_repo,
+    local_task_lock,
     marker,
     remove_managed_worktree,
     task_new,
@@ -29,6 +30,9 @@ class ManagedWorktreeTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix="continuity-managed-worktrees-")
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
+        self.registry_environment = patch.dict(os.environ, {"LOCALAPPDATA": str(self.base / "appdata")})
+        self.registry_environment.start()
+        self.addCleanup(self.registry_environment.stop)
         self.remote = self.base / "origin.git"
         self.root = self.base / "project"
         subprocess.run(
@@ -127,8 +131,51 @@ class ManagedWorktreeTests(unittest.TestCase):
     def test_create_refuses_a_task_branch_already_checked_out_in_home_base(self) -> None:
         branch = "task/DPT-0001-safe-cleanup"
         self.git(["git", "checkout", "-b", branch])
-        with self.assertRaisesRegex(ContinuityError, "already attached"):
+        self.assertEqual((self.root, True), create_managed_worktree(self.root, self.task_id))
+
+    def test_create_reuses_registered_checkout_on_another_root(self) -> None:
+        from continuity.cli import register_local_workspace
+
+        other = self.base / "other-drive-checkout"
+        self.git(["git", "clone", str(self.remote), str(other)])
+        subprocess.run(["git", "-C", str(other), "config", "user.name", "PCM Test"], check=True)
+        subprocess.run(["git", "-C", str(other), "config", "user.email", "pcm-test@example.invalid"], check=True)
+        branch = "task/DPT-0001-safe-cleanup"
+        subprocess.run(["git", "-C", str(other), "checkout", "-b", branch], check=True, capture_output=True, text=True)
+        register_local_workspace(other)
+        self.assertEqual((other, True), create_managed_worktree(self.root, self.task_id))
+        self.assertFalse((self.root / "pcm" / "worktree" / self.task_id).exists())
+
+    def test_create_stops_on_dirty_registered_checkout(self) -> None:
+        from continuity.cli import register_local_workspace
+
+        other = self.base / "dirty-registered-checkout"
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(other)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(other), "checkout", "-b", "task/DPT-0001-safe-cleanup"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        (other / "uncommitted.txt").write_text("keep this local work\n", encoding="utf-8")
+        register_local_workspace(other)
+        with self.assertRaisesRegex(ContinuityError, "existing task checkout is dirty"):
             create_managed_worktree(self.root, self.task_id)
+        self.assertFalse((self.root / "pcm" / "worktree" / self.task_id).exists())
+
+    def test_local_lock_rejects_a_second_concurrent_resolver(self) -> None:
+        with (
+            local_task_lock(self.root, self.task_id),
+            self.assertRaisesRegex(ContinuityError, "another local session"),
+            local_task_lock(self.root, self.task_id),
+        ):
+            pass
 
     def test_create_rejects_invalid_task_id_without_touching_filesystem(self) -> None:
         with self.assertRaisesRegex(ContinuityError, "invalid task ID"):

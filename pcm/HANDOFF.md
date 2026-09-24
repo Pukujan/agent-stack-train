@@ -5,7 +5,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 ## Current status
 
 - PCM-0017 is complete: PR #49 delivered package/runtime version identity and isolated wheel/sdist generated-output parity on Python 3.11 and 3.12; PR #50 completed canonical closeout, and issue #31 is closed. PCM-0018 / [GitHub issue #33](https://github.com/Pukujan/project-continuity-modules/issues/33) remains active. Its implementation PR #51 merged automatically at `98747fce4d5c805670dc3b00bb572e5c02706237`; all hosted quality, Python 3.11/3.12 test, package, package-parity, and auto-merge checks passed. The permanent checkout is now clean on `main` at that commit. The implementation candidate is version 0.3.0 and has not been published. Independent baseline and candidate fresh-session reports are recorded in the PCM-0018 task; the candidate found the seeded PCM-0015 research/plan and related catalog entries. The candidate trial clone remains and the baseline trial directory retains a hidden `.git` marker; ordinary cleanup was denied and the environment's automatic review blocked follow-up removal. Cleanup and separate merged closeout remain outstanding. Issue #33 stays open.
-- PCM-0024 / [GitHub issue #53](https://github.com/Pukujan/project-continuity-modules/issues/53) is recorded as the queued follow-up. It requires GitHub authority and additional delivery/resumption proof; the policy has not changed yet. Finish active #33 first.
+- PCM-0024 / [GitHub issue #53](https://github.com/Pukujan/project-continuity-modules/issues/53) is active per owner direction on `task/PCM-0024-github-authority`. It requires GitHub task authority, private local workspace identity, safe multi-worker coordination, and tested delivery/resumption. PCM-0018 / #33 remains open for owner cleanup and a separate closeout; it is not represented as complete.
 - PCM-0019's managed-worktree implementation, cleanup safeguards, and time-bounded audit holds are in merged PRs #45–#47; final task/checkpoint/handoff closeout is PR #48. Issues #20, #34, and #39 are closed after protected CI; the PCM-0019 task branches are removed and the permanent main checkout is the only registered worktree. Five disposable holdout clone folders remain outside the repository because the local recursive-deletion operation was blocked; they are not registered worktrees.
 - The final independent candidate and retention-variant audits passed on the merged snapshot; full suites passed 46 tests each on Python 3.11 and 3.12. Detailed evidence, exact prompts, research citations, and measurement limits are in `tasks/TASK-PCM-0019-managed-worktrees.md` and GitHub issue comments #34/#39.
 - #42 README image recovery remains deferred; do not search for or generate images until the user provides the promised plan.
@@ -15,7 +15,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 - Issue #17's baseline failure, fix, and blind rerun are recorded; it closed after status correction in PR #37. Issue #15 remains open because it includes an unperformed target-repository remediation outside current scope. Issue #42 remains deferred until the user provides the promised image plan; do not search for or generate images.
 - PCM-0012 and PCM-0013 remain separately recorded workspace-policy histories.
 - Other reports stay separately scoped; consult GitHub for the current open list before selecting new work.
-- The PCM-0018 source candidate is `0.3.0`, sourced from `continuity.__version__`; it has not been published. Protocol version remains independent at `0.1.0-draft`.
+- The active PCM-0024 source candidate is `0.4.0`, sourced from `continuity.__version__`; it has not been published. The protocol remains independently declared as `0.1.0-draft`.
 - Protocol version remains: `0.1.0-draft`
 
 ## Read exactly this first
@@ -23,7 +23,7 @@ This repository is ready for a fresh PCM development session without prior chat 
 1. `PROJECT.md`
 2. `AGENTS.md`
 3. `checkpoints/CURRENT.md`
-4. `tasks/TASK-PCM-0018-document-discovery.md`
+4. `tasks/TASK-PCM-0024-github-authority.md`
 5. `SPEC.md`
 6. `docs/HANDOFF_PROTOCOL.md`
 7. `docs/TESTING_POLICY.md`
@@ -32,14 +32,14 @@ This repository is ready for a fresh PCM development session without prior chat 
 
 On every task takeover/resumption, use the optional catalog before choosing
 the next action: run `git fetch origin`, then `continuity docs find "<issue
-title and task-objective terms>" --task PCM-0018` and read matching records and
+title and task-objective terms>" --task PCM-0024` and read matching records and
 their declared neighbors. The catalog and generated human index are
 `.continuity/documents.json` and `docs/CONTINUITY_INDEX.md`; do not invent
 another index when the catalog is present.
 
 ## Exact next action
 
-Use the canonical task [tasks/TASK-PCM-0018-document-discovery.md](tasks/TASK-PCM-0018-document-discovery.md) and `checkpoints/CURRENT.md`. Baseline and candidate reports at `85f13464c466ff277ce319850ce8124c4bc95c52` and `98747fce4d5c805670dc3b00bb572e5c02706237` are recorded. Have the task owner remove or explicitly reconcile the remaining disposable trial-copy residue; Windows denied ordinary removal and automatic review blocked the follow-up operation. Then prepare a separate closeout PR with final task/checkpoint/handoff state. Keep issue #33 open until cleanup and the closeout PR's required CI/automatic merge complete. Leave issues #15 and #42 open for their explicit scope constraints; do not modify excluded target repositories or search/generate the images.
+Use the canonical task [tasks/TASK-PCM-0024-github-authority.md](tasks/TASK-PCM-0024-github-authority.md) and `checkpoints/CURRENT.md`. Implement issue #53's GitHub authority and delivery contract, preserving private local paths, one writer per task branch, protected checks, asynchronous auto-merge, and safe verified cleanup. PCM-0018 / #33 remains open for owner cleanup of disposable trial copies and a separate closeout; do not claim it is complete. Leave issues #15 and #42 open for their explicit scope constraints; do not modify excluded target repositories or search/generate the images.
 
 ## Authority
 

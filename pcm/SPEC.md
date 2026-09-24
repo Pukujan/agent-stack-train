@@ -30,8 +30,8 @@ Append-only observation of state transition with:
 ### CONTEXT PACK
 Generated view derived from canonical objects and tagged with repository/ref/commit/protocol version/source list.
 
-### TRACKER MIRROR
-Optional Issue/Beads/PR representation linked by the same task ID. It is not canonical unless a profile explicitly says otherwise.
+### GITHUB ISSUE
+For GitHub-governed repositories, the GitHub issue is authoritative for task scope, priority, owner, dependencies, acceptance, and lifecycle. The task file is a compact, committed working cache linked with `issue_url`; conflicts are resolved from the live issue. Merged default-branch history is authoritative for accepted code. Pull request checks and merge evidence are authoritative for delivery. Other trackers, chat, and context packs are secondary views.
 
 ## 3. v1 machine-readable shape
 
@@ -69,7 +69,8 @@ A continuity-compliant repository must allow deterministic validation of at leas
 - context packs identify source repository/ref/commit/protocol version/source files and are treated as derived;
 - an optional `.continuity/documents.json` inventory validates and its generated human index matches the canonical inventory and current local source state;
 - no secret material is required inside continuity state;
-- tracker references are optional and cannot be the only copy of task context.
+- GitHub-governed repositories link every active task to one issue in the same repository; the live issue is checked before resuming work.
+- a local task copy never overrides a changed or closed authoritative issue.
 
 Pre-v1 checkpoint entries may lack the v1 metadata marker; validators preserve that history and require the legacy human sections rather than rewriting it.
 
@@ -130,7 +131,7 @@ Projects declare a protocol version in `.continuity/config.json`. Backward-compa
 
 ## 8. Authority
 
-Canonical repository files are authoritative for project continuity. Generated context packs and chat summaries are derived. External trackers are coordination mirrors.
+For GitHub-governed repositories, GitHub Issues own task intent and lifecycle; task files are committed working caches. Merged default-branch history owns accepted code, and PR checks/merge records own delivery evidence. Context packs and chat summaries are derived. If task metadata and GitHub disagree, stop and resolve from the issue before editing. A local path registry may contain absolute paths only on that device; shared issues, commits, PRs, and handoffs contain repository/task/ref/commit identity, never machine-specific paths.
 
 ## 9. Evidence semantics
 
@@ -138,7 +139,7 @@ Continuity records should prefer claims tied to evidence. Validators check struc
 
 ## 10. v1 implementation boundary
 
-PCM-0001 covers schemas, minimal/software templates, deterministic validator, init/bootstrap, task creation, checkpoint append, context-pack generation, tests, and self-dogfooding. GitHub/Beads synchronization adapters are deferred to later tasks.
+GitHub issue verification is read-only; PCM does not synchronize issue text or status. Checkpoint commits are pushed asynchronously through the task branch. Pull requests merge only after branch protection's required reviews/checks; use a merge queue when branch contention warrants it. Each task/checkpoint stream has one primary writer; collaborators work on distinct issue/task branches and submit changes through PRs. Non-fast-forward or stale checkpoint writes fail closed, and force pushes are prohibited. Multiple authorized auto-mergers can request merge; protected branch rules and required checks remain the merge gate. Jira may report GitHub development links but must not become a second task-status authority.
 
 ## 11. Continuity record writing and evidence
 
@@ -148,4 +149,4 @@ External factual claims SHOULD link directly to authoritative sources. Repositor
 
 Keep machine-readable IDs and versions aligned across task/checkpoint, tracker, PR, and evidence links. Human-readable and machine-readable records SHOULD share one declared source or have deterministic checks for shared identifiers and status. A valid schema, citation, link, or agent report is not proof of semantic truth.
 
-PCM owns the continuation-record contract and its propagation to adopting projects. It does not standardize unrelated domain/product writing. GitHub issue and PR templates are optional aids, not synchronization adapters; installing them MUST preserve conflicting project files. PCM MUST NOT claim automatic conversation capture or tracker synchronization without a separately implemented and tested integration. The full policy is in docs/CONTINUITY_RECORDS_POLICY.md.
+PCM owns the continuation-record contract and its propagation to adopting projects. It does not standardize unrelated domain/product writing. GitHub issue and PR templates are optional writing aids, not synchronization adapters; installing them MUST preserve conflicting project files. PCM MUST NOT claim automatic conversation capture or issue synchronization. The full policy is in docs/CONTINUITY_RECORDS_POLICY.md.

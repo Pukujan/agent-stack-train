@@ -133,7 +133,7 @@ Git already solves several parts of the continuity problem well:
 
 PCM builds on that instead of introducing a separate project-memory service.
 
-Issue trackers, pull requests, task systems, or agent memories can still be useful, but they are treated as coordination layers. The repository remains capable of explaining itself without requiring access to an old chat.
+For GitHub-governed repositories, GitHub Issues own task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge evidence own delivery. PCM task files cache a concise working view linked to the authoritative issue. Before resuming, verify current issue state. Local absolute checkout paths belong in a private per-device registry, never shared handoffs.
 
 ## Human-readable first, machine-checkable second
 
@@ -242,8 +242,11 @@ Create a bounded task:
 continuity task new \
   --slug first-task \
   --goal "Implement the first bounded piece of work." \
-  --why "This is the next dependency in the project."
+  --why "This is the next dependency in the project." \
+  --issue https://github.com/OWNER/REPO/issues/123
 ```
+
+GitHub repositories use Issues as the required task authority. Verify the live issue before resuming with `continuity issue verify APP-0001`. Register checkouts on additional drives with `continuity workspace register --root <checkout>`; `continuity workspace list` and `unregister` manage this private device-only registry. Worktree creation checks registered roots and reuses a single clean, unlocked matching task branch. It stops before creating a duplicate when a match is dirty, locked, conflicting, or ambiguous. PCM does not scan drives, and registry paths do not enter shared handoffs.
 
 Before a session ends, append a checkpoint:
 
@@ -341,7 +344,7 @@ It is a small protocol for making project state durable enough that work can cro
 
 ## Current status
 
-The continuity protocol is currently `0.1.0-draft`; the CLI package is `0.3.0`.
+The continuity protocol is currently `0.1.0-draft`; the active CLI source candidate is `0.4.0` and has not been published.
 Run `continuity --version` to see the package version installed in the active environment. Building or testing the package does not publish a public release.
 
 The implemented core includes:

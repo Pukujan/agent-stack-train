@@ -4,13 +4,15 @@
 
 Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.
 
+For GitHub repositories, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming; the issue owns task scope/lifecycle, merged default-branch history owns accepted code, and PR checks/merge records own delivery. Resolve discrepancies from the issue before editing.
+
 ## Scope
 
 Work only inside the active bounded task. Split or revise the task before materially expanding scope.
 
 ## Canonical checkout
 
-The Git repository, remote, task ID, branch/ref, and commit history identify the work; the physical path does not. Keep one permanent main checkout as the project home base and use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task at `<canonical-root>/pcm/worktree/<TASK-ID>`. Do not create one per session/agent, sibling clones, or arbitrary worktree paths; resume the same worktree across sessions.
+The Git repository, remote, task ID, branch/ref, and commit history identify the work; the physical path does not. Keep one permanent main checkout as the project home base and use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task at `<canonical-root>/pcm/worktree/<TASK-ID>`. Do not create one per session/agent, sibling clones, or arbitrary worktree paths; resume the same worktree across sessions. Register other existing checkouts with `continuity workspace register --root <checkout>`; PCM checks the private per-device registry and Git's worktree list, reuses one clean unlocked task match, and stops on dirty, locked, conflicting, or ambiguous matches. It never scans drives. Keep absolute paths out of shared handoffs.
 
 After required checks pass, the PR is merged, the task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. It verifies the GitHub PR, required checks, and merged commit and refuses locked/pinned or otherwise unsafe cleanup; never force-remove unfinished or user-modified work. For a short audit hold, record the reason, expected release date, exact path, and unlock/remove next action in the completed task's checkpoint, then pin the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. When the audit ends, return to the permanent checkout, unlock the tree, and run normal verified cleanup. Other Git hosts remain unsupported for cleanup until PCM has a tested CI/merge verifier for them. `workspace.mode: single-checkout` is available when a project explicitly wants to prohibit linked worktrees.
 
@@ -22,7 +24,7 @@ Before stopping after meaningful work, append completed work, exact evidence, de
 
 Continuity bookkeeping supports execution but does not gate safe execution. If canonical continuity state is temporarily unavailable, continue safe authorized work only in an already-authorized alternate environment; do not create a clone or a new worktree merely to work around it. When authorized, run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, repair storage merely to write a checkpoint, create competing continuity state, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.
 
-For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it prints a stable `REQUEST_ID`, commits, and pushes the checkpoint to the task branch. If interrupted, retry with the same `--request-id`; the same payload is a no-op and a different payload is rejected. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.
+For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it prints a stable `REQUEST_ID`, commits, and synchronously pushes the checkpoint to the task branch. If interrupted, retry with the same `--request-id`; the same payload is a no-op and a different payload is rejected. Open or update a PR after pushing. CI and auto-merge run asynchronously after required reviews/checks pass; confirm the merge before marking complete or removing a worktree.
 
 If `.continuity/documents.json` exists, every fresh session or task takeover/resumption must consult it before deciding the next action, not only before writing documentation. Run `git fetch origin`, then `continuity docs find "<issue title and task-objective terms>" --task <TASK-ID>`; read the returned matches and declared neighbors before deciding that prior work is missing or creating/replacing a document. Investigate `NEEDS_REVIEW`/`REMOTE_UNKNOWN` before relying on old evidence. The generated human view is checked by `continuity validate`.
 

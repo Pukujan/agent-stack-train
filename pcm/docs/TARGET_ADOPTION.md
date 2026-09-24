@@ -16,6 +16,8 @@ When PCM is used as a helper for another repository:
 
 ## Fresh target
 
+For a GitHub repository that does not already own conflicting PCM-managed paths, GitHub Issues are the required task authority. Create or identify an issue before creating each active task; pass its canonical URL with `continuity task new --issue https://github.com/OWNER/REPO/issues/NUMBER`. Existing task/status files are a cached working view linked to that issue. Before resuming, run `continuity issue verify <TASK-ID>` and resolve any conflict from the live issue.
+
 For a repository that does not already own conflicting PCM-managed paths:
 
 ```bash
@@ -23,7 +25,7 @@ continuity init --root /path/to/target --profile software --name "Target Project
 continuity validate --root /path/to/target
 ```
 
-For a project that uses GitHub issues and wants PCM's optional issue/PR writing prompts, opt in with the extra initialization flag:
+To install PCM's optional issue/PR writing prompts, opt in with the extra initialization flag:
 
     continuity init --root /path/to/target --profile software --name "Target Project" --task-prefix APP --github-templates
 

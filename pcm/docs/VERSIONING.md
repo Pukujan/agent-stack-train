@@ -35,6 +35,8 @@ PCM-0010 keeps the repository protocol at **0.1.0-draft**. Recovery receipts are
 
 PCM-0018 sets the backward-compatible CLI/package source version to **0.3.0**: checkpoint request IDs are an optional extension marker, and a document catalog is an optional capability. Existing checkpoint history stays readable, repositories need not adopt a catalog, and old validators can ignore the extension marker and unrecognized catalog files. This does not publish a package. The protocol remains **0.1.0-draft** because no new canonical object is required for every repository.
 
+PCM-0024 sets the backward-compatible CLI/package source version to **0.4.0**: it adds read-only GitHub issue verification and private local workspace registration/reuse. `issue_url` is optional task metadata generally, but repositories that enable `trackers.github` require it for active tasks and new task creation. This does not publish a package. The protocol remains **0.1.0-draft** because the authority behavior is opt-in for GitHub repositories and existing non-GitHub repositories remain valid.
+
 ## Project declaration
 
 The Python distribution's version has one source of truth in

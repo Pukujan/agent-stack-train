@@ -27,6 +27,7 @@ from continuity.cli import (
     reconcile_recovery,
     task_new,
     validate_repo,
+    verify_task_issue,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -94,6 +95,44 @@ class ContinuityTests(unittest.TestCase):
         self.assertFalse(config["trackers"]["github"])
         self.assertIn("does not automatically synchronize", github_issue_template().lower())
         self.assertIn("does not automatically synchronize", github_pr_template().lower())
+
+    def test_github_authority_requires_issue_links_for_new_active_tasks(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-github-authority-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP", github_authority=True)
+        with self.assertRaisesRegex(ContinuityError, "require --issue"):
+            task_new(root, "first", "Do work", "Why", "owner", "P1")
+        task = task_new(
+            root, "first", "Do work", "Why", "owner", "P1", "https://github.com/example/repo/issues/12"
+        )
+        meta = extract_marker(task.read_text(encoding="utf-8"), "task")
+        self.assertEqual("https://github.com/example/repo/issues/12", meta["issue_url"])
+        self.assertEqual([], validate_repo(root))
+
+    def test_generated_handoff_names_github_and_private_workspace_authorities(self) -> None:
+        from continuity.cli import handoff_template
+
+        generated = handoff_template("managed-worktrees")
+        self.assertIn("GitHub Issues are authoritative", generated)
+        self.assertIn("continuity workspace register", generated)
+        self.assertIn("must never be copied into issues, commits, PRs, or handoffs", generated)
+
+    def test_issue_verification_reads_live_github_state(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-issue-verify-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP", github_authority=True)
+        task_new(root, "first", "Do work", "Why", "owner", "P1", "https://github.com/example/repo/issues/12")
+        response = json.dumps({"number": 12, "title": "First issue", "state": "OPEN", "url": "https://github.com/example/repo/issues/12"})
+        with (
+            patch("continuity.cli.git_value", return_value="https://github.com/example/repo.git"),
+            patch(
+                "continuity.cli.run_external",
+                return_value=subprocess.CompletedProcess([], 0, response, ""),
+            ) as external,
+        ):
+            result = verify_task_issue(root, "APP-0001")
+        self.assertEqual("OPEN", result["state"])
+        self.assertIn("gh", external.call_args.args[0][0])
 
     def test_valid_fixture(self) -> None:
         root = self.copy_fixture("valid-minimal")

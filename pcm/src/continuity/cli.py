@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
 import uuid
-from contextlib import suppress
+from collections.abc import Iterator
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
@@ -126,6 +129,7 @@ BUILTIN_SCHEMAS = {
             "depends_on": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
             "goal": {"minLength": 1, "type": "string"},
             "id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{4}$", "type": "string"},
+            "issue_url": {"format": "uri", "pattern": "^https://github\\.com/[^/]+/[^/]+/issues/[1-9][0-9]*$", "type": "string"},
             "next_action": {"minLength": 1, "type": "string"},
             "owner": {"minLength": 1, "type": "string"},
             "priority": {"minLength": 1, "type": "string"},
@@ -494,6 +498,8 @@ def workspace_policy_text(workspace_mode: str) -> str:
         "Use it for sequential work. Create a linked worktree only when parallel work or isolation is actually useful, "
         "at `<canonical-root>/pcm/worktree/<TASK-ID>`. Use one per independent active task, not one per session or agent; "
         "a new session continuing that task resumes the same tree. Do not create sibling clones or arbitrary worktree paths.\n\n"
+        "Before creating a tree, PCM checks Git's registered worktrees and the private per-device workspace registry. "
+        "Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match for the same remote/task/ref is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths are local-only and must never be copied into issues, commits, PRs, or handoffs.\n\n"
         "After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. "
         "Removal verifies the GitHub PR, required checks, and merged commit; it refuses locked/pinned, dirty, untracked, unpublished, unmerged, or unverifiable work. For a short audit hold, record the reason, expected release date, exact worktree path, and unlock/remove next action in the completed task's checkpoint, then lock it with `git worktree lock --reason \"<reason; release YYYY-MM-DD>\" <path>`. The lock makes normal cleanup refuse the tree and is not a cleanup exemption. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, then `continuity worktree remove <TASK-ID>` to complete verified cleanup. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
         "Linked worktrees share the repository's Git object store; they are not full repository clones. Reuse package-manager download/build caches and installed runtimes where supported. "
@@ -512,7 +518,11 @@ def handoff_template(workspace_mode: str) -> str:
         "3. `checkpoints/CURRENT.md`\n"
         "4. the active task named by CURRENT\n"
         "5. the minimum relevant specification/design document\n\n"
-        "## Authority\n\nCanonical repository files are authoritative. Tracker items and context packs are mirrors/derived views.\n\n"
+        "Before editing a GitHub task, run `continuity issue verify <TASK-ID>` and confirm the live issue is open and matches the task.\n\n"
+        "## Authority\n\nGitHub Issues are authoritative for task scope, priority, ownership, dependencies, acceptance, and lifecycle; "
+        "the linked task file is a compact working cache. Merged default-branch history is authoritative for accepted code. "
+        "PR checks and merge evidence are authoritative for delivery. Chat and context packs are derived. Before resuming, "
+        "verify the linked issue and read current GitHub status.\n\n"
         + workspace_policy_text(workspace_mode)
         + "## Finding earlier project documents\n\n"
         "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
@@ -521,7 +531,7 @@ def handoff_template(workspace_mode: str) -> str:
         "Write continuity issues, updates, pull requests, and project-state documents so a fresh reader can understand the problem, human outcome, scope, evidence, and next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when needed to verify the claim. Keep PR openings skimmable; link long logs. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.\n\n"
         "## Degraded continuity\n\n"
         "Execution safety and existing authorization outrank continuity bookkeeping. If a canonical continuity file is temporarily unavailable, do not stop safe work, repair storage just to force a checkpoint, or ask again for an already-authorized host/worktree. Use an authorized alternate checkout and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write a JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint or replace the alternate task file. Reconcile it into the canonical task with `continuity recovery reconcile --root <canonical-root> --file <receipt>` when writable. The repository/task lineage is authoritative; a physical path is not.\n\n"
-        "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). A local-only checkpoint is not durable. CI and pull-request automation merge the pushed state after required checks pass.\n"
+        "Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and synchronously pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). Open or update a PR after pushing. GitHub CI and auto-merge then run asynchronously and wait for required reviews/checks and any merge queue. Confirm the merge before marking the task complete or removing its worktree.\n"
     )
 
 
@@ -530,6 +540,8 @@ def agents_template(workspace_mode: str) -> str:
         "# Agent Operating Contract\n\n"
         "## Start\n\n"
         "Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.\n\n"
+        "For GitHub repositories, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming; the issue owns task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge records own delivery. Resolve discrepancies from the issue before editing.\n\n"
+        "Store checkout roots only in the private per-device registry with `continuity workspace register --root <checkout>`. Before creating a worktree, inspect registered roots and Git's worktree list. Reuse one clean, unlocked matching task branch; stop on dirty, locked, conflicting, or ambiguous matches. Do not scan drives or copy absolute paths into shared handoffs.\n\n"
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
         + workspace_policy_text(workspace_mode)
@@ -539,7 +551,7 @@ def agents_template(workspace_mode: str) -> str:
         + "## Checkpoint\n\n"
         "Before stopping after meaningful work, append completed work, exact evidence, decisions, changed paths, blockers, and one next atomic action.\n\n"
         "If canonical continuity state is temporarily unavailable, treat that as degraded continuity rather than an execution blocker: keep safe authorized work moving, use an already-authorized alternate checkout/host, and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> --agent <name> --completed <work> --evidence <result> --next <next-action>` to write the JSON recovery receipt under `.continuity/recovery/`. Do not write an ad-hoc checkpoint under `checkpoints/`, replace the alternate task file, treat a physical worktree as project identity, repair storage merely to write a checkpoint, or request redundant permission. Reconcile later with `continuity recovery reconcile --root <canonical-root> --file <receipt>`.\n\n"
-        "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it prints a stable `REQUEST_ID`, commits, and pushes the checkpoint to the task branch. If interrupted, retry with the same `--request-id`; the same payload is a no-op and a different payload is rejected. A normal checkpoint is not complete while it exists only in a local worktree. CI and pull-request automation take the pushed branch through validation and merge.\n\n"
+        "For a normal checkpoint, commit the product change first and then run `continuity checkpoint`; it prints a stable `REQUEST_ID`, commits, and synchronously pushes the checkpoint to the task branch. If interrupted, retry with the same `--request-id`; the same payload is a no-op and a different payload is rejected. Open or update a PR after pushing. GitHub CI and auto-merge then run asynchronously, gated by required reviews/checks and any merge queue. Confirm the merge before marking complete or removing the worktree.\n\n"
         "If `.continuity/documents.json` exists, every fresh session or task takeover/resumption must consult it before deciding the next action, not only before writing documentation. Run `git fetch origin`, then `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>`; read the returned matches and declared neighbors before deciding that prior work is missing or creating/replacing a document. Investigate `NEEDS_REVIEW`/`REMOTE_UNKNOWN` before relying on old evidence. The generated human view is checked by `continuity validate`.\n"
     )
 
@@ -638,6 +650,7 @@ def init_repo(
     prefix: str,
     github_templates: bool = False,
     workspace_mode: str | None = None,
+    github_authority: bool | None = None,
 ) -> list[str]:
     if profile not in {"minimal", "software"}:
         raise ContinuityError(f"unsupported profile: {profile}")
@@ -647,6 +660,8 @@ def init_repo(
     workspace_mode = workspace_mode or "managed-worktrees"
     if workspace_mode not in WORKSPACE_MODES:
         raise ContinuityError(f"unsupported workspace mode: {workspace_mode}")
+    remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
+    github_authority = github_repository(remote) is not None if github_authority is None else github_authority
     config = {
         "schema": CONFIG_SCHEMA,
         "protocol": "project-continuity",
@@ -659,7 +674,7 @@ def init_repo(
             "tasks": "tasks",
         },
         "schema_dir": "schemas/v1",
-        "trackers": {"github": False, "beads": False},
+        "trackers": {"github": github_authority, "beads": False},
         "workspace": {"mode": workspace_mode},
     }
 
@@ -728,8 +743,15 @@ def next_task_id(root: Path, config: dict[str, Any]) -> str:
     return f"{prefix}-{highest + 1:04d}"
 
 
-def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: str) -> Path:
+def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: str, issue_url: str | None = None) -> Path:
     config = load_config(root)
+    if config.get("trackers", {}).get("github") and not issue_url:
+        raise ContinuityError("GitHub-authoritative repositories require --issue URL when creating a task")
+    if issue_url:
+        issue_repo, _ = validate_github_issue_url(issue_url)
+        origin = github_repository(git_value(root, ["remote", "get-url", "origin"], fallback=""))
+        if origin and origin.casefold() != issue_repo.casefold():
+            raise ContinuityError(f"issue belongs to {issue_repo}, but this checkout is {origin}")
     task_id = next_task_id(root, config)
     slug = slugify(slug)
     tasks_dir: str = config["canonical"]["tasks"]
@@ -738,6 +760,7 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
         "schema": "project-continuity.task.v1",
         "protocol_version": config["protocol_version"],
         "id": task_id,
+        **({"issue_url": issue_url} if issue_url else {}),
         "status": "active",
         "owner": owner,
         "priority": priority,
@@ -1209,7 +1232,21 @@ def validate_document_catalog(root: Path, known_task_ids: set[str]) -> list[str]
     except OSError as exc:
         return errors + [f"generated document index unavailable: {view_path}: {exc}"]
     if actual != rendered:
-        errors.append(f"generated document index is out of date: run `continuity docs render --root {root}`")
+        detail = "\n".join(
+            list(
+                difflib.unified_diff(
+                    actual.splitlines(),
+                    rendered.splitlines(),
+                    fromfile="checked-in index",
+                    tofile="expected index",
+                    lineterm="",
+                )
+            )[:14]
+        )
+        errors.append(
+            f"generated document index is out of date: run `continuity docs render --root {root}`"
+            + (f"\n{detail}" if detail else "")
+        )
     return errors
 
 
@@ -1371,6 +1408,9 @@ def validate_repo(root: Path) -> list[str]:
         return sorted(set(errors))
 
     errors.extend(validate_workspace_layout(root, config))
+    remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
+    if github_repository(remote) and not config.get("trackers", {}).get("github"):
+        errors.append(f"{config_path}: GitHub repositories must set trackers.github=true to enable issue authority")
 
     canonical = config.get("canonical", {})
     project_path = root / canonical.get("project", "PROJECT.md")
@@ -1439,6 +1479,23 @@ def validate_repo(root: Path) -> list[str]:
             errors.append(f"{path}: protocol_version does not match config")
         if meta.get("next_action", "").strip() == "":
             errors.append(f"{path}: next_action must be non-empty")
+        if (
+            config.get("trackers", {}).get("github")
+            and current_meta
+            and meta.get("id") == current_meta.get("active_task")
+        ):
+            issue_url = meta.get("issue_url")
+            if not isinstance(issue_url, str):
+                errors.append(f"{path}: active task in a GitHub-authoritative repository requires issue_url")
+            else:
+                try:
+                    issue_repo, _ = validate_github_issue_url(issue_url)
+                    remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
+                    repository = github_repository(remote)
+                    if repository and repository.casefold() != issue_repo.casefold():
+                        errors.append(f"{path}: issue_url repository {issue_repo} does not match origin {repository}")
+                except ContinuityError as exc:
+                    errors.append(f"{path}: {exc}")
         errors.extend(validate_checkpoint_structure(root, path, text))
 
     for _task_id, (path, meta) in tasks_by_id.items():
@@ -1943,6 +2000,45 @@ def worktree_inventory(root: Path) -> list[GitWorktree]:
     return parse_git_worktrees(git_run(root, ["worktree", "list", "--porcelain"]).stdout)
 
 
+def local_workspace_registry_path() -> Path:
+    base = Path(os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config"))
+    return base / "project-continuity" / "workspaces.json"
+
+
+def local_workspace_roots() -> list[Path]:
+    registry_path = local_workspace_registry_path()
+    if not registry_path.exists():
+        return []
+    try:
+        data = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ContinuityError(f"private workspace registry cannot be read: {exc}") from exc
+    roots = data.get("roots") if isinstance(data, dict) else None
+    if not isinstance(roots, list) or any(not isinstance(item, str) for item in roots):
+        raise ContinuityError("private workspace registry has an invalid roots list")
+    return [Path(item).expanduser().resolve() for item in roots]
+
+
+def register_local_workspace(root: Path) -> Path:
+    root = root.resolve()
+    git_value(root, ["remote", "get-url", "origin"])
+    # Normalize linked-worktree input to this clone's permanent checkout.
+    entries = worktree_inventory(root)
+    if not entries:
+        raise ContinuityError("Git reported no checkout to register")
+    permanent = Path(entries[0].path).resolve()
+    registry_path = local_workspace_registry_path()
+    current = local_workspace_roots()
+    if permanent not in current:
+        current.append(permanent)
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_text(json.dumps({"version": 1, "roots": sorted(str(item) for item in current)}, indent=2) + "\n", encoding="utf-8")
+    if os.name != "nt":
+        os.chmod(registry_path.parent, 0o700)
+        os.chmod(registry_path, 0o600)
+    return permanent
+
+
 def managed_worktree_path(root: Path, task_id: str) -> Path:
     root = root.resolve()
     for parent in (root / "pcm", root / "pcm" / "worktree"):
@@ -1980,6 +2076,39 @@ def github_repository(remote: str) -> str | None:
         remote,
     )
     return match.group(1) if match else None
+
+
+def validate_github_issue_url(url: str) -> tuple[str, str]:
+    match = re.fullmatch(r"https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/issues/([1-9][0-9]*)", url)
+    if not match:
+        raise ContinuityError("issue must be a canonical GitHub issue URL: https://github.com/OWNER/REPO/issues/NUMBER")
+    return f"{match.group(1)}/{match.group(2)}", match.group(3)
+
+
+def verify_task_issue(root: Path, task_id: str) -> dict[str, str]:
+    config = load_config(root)
+    task_path, meta = task_for_worktree(root, task_id, config)
+    issue_url = meta.get("issue_url")
+    if not isinstance(issue_url, str):
+        raise ContinuityError(f"task {task_id} has no authoritative GitHub issue URL: {task_path}")
+    repository, number = validate_github_issue_url(issue_url)
+    remote = git_value(root, ["remote", "get-url", "origin"])
+    expected_repo = github_repository(remote)
+    if expected_repo and expected_repo.casefold() != repository.casefold():
+        raise ContinuityError(f"task issue belongs to {repository}, but this checkout is {expected_repo}")
+    result = run_external(["gh", "issue", "view", number, "--repo", repository, "--json", "number,title,state,url"], root)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "issue lookup failed").strip()
+        raise ContinuityError(f"cannot verify authoritative issue {issue_url}: {detail}")
+    try:
+        issue = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("GitHub returned invalid issue data") from exc
+    if issue.get("url") != issue_url or str(issue.get("number")) != number:
+        raise ContinuityError(f"GitHub issue response does not match task link: {issue_url}")
+    if meta.get("status") == "active" and str(issue.get("state", "")).upper() != "OPEN":
+        raise ContinuityError(f"authoritative issue is {issue.get('state')}; resolve lifecycle before resuming task {task_id}")
+    return {"number": number, "title": str(issue.get("title", "")), "state": str(issue.get("state", "")), "url": issue_url}
 
 
 def run_external(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -2025,7 +2154,57 @@ def task_exists_on_remote(root: Path, task_path: Path, base_ref: str, task_id: s
         )
 
 
+@contextmanager
+def local_task_lock(root: Path, task_id: str) -> Iterator[None]:
+    registry_dir = local_workspace_registry_path().parent
+    registry_dir.mkdir(parents=True, exist_ok=True)
+    remote = git_value(root, ["remote", "get-url", "origin"])
+    repo_identity = (github_repository(remote) or remote.rstrip("/").removesuffix(".git")).casefold()
+    lock_name = hashlib.sha256(f"{repo_identity}\0{task_id}".encode()).hexdigest() + ".lock"
+    lock_file = (registry_dir / lock_name).open("a+b")
+    try:
+        if os.name == "nt":
+            msvcrt: Any = __import__("msvcrt")
+
+            try:
+                lock_file.seek(0, 2)
+                if lock_file.tell() == 0:
+                    lock_file.write(b"0")
+                    lock_file.flush()
+                lock_file.seek(0)
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError as exc:
+                raise ContinuityError("another local session is resolving this task checkout; retry after it finishes") from exc
+        else:
+            fcntl = __import__("fcntl")
+
+            try:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError as exc:
+                raise ContinuityError("another local session is resolving this task checkout; retry after it finishes") from exc
+        try:
+            yield
+        finally:
+            if os.name == "nt":
+                msvcrt_unlock: Any = __import__("msvcrt")
+
+                lock_file.seek(0)
+                msvcrt_unlock.locking(lock_file.fileno(), msvcrt_unlock.LK_UNLCK, 1)
+            else:
+                fcntl = __import__("fcntl")
+
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    finally:
+        lock_file.close()
+
+
 def create_managed_worktree(root: Path, task_id: str) -> tuple[Path, bool]:
+    root = canonical_worktree_root(root)
+    with local_task_lock(root, task_id):
+        return _create_managed_worktree(root, task_id)
+
+
+def _create_managed_worktree(root: Path, task_id: str) -> tuple[Path, bool]:
     root = canonical_worktree_root(root)
     config = load_config(root)
     if workspace_mode(config) != "managed-worktrees":
@@ -2040,14 +2219,42 @@ def create_managed_worktree(root: Path, task_id: str) -> tuple[Path, bool]:
 
     path = managed_worktree_path(root, task_id)
     branch = branch_for_task(task_path)
-    entries = worktree_inventory(root)
-    for entry in entries:
-        if Path(entry.path).resolve() == path.resolve(strict=False):
-            if entry.branch != f"refs/heads/{branch}":
-                raise ContinuityError(f"managed path is registered to the wrong branch: {entry.path}")
+    remote_value = git_value(root, ["remote", "get-url", "origin"])
+    remote_identity = (github_repository(remote_value) or remote_value.rstrip("/").removesuffix(".git")).casefold()
+    candidate_entries: list[GitWorktree] = []
+    seen_worktrees: set[str] = set()
+    for registered_root in [root, *local_workspace_roots()]:
+        if not registered_root.is_dir():
+            continue
+        candidate_remote = run_external(["git", "-C", str(registered_root), "remote", "get-url", "origin"], root)
+        candidate_value = candidate_remote.stdout.strip()
+        candidate_identity = (github_repository(candidate_value) or candidate_value.rstrip("/").removesuffix(".git")).casefold()
+        if candidate_remote.returncode != 0 or candidate_identity != remote_identity:
+            continue
+        for entry in worktree_inventory(registered_root):
+            key = str(Path(entry.path).resolve()).casefold()
+            if entry.branch == f"refs/heads/{branch}" and key not in seen_worktrees:
+                candidate_entries.append(entry)
+                seen_worktrees.add(key)
+    if len(candidate_entries) > 1:
+        raise ContinuityError(f"task branch {branch} is present in multiple registered checkouts; resolve ownership before continuing")
+    if candidate_entries:
+        existing = candidate_entries[0]
+        existing_path = Path(existing.path).resolve()
+        if existing.locked:
+            raise ContinuityError(f"task worktree is locked; refusing to create a duplicate: {existing.path}")
+        status = run_external(["git", "-C", str(existing_path), "status", "--porcelain", "--untracked-files=all"], root)
+        if status.returncode != 0:
+            raise ContinuityError(f"cannot inspect existing task checkout: {existing.path}")
+        if status.stdout.strip():
+            raise ContinuityError(f"existing task checkout is dirty; preserve it and resolve ownership before continuing: {existing.path}")
+        candidate_config = load_config(existing_path)
+        _, candidate_meta = task_for_worktree(existing_path, task_id, candidate_config)
+        if candidate_meta.get("issue_url") != meta.get("issue_url"):
+            raise ContinuityError(f"existing task checkout has conflicting issue ownership: {existing.path}")
+        if existing_path == path.resolve(strict=False):
             return path, True
-        if entry.branch == f"refs/heads/{branch}":
-            raise ContinuityError(f"task branch {branch} is already attached at {entry.path}")
+        return existing_path, True
     if path.exists() or path.is_symlink():
         raise ContinuityError(f"refusing to overwrite an existing unmanaged path: {path}")
 
@@ -2401,6 +2608,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_init.add_argument("--name", default=None)
     p_init.add_argument("--task-prefix", default="TASK")
     p_init.add_argument("--workspace-mode", choices=sorted(WORKSPACE_MODES), default="managed-worktrees")
+    p_init.add_argument("--github-authority", action="store_true", help="require GitHub issue links even before origin is configured")
     p_init.add_argument(
         "--github-templates",
         action="store_true",
@@ -2422,6 +2630,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_task_new.add_argument("--why", required=True)
     p_task_new.add_argument("--owner", default="unassigned")
     p_task_new.add_argument("--priority", default="P1")
+    p_task_new.add_argument("--issue", default=None, help="authoritative GitHub issue URL")
+
+    p_issue = sub.add_parser("issue")
+    issue_sub = p_issue.add_subparsers(dest="issue_command", required=True)
+    p_issue_verify = issue_sub.add_parser("verify")
+    p_issue_verify.add_argument("task_id")
+    p_issue_verify.add_argument("--root", default=".")
 
     p_checkpoint = sub.add_parser("checkpoint")
     p_checkpoint.add_argument("task_id")
@@ -2489,6 +2704,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_worktree_remove.add_argument("task_id")
     p_worktree_remove.add_argument("--root", default=".")
 
+    p_workspace = sub.add_parser("workspace")
+    workspace_sub = p_workspace.add_subparsers(dest="workspace_command", required=True)
+    p_workspace_register = workspace_sub.add_parser("register")
+    p_workspace_register.add_argument("--root", required=True)
+    workspace_sub.add_parser("list")
+    p_workspace_unregister = workspace_sub.add_parser("unregister")
+    p_workspace_unregister.add_argument("--root", required=True)
+
     return parser
 
 
@@ -2506,6 +2729,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.task_prefix,
                 github_templates=args.github_templates,
                 workspace_mode=args.workspace_mode,
+                github_authority=True if args.github_authority else None,
             )
             for line in results:
                 print(line)
@@ -2542,9 +2766,44 @@ def main(argv: list[str] | None = None) -> int:
                 args.why,
                 args.owner,
                 args.priority,
+                args.issue,
             )
             print(path)
             return 0
+
+        if args.command == "issue" and args.issue_command == "verify":
+            issue = verify_task_issue(Path(args.root).resolve(), args.task_id)
+            print(f"ISSUE: {issue['url']}")
+            print(f"STATE: {issue['state']}")
+            print(f"TITLE: {issue['title']}")
+            return 0
+
+        if args.command == "workspace":
+            registry_path = local_workspace_registry_path()
+            roots = local_workspace_roots()
+            if args.workspace_command == "register":
+                register_local_workspace(Path(args.root))
+                print("REGISTERED: local checkout (path stored only in this device's private registry)")
+                return 0
+            if args.workspace_command == "list":
+                for item in roots:
+                    print(item)
+                if not roots:
+                    print("EMPTY: no local checkouts registered")
+                return 0
+            if args.workspace_command == "unregister":
+                target = Path(args.root).expanduser().resolve()
+                roots = [item for item in roots if item != target]
+                registry_path.parent.mkdir(parents=True, exist_ok=True)
+                registry_path.write_text(
+                    json.dumps({"version": 1, "roots": sorted(str(item) for item in roots)}, indent=2) + "\n",
+                    encoding="utf-8",
+                )
+                if os.name != "nt":
+                    os.chmod(registry_path.parent, 0o700)
+                    os.chmod(registry_path, 0o600)
+                print("UNREGISTERED: local checkout")
+                return 0
 
         if args.command == "checkpoint":
             timestamp = args.time or datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -2693,7 +2952,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         if args.command == "worktree" and args.worktree_command == "create":
-            path, resumed = create_managed_worktree(Path(args.root).resolve(), args.task_id)
+            workspace_root = Path(args.root).resolve()
+            register_local_workspace(workspace_root)
+            path, resumed = create_managed_worktree(workspace_root, args.task_id)
             print(f"{'RESUMED' if resumed else 'CREATED'}: {path}")
             return 0
 
