@@ -1,6 +1,6 @@
 # Human-first, auditable continuity records
 
-<!-- pcm:policy {"id":"continuity-records","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->
 
 PCM records exist so another person or agent can understand what happened and continue accurately without the original conversation. A record must be readable as a human explanation and traceable to the evidence behind its claims.
 
@@ -34,7 +34,7 @@ Describe the real-world or project consequence first. State the intended result 
 
 ### Issue progress update
 
-Record what changed for the person or project, the evidence that supports the update, what remains open or uncertain, and the next action. Link the PR, commit, CI run, or source; do not paste their full contents or restate the issue.
+Every issue progress update MUST link the leaf child issue owning the work, its parent ancestry and relevant dependencies (or explicitly none). A top-level deliverable identifies itself as leaf with parent: none; aggregates link relevant leaves. Create children only for independently deliverable scopes, never per comment. Record what changed for the person or project, the evidence that supports the update, what remains open or uncertain, and the next action. Link the PR, commit, CI run, or source; do not paste their full contents or restate the issue.
 
 ### Pull request
 
@@ -75,9 +75,22 @@ Structural checks can validate required sections, identifiers, versions, and loc
 
 Use this when a comment or checkpoint needs a compact progress update:
 
+    Leaf owning issue / parent ancestry / dependencies:
+    Source issue revision / as-of status:
+    Request ID / pushed SHA / PR and required CI/merge evidence (when applicable):
     Human outcome / change:
     Evidence and provenance:
     Still open or unknown:
     Next action:
 
 Leave a field out when it truly does not apply; do not fill space with “N/A” blocks.
+
+## Authority, correction and finite receipts
+
+[Normative SPEC section 8](../SPEC.md#8-authority) bounds authority: GitHub issues own task/progression fields; protected merged history owns accepted code and normative/domain content; PR/check/merge records own delivery facts. Checked-in task/current/handoff/checkpoint records are mandatory versioned projections and evidence. Local files, chat or a ledger are never canonical task state.
+
+Record authorized owner direction on the owning issue before dependent work, linking the superseded decision. It cannot waive required gates or change observed facts. Stale projections yield to the field authority; unresolved conflicts remain disputed/unknown and pause affected work. One primary writer owns a task stream; coordinate shared-document changes through linked issues/PRs and re-read the base before writing. Preserve contradictory evidence by source/revision, label observation versus agent report/inference, and append correction/supersession. Upstream corrections identify affected descendants for re-planning/revalidation, not history rewriting.
+
+Before every push synchronize applicable docs, task/checkpoint and affected CURRENT/HANDOFF/catalog/index; record source issue revision, as-of status, evidence, pending gates and next action. After synchronous checkpoint push, manually post a leaf receipt keyed by request ID and exact SHA with changed-doc/checkpoint links, PR/tests/gates and lineage, then link a parent update. Inspect the same receipt key before retrying a lost response; a missing comment does not require another push. Required CI and GitHub auto-merge are mandatory and fail closed on missing, failed, skipped, stale or unverified gates. After CI/merge, append exact candidate/check/merge/live-status evidence, fetch and verify before completion/cleanup. Material corrections get a new synchronized increment. Receipt-only transitions need no recursive doc commit: truthful as-of/pending projections point to live GitHub for subsequent events.
+
+This is a manual protocol with deterministic propagation tests, not automatic issue synchronization or a semantic truth checker. Runtime automation is tracked by #67, dependent on #66, under #53.

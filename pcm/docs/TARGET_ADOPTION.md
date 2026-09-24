@@ -61,3 +61,11 @@ A fresh agent using PCM as a helper should be able to answer these before editin
 - Which target files are canonical PROJECT, CURRENT, and TASK state?
 
 If any answer is unknown, continuity has not been established yet.
+
+## Required GitHub progression contract
+
+For PCM-governed project work, GitHub Issues are required even if offline fixture/schema generation is possible. Issues own task scope, acceptance, priority, ownership, dependencies, lifecycle and durable progression. Merged history owns accepted code/domain documents; PR/check/merge records own delivery facts. Preserve target-owned domain contracts while treating task/status fields in repository docs as mandatory versioned projections. Local files, chat and packs never become task authority.
+
+Carry [SPEC section 8](../SPEC.md#8-authority) into existing guidance without overwriting different files: leaf/parent/dependency links in every issue update; owner corrections on GitHub; one primary writer and shared-document coordination; disputed evidence preserved with sources; upstream corrections triggering affected descendant re-planning/revalidation.
+
+Before every push synchronize applicable docs/checkpoint/catalog/index and record as-of/pending status; after the synchronous checkpoint push publish the request-ID/SHA leaf receipt and linked parent update. Required CI and GitHub auto-merge are mandatory; missing, failed or unverified gates prohibit completion/cleanup. Verify exact candidate checks and merge, fetch and reconcile live issue status. Material doc corrections require another gated increment; receipt-only transitions need no recursive doc commit. Templates are optional installation aids, not an exemption from these requirements. Comment automation is not implemented; the primary writer posts receipts manually.

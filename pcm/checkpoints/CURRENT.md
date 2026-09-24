@@ -1,8 +1,20 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0024","active_task_file":"tasks/TASK-PCM-0024-github-authority.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"PCM-0025","active_task_file":"tasks/TASK-PCM-0025-github-progression-policy.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
-## Program state
+## Current projection — policy increment pending delivery
+
+Leaf [#66 / PCM-0025](https://github.com/Pukujan/project-continuity-modules/issues/66) owns this bounded policy work under parent [#53 / PCM-0024](https://github.com/Pukujan/project-continuity-modules/issues/53). Branch: `task/PCM-0025-github-progression-policy`; primary writer: Astra/Codex. Source issue update observed: 2026-09-24T15:32:31Z. Prerequisite authority/checkpoint slices are merged; no unresolved prerequisite. Automation sibling [#67 / PCM-0026](https://github.com/Pukujan/project-continuity-modules/issues/67) depends on #66 and is queued; #33 cleanup remains independent.
+
+Candidate work defines GitHub-owned progression, mandatory synchronized docs, finite receipts, bounded conflicts/lineage corrections and deterministic generated/adopter guidance tests. Local Python 3.12 gates passed: 78 tests in 350.921s; five focused policy tests also passed after the indexed-checkpoint clarification; Ruff, MyPy, compileall, continuity validation, generated-index synchronization and diff checks passed. Wheel and source archive build/install parity passed for minimal/software profiles and PCM-0018 features. Pushed checkpoint, PR, required hosted checks and auto-merge are pending in this snapshot; the live leaf issue owns subsequent events.
+
+The [owner decision](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5816655372) supersedes all historical second-account blockers below: the accepted #63 holdouts/local tests suffice for their stated claims; cross-account permissions remain untested but are not required. #53 remains OPEN for its broader acceptance. Historical prose below is preserved as as-of evidence, not current instructions.
+
+## Next atomic action
+
+Publish the synchronized #66 checkpoint/PR, then verify exact required CI and auto-merge and reconcile GitHub receipts. Receipt-only transitions need no recursive doc commit; material corrections require another synchronized increment.
+
+## Historical program state (superseded by projection above)
 
 Phase: adoption — prove v1 in mature repositories.
 
@@ -65,6 +77,6 @@ Adopt the validated continuity protocol in existing repositories without erasing
 
 None known.
 
-## Next atomic action
+## Historical next action (superseded)
 
 Use child issue [#63](https://github.com/Pukujan/project-continuity-modules/issues/63) for the completed no-history holdout reports and local test evidence. Preserve the boundary that only one GitHub account is available: the tests verify local checkout reuse and writer safety, not cross-account permissions or a real second user's hosted PR/CI path. Keep #53 open while its explicit hosted two-user acceptance remains unresolved; keep #33 open for its separate cleanup and canonical closeout.

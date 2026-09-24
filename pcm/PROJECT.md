@@ -14,18 +14,18 @@ The project should turn continuity into a repository invariant rather than a pro
 
 ## Core model
 
-Canonical continuity state is layered:
+GitHub owns durable project task/progression state. Repository documents are mandatory versioned projections for task fields; merged history owns accepted code and normative/domain contracts:
 
 1. `PROJECT` — stable purpose, scope, principles, phases.
 2. `CURRENT` — repository/program-wide present state and priority.
 3. `TASK` — one bounded unit of work for one primary agent/session.
 4. `CHECKPOINT` — append-only evidence of completed work, tests, decisions, blockers, and next action.
-5. `ISSUE/BEADS/PR` — coordination mirrors, not sole authority.
+5. `GITHUB ISSUE` — required authority for scope, acceptance, priority, ownership, dependencies, lifecycle and progression; PR/check/merge records own delivery facts.
 6. `CONTEXT PACK` — generated convenience view, never canonical.
 
 ## Design principles
 
-- cold-startable from repository state;
+- cold-startable from live GitHub issues and synchronized repository projections;
 - human- and agent-readable;
 - machine-validatable;
 - versioned and migratable;
@@ -47,7 +47,7 @@ Canonical continuity state is layered:
 - `continuity task new`;
 - `continuity checkpoint`;
 - `continuity pack`;
-- optional GitHub Issue adapter;
+- required GitHub issue tracking and manual push/merge receipts; runtime receipt automation remains separate;
 - migration/versioning conventions;
 - deterministic tests;
 - examples/dogfooding.
@@ -65,10 +65,12 @@ Canonical continuity state is layered:
 - becoming a full project-management SaaS;
 - requiring a hosted server;
 - making LLM-generated summaries canonical;
-- forcing GitHub/Beads/Jira as a dependency;
+- making Beads/Jira, a graph database, local canonical ledger or polling agent required; GitHub is required for governed project work;
 - encoding every domain's workflow in one universal schema;
 - treating previous-agent prose as evidence without supporting results.
 
 ## Definition of success for v1
 
-A fresh repository can be initialized with the protocol, validated deterministically, assigned a bounded task, checkpointed by multiple independent sessions, and resumed by another session using PROJECT + CURRENT + TASK + one relevant spec/context pack without reading historical chats.
+Following the bounded authority and finite publication rules in SPEC section 8, a fresh repository can be initialized with the protocol, validated deterministically, assigned a bounded task, checkpointed by multiple independent sessions, and resumed by another session using PROJECT + CURRENT + TASK + one relevant spec/context pack without reading historical chats.
+
+Every pushed increment synchronizes applicable docs and records leaf/parent/dependency lineage on GitHub. Required CI and GitHub auto-merge are mandatory; failed or unverified gates prohibit completion/cleanup. Local execution state is never delivered state. See [SPEC section 8](SPEC.md#8-authority) for owner-direction conflicts, shared writers, evidence corrections and downstream re-planning.

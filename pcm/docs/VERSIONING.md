@@ -63,3 +63,9 @@ A migration must:
 ## Draft phase
 
 `0.1.0-draft` establishes the concrete v1 schema/tooling shape. A stable `1.0.0` release remains a later explicit task after dogfooding and migrations are demonstrated.
+
+## PCM-0025 policy reconciliation
+
+Continuity-record guidance is now policy **1.2.0**, tracked by [#66](https://github.com/Pukujan/project-continuity-modules/issues/66) under [#53](https://github.com/Pukujan/project-continuity-modules/issues/53). This corrects contradictory descriptions of the already-required GitHub authority and delivery contract; it adds no CLI command or schema field. Package source remains **0.4.0**, unpublished; the machine-readable protocol remains **0.1.0-draft**. Earlier opt-in wording above describes historical implementation, not an exemption from current governed-work policy.
+
+Existing projects must reconcile PCM-owned guidance with SPEC section 8, preserving their domain content and historical checkpoints. GitHub issues own task/progression state; checked-in files are mandatory projections. Offline schema fixtures can still validate structurally, but that does not certify GitHub governance, semantic agreement, required CI or auto-merge. Generated guidance changes reach newly initialized projects; existing adopters need a reviewed guidance update. No automatic migration, receipt automation or public release is claimed.

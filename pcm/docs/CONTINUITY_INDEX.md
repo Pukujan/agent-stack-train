@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"a4a0deea1a84766fde57663c4fe1ce8c26c1782a26047239a2c03e59adbd84ea","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"aa8ab90912cf40eb5d8ae50f6891c8725652eae13074802d6bb0f523ecc0469d","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -45,13 +45,25 @@
 
 - File: [`docs/CONTINUITY_RECORDS_POLICY.md`](../docs/CONTINUITY_RECORDS_POLICY.md)
 - Local content status: **CURRENT**
-- Last reviewed at commit: `a9555b5d21d981c937ae9bd3cfebca24916a05db`
-- Reviewed SHA-256: `22a14093565d3990e2078547ae7c9d485ec9c2a71b95c74777e3cbdb53cf6a02`
-- Current SHA-256: `22a14093565d3990e2078547ae7c9d485ec9c2a71b95c74777e3cbdb53cf6a02`
+- Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
+- Reviewed SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
+- Current SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
 - Summary: Human-readable and machine-verifiable issue, task, checkpoint and handoff records.
-- Search terms: `issue logs`, `provenance`, `records`
+- Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`
-- Task associations: `PCM-0018`
+- Task associations: `PCM-0018`, `PCM-0025`, `PCM-0026`
+
+## GitHub authority and finite progression (`github-progression-spec`)
+
+- File: [`SPEC.md`](../SPEC.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
+- Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
+- Current SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
+- Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
+- Search terms: `GitHub authority`, `lineage`, `receipts`
+- Neighboring records: `continuity-records-policy`, `testing-policy`
+- Task associations: `PCM-0025`, `PCM-0026`
 
 ## PCM-0015 implementation plan (`pcm-0015-plan`)
 
@@ -80,14 +92,14 @@
 ## PCM-0024 GitHub authority (`pcm-0024-github-authority`)
 
 - File: [`tasks/TASK-PCM-0024-github-authority.md`](../tasks/TASK-PCM-0024-github-authority.md)
-- Local content status: **NEEDS_REVIEW**
-- Last reviewed at commit: `a9555b5d21d981c937ae9bd3cfebca24916a05db`
-- Reviewed SHA-256: `4c02c9547985cbb38b9242423697439350d49a3f1ffabed909c33bddc64444a7`
-- Current SHA-256: `dfc4c34a2841a8b88de805cc6889185009ec3a61f815315077c6e705f96e1579`
-- Summary: Queued policy to make GitHub authoritative for PCM task tracking and prove fresh-session delivery and continuity.
+- Local content status: **CURRENT**
+- Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
+- Reviewed SHA-256: `403f918b19f35de27139d3fb820d78ae001a15feef6209bbfceaac7af559147c`
+- Current SHA-256: `403f918b19f35de27139d3fb820d78ae001a15feef6209bbfceaac7af559147c`
+- Summary: Parent GitHub-authority task; current correction removes the second-account requirement and links policy and receipt children.
 - Search terms: `GitHub authority`, `automatic merge`, `fresh session`, `issue lifecycle`, `large repository`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
-- Task associations: `PCM-0018`, `PCM-0024`
+- Task associations: `PCM-0018`, `PCM-0024`, `PCM-0025`
 
 ## PCM-0024 large-repository stress profile (`pcm-0024-stress-profile`)
 

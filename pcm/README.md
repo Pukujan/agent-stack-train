@@ -63,9 +63,9 @@ PCM does not make research correct by itself. It makes the **state and evidence 
 
 PCM treats continuity as part of the repository instead of part of the conversation.
 
-The Git repository becomes the shared memory that survives sessions, agents, models, and machines.
+GitHub Issues own task scope, acceptance, priority, ownership, dependencies, lifecycle and durable project progression. Merged history owns accepted code and normative/domain documents; PR/check/merge records own delivery facts. The checkout is transient editing/execution space.
 
-A participating project keeps a small set of human-readable files that answer different questions:
+A participating project MUST keep synchronized versioned documents. Their task fields are as-of projections linked to GitHub, never a competing local source of truth:
 
 - **PROJECT** — What is this project, what are its goals, and what should remain stable?
 - **CURRENT** — Where is the project right now?
@@ -85,13 +85,14 @@ A long-running project might involve dozens or hundreds of sessions.
 A typical cycle is:
 
 1. A fresh human or agent opens the repository.
-2. It reads the project's handoff/current state and the one active task.
+2. It reads the project's handoff/current projection and verifies the live owning leaf issue, parent ancestry and dependencies.
 3. It performs only that bounded work.
 4. It runs whatever tests, experiments, or validation the task requires.
 5. Before stopping, it writes a checkpoint containing the important evidence, decisions, blockers, changed files, and one concrete next action.
-6. It commits and pushes that state to the task branch. A normal checkpoint is not complete while it exists only in a local worktree.
-7. The session can disappear completely.
-8. A new session resumes from the repository rather than reconstructing the old conversation.
+6. It synchronizes applicable docs/catalog/index before each push, commits product/docs, then runs the synchronous checkpoint commit/push.
+7. It records a request-ID/SHA receipt on the leaf issue and links the parent update, opens/updates the PR and enables mandatory GitHub auto-merge behind required CI/reviews. Missing, failed or unverified gates prohibit completion/cleanup.
+8. After verified merge, it records exact CI/merge/live-status evidence on GitHub and corrects material doc drift through another synchronized increment. Receipt-only transitions need no recursive doc commit; as-of/pending docs link to the live issue.
+9. A new session resumes from GitHub and repository projections, without reconstructing the old conversation.
 
 That means the project can continue across:
 
@@ -108,7 +109,7 @@ The goal is not to preserve every sentence an agent ever produced. The goal is t
 
 Continuity state is important, but writing it is not an execution gate. If a canonical continuity file or checkout becomes temporarily unavailable while the underlying task remains safe, continue only through an already-authorized alternate environment and record a small recovery receipt with `--recovery-root`. Do not create a clone or worktree as a workaround. Reconcile that receipt into the canonical task when it becomes writable.
 
-The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Keep one permanent project folder as the home base and use it for sequential tasks. When simultaneous work or isolation genuinely helps, create a temporary managed worktree for that task under `pcm/worktree/<TASK-ID>`; reuse it across sessions rather than making one per agent. Do not create sibling clones. Git worktrees share repository data, so they are lighter than separate clones, though each still has its own checked-out files and may have its own dependency environment. After changes are pushed, required checks pass, GitHub merges the PR, and the task is complete, run `continuity worktree remove <TASK-ID>`; PCM verifies the result before removing the clean worktree. Other Git hosts stay untouched until PCM has a tested CI/merge verifier for them. Unfinished or dirty work is kept, never force-deleted. For a short audit hold, record the reason, expected release date, exact path, and unlock/remove next action in the completed task's checkpoint, then pin the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. This blocks ordinary cleanup while keeping the hold visible in durable task state. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, and run `continuity worktree remove <TASK-ID>` for normal verified cleanup. See [Git's worktree lock/unlock rules](https://git-scm.com/docs/git-worktree).
+The durable identity is the repository/task lineage: project identity, task ID, branch/ref, remote, and Git history. Keep one permanent project folder as the home base and use it for sequential tasks. When simultaneous work or isolation genuinely helps, create a temporary managed worktree for that task under `pcm/worktree/<TASK-ID>`; reuse it across sessions rather than making one per agent. Do not create sibling clones. Git worktrees share repository data, so they are lighter than separate clones, though each still has its own checked-out files and may have its own dependency environment. After changes are pushed, required checks pass, GitHub merges the PR, and the task is complete, run `continuity worktree remove <TASK-ID>`; PCM verifies the result before removing the clean worktree. Other Git hosts stay untouched until PCM has a tested CI/merge verifier for them. Unfinished or dirty work is kept, never force-deleted. For a short audit hold, record the reason, expected release date, private workspace ID, and unlock/remove next action in the completed task's checkpoint, then pin the tree with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. This blocks ordinary cleanup while keeping the hold visible in durable task state. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, and run `continuity worktree remove <TASK-ID>` for normal verified cleanup. See [Git's worktree lock/unlock rules](https://git-scm.com/docs/git-worktree).
 
 Dependency downloads/build artifacts should use the package manager's shared cache where supported. pnpm documents a shared content store whose package files are linked into each `node_modules` ([pnpm storage model](https://pnpm.io/)); uv documents a reusable, thread-safe cache ([uv cache](https://docs.astral.sh/uv/concepts/cache/)), while normally keeping a project-specific `.venv` ([uv project layout](https://docs.astral.sh/uv/concepts/projects/layout/)). The goal is to avoid downloading/building the same dependencies repeatedly without allowing one task's dependency edits to disrupt another. Normal checkpoints must be committed and pushed; an unavailable remote is an emergency degraded-continuity condition that must be recorded and repaired, not a second local canonical state.
 
@@ -228,7 +229,7 @@ Software initialization defaults to managed temporary task worktrees. Use the
 main checkout for sequential work; create a worktree only when isolation or
 parallelism helps, then run `continuity worktree remove <TASK-ID>` after the
 task is merged, complete, and clean. For a short audit hold, record the reason,
-release date, exact path, and cleanup action in the task checkpoint, then pin it
+release date, private workspace ID, and cleanup action in the task checkpoint, then pin it
 with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`; after
 the audit, unlock it explicitly before verified cleanup. Choose
 `--workspace-mode single-checkout`
@@ -296,7 +297,7 @@ A context pack is a generated view for convenience when a fresh session needs a 
 
 It records Git provenance such as repository, ref, and commit and includes the selected canonical source files.
 
-Context packs are **derived**, not authoritative. If a context pack disagrees with the canonical files in the repository, the repository files win.
+Context packs are **derived**, not authoritative. Resolve conflicts by record type: live issues own task/progression fields, merged source documents own accepted content, and PR/check records own delivery facts. See [SPEC section 8](SPEC.md#8-authority).
 
 ## Finding earlier documents
 
@@ -363,7 +364,7 @@ The implemented core includes:
 - Git-provenance context-pack generation;
 - fixture and end-to-end tests.
 
-Automatic synchronization with external issue/task systems is intentionally separate from the core protocol.
+Manual GitHub issue receipts after every push and merge are mandatory today. Retry-safe comment automation is separately tracked in [#67](https://github.com/Pukujan/project-continuity-modules/issues/67), dependent on policy [#66](https://github.com/Pukujan/project-continuity-modules/issues/66), both children of [#53](https://github.com/Pukujan/project-continuity-modules/issues/53). No autonomous polling agent is required.
 
 ## Development validation
 
@@ -377,3 +378,5 @@ PYTHONPATH=src python -m continuity validate --root .
 The long-term success criterion is straightforward:
 
 > A project should remain understandable and resumable even if every previous agent session disappears.
+
+The [authority/conflict rules](SPEC.md#81-conflict-ownership-and-lineage) require owner corrections to be recorded on GitHub, one primary task writer and coordinated shared-document edits, and explicit disputed/unknown evidence. Upstream corrections pause affected descendants for re-planning and revalidation. Every issue update links its leaf/parent/dependency lineage; children represent independently deliverable scopes, never individual comments. [The finite publication protocol](SPEC.md#82-finite-publication-and-reconciliation) defines exactly what belongs before and after each push.

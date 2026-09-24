@@ -23,8 +23,24 @@ from . import __version__
 
 PROTOCOL_VERSION = "0.1.0-draft"
 CONTINUITY_RECORDS_POLICY_MARKER = (
-    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->'
+    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->'
 )
+GITHUB_PROGRESSION_GUIDANCE = """<!-- pcm:github-progression:start -->
+## GitHub-owned progression
+
+GitHub Issues are required for PCM-governed project work and own task scope, acceptance, priority, ownership, dependencies, lifecycle and durable project progression. Merged default-branch history owns accepted code and normative/domain documents; PR checks and merge records own delivery facts. Checked-in PROJECT/CURRENT/TASK/checkpoint/handoff documents are mandatory versioned projections for task state, not a parallel authority. Local files, registries, context packs and chat are ephemeral execution aids. Domain-document ownership stays with the target project.
+
+Every issue progress update MUST link the leaf child issue that owns the work, its parent ancestry and dependencies (or explicitly none). A top-level deliverable identifies itself as the leaf and says parent: none. Create one child per independently deliverable scope, never one per comment. Record task ID, primary writer and branch on the issue before creating its repository projection. Re-read live issues and relevant source revisions before resuming; the issue verifier checks identity/status, not semantic agreement.
+
+Authorized owner/user direction can revise intent: record it on the owning GitHub issue with a correction/supersession link before dependent work. It cannot alter observed CI/merge facts or waive required gates. Stale projections yield to their field's authority. If direction, ownership or evidence conflicts remain unresolved, pause affected work and record uncertainty; continue independent safe work. One primary writer owns each task branch/checkpoint stream. Coordinate shared-document edits through linked issues/PRs, re-read the current base and reconcile concurrent changes; never force-push or overwrite another writer. Issue prose is not an atomic lock.
+
+Label observed results, repository/external evidence, agent reports and inference separately. Preserve contradictory evidence with source/revision and mark conclusions disputed or unknown until resolved. Append correction/supersession evidence; never rewrite checkpoint history. An upstream correction MUST identify affected descendants and assumptions on their issues; pause, re-plan and revalidate dependent work before resuming. Follow explicit parent/dependency links within the affected scope; cycles or unknown lineage block affected claims. No graph database, local canonical ledger or autonomous polling agent is required.
+
+Before every push, synchronize relevant docs and task/checkpoint projections, CURRENT/HANDOFF when affected, and reviewed catalog/generated index. Record leaf/parent/dependency links, source issue/comment revision, as-of status, evidence, blockers and next action. Commit product/docs first; `continuity checkpoint` then commits and synchronously pushes the checkpoint with a stable request ID. After every successful push, manually publish a leaf issue receipt keyed by request ID and exact pushed SHA, linking changed docs/checkpoint, PR, tests and pending gates; add a linked parent progression update. Retry a missing receipt without another checkpoint/push; inspect for the same key before posting. Automatic issue-comment synchronization is not implemented.
+
+Required CI and GitHub auto-merge are mandatory. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
+<!-- pcm:github-progression:end -->"""
+
 GITHUB_ISSUE_LIFECYCLE_GUIDANCE = (
     "When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. "
     "GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. "
@@ -465,6 +481,7 @@ def project_template(name: str) -> str:
     return (
         f"# {name} — Project Contract\n\n"
         f"{marker('project', meta)}\n\n"
+        f"{GITHUB_PROGRESSION_GUIDANCE}\n\n"
         "## Main goal\n\nDescribe the durable project goal.\n\n"
         "## Why\n\nExplain why the project exists.\n\n"
         "## Scope\n\nDescribe what is in scope.\n\n"
@@ -483,13 +500,14 @@ def current_template(prefix: str) -> str:
     return (
         "# Current Repository Checkpoint\n\n"
         f"{marker('current', meta)}\n\n"
+        "This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.\n\n"
         "## Program state\n\nPhase: bootstrap.\n\n"
         "## Completed\n\n- continuity protocol initialized.\n\n"
         "## Active\n\n- none.\n\n"
         "## Queued\n\n- create the first bounded task.\n\n"
         "## Blockers\n\nNone known.\n\n"
         "## Next atomic action\n\n"
-        f"Create the first {prefix} task with `continuity task new`.\n"
+        f"Create or identify the GitHub issue, record its {prefix} task/branch identity, then create the task projection with `continuity task new --issue <URL>`.\n"
     )
 
 
@@ -509,7 +527,7 @@ def workspace_policy_text(workspace_mode: str) -> str:
         "Before creating a tree, PCM checks Git's registered worktrees and the private per-device workspace registry. "
         "Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match for the same remote/task/ref is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths are local-only and must never be copied into issues, commits, PRs, or handoffs.\n\n"
         "After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. "
-        "Removal verifies the GitHub PR, required checks, and merged commit; it refuses locked/pinned, dirty, untracked, unpublished, unmerged, or unverifiable work. For a short audit hold, record the reason, expected release date, exact worktree path, and unlock/remove next action in the completed task's checkpoint, then lock it with `git worktree lock --reason \"<reason; release YYYY-MM-DD>\" <path>`. The lock makes normal cleanup refuse the tree and is not a cleanup exemption. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, then `continuity worktree remove <TASK-ID>` to complete verified cleanup. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
+        "Removal verifies the GitHub PR, required checks, and merged commit; it refuses locked/pinned, dirty, untracked, unpublished, unmerged, or unverifiable work. For a short audit hold, record the reason, expected release date, private workspace ID, and unlock/remove next action in the completed task's checkpoint, then lock it with `git worktree lock --reason \"<reason; release YYYY-MM-DD>\" <path>`. The lock makes normal cleanup refuse the tree and is not a cleanup exemption. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, then `continuity worktree remove <TASK-ID>` to complete verified cleanup. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.\n\n"
         "Linked worktrees share the repository's Git object store; they are not full repository clones. Reuse package-manager download/build caches and installed runtimes where supported. "
         "Keep mutable `node_modules` and `.venv` environments separate when lockfiles or interpreters differ; store dependency changes in tracked manifests/lockfiles or patch files, not as hidden edits inside an installed environment. "
         "Remove the task worktree after verified merge and completion.\n\n"
@@ -533,6 +551,8 @@ def handoff_template(workspace_mode: str) -> str:
         "verify the linked issue and read current GitHub status.\n\n"
         + GITHUB_ISSUE_LIFECYCLE_GUIDANCE
         + "\n\n"
+        + GITHUB_PROGRESSION_GUIDANCE
+        + "\n\n"
         + workspace_policy_text(workspace_mode)
         + "## Finding earlier project documents\n\n"
         "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
@@ -552,6 +572,8 @@ def agents_template(workspace_mode: str) -> str:
         "Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.\n\n"
         "For GitHub repositories, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming; the issue owns task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge records own delivery. Resolve discrepancies from the issue before editing.\n\n"
         + GITHUB_ISSUE_LIFECYCLE_GUIDANCE
+        + "\n\n"
+        + GITHUB_PROGRESSION_GUIDANCE
         + "\n\n"
         "Store checkout roots only in the private per-device registry with `continuity workspace register --root <checkout>`. Before creating a worktree, inspect registered roots and Git's worktree list. Reuse one clean, unlocked matching task branch; stop on dirty, locked, conflicting, or ambiguous matches. Do not scan drives or copy absolute paths into shared handoffs.\n\n"
         "## Scope\n\n"
@@ -603,12 +625,13 @@ Record the starting revision, relevant inputs/configuration, runtime, exact comm
 
 ## Continuity links
 
-- Task ID and canonical task file:
+- Leaf owning issue, parent ancestry and dependencies (or explicitly none):
+- Task ID, primary writer, branch and linked repository projection:
 - Related issues or PRs:
 - Current owner and next action:
 
 This template records context; it does not automatically synchronize this issue with repository tasks, pull requests, or checkpoints.
-"""
+""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n"
 
 
 def github_pr_template() -> str:
@@ -628,7 +651,7 @@ List focused commands and observed results. Link the CI run; do not paste full l
 
 ## Evidence and provenance (when relevant)
 
-- Task ID and issue:
+- Task ID and leaf owning issue, parent ancestry and dependencies (or explicitly none):
 - Starting revision, inputs, or source:
 - Direct citations or reproducible artifact:
 - What remains unknown:
@@ -642,11 +665,13 @@ Add exact commands, configuration, inputs, results, and limitations here when th
 
 ## Continuity closeout
 
-- Task checkpoint updated:
+- Docs/task/checkpoint/catalog/index synchronized before push; as-of status and source issue revision:
+- Request ID / exact pushed SHA / leaf receipt and parent update:
+- Required CI on exact candidate / mandatory auto-merge / verified merge and live issue status:
 - One next action or explicit completion:
 
 This template records context; it does not automatically synchronize this pull request with issues or checkpoints.
-"""
+""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n"
 
 
 def readme_template(name: str) -> str:
@@ -654,6 +679,7 @@ def readme_template(name: str) -> str:
         f"# {name}\n\n"
         "This repository uses Project Continuity Protocol.\n\n"
         "Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.\n"
+        f"\n{GITHUB_PROGRESSION_GUIDANCE}\n"
     )
 
 
@@ -795,7 +821,7 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
         "## Acceptance criteria\n\n- [ ] state observable, task-specific outcomes.\n\n"
         "## Evidence and sources\n\nLink repository state at a revision and cite external factual claims directly. Record commands and results for claims that need verification.\n\n"
         "## Reproduction details (only when needed)\n\nStarting revision, material inputs/configuration, runtime, exact command or prompt, observed result, and limitations.\n\n"
-        "## Related records\n\n- Issue/tracker link (if used):\n- Related PR/CI evidence:\n\n"
+        "## Related records\n\n- Required leaf owning issue, parent ancestry and dependencies (or explicitly none):\n- Primary writer / branch / source issue revision / as-of status:\n- Related PR/CI evidence and push receipt (request ID / SHA):\n\n"
         "## Checkpoint log\n\n"
         "No checkpoints yet.\n\n"
         "## Handoff\n\n"

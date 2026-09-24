@@ -1,6 +1,10 @@
 # TASK-PCM-0024 — Make GitHub authoritative and prove reliable continuation
 
-<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"No-history holdouts at baseline 5304bfa and candidate 18e262d and the focused local checkout/checkpoint tests are recorded in child issue #63. Keep #53 open and preserve the explicit boundary that cross-account GitHub permissions and a real second user's hosted adoption remain unverified because this repository has only the owner's account.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
+<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"Follow policy child issue 66 and automation child issue 67; retain issue 53 open for its broader acceptance. Second-account verification is not required per owner comment 5816655372.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
+
+## Current authority correction — 2026-09-24
+
+Leaf policy work: [#66 / PCM-0025](https://github.com/Pukujan/project-continuity-modules/issues/66) → parent [#53 / PCM-0024](https://github.com/Pukujan/project-continuity-modules/issues/53). Automation sibling [#67 / PCM-0026](https://github.com/Pukujan/project-continuity-modules/issues/67) depends on #66. Prerequisite policy/runtime slices are merged; #33 cleanup is independent. The [owner decision](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5816655372) supersedes every older statement below that treats a second GitHub account as required or blocking. Accepted #63 holdouts/local evidence do not test cross-account permissions, but that limitation is not an acceptance blocker. #53 remains OPEN for broader acceptance and is not completed by this policy slice. Older checkpoint text is historical evidence, preserved verbatim.
 
 - Status: active per owner direction; PCM-0018 / #33 cleanup remains separately blocked
 - Owner: Codex PCM session; GitHub issue #53
@@ -467,6 +471,22 @@ Blocked/uncertain:
 
 Next:
 - Preserve the completed holdout and local-test evidence in the task record. Keep issue #53 open because actual cross-account GitHub permissions and hosted adoption remain unverified; proceed only if the owner supplies an existing independent account or changes that acceptance criterion.
+
+
+### 2026-09-24 — authoritative acceptance correction and policy child
+
+Completed:
+- Verified live #53 and owner comment 5816655372; allocated leaf #66 / PCM-0025 and automation leaf #67 / PCM-0026 under #53.
+Evidence:
+- https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5816655372; https://github.com/Pukujan/project-continuity-modules/issues/66; https://github.com/Pukujan/project-continuity-modules/issues/67. Accepted baseline at 7762792263779719af03fd13a30b858a05ad120d.
+Decisions:
+- The owner removed the second-account requirement; old blocking claims are superseded, not erased. Automation #67 depends on policy #66; #33 cleanup is independent.
+Changed:
+- Active projections identify #66 and correct the owner requirement; historical checkpoints remain unchanged.
+Blocked/uncertain:
+- Policy delivery gates remain pending in the #66 candidate; broader #53 acceptance is not completed here.
+Next:
+- Verify required checks and auto-merge for the #66 policy PR, then record receipt/parent evidence; retain #53 OPEN.
 
 ## Handoff
 

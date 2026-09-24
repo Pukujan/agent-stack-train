@@ -2,6 +2,8 @@
 
 <!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
+This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
+
 ## Program state
 
 Phase: bootstrap.
@@ -24,4 +26,4 @@ None known.
 
 ## Next atomic action
 
-Create the first bounded task with `continuity task new`.
+Create or identify the GitHub issue, record its task/branch identity, then create the task projection with `continuity task new --issue <URL>`.
