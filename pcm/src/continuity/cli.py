@@ -2575,6 +2575,15 @@ def post_receipt_if_absent(
     return decision
 
 
+def reject_receipt_secrets(body: str) -> None:
+    lowered = body.lower()
+    secret_markers = ("ghp_", "github_pat_", "akia", "-----begin", "gh_token=", "inferhub_api_key")
+    if any(marker in lowered for marker in secret_markers):
+        raise ContinuityError("receipt body contains a secret marker; refusing to post")
+    if "d:\\" in lowered or "c:\\users\\" in lowered or "/users/" in lowered:
+        raise ContinuityError("receipt body contains a private path; refusing to post")
+
+
 def github_issue_comment_path(repository: str, issue_number: str) -> str:
     owner, separator, name = repository.partition("/")
     if not separator or not owner or not name or "/" in name or ".." in repository:
@@ -2600,10 +2609,15 @@ def publish_issue_receipt(
     def post() -> None:
         if marker not in body:
             raise ContinuityError("receipt body is missing its marker")
+        reject_receipt_secrets(body)
         path = github_issue_comment_path(repository, issue_number)
         result = run(["gh", "api", "--method", "POST", path, "--input", "-"], body)
         if result.returncode != 0:
             detail = (result.stderr or result.stdout or "GitHub comment post failed").strip()
+            try:
+                reject_receipt_secrets(detail)
+            except ContinuityError:
+                detail = "response withheld because it contained a secret marker"
             raise ContinuityError(f"receipt post failed; do not retry without a new lookup: {detail}")
 
     return post_receipt_if_absent(
