@@ -1,6 +1,6 @@
 # TASK-PCM-0024 — Make GitHub authoritative and prove reliable continuation
 
-<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"Complete independent no-history issue-53 holdouts and a real two-user, separate-drive adoption; verify checkout reuse, writer arbitration, required checks, auto-merge and cleanup. Use an independently authenticated collaborator; this session has only the owner account.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
+<!-- continuity:task {"acceptance":["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code","Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption","A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior","Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty","Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim","Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"],"depends_on":[],"goal":"Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.","id":"PCM-0024","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/53","next_action":"Start with child issue #63: designate an independently authenticated collaborator with access to a separate device/drive, then run the issue-53 baseline/candidate no-history holdouts and real two-user checkout, writer, CI, merge, and cleanup proof.","owner":"Codex PCM session; GitHub issue #53","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
 
 - Status: active per owner direction; PCM-0018 / #33 cleanup remains separately blocked
 - Owner: Codex PCM session; GitHub issue #53
@@ -416,6 +416,31 @@ Blocked/uncertain:
 
 Next:
 - Wait for an owner-designated independently authenticated collaborator on a separate device/drive and authorization for the baseline/candidate no-history holdouts; then complete the remaining multi-user and fresh-session acceptance proof.
+
+### 2026-09-24 05:27:44 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Need an owner-designated independently authenticated collaborator with access to a separate device or drive to perform the issue-53 holdouts and coordinated adoption."],"changed":["HANDOFF.md; checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md; tasks/TASK-PCM-0024-github-authority.md; issue #53; child issue #63"],"completed":["Created and linked child issue #63 for the independently authenticated collaborator adoption and issue-53 holdouts.","Reconciled issue #53 to acknowledge the recorded PCM-0018 baseline/candidate reports while keeping its issue-53-specific proof separate."],"decisions":["Keep #53 and #33 open; same-account tests do not satisfy the separate-user acceptance."],"evidence":["GitHub issue #63 is open and linked under #53. Issue #53 is OPEN. Issue #33 task/issue records contain independent baseline and candidate reports at 85f1346 and 98747fc, with timings and cleanup status.","GitHub collaborator listing returns only Pukujan with admin/push permissions; a distinct authorized collaborator is not currently available."],"next_action":"Ask the repository owner to designate and authorize a second GitHub collaborator for issue #63; then run independent sessions at baseline 5304bfa and candidate 18e262d plus the real two-user checkout, writer, CI, merge, and cleanup proof.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T05:27:44Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"414ac12cd5f567865d1780a76d48df42f25d92cad5647e5ff434ac4de2a880af","request_id":"7a31a2b0f5e84ef18bc7def81e7bc2c1","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Created and linked child issue #63 for the independently authenticated collaborator adoption and issue-53 holdouts.
+- Reconciled issue #53 to acknowledge the recorded PCM-0018 baseline/candidate reports while keeping its issue-53-specific proof separate.
+
+Evidence:
+- GitHub issue #63 is open and linked under #53. Issue #53 is OPEN. Issue #33 task/issue records contain independent baseline and candidate reports at 85f1346 and 98747fc, with timings and cleanup status.
+- GitHub collaborator listing returns only Pukujan with admin/push permissions; a distinct authorized collaborator is not currently available.
+
+Decisions:
+- Keep #53 and #33 open; same-account tests do not satisfy the separate-user acceptance.
+
+Changed:
+- HANDOFF.md; checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md; tasks/TASK-PCM-0024-github-authority.md; issue #53; child issue #63
+
+Blocked/uncertain:
+- Need an owner-designated independently authenticated collaborator with access to a separate device or drive to perform the issue-53 holdouts and coordinated adoption.
+
+Next:
+- Ask the repository owner to designate and authorize a second GitHub collaborator for issue #63; then run independent sessions at baseline 5304bfa and candidate 18e262d plus the real two-user checkout, writer, CI, merge, and cleanup proof.
 
 ## Handoff
 

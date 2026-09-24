@@ -83,7 +83,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `a9555b5d21d981c937ae9bd3cfebca24916a05db`
 - Reviewed SHA-256: `4c02c9547985cbb38b9242423697439350d49a3f1ffabed909c33bddc64444a7`
-- Current SHA-256: `7d1f954141a5711a2c353396a460490d463a43288c03c9fd81ee77172a473220`
+- Current SHA-256: `35add171d3301dde0b68a54879655f61349d5a568571a62b9134209d8adb5eb4`
 - Summary: Queued policy to make GitHub authoritative for PCM task tracking and prove fresh-session delivery and continuity.
 - Search terms: `GitHub authority`, `automatic merge`, `fresh session`, `issue lifecycle`, `large repository`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
