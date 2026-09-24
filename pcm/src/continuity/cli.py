@@ -2661,6 +2661,16 @@ def require_receipt_pair(repository: str | None, issue_number: str | None) -> tu
     return repository, issue_number
 
 
+def require_parent_issue(receipt_selected: bool, parent_issue: str | None) -> str | None:
+    if parent_issue is None:
+        return None
+    if not receipt_selected:
+        raise ContinuityError("parent receipt requires --receipt-repo and --receipt-issue")
+    if not parent_issue.isdecimal():
+        raise ContinuityError("parent receipt issue must be numeric")
+    return parent_issue
+
+
 def page_is_complete(count: int, page_size: int) -> bool:
     if page_size < 1:
         raise ContinuityError("receipt page size must be positive")
@@ -3025,6 +3035,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_checkpoint.add_argument("--receipt-repo", default=None, help="opt-in owner/name for a GitHub receipt")
     p_checkpoint.add_argument("--receipt-issue", default=None, help="opt-in issue number for a GitHub receipt")
+    p_checkpoint.add_argument("--receipt-parent", default=None, help="opt-in parent issue number")
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3251,6 +3262,42 @@ def main(argv: list[str] | None = None) -> int:
                     except ContinuityError as exc:
                         raise ContinuityError(f"{exc}; push {commit} stands") from exc
                     print(f"RECEIPT: {decision}")
+                    parent_issue = require_parent_issue(True, args.receipt_parent)
+                    if parent_issue is not None:
+                        parent_marker = render_receipt_marker(
+                            repository=repository,
+                            task_id=args.task_id,
+                            request_id=request_id,
+                            pushed_sha=commit,
+                            destination=parent_issue,
+                            kind="parent",
+                            payload_sha256=payload_sha,
+                        )
+                        parent_path = github_issue_comment_path(repository, parent_issue)
+                        parent_fetched = run_external(
+                            ["gh", "api", "--method", "GET", f"{parent_path}?per_page=100"],
+                            Path(args.root).resolve(),
+                        )
+                        if parent_fetched.returncode != 0:
+                            detail = (parent_fetched.stderr or parent_fetched.stdout or "parent lookup failed").strip()
+                            raise ContinuityError(
+                                f"RECEIPT_PARENT_PARTIAL: leaf receipt stands; do not roll back; {detail}"
+                            )
+                        try:
+                            parent_decision = maybe_post_from_page(
+                                parent_fetched.stdout,
+                                100,
+                                marker=parent_marker,
+                                payload_sha256=payload_sha,
+                                repository=repository,
+                                issue_number=parent_issue,
+                                run=run_post,
+                            )
+                        except ContinuityError as exc:
+                            raise ContinuityError(
+                                f"RECEIPT_PARENT_PARTIAL: leaf receipt stands; do not roll back; {exc}"
+                            ) from exc
+                        print(f"PARENT_RECEIPT: {parent_decision}")
             return 0
 
         if args.command == "recovery" and args.recovery_command == "reconcile":

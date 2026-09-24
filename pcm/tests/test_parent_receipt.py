@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from continuity.cli import ContinuityError, deliver_leaf_then_parent
+from continuity.cli import ContinuityError, build_parser, deliver_leaf_then_parent, require_parent_issue
 
 
 class ParentReceiptTests(unittest.TestCase):
@@ -48,6 +48,15 @@ class ParentReceiptTests(unittest.TestCase):
 
         self.assertEqual(deliver_leaf_then_parent(leaf, parent), "leaf-sha")
         self.assertEqual(calls, ["leaf", "parent"])
+
+    def test_parent_flag_requires_the_leaf_receipt_flags(self) -> None:
+        with self.assertRaises(ContinuityError):
+            require_parent_issue(False, "53")
+        self.assertEqual(require_parent_issue(True, "53"), "53")
+        args = build_parser().parse_args(
+            ["checkpoint", "PCM-0026", "--agent", "staff", "--next", "continue", "--receipt-parent", "53"]
+        )
+        self.assertEqual(args.receipt_parent, "53")
 
 
 if __name__ == "__main__":
