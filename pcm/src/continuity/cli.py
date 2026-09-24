@@ -2540,6 +2540,33 @@ def render_receipt_marker(
     )
 
 
+def receipt_retry_command(task_id: str, request_id: str, repository: str, issue_number: str) -> str:
+    return (
+        f"continuity checkpoint {task_id} --request-id {request_id} "
+        f"--receipt-repo {repository} --receipt-issue {issue_number}"
+    )
+
+
+def render_receipt_body(
+    marker: str,
+    *,
+    actor: str,
+    parent: str,
+    tests: str,
+    next_action: str,
+) -> str:
+    return "\n".join(
+        [
+            marker,
+            f"Actor: {actor}",
+            f"Parent: {parent}",
+            f"Tests: {tests}",
+            f"Next: {next_action}",
+            "Pending: hosted checks remain outside this comment.",
+        ]
+    )
+
+
 def parse_receipt_marker(body: str) -> ReceiptComment | None:
     """Read a v2 marker. Historical pcm:receipt comments are left unchanged."""
     start = body.find(_RECEIPT_V2_PREFIX)
@@ -2789,6 +2816,7 @@ def maybe_post_from_page(
     repository: str,
     issue_number: str,
     run: Callable[[list[str], str], subprocess.CompletedProcess[str]],
+    body: str | None = None,
 ) -> str:
     bodies = comment_bodies(payload)
     if not page_is_complete(len(bodies), page_size):
@@ -2800,7 +2828,7 @@ def maybe_post_from_page(
         lookup_complete=True,
         repository=repository,
         issue_number=issue_number,
-        body=marker,
+        body=body or marker,
         run=run,
     )
 
@@ -3282,7 +3310,8 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     if fetched.returncode != 0:
                         detail = (fetched.stderr or fetched.stdout or "GitHub comment lookup failed").strip()
-                        raise ContinuityError(receipt_failure_message(commit, detail))
+                        retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
+                        raise ContinuityError(f"{receipt_failure_message(commit, detail)}; retry: {retry}")
                     payload_sha = hashlib.sha256(f"{args.task_id}\n{request_id}\n{commit}".encode()).hexdigest()
                     marker = render_receipt_marker(
                         repository=repository,
@@ -3292,6 +3321,13 @@ def main(argv: list[str] | None = None) -> int:
                         destination=issue_number,
                         kind="leaf",
                         payload_sha256=payload_sha,
+                    )
+                    receipt_body = render_receipt_body(
+                        marker,
+                        actor="unverified",
+                        parent="issue 53",
+                        tests="mocked receipt tests",
+                        next_action=args.next_action,
                     )
 
                     def run_post(command: list[str], body: str) -> subprocess.CompletedProcess[str]:
@@ -3318,9 +3354,11 @@ def main(argv: list[str] | None = None) -> int:
                             repository=repository,
                             issue_number=issue_number,
                             run=run_post,
+                            body=receipt_body,
                         )
                     except ContinuityError as exc:
-                        raise ContinuityError(f"{exc}; push {commit} stands") from exc
+                        retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
+                        raise ContinuityError(f"{exc}; push {commit} stands; retry: {retry}") from exc
                     print(f"RECEIPT: {decision}")
                     parent_issue = require_parent_issue(True, args.receipt_parent)
                     if parent_issue is not None:
