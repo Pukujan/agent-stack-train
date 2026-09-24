@@ -2573,6 +2573,18 @@ def receipt_parent_url(repository: str, parent_issue: str | None) -> str:
     return f"https://github.com/{repository}/issues/{parent_issue}"
 
 
+def receipt_commit_url(repository: str, commit: str) -> str:
+    return f"https://github.com/{repository}/commit/{commit}"
+
+
+def receipt_pr_line(pull_request: str | None) -> str:
+    if not pull_request:
+        return "not supplied"
+    if not pull_request.startswith("https://github.com/") or "/pull/" not in pull_request:
+        raise ContinuityError("receipt pull request must be a GitHub pull URL")
+    return pull_request
+
+
 def receipt_test_line(evidence: list[str]) -> str:
     cleaned = [item.strip() for item in evidence if item.strip()]
     return "; ".join(cleaned) if cleaned else "not supplied"
@@ -2585,11 +2597,15 @@ def render_receipt_body(
     parent: str,
     tests: str,
     next_action: str,
+    commit_url: str = "not supplied",
+    pull_request: str = "not supplied",
 ) -> str:
     return "\n".join(
         [
             marker,
             f"Actor: {actor}",
+            f"Commit: {commit_url}",
+            f"Pull: {pull_request}",
             f"Parent: {parent}",
             f"Tests: {tests}",
             f"Next: {next_action}",
@@ -3154,6 +3170,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--receipt-repo", default=None, help="opt-in owner/name for a GitHub receipt")
     p_checkpoint.add_argument("--receipt-issue", default=None, help="opt-in issue number for a GitHub receipt")
     p_checkpoint.add_argument("--receipt-parent", default=None, help="opt-in parent issue number")
+    p_checkpoint.add_argument("--receipt-pr", default=None, help="optional GitHub pull request URL")
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3381,6 +3398,8 @@ def main(argv: list[str] | None = None) -> int:
                         parent=receipt_parent_url(repository, args.receipt_parent),
                         tests=receipt_test_line(args.evidence or []),
                         next_action=args.next_action,
+                        commit_url=receipt_commit_url(repository, commit),
+                        pull_request=receipt_pr_line(args.receipt_pr),
                     )
 
                     def run_post(command: list[str], body: str) -> subprocess.CompletedProcess[str]:
