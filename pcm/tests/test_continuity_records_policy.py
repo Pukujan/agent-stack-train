@@ -7,6 +7,7 @@ from pathlib import Path
 
 from continuity.cli import (
     CONTINUITY_RECORDS_POLICY_MARKER,
+    GITHUB_ISSUE_LIFECYCLE_GUIDANCE,
     github_issue_template,
     github_pr_template,
     init_repo,
@@ -58,6 +59,38 @@ class ContinuityRecordsPolicyTests(unittest.TestCase):
         self.assertIn("Human outcome", github_pr_template())
         self.assertIn("do not paste full logs", github_pr_template())
         self.assertIn("only when useful", github_pr_template())
+
+    def test_issue_transition_safeguard_reaches_policy_and_generated_guidance(self) -> None:
+        policy = (ROOT / "docs" / "CONTINUITY_RECORDS_POLICY.md").read_text(encoding="utf-8").lower()
+        self.assertIn("negated sentence can still be interpreted", policy)
+        self.assertIn("commit message", policy)
+        self.assertIn("linking-a-pull-request-to-an-issue", policy)
+
+        generated = github_pr_template().lower()
+        self.assertIn("negation does not cancel it", generated)
+        self.assertIn("refs #<number>", generated)
+        self.assertIn(GITHUB_ISSUE_LIFECYCLE_GUIDANCE.lower(), generated)
+
+        minimal_root = Path(tempfile.mkdtemp(prefix="continuity-records-minimal-issues-"))
+        software_root = Path(tempfile.mkdtemp(prefix="continuity-records-software-issues-"))
+        self.addCleanup(shutil.rmtree, minimal_root, True)
+        self.addCleanup(shutil.rmtree, software_root, True)
+        init_repo(minimal_root, "minimal", "Minimal Example", "MIN", github_templates=True)
+        init_repo(software_root, "software", "Software Example", "APP", github_templates=True)
+        for relative_path in ("HANDOFF.md", ".github/pull_request_template.md"):
+            text = (minimal_root / relative_path).read_text(encoding="utf-8").lower()
+            self.assertIn("negation does not cancel it", text)
+        for relative_path in ("AGENTS.md", ".github/pull_request_template.md"):
+            text = (software_root / relative_path).read_text(encoding="utf-8").lower()
+            self.assertIn("negation does not cancel it", text)
+        for relative_path in (
+            "HANDOFF.md",
+            "AGENTS.md",
+            "templates/v1/minimal/HANDOFF.md",
+            "templates/v1/software/AGENTS.md",
+        ):
+            text = (ROOT / relative_path).read_text(encoding="utf-8").lower()
+            self.assertTrue("negation does not cancel it" in text or "under negation" in text)
 
     def test_new_profiles_and_tasks_carry_the_short_contract(self) -> None:
         minimal_root = Path(tempfile.mkdtemp(prefix="continuity-records-minimal-"))

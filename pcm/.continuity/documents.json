@@ -60,8 +60,8 @@
       "related": [
         "pcm-0015-research"
       ],
-      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
-      "reviewed_sha256": "a8468c14f7a14870532c8981f447875410baa896e323bed2c2431ee2cccc39c9",
+      "reviewed_commit": "a9555b5d21d981c937ae9bd3cfebca24916a05db",
+      "reviewed_sha256": "22a14093565d3990e2078547ae7c9d485ec9c2a71b95c74777e3cbdb53cf6a02",
       "summary": "Human-readable and machine-verifiable issue, task, checkpoint and handoff records.",
       "tasks": [
         "PCM-0018"
@@ -122,8 +122,8 @@
         "continuity-records-policy",
         "testing-policy"
       ],
-      "reviewed_commit": "563c7b3172232aa69daff4b1971ef22ca91c85b4",
-      "reviewed_sha256": "53b7d5dc22a28983fae082e400a741ee30dfc54a60ef05f6ac801d01d26ece21",
+      "reviewed_commit": "a9555b5d21d981c937ae9bd3cfebca24916a05db",
+      "reviewed_sha256": "4c02c9547985cbb38b9242423697439350d49a3f1ffabed909c33bddc64444a7",
       "summary": "Queued policy to make GitHub authoritative for PCM task tracking and prove fresh-session delivery and continuity.",
       "tasks": [
         "PCM-0018",

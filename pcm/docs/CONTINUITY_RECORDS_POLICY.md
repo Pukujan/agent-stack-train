@@ -1,6 +1,6 @@
 # Human-first, auditable continuity records
 
-<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
 
 PCM records exist so another person or agent can understand what happened and continue accurately without the original conversation. A record must be readable as a human explanation and traceable to the evidence behind its claims.
 
@@ -39,6 +39,8 @@ Record what changed for the person or project, the evidence that supports the up
 ### Pull request
 
 Keep the visible summary easy to scan: human outcome, change and scope, verification result, and related task/issue. Put detailed reproduction, logs, and provenance behind a short expandable section or direct artifact links. Include the CI result and merge/closeout status when known. Do not claim a PR is merged until the remote confirms it.
+
+When a PR description or commit message refers to a GitHub issue, use an issue-closing keyword only when merging should complete that issue. GitHub recognizes `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference; a negated sentence can still be interpreted as a closing directive. For progress-only work, use a non-closing reference such as `Refs #123` or link the issue manually from GitHub's sidebar. After every merge, verify the live issue status before reconciling task lifecycle. See [GitHub's linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
 ### Project-continuity documents
 

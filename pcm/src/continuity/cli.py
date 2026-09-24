@@ -23,7 +23,13 @@ from . import __version__
 
 PROTOCOL_VERSION = "0.1.0-draft"
 CONTINUITY_RECORDS_POLICY_MARKER = (
-    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
+    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->'
+)
+GITHUB_ISSUE_LIFECYCLE_GUIDANCE = (
+    "When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. "
+    "GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. "
+    "For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. "
+    "See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)."
 )
 CONFIG_SCHEMA = "project-continuity.config.v1"
 MARKER_RE = re.compile(r"<!--\s*continuity:(?P<kind>[a-z-]+)\s+(?P<payload>\{.*\})\s*-->")
@@ -525,6 +531,8 @@ def handoff_template(workspace_mode: str) -> str:
         "the linked task file is a compact working cache. Merged default-branch history is authoritative for accepted code. "
         "PR checks and merge evidence are authoritative for delivery. Chat and context packs are derived. Before resuming, "
         "verify the linked issue and read current GitHub status.\n\n"
+        + GITHUB_ISSUE_LIFECYCLE_GUIDANCE
+        + "\n\n"
         + workspace_policy_text(workspace_mode)
         + "## Finding earlier project documents\n\n"
         "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
@@ -543,6 +551,8 @@ def agents_template(workspace_mode: str) -> str:
         "## Start\n\n"
         "Read PROJECT → CURRENT → active TASK → minimum relevant spec before editing.\n\n"
         "For GitHub repositories, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming; the issue owns task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge records own delivery. Resolve discrepancies from the issue before editing.\n\n"
+        + GITHUB_ISSUE_LIFECYCLE_GUIDANCE
+        + "\n\n"
         "Store checkout roots only in the private per-device registry with `continuity workspace register --root <checkout>`. Before creating a worktree, inspect registered roots and Git's worktree list. Reuse one clean, unlocked matching task branch; stop on dirty, locked, conflicting, or ambiguous matches. Do not scan drives or copy absolute paths into shared handoffs.\n\n"
         "## Scope\n\n"
         "Work only inside the active bounded task. Split or revise the task before materially expanding scope.\n\n"
@@ -602,7 +612,9 @@ This template records context; it does not automatically synchronize this issue 
 
 
 def github_pr_template() -> str:
-    return """## Human outcome
+    return f"""{GITHUB_ISSUE_LIFECYCLE_GUIDANCE}
+
+## Human outcome
 
 What changed for the person or project?
 

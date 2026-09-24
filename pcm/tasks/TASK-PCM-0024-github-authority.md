@@ -348,6 +348,29 @@ Blocked/uncertain:
 Next:
 - Ask the owner to designate an independently authenticated collaborator/device and authorize independent no-history holdouts; run the required collaboration and fresh-session proof, then mark the issue complete only after every acceptance criterion passes.
 
+### 2026-09-24 05:07:12 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Independent no-history issue-53 holdouts and the real two-user/separate-drive adoption need an independently authenticated collaborator/device."],"changed":["SPEC.md; README.md; docs/CONTINUITY_RECORDS_POLICY.md; generated AGENTS/HANDOFF guidance and templates; src/continuity/cli.py; tests/test_continuity_records_policy.py"],"completed":["Added a normative GitHub issue-transition rule to PCM's policy, generated adopter instructions, and PR template. It explains that negated issue-closing keywords still change issue state and that progress-only PRs should use references."],"decisions":["Progress PRs reference issues without lifecycle keywords; use a completion keyword only when the issue's acceptance is satisfied. Verify live issue state after merges."],"evidence":["python -m unittest discover -s tests -v: 73 passed. Ruff, MyPy, compileall, continuity validation, and Python 3.12 wheel/sdist parity passed. The new regression verifies minimal/software generated guidance and PR templates. GitHub's official linking documentation lists the keywords and says they work in PR descriptions and commit messages: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue. Repo incident is documented in issue #53 comments; #53 is currently OPEN."],"next_action":"Publish the issue-lifecycle wording safeguard PR with auto-merge gated by required checks; then ask the owner to designate an independently authenticated collaborator/device and authorize the remaining holdouts.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-24T05:07:12Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"e62b991ab2982d13e73b40c842b8a20c3ac05374f7f2ba13f7547c02bf158d96","request_id":"bb3a561593da4713bc80900224371283","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Added a normative GitHub issue-transition rule to PCM's policy, generated adopter instructions, and PR template. It explains that negated issue-closing keywords still change issue state and that progress-only PRs should use references.
+
+Evidence:
+- python -m unittest discover -s tests -v: 73 passed. Ruff, MyPy, compileall, continuity validation, and Python 3.12 wheel/sdist parity passed. The new regression verifies minimal/software generated guidance and PR templates. GitHub's official linking documentation lists the keywords and says they work in PR descriptions and commit messages: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue. Repo incident is documented in issue #53 comments; #53 is currently OPEN.
+
+Decisions:
+- Progress PRs reference issues without lifecycle keywords; use a completion keyword only when the issue's acceptance is satisfied. Verify live issue state after merges.
+
+Changed:
+- SPEC.md; README.md; docs/CONTINUITY_RECORDS_POLICY.md; generated AGENTS/HANDOFF guidance and templates; src/continuity/cli.py; tests/test_continuity_records_policy.py
+
+Blocked/uncertain:
+- Independent no-history issue-53 holdouts and the real two-user/separate-drive adoption need an independently authenticated collaborator/device.
+
+Next:
+- Publish the issue-lifecycle wording safeguard PR with auto-merge gated by required checks; then ask the owner to designate an independently authenticated collaborator/device and authorize the remaining holdouts.
+
 ## Handoff
 
 Read issue #53, PROJECT, CURRENT, this task, and only relevant policy/test records. Confirm current GitHub state; do not rely on prior chat. Issue #33 remains open for cleanup/closeout, but does not block this owner-directed task.

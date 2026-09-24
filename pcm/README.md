@@ -135,6 +135,8 @@ PCM builds on that instead of introducing a separate project-memory service.
 
 For GitHub-governed repositories, GitHub Issues own task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge evidence own delivery. PCM task files cache a concise working view linked to the authoritative issue. Before resuming, verify current issue state. Local absolute checkout paths belong in a private per-device registry, never shared handoffs.
 
+PR descriptions and commit messages can change issue state. Use GitHub's closing keywords only when merging should complete the referenced issue; negation does not cancel the directive. Use `Refs #<number>` for progress-only PRs and verify issue state after merges. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+
 ## Human-readable first, machine-checkable second
 
 The continuity files are ordinary Markdown and JSON. A person should be able to open them and understand the project without special software.

@@ -133,6 +133,8 @@ Projects declare a protocol version in `.continuity/config.json`. Backward-compa
 
 For GitHub-governed repositories, GitHub Issues own task intent and lifecycle; task files are committed working caches. Merged default-branch history owns accepted code, and PR checks/merge records own delivery evidence. Context packs and chat summaries are derived. If task metadata and GitHub disagree, stop and resolve from the issue before editing. A local path registry may contain absolute paths only on that device; shared issues, commits, PRs, and handoffs contain repository/task/ref/commit identity, never machine-specific paths.
 
+Issue lifecycle language in PR descriptions and commit messages is operational: GitHub recognizes supported closing keywords followed by an issue reference and may close the issue when the commit or PR merges to the default branch. Negation does not cancel the keyword. Use such a keyword only when the issue is ready to complete; for progress-only PRs, use `Refs #<number>` or a manual sidebar link. Verify the live issue after each merge before marking its task complete. See [GitHub's linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+
 ## 9. Evidence semantics
 
 Continuity records should prefer claims tied to evidence. Validators check structure and references but do not decide whether a human/model semantic claim is true.

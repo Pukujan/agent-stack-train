@@ -51,6 +51,6 @@ Keep one permanent main checkout as the project home base and use it for sequent
 
 ## Continuity records
 
-<!-- pcm:policy {"id":"continuity-records","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
 
-Issue logs, progress updates, pull requests, and continuity documents should explain the human problem and observable outcome, then scope, evidence, and one next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when it helps verify a claim; keep PR openings skimmable and link long logs. The CLI does not automatically synchronize arbitrary trackers; reconcile authoritative issue status explicitly.
+Issue logs, progress updates, pull requests, and continuity documents should explain the human problem and observable outcome, then scope, evidence, and one next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when it helps verify a claim; keep PR openings skimmable and link long logs. The CLI does not automatically synchronize arbitrary trackers; reconcile authoritative issue status explicitly. GitHub closing keywords in PR descriptions or commit messages still act under negation; use them only when the referenced issue should complete at merge. Use `Refs #<number>` for progress-only changes and verify issue status after every merge.
