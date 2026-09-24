@@ -2684,6 +2684,18 @@ def receipt_failure_message(commit: str, detail: str) -> str:
     )
 
 
+def deliver_leaf_then_parent(leaf: Callable[[], str], parent: Callable[[], str]) -> str:
+    """Post the parent only after the leaf succeeds. A parent failure does not undo the leaf."""
+    leaf_result = leaf()
+    try:
+        parent()
+    except ContinuityError as exc:
+        raise ContinuityError(
+            f"RECEIPT_PARENT_PARTIAL: leaf receipt stands; parent was not posted; do not roll back; {exc}"
+        ) from exc
+    return leaf_result
+
+
 def comment_bodies(payload: str) -> list[str]:
     try:
         data = json.loads(payload)
