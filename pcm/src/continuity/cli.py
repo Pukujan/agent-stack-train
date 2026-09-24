@@ -2465,6 +2465,36 @@ def remove_managed_worktree(root: Path, task_id: str) -> Path:
     return path
 
 
+@dataclass(frozen=True)
+class ReceiptComment:
+    marker: str
+    payload_sha256: str
+
+
+def decide_receipt_retry(
+    comments: list[ReceiptComment],
+    marker: str,
+    payload_sha256: str,
+    *,
+    lookup_complete: bool,
+) -> str:
+    """Choose whether a lost comment response may be posted again.
+
+    A lost response is not evidence that the receipt is absent. An incomplete
+    or ambiguous lookup stops instead of posting.
+    """
+    if not lookup_complete:
+        raise ContinuityError("receipt lookup is incomplete; refusing to post")
+    matches = [comment for comment in comments if comment.marker == marker]
+    if len(matches) > 1:
+        raise ContinuityError("receipt marker is ambiguous; refusing to post")
+    if not matches:
+        return "post"
+    if matches[0].payload_sha256 != payload_sha256:
+        raise ContinuityError("receipt identity was reused with a different payload")
+    return "recovered"
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
