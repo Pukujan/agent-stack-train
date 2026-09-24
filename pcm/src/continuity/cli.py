@@ -2567,6 +2567,19 @@ def require_issue_identity(payload: str, *, issue_number: str, task_id: str) -> 
         raise ContinuityError(f"receipt issue does not name {task_id}; refusing to post")
 
 
+def require_issue_owner(payload: str, actor: str) -> None:
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise ContinuityError("receipt issue ownership returned invalid JSON") from exc
+    if not isinstance(data, dict):
+        raise ContinuityError("receipt issue ownership did not return an object")
+    assignees = data.get("assignees") or []
+    logins = [str(item.get("login")) for item in assignees if isinstance(item, dict) and item.get("login")]
+    if logins and actor not in logins:
+        raise ContinuityError("receipt actor is not an issue assignee; refusing to post")
+
+
 def receipt_parent_url(repository: str, parent_issue: str | None) -> str:
     if not parent_issue:
         return "not supplied"
@@ -3398,6 +3411,7 @@ def main(argv: list[str] | None = None) -> int:
                         raise ContinuityError(f"{receipt_failure_message(commit, detail)}; retry: {retry}")
                     try:
                         require_issue_identity(identity.stdout, issue_number=issue_number, task_id=args.task_id)
+                        require_issue_owner(identity.stdout, actor)
                     except ContinuityError as exc:
                         retry = receipt_retry_command(args.task_id, request_id, repository, issue_number)
                         raise ContinuityError(f"{exc}; push {commit} stands; retry: {retry}") from exc
