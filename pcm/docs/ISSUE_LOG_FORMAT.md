@@ -93,7 +93,7 @@ local branch tip descends from the remote tip. This proposes detecting the
 divergence and reporting the exact recovery command.
 
 Identity and lineage: Leaf: #1234. Parent: none. Dependencies: none.
-Task ID: PCM-0042. Branch: task/PCM-0042-checkpoint-rebase. Writer: Astra.
+Task ID: ABC-0001 (fictional). Branch: task/ABC-0001-example. Writer: <primary writer>.
 
 Observation: repro on the current revision (fact); the branch was rebased
 earlier in the session (inferred from reflog).

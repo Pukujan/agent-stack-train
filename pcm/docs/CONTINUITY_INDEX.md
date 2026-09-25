@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"b2cf1bfacc4bce816ed5fc40cca16c3ae5992a50b37bf9e0b324b8a1e03d5d0b","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"ddda7fed653353e4f8f17e218c24081bbba367b2921614a13b1921c610560eed","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -15,18 +15,6 @@
 - Summary: Capture results and close completed helper agents while retaining useful history.
 - Search terms: `agent`, `cleanup`, `lifecycle`
 - Neighboring records: none
-- Task associations: none
-
-## Astra owner and Grok staff operating model (`astra-grok-staff`)
-
-- File: [`docs/ASTRA_GROK_STAFF.md`](../docs/ASTRA_GROK_STAFF.md)
-- Local content status: **NEEDS_REVIEW**
-- Last reviewed at commit: `1eeac1d94790df132e38e8c990fdd97adfcf284c`
-- Reviewed SHA-256: `e6a55f797d2e7b457ae4edc4f2cac7c29eba5f5ecf5c2c6aed96761c15ec51d8`
-- Current SHA-256: `be911bb409ef3be361422c9cd91fb9b99f424e7ecc220220e91e3446fb5e1a05`
-- Summary: Astra owns planning and verification. A failure is repaired and Astra is restored. Staff execute assigned tasks and do not choose the next slice.
-- Search terms: `Astra`, `Grok staff`, `background helper`, `failure recovery`
-- Neighboring records: `agent-lifecycle`
 - Task associations: none
 
 ## Checkpoint schema (`checkpoint-schema`)
@@ -80,10 +68,10 @@
 ## Issue log format (`issue-log-format`)
 
 - File: [`docs/ISSUE_LOG_FORMAT.md`](../docs/ISSUE_LOG_FORMAT.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
-- Current SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
+- Current SHA-256: `569625b28335029c844eb0e2a6510bcf09a1e1b0bbb62d23d634af96e95f54c4`
 - Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`
