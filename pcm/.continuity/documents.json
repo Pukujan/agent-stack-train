@@ -16,6 +16,28 @@
       "title": "Agent lifecycle policy"
     },
     {
+      "id": "architecture-guide",
+      "keywords": [
+        "architecture",
+        "checkpoint",
+        "doc-system",
+        "ownership",
+        "resume"
+      ],
+      "path": "docs/ARCHITECTURE.md",
+      "related": [
+        "continuity-records-policy",
+        "issue-log-format"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3",
+      "summary": "How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.",
+      "tasks": [
+        "PCM-0043"
+      ],
+      "title": "PCM architecture guide"
+    },
+    {
       "id": "checkpoint-schema",
       "keywords": [
         "checkpoint",

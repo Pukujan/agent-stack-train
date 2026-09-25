@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"ddda7fed653353e4f8f17e218c24081bbba367b2921614a13b1921c610560eed","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"976bcd30c7d28b8edb5ff630a956d9b2f1d765ce30bff38b989b90a4947d67b0","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -16,6 +16,18 @@
 - Search terms: `agent`, `cleanup`, `lifecycle`
 - Neighboring records: none
 - Task associations: none
+
+## PCM architecture guide (`architecture-guide`)
+
+- File: [`docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
+- Current SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
+- Summary: How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.
+- Search terms: `architecture`, `checkpoint`, `doc-system`, `ownership`, `resume`
+- Neighboring records: `continuity-records-policy`, `issue-log-format`
+- Task associations: `PCM-0043`
 
 ## Checkpoint schema (`checkpoint-schema`)
 
