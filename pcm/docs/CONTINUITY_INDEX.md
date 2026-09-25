@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"6f25868d83a8cd1ae56912a717fcc5af9e213c04bc98fa3dc50bb91fb04caca5","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"f47cd104886e5cc948b7513ec19eab6c26e834d528cd86496cb958ef3a25694d","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -220,6 +220,18 @@
 - Search terms: `PCM-0051`, `closing-keyword`, `sanitizer`
 - Neighboring records: none
 - Task associations: `PCM-0051`
+
+## PCM-0052 stale installed CLI bypassed the checkpoint sanitizer (incident record) (`pcm-0052-incident`)
+
+- File: [`tasks/TASK-PCM-0052-stale-cli-incident.md`](../tasks/TASK-PCM-0052-stale-cli-incident.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `6171aed26136ab97a7d4ccaefa689ded092a606e6f3cdeaacadc83bb0608fe0a`
+- Current SHA-256: `ffb3cc811afa28c4bbe8833eae33ad4f1f5ca28e0fd7b0b8c551a8978562f63f`
+- Summary: Incident: PR #161 checkpoint composed by uv-tool CLI 0.4.0 (pre-sanitizer) carried a raw closing keyword; squash merge auto-closed active issue #139; reopened with correction; version-drift gate decision open on #162.
+- Search terms: `closing-keyword`, `incident`, `sanitizer-bypass`, `stale-cli`, `version-drift`
+- Neighboring records: none
+- Task associations: `PCM-0052`
 
 ## Testing policy (`testing-policy`)
 

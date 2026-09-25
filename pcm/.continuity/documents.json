@@ -349,6 +349,25 @@
       "title": "PCM-0051 sanitizer forms task projection"
     },
     {
+      "id": "pcm-0052-incident",
+      "keywords": [
+        "closing-keyword",
+        "incident",
+        "sanitizer-bypass",
+        "stale-cli",
+        "version-drift"
+      ],
+      "path": "tasks/TASK-PCM-0052-stale-cli-incident.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "6171aed26136ab97a7d4ccaefa689ded092a606e6f3cdeaacadc83bb0608fe0a",
+      "summary": "Incident: PR #161 checkpoint composed by uv-tool CLI 0.4.0 (pre-sanitizer) carried a raw closing keyword; squash merge auto-closed active issue #139; reopened with correction; version-drift gate decision open on #162.",
+      "tasks": [
+        "PCM-0052"
+      ],
+      "title": "PCM-0052 stale installed CLI bypassed the checkpoint sanitizer (incident record)"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",
