@@ -3037,6 +3037,34 @@ def maybe_post_from_page(
     )
 
 
+CLOSING_DIRECTIVE_RE = re.compile(
+    r"(?i)\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)"
+    r"([-\s]+)(#[0-9]+|https?://[^ ]*issues/[0-9]+)"
+)
+
+
+def sanitize_closing_keywords(message: str) -> tuple[str, int]:
+    """Rewrite GitHub issue-closing directives to the non-closing Refs form."""
+    return CLOSING_DIRECTIVE_RE.subn(lambda match: f"Refs{match.group(1)}{match.group(2)}", message)
+
+
+def refresh_index_for_cataloged_change(root: Path, relative: str) -> bool:
+    """Regenerate and stage the document index when a committed path is cataloged."""
+    if not (root / DOCUMENT_CATALOG_PATH).is_file():
+        return False
+    catalog = load_document_catalog(root)
+    records = catalog.get("documents")
+    if not isinstance(records, list) or not any(
+        isinstance(record, dict) and record.get("path") == relative for record in records
+    ):
+        return False
+    view_path = managed_output_path(root, DOCUMENT_INDEX_PATH)
+    view_path.parent.mkdir(parents=True, exist_ok=True)
+    view_path.write_text(render_document_index(root, catalog), encoding="utf-8")
+    git_run(root, ["add", "--", DOCUMENT_INDEX_PATH])
+    return True
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
@@ -3044,6 +3072,7 @@ def publish_checkpoint(
     next_action: str,
     recovery: bool = False,
     request_id: str | None = None,
+    allow_closing_keywords: bool = False,
 ) -> str:
     """Commit and push one checkpoint so the shared branch is the durable handoff."""
     root = root.resolve()
@@ -3068,10 +3097,16 @@ def publish_checkpoint(
         )
 
     git_run(root, ["add", "--", relative])
+    if refresh_index_for_cataloged_change(root, relative):
+        print(f"NOTE: regenerated {DOCUMENT_INDEX_PATH} for cataloged change: {relative}")
     staged = git_run(root, ["diff", "--cached", "--name-only"]).stdout.splitlines()
     if relative in staged:
         kind = "recovery receipt" if recovery else "checkpoint"
         message = f"PCM {kind} {task_id}: {next_action}"
+        if not allow_closing_keywords:
+            message, replaced = sanitize_closing_keywords(message)
+            if replaced:
+                print("NOTE: closing keyword sanitized in commit message; use --allow-closing-keywords to keep it")
         git_run(root, ["commit", "-m", message])
     else:
         # A previous invocation may already have committed the checkpoint, or
@@ -3329,6 +3364,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--receipt-parent", default=None, help="opt-in parent issue number")
     p_checkpoint.add_argument("--receipt-pr", default=None, help="optional GitHub pull request URL")
     p_checkpoint.add_argument("--receipt-depends", action="append", default=None, help="optional dependency link")
+    p_checkpoint.add_argument(
+        "--allow-closing-keywords",
+        action="store_true",
+        help="keep GitHub issue-closing keywords from --next in the checkpoint commit message",
+    )
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3500,13 +3540,24 @@ def main(argv: list[str] | None = None) -> int:
             )
             if recovery_root is not None and path.is_relative_to(recovery_root / ".continuity" / "recovery"):
                 commit = publish_checkpoint(
-                    recovery_root, path, args.task_id, args.next_action, recovery=True, request_id=request_id
+                    recovery_root,
+                    path,
+                    args.task_id,
+                    args.next_action,
+                    recovery=True,
+                    request_id=request_id,
+                    allow_closing_keywords=args.allow_closing_keywords,
                 )
                 print(f"DEGRADED_CONTINUITY: canonical checkpoint unavailable; recovery receipt written: {path}")
                 print(f"PUSHED: {commit}")
             else:
                 commit = publish_checkpoint(
-                    Path(args.root).resolve(), path, args.task_id, args.next_action, request_id=request_id
+                    Path(args.root).resolve(),
+                    path,
+                    args.task_id,
+                    args.next_action,
+                    request_id=request_id,
+                    allow_closing_keywords=args.allow_closing_keywords,
                 )
                 print(path)
                 print(f"PUSHED: {commit}")
