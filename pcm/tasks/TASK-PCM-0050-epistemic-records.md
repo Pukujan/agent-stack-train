@@ -208,3 +208,9 @@ Next:
 ## Handoff
 
 Read PROJECT -> CURRENT -> this task -> #144 -> docs/research/PCM-0050-epistemic-bitemporal-records.md. Decision slice only.
+
+### 2026-09-25 — Correction: dogfood passes 1-5 recorded sanitizer evidence their commits lack (append-only)
+
+Passes 1-5 (requests pcm-0047-dogfood-20260925 replay, -dogfood2..5) state the keyword was in --next and/or expect a Refs rewrite in their own commit subject. Refuted by the artifacts: subjects of 888020b/411bf64/81938f0/e8c1b32/71b4ef6 contain no closing keyword and no Refs rewrite; only the index NOTE fired. Those five entries are valid evidence for the index-refresh half ONLY. The sanitizer proof is pass 6 alone: 2063136 (request pcm-0047-dogfood6-20260925) — --next began "close #99999", stdout printed "NOTE: closing keyword sanitized in commit message", subject reads "Refs #99999". Split evidence with this correction: #140 comment 5839601446; #140 closeout comment 5839320917 is partially inaccurate ("keyword-free ... in one pass") and superseded by 2063136. Entries above are preserved unmodified per append-only policy.
+
+Next: holdout arms per docs/plans/PCM-0046-arm-plan.md amendment 11 after the provider window.

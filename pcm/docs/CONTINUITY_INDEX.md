@@ -155,7 +155,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113`
-- Current SHA-256: `f21ed8373f834c0c645db664599bcb424a77ae8d2f51a47c9b42a3e7987ee4a7`
+- Current SHA-256: `0e66c5a8421cad4eb9e00c84d9e51737dfce71931d84f14a062f27e99d31939a`
 - Summary: Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.
 - Search terms: `arms`, `holdout`, `scoring`, `traversal`
 - Neighboring records: `pcm-0050-research`
@@ -203,7 +203,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `1d3671d62ad8872b9798415da5b46d9ab7cffbe7`
 - Reviewed SHA-256: `dbbd6d7b5fa5a65342093a421eed3fbed7b5d852eed588871c3e15c5dda07599`
-- Current SHA-256: `bf7f865bcc95103c28b8575d4384c82946a66b9fff47c3729a422b993ea8e7c5`
+- Current SHA-256: `44a0d5ed5587eeaf028fd0b33d5de72487dcc5b161dfbd8bd532808b70d28a79`
 - Summary: Decision-slice projection for PCM-0050.
 - Search terms: `PCM-0050`, `decision`, `projection`
 - Neighboring records: none
