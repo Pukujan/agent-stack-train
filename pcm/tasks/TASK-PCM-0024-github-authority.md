@@ -1,12 +1,12 @@
 # TASK-PCM-0024 — Make GitHub authoritative and prove reliable continuation
 
-<!-- continuity:task {"acceptance": ["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code", "Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption", "A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior", "Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty", "Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim", "Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"], "depends_on": [], "goal": "Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.", "id": "PCM-0024", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/53", "next_action": "Publish the disposable-adoption lifecycle evidence (trial repo Pukujan/pcm-dogfood-0024-lifecycle: checkpoint+push PR #2 at 39af869, projection PR #3 at e052045, worktree-owned closeout PR #4 auto-merged at bd0a9ba with required lint/test/continuity green and auto_merge armed by Pukujan, verified worktree remove, trial validate VALID). Then close #53 with the item-by-item reconciliation and the final closeout increment flips this projection to completed.", "owner": "Codex PCM session; GitHub issue #53", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
+<!-- continuity:task {"acceptance": ["Amend the normative specification and adopter guidance so GitHub issues are required and authoritative for PCM-governed task scope and lifecycle; keep merged repository history authoritative for accepted code", "Deterministic tests verify the authority rule reaches generated guidance and conflict-safe adoption", "A disposable GitHub adoption proves pushed checkpoints, required CI, automatic merge, issue closeout, and safe cleanup, including failure behavior", "Fresh sessions without parent-chat history reliably find the authoritative issue, repository handoff, actual status, and next action; record observable baseline/candidate evidence and uncertainty", "Add a reproducible larger-repository stress profile while keeping differential tests limited to a named trusted reference and tests proportional to the claim", "Required local and hosted quality gates pass, changes merge automatically, and final task/checkpoint/handoff state is reconciled before issue #53 closes"], "depends_on": [], "goal": "Make GitHub the required authority for PCM project tracking and prove that a fresh session can continue the GitHub-owned task through tested, merged delivery and safe cleanup.", "id": "PCM-0024", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/53", "next_action": "None for PCM-0024: #53 CLOSED after PR #116 evidence merged at 0c47747/amend; full item-by-item reconciliation in the closeout comment; disposable trial repository deleted after the record lands.", "owner": "Codex PCM session; GitHub issue #53", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "The current SPEC treats external trackers as optional mirrors, while the owner requires GitHub authority. A fresh agent must be able to recover task scope/status and complete the push, CI, merge, closeout, and cleanup path without chat history or contradictory local state."} -->
 
 ## Current authority correction — 2026-09-24
 
 Leaf policy work: [#66 / PCM-0025](https://github.com/Pukujan/project-continuity-modules/issues/66) → parent [#53 / PCM-0024](https://github.com/Pukujan/project-continuity-modules/issues/53). Automation sibling [#67 / PCM-0026](https://github.com/Pukujan/project-continuity-modules/issues/67) depends on #66. Prerequisite policy/runtime slices are merged; #33 cleanup is independent. The [owner decision](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5816655372) supersedes every older statement below that treats a second GitHub account as required or blocking. Accepted #63 holdouts/local evidence do not test cross-account permissions, but that limitation is not an acceptance blocker. #53 remains OPEN for broader acceptance and is not completed by this policy slice. Older checkpoint text is historical evidence, preserved verbatim.
 
-- Status: active per owner direction; PCM-0018 / #33 cleanup remains separately blocked
+- Status: completed 2026-09-25 (was active per owner direction); PCM-0018 / #33 cleanup remains separately tracked on #33
 - Owner: Codex PCM session; GitHub issue #53
 - Priority: P1
 - Prior sequencing dependency on PCM-0018 was explicitly overridden by the owner to proceed; #33 remains open with cleanup follow-up recorded.
@@ -27,7 +27,7 @@ A new session should be able to identify the authorized work from GitHub, resume
 - [x] Implement and test the GitHub authority and delivery contract in the normative spec and generated adopter guidance (PR #56, merged at `4033b49`; hosted required checks passed).
 - [x] Verify the policy and end-to-end issue → checkpoint/push → required CI → automatic merge → issue closeout → safe cleanup path in a disposable adoption. Observed 2026-09-25 in `Pukujan/pcm-dogfood-0024-lifecycle` (see "Disposable lifecycle trial evidence" below): PR #2/#3/#4 with strict required contexts and GitHub auto-merge, conflict-time refusal observed, worktree created and verified-removed. "including failure behavior" is partially proven: the CONFLICTING/stale-candidate refusal was observed; a deliberately *failing-checks* run was not executed in the trial (the main repo's own failed pre-fix runs show checks gating merge, recorded in this log's history). Trial issue closeout: the trial's own issue #1 stays open per design; the disposable repo's cleanup means deleting the repository, deferred until #53 closes and evidence is summarized here.
 - [x] Record independent no-history fresh-session results for the GitHub-authority promise and a reproducible large-repository stress measurement; label what a single run cannot establish. Baseline/candidate reports are recorded in #63, with approximate timings and unknown runtime identifiers; one run per revision demonstrates discovery, not repeatability. The 5,000-document/2,000-checkpoint synthetic stress profile and its single-machine limits are recorded in the benchmark report.
-- [ ] Run local and hosted quality gates, merge automatically, then reconcile task/current/handoff state and clean task-owned resources before closing #53.
+- [x] Run local and hosted quality gates, merge automatically, then reconcile task/current/handoff state and clean task-owned resources before closing #53. Gates: local 182-discovery (6 known macOS-environmental only), VALID/SYNCHRONIZED, Ruff/MyPy/compileall; hosted: [PR #115](https://github.com/Pukujan/project-continuity-modules/pull/115) at `e92ebdb` and [PR #116](https://github.com/Pukujan/project-continuity-modules/pull/116) at `2b28da4` auto-merged with six required contexts. Reconciliation: this closeout + #53 receipt. Cleanup: managed worktrees removed, local task branches pruned; the disposable trial repository is deleted immediately after its facts are recorded inline in the #53 closeout.
 
 ## Related records
 
@@ -499,6 +499,29 @@ Blocked/uncertain:
 - Policy delivery gates remain pending in the #66 candidate; broader #53 acceptance is not completed here.
 Next:
 - Verify required checks and auto-merge for the #66 policy PR, then record receipt/parent evidence; retain #53 OPEN.
+
+### 2026-09-25 10:58:24 UTC — owner/Astra planning; subagent execution
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning; subagent execution","blocked":["None."],"changed":["tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md."],"completed":["Marked PCM-0024 completed with all four acceptance boxes checked and honest boundary notes; CURRENT chain now reads delivered/closed through #53."],"decisions":["Trial repository facts recorded inline before its scheduled deletion; #110 keeps deferred automation; #100 keeps evaluation adjudication."],"evidence":["PRs #114/#115/#116 merged with six required contexts at 84fd300/e92ebdb/2b28da4; disposable trial evidence PR #116 section; validate VALID, index SYNCHRONIZED, 182-discovery with only six known macOS-environmental failures."],"next_action":"Merge this closeout PR, post #53 closeout receipt with inline trial facts, delete the disposable trial repository, close #53.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-25T10:58:24Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"7b6fea7f7a53a52f0b7bcca46d5d694b164da8b49b9a1225a21d601c2d75d9da","request_id":"pcm0024-closeout-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Marked PCM-0024 completed with all four acceptance boxes checked and honest boundary notes; CURRENT chain now reads delivered/closed through #53.
+
+Evidence:
+- PRs #114/#115/#116 merged with six required contexts at 84fd300/e92ebdb/2b28da4; disposable trial evidence PR #116 section; validate VALID, index SYNCHRONIZED, 182-discovery with only six known macOS-environmental failures.
+
+Decisions:
+- Trial repository facts recorded inline before its scheduled deletion; #110 keeps deferred automation; #100 keeps evaluation adjudication.
+
+Changed:
+- tasks/TASK-PCM-0024-github-authority.md; checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge this closeout PR, post #53 closeout receipt with inline trial facts, delete the disposable trial repository, close #53.
 
 ## Handoff
 
