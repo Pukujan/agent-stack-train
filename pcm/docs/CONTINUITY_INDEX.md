@@ -155,7 +155,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113`
-- Current SHA-256: `0e66c5a8421cad4eb9e00c84d9e51737dfce71931d84f14a062f27e99d31939a`
+- Current SHA-256: `270f3fa3499d176d90f8fff77c86526767d36c83571f6e05057fd693fa394c6a`
 - Summary: Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.
 - Search terms: `arms`, `holdout`, `scoring`, `traversal`
 - Neighboring records: `pcm-0050-research`

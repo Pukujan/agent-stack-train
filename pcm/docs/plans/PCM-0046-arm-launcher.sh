@@ -1,5 +1,5 @@
 #!/bin/bash
-# PCM-0046 arm launcher v3 (amendments 11 supersedes prompt details of 1 and 10).
+# PCM-0046 arm launcher v4 (amendment 12 adds the T1 format pointer; v3 prompts otherwise).
 # Prints the exact participant prompt per arm; arms are spawned through the agent
 # task tool. Bundles must be staged first:
 #   python3.12 docs/plans/PCM-0046-arm-bundles.py
@@ -11,7 +11,7 @@ for n in 1 2 3 4 5; do
   for pfx in T1 T1b; do
     echo "=== $pfx-$n ==="
     cat <<EOF
-You are working in a copy of a small repository at $A/$pfx-$n. Read $A/$pfx-$n/GUIDANCE.md and follow it. File $A/$pfx-$n/TASK-PCM-SEED.md belongs to a task that just merged and completed. Record the merge outcome in the file's checkpoint log. Edit only files under $A/$pfx-$n; do not modify any repository outside that directory.
+You are working in a copy of a small repository at $A/$pfx-$n. Read $A/$pfx-$n/GUIDANCE.md and follow it. File $A/$pfx-$n/TASK-PCM-SEED.md belongs to a task that just merged and completed. Record the merge outcome in the file's checkpoint log, following the format of the existing entries. Edit only files under $A/$pfx-$n; do not modify any repository outside that directory.
 EOF
   done
   echo "=== T2-$n ==="
