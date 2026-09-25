@@ -97,7 +97,7 @@ Never promote an unsupported previous-session statement into project fact.
 
 ## Continuity record writing
 
-<!-- pcm:policy {"id":"continuity-records","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.3.0","protocol_version":"0.1.0-draft"} -->
 
 For continuity issues, progress updates, pull requests, and PCM-owned project-state documents, orient the reader to the human problem and consequence, observable outcome, scope, status, evidence, and next action. Link external claims to direct sources and repository claims to a commit/revision, issue, PR, CI run, or artifact. Record enough inputs and commands to reproduce a result only when the claim depends on an experiment, research, or failure reproduction. Keep PR openings skimmable; link or collapse long logs and technical detail. Preserve the target project's ownership of unrelated writing and documents. GitHub's issue-closing keywords in PR descriptions and commit messages remain active under negation; use them only when the issue should complete at merge, and verify issue status afterward. See docs/CONTINUITY_RECORDS_POLICY.md.
 
@@ -128,3 +128,11 @@ Before every push, synchronize relevant docs and task/checkpoint projections, CU
 
 Required CI and GitHub auto-merge are mandatory. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
 <!-- pcm:github-progression:end -->
+
+<!-- pcm:issue-log-format:start -->
+## Issue log format (issue-log-format 1.0.0)
+
+<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+
+Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
+<!-- pcm:issue-log-format:end -->

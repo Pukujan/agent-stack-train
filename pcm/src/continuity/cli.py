@@ -23,7 +23,24 @@ from . import __version__
 
 PROTOCOL_VERSION = "0.1.0-draft"
 CONTINUITY_RECORDS_POLICY_MARKER = (
-    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->'
+    '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.3.0","protocol_version":"0.1.0-draft"} -->'
+)
+CONTINUITY_RECORDS_POLICY_VERSION = "1.3.0"
+ISSUE_LOG_FORMAT_POLICY_VERSION = "1.0.0"
+ISSUE_LOG_FORMAT_POLICY_MARKER = (
+    '<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->'
+)
+ISSUE_LOG_FORMAT_START_MARKER = "<!-- pcm:issue-log-format:start -->"
+ISSUE_LOG_FORMAT_END_MARKER = "<!-- pcm:issue-log-format:end -->"
+ISSUE_LOG_FORMAT_GUIDANCE = (
+    ISSUE_LOG_FORMAT_START_MARKER
+    + "\n## Issue log format (issue-log-format "
+    + ISSUE_LOG_FORMAT_POLICY_VERSION
+    + ")\n\n"
+    + ISSUE_LOG_FORMAT_POLICY_MARKER
+    + "\n\n"
+    "Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with \"Refs #<number>\" and use closing keywords only when closing at merge is intended. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.\n"
+    + ISSUE_LOG_FORMAT_END_MARKER
 )
 GITHUB_PROGRESSION_GUIDANCE = """<!-- pcm:github-progression:start -->
 ## GitHub-owned progression
@@ -553,6 +570,8 @@ def handoff_template(workspace_mode: str) -> str:
         + "\n\n"
         + GITHUB_PROGRESSION_GUIDANCE
         + "\n\n"
+        + ISSUE_LOG_FORMAT_GUIDANCE
+        + "\n\n"
         + workspace_policy_text(workspace_mode)
         + "## Finding earlier project documents\n\n"
         "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
@@ -574,6 +593,8 @@ def agents_template(workspace_mode: str) -> str:
         + GITHUB_ISSUE_LIFECYCLE_GUIDANCE
         + "\n\n"
         + GITHUB_PROGRESSION_GUIDANCE
+        + "\n\n"
+        + ISSUE_LOG_FORMAT_GUIDANCE
         + "\n\n"
         "Store checkout roots only in the private per-device registry with `continuity workspace register --root <checkout>`. Before creating a worktree, inspect registered roots and Git's worktree list. Reuse one clean, unlocked matching task branch; stop on dirty, locked, conflicting, or ambiguous matches. Do not scan drives or copy absolute paths into shared handoffs.\n\n"
         "## Scope\n\n"
@@ -623,6 +644,21 @@ Link relevant repository state at a revision. Cite direct sources for external f
 
 Record the starting revision, relevant inputs/configuration, runtime, exact command or prompt, observed result, and limitations.
 
+<details>
+<summary>Investigation issues add: symptoms, hypotheses (unverified), evidence, proposal</summary>
+
+Use this tier for incidents, failures, research, or design issues whose cause is not yet proven:
+
+- **Symptoms:** numbered, each with a bold short name and one observable sentence.
+- **Hypotheses (unverified):** each with an ID, **Status**, **Would confirm**, **Would refute**, and **Experiment**.
+- **Evidence with provenance:** source type, time with zone, redacted identifiers; say which hypothesis each item supports or undercuts; add a **Counter-signal** entry when one exists.
+- **Honest caveat:** which stops or limits are legitimate rather than failures.
+- **Problems vs gaps:** separate observed problems from missing capabilities.
+- **Proposal:** label every component *(proposal)*; none of it exists unless named as existing.
+- **Plan:** verification before build, in small separately verified increments.
+
+</details>
+
 ## Continuity links
 
 - Leaf owning issue, parent ancestry and dependencies (or explicitly none):
@@ -631,7 +667,7 @@ Record the starting revision, relevant inputs/configuration, runtime, exact comm
 - Current owner and next action:
 
 This template records context; it does not automatically synchronize this issue with repository tasks, pull requests, or checkpoints.
-""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n"
+""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n" + ISSUE_LOG_FORMAT_GUIDANCE + "\n"
 
 
 def github_pr_template() -> str:
@@ -644,6 +680,10 @@ What changed for the person or project?
 ## Change and scope
 
 Summarize the change and important boundaries.
+
+## What stays unchanged
+
+Name the behavior, files, or ownership that stay unchanged, so reviewers can see the blast radius without reading the diff first.
 
 ## Verification
 
@@ -668,10 +708,11 @@ Add exact commands, configuration, inputs, results, and limitations here when th
 - Docs/task/checkpoint/catalog/index synchronized before push; as-of status and source issue revision:
 - Request ID / exact pushed SHA / leaf receipt and parent update:
 - Required CI on exact candidate / mandatory auto-merge / verified merge and live issue status:
+- Issue references: use `Refs #<number>` unless merging should close the issue; verify live issue status after merge.
 - One next action or explicit completion:
 
 This template records context; it does not automatically synchronize this pull request with issues or checkpoints.
-""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n"
+""" + "\n" + GITHUB_PROGRESSION_GUIDANCE + "\n" + ISSUE_LOG_FORMAT_GUIDANCE + "\n"
 
 
 def readme_template(name: str) -> str:
@@ -680,6 +721,7 @@ def readme_template(name: str) -> str:
         "This repository uses Project Continuity Protocol.\n\n"
         "Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.\n"
         f"\n{GITHUB_PROGRESSION_GUIDANCE}\n"
+        f"\n{ISSUE_LOG_FORMAT_GUIDANCE}\n"
     )
 
 
@@ -1431,24 +1473,110 @@ def validate_workspace_layout(root: Path, config: dict[str, Any]) -> list[str]:
         return validate_managed_worktrees(root, config)
     return [f"unsupported workspace mode: {mode}"]
 
+def issue_log_format_findings(root: Path) -> tuple[list[str], list[str]]:
+    """Scan guidance files for the versioned issue-log-format marker.
+
+    Severity contract (owner direction on #99, comment 5828143593): a missing
+    marker is a warning so existing adopters stay VALID; contradictory versions
+    across files, unbalanced start/end markers, and malformed marker JSON are
+    errors; a marker that differs from the shipped constant is a stale warning
+    printing the mechanical update step.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    files = _issue_log_format_guidance_files(root)
+    versions: dict[str, list[str]] = {}
+    for path in files:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"{path.relative_to(root).as_posix()}: issue-log-format guidance unreadable: {exc}")
+            continue
+        relative = path.relative_to(root).as_posix()
+        starts = text.count(ISSUE_LOG_FORMAT_START_MARKER)
+        ends = text.count(ISSUE_LOG_FORMAT_END_MARKER)
+        if starts != ends:
+            errors.append(
+                f"{relative}: unbalanced issue-log-format guidance markers ({starts} start, {ends} end); "
+                f"repair the block between {ISSUE_LOG_FORMAT_START_MARKER} and {ISSUE_LOG_FORMAT_END_MARKER}"
+            )
+            continue
+        file_versions: list[str] = []
+        malformed = False
+        for payload in re.findall(r"<!--\s*pcm:policy\s+(.*?)\s*-->", text, flags=re.DOTALL):
+            if "issue-log-format" not in payload:
+                continue
+            try:
+                data = json.loads(payload)
+            except json.JSONDecodeError:
+                malformed = True
+                continue
+            if isinstance(data, dict) and data.get("id") == "issue-log-format":
+                file_versions.append(str(data.get("policy_version", "")))
+        if malformed:
+            errors.append(f"{relative}: malformed issue-log-format policy marker JSON")
+            continue
+        if not file_versions and starts == 0:
+            warnings.append(
+                f"{relative}: missing issue-log-format policy marker; add the current block "
+                f"(between {ISSUE_LOG_FORMAT_START_MARKER} and {ISSUE_LOG_FORMAT_END_MARKER} in "
+                "docs/ISSUE_LOG_FORMAT.md or the installed CLI templates), then run continuity validate"
+            )
+            continue
+        for version in set(file_versions):
+            versions.setdefault(version, []).append(relative)
+    distinct = sorted(versions)
+    if len(distinct) > 1:
+        listed = "; ".join(f"{version} ({', '.join(sorted(set(versions[version])))})" for version in distinct)
+        errors.append(f"contradictory issue-log-format policy versions across guidance files: {listed}")
+    elif distinct and distinct[0] != ISSUE_LOG_FORMAT_POLICY_VERSION:
+        version = distinct[0]
+        touched = ", ".join(sorted(set(versions[version])))
+        warnings.append(
+            f"stale issue-log-format policy marker ({version}) in {touched}; update to "
+            f"{ISSUE_LOG_FORMAT_POLICY_VERSION}: replace the text between {ISSUE_LOG_FORMAT_START_MARKER} "
+            f"and {ISSUE_LOG_FORMAT_END_MARKER} with the current block from docs/ISSUE_LOG_FORMAT.md "
+            "(or the installed CLI), then run continuity validate to confirm"
+        )
+    return sorted(set(errors)), warnings
+
+
+def _issue_log_format_guidance_files(root: Path) -> list[Path]:
+    files: list[Path] = []
+    for relative in ("AGENTS.md", "HANDOFF.md", ".github/pull_request_template.md"):
+        path = root / relative
+        if path.is_file():
+            files.append(path)
+    template_dir = root / ".github" / "ISSUE_TEMPLATE"
+    if template_dir.is_dir():
+        files.extend(sorted(template_dir.glob("*.md")))
+    return files
+
 
 def validate_repo(root: Path) -> list[str]:
     errors: list[str] = []
+    format_errors, _format_warnings = issue_log_format_findings(root)
+    errors.extend(format_errors)
     config_path = root / ".continuity" / "config.json"
     try:
         config = load_json(config_path)
     except ContinuityError as exc:
-        return [str(exc)]
+        return sorted(set([*errors, str(exc)]))
 
     if "workspace_mode" in config:
-        return [
-            (
-                f"{config_path}: unsupported legacy key 'workspace_mode'; "
-                "migration required: use `workspace: {mode: single-checkout}` or "
-                "`workspace: {mode: managed-worktrees}` in .continuity/config.json. "
-                "Validation does not modify configuration."
+        return sorted(
+            set(
+                [
+                    *errors,
+                    (
+                        f"{config_path}: unsupported legacy key 'workspace_mode'; "
+                        "migration required: use `workspace: {mode: single-checkout}` or "
+                        "`workspace: {mode: managed-worktrees}` in .continuity/config.json. "
+                        "Validation does not modify configuration."
+                    ),
+                ]
             )
-        ]
+        )
 
     try:
         config_errors = [f"{config_path}: {e}" for e in validate_schema(config, load_schema(root, "config"))]
@@ -3280,6 +3408,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "validate":
             root = Path(args.root).resolve()
             errors = validate_repo(root)
+            _, format_warnings = issue_log_format_findings(root)
+            for warning in format_warnings:
+                print(f"WARNING: {warning}")
             if errors:
                 for error in errors:
                     print(f"ERROR: {error}")

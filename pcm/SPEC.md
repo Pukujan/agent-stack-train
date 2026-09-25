@@ -183,3 +183,5 @@ External factual claims SHOULD link directly to authoritative sources. Repositor
 Keep machine-readable IDs and versions aligned across task/checkpoint, tracker, PR, and evidence links. Human-readable and machine-readable records SHOULD share one declared source or have deterministic checks for shared identifiers and status. A valid schema, citation, link, or agent report is not proof of semantic truth.
 
 PCM owns the continuation-record contract and its propagation to adopting projects. It does not standardize unrelated domain/product writing. GitHub issue and PR templates are optional writing aids, not synchronization adapters; installing them MUST preserve conflicting project files. PCM MUST NOT claim automatic conversation capture or issue synchronization. The full policy is in docs/CONTINUITY_RECORDS_POLICY.md.
+
+The readable structure for issue logs, progress updates and pull requests is the separately versioned `issue-log-format` module (policy 1.0.0): docs/ISSUE_LOG_FORMAT.md.

@@ -65,11 +65,11 @@ Each session follows the same short cycle:
 
 ## Evidence and boundaries
 
-**What is real today:** the protocol is `0.1.0-draft`, and the CLI package source is version `0.4.0`, which **has not been published** to any package index. Building or testing the package does not publish it. Everything below was checked at commit [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/).
+**What is real today:** the protocol is `0.1.0-draft`, and the CLI package source is version `0.5.0`, which **has not been published** to any package index. Building or testing the package does not publish it. The issue log format module is documented in [`docs/ISSUE_LOG_FORMAT.md`](docs/ISSUE_LOG_FORMAT.md): one plain-language shape for issue logs, updates and PRs that adopters can apply mechanically. Everything below was checked at commit [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/).
 
 | Claim | Status | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- | --- |
-| CLI package version is 0.4.0 | shipped (source only) | The installed CLI reports `continuity 0.4.0` | That a public release exists. PyPI returned 404 for `project-continuity` on 2026-09-24 | [`src/continuity/__init__.py`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/__init__.py#L1), [`docs/VERSIONING.md`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/docs/VERSIONING.md#L24-L38) |
+| CLI package version is 0.5.0 | shipped (source only) | The package source declares `0.5.0` and the installed CLI reports `continuity 0.5.0` | That a public release exists. PyPI returned 404 for `project-continuity` on 2026-09-24 | [`src/continuity/__init__.py`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/__init__.py#L1), [`docs/VERSIONING.md`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/docs/VERSIONING.md#L24-L38) |
 | Protocol version is 0.1.0-draft | shipped | The CLI and every profile declare this version | Stability. Draft versions may change | [`cli.py` L24](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/cli.py#L24), [`templates/v1/software/profile.json`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1/software/profile.json) |
 | Two init profiles: `minimal` and `software` | shipped | `software` extends `minimal` with `AGENTS.md` and `README.md` | Fit for non-software projects beyond the minimal files | [`templates/v1/`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1), [`minimal/profile.json`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/templates/v1/minimal/profile.json) |
 | `init` is non-destructive | shipped | It refuses before writing if a planned path holds different content | Semantic merging of your existing docs. Use [`docs/TARGET_ADOPTION.md`](docs/TARGET_ADOPTION.md) for mature repositories | [`cli.py` L462](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/src/continuity/cli.py#L462) |
@@ -127,7 +127,7 @@ Exact title and subtitle copy, prompts, alt text, crop rules, rejection conditio
 git clone https://github.com/Pukujan/project-continuity-modules.git
 cd project-continuity-modules
 python -m pip install -e .
-continuity --version        # continuity 0.4.0
+continuity --version        # continuity 0.5.0
 ```
 
 Then, inside the Git repository you want to make resumable:

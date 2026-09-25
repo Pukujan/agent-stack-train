@@ -30,6 +30,21 @@ Link relevant repository state at a revision. Cite direct sources for external f
 
 Record the starting revision, relevant inputs/configuration, runtime, exact command or prompt, observed result, and limitations.
 
+<details>
+<summary>Investigation issues add: symptoms, hypotheses (unverified), evidence, proposal</summary>
+
+Use this tier for incidents, failures, research, or design issues whose cause is not yet proven:
+
+- **Symptoms:** numbered, each with a bold short name and one observable sentence.
+- **Hypotheses (unverified):** each with an ID, **Status**, **Would confirm**, **Would refute**, and **Experiment**.
+- **Evidence with provenance:** source type, time with zone, redacted identifiers; say which hypothesis each item supports or undercuts; add a **Counter-signal** entry when one exists.
+- **Honest caveat:** which stops or limits are legitimate rather than failures.
+- **Problems vs gaps:** separate observed problems from missing capabilities.
+- **Proposal:** label every component *(proposal)*; none of it exists unless named as existing.
+- **Plan:** verification before build, in small separately verified increments.
+
+</details>
+
 ## Continuity links
 
 - Leaf owning issue, parent ancestry and dependencies (or explicitly none):
@@ -54,3 +69,10 @@ Before every push, synchronize relevant docs and task/checkpoint projections, CU
 
 Required CI and GitHub auto-merge are mandatory. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
 <!-- pcm:github-progression:end -->
+<!-- pcm:issue-log-format:start -->
+## Issue log format (issue-log-format 1.0.0)
+
+<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+
+Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
+<!-- pcm:issue-log-format:end -->

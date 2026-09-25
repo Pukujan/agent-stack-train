@@ -37,6 +37,8 @@ PCM-0018 sets the backward-compatible CLI/package source version to **0.3.0**: c
 
 PCM-0024 sets the backward-compatible CLI/package source version to **0.4.0**: it adds read-only GitHub issue verification and private local workspace registration/reuse. `issue_url` is optional task metadata generally, but repositories that enable `trackers.github` require it for active tasks and new task creation. This does not publish a package. The protocol remains **0.1.0-draft** because the authority behavior is opt-in for GitHub repositories and existing non-GitHub repositories remain valid.
 
+PCM-0027 sets the backward-compatible CLI/package source version to **0.5.0**: `continuity validate` gains the issue-log-format marker checks (missing and stale are warnings, contradictory or malformed is an error) and the generated guidance carries the new `issue-log-format` **1.0.0** module block ([`docs/ISSUE_LOG_FORMAT.md`](ISSUE_LOG_FORMAT.md)). Because that normative reference changes the record contract, continuity-records guidance is now policy **1.3.0**. This does not publish a package. The protocol remains **0.1.0-draft** because no required canonical object or schema meaning changes; existing adopters follow the marker-replacement update path in `docs/ISSUE_LOG_FORMAT.md`.
+
 ## Project declaration
 
 The Python distribution's version has one source of truth in

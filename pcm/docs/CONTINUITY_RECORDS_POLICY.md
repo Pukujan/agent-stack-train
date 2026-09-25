@@ -1,6 +1,6 @@
 # Human-first, auditable continuity records
 
-<!-- pcm:policy {"id":"continuity-records","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.3.0","protocol_version":"0.1.0-draft"} -->
 
 PCM records exist so another person or agent can understand what happened and continue accurately without the original conversation. A record must be readable as a human explanation and traceable to the evidence behind its claims.
 
@@ -31,14 +31,17 @@ The human explanation can be detailed when the decision is consequential or unfa
 ### New issue
 
 Describe the real-world or project consequence first. State the intended result in terms someone can observe, then scope/non-goals and proportionate acceptance checks. Link the canonical task when one is activated. Add sources and reproduction details only when they support a claim or are needed to repeat the reported behavior.
+ Follow the structure defined by the [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) for the issue log itself.
 
 ### Issue progress update
 
 Every issue progress update MUST link the leaf child issue owning the work, its parent ancestry and relevant dependencies (or explicitly none). A top-level deliverable identifies itself as leaf with parent: none; aggregates link relevant leaves. Create children only for independently deliverable scopes, never per comment. Record what changed for the person or project, the evidence that supports the update, what remains open or uncertain, and the next action. Link the PR, commit, CI run, or source; do not paste their full contents or restate the issue.
+ Write the update in the plain-language shape of the [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker).
 
 ### Pull request
 
 Keep the visible summary easy to scan: human outcome, change and scope, verification result, and related task/issue. Put detailed reproduction, logs, and provenance behind a short expandable section or direct artifact links. Include the CI result and merge/closeout status when known. Do not claim a PR is merged until the remote confirms it.
+ The [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) defines the reader-first PR opening and the `Refs #<number>` reference convention.
 
 When a PR description or commit message refers to a GitHub issue, use an issue-closing keyword only when merging should complete that issue. GitHub recognizes `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference; a negated sentence can still be interpreted as a closing directive. For progress-only work, use a non-closing reference such as `Refs #123` or link the issue manually from GitHub's sidebar. After every merge, verify the live issue status before reconciling task lifecycle. See [GitHub's linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 

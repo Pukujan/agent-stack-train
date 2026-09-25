@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"92f947c65a14ae2b5c7104d6d97862d5334f1c8171e59aaa885bf79ce42a4834","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"cfbfeaa9daf7d76b8846f4efdd71028ea9bfc3d85864d9b5016fb8afb8154807","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -56,10 +56,10 @@
 ## Continuity records policy (`continuity-records-policy`)
 
 - File: [`docs/CONTINUITY_RECORDS_POLICY.md`](../docs/CONTINUITY_RECORDS_POLICY.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
-- Current SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
+- Current SHA-256: `f6dd332d5155ab219adf289b766fa80e9ec8b196fb85926311e454252c9e14a9`
 - Summary: Human-readable and machine-verifiable issue, task, checkpoint and handoff records.
 - Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`
@@ -68,14 +68,26 @@
 ## GitHub authority and finite progression (`github-progression-spec`)
 
 - File: [`SPEC.md`](../SPEC.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
+- Current SHA-256: `d43df3e01bcb4a11b86716383c2d25ea6c4b609cbd0f6fc56664c0bc6af25cbb`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
 - Task associations: `PCM-0025`, `PCM-0026`
+
+## Issue log format (`issue-log-format`)
+
+- File: [`docs/ISSUE_LOG_FORMAT.md`](../docs/ISSUE_LOG_FORMAT.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `8e88ae2bb1062e0f55821d45b42c28ec55723b3b6b82913fc6d78e7f4973ee7c`
+- Current SHA-256: `8e88ae2bb1062e0f55821d45b42c28ec55723b3b6b82913fc6d78e7f4973ee7c`
+- Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
+- Search terms: `PR`, `format`, `issue`, `log`, `readability`
+- Neighboring records: `continuity-records-policy`
+- Task associations: none
 
 ## PCM-0015 implementation plan (`pcm-0015-plan`)
 
