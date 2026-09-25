@@ -38,7 +38,7 @@ A new session should be able to identify the authorized work from GitHub, resume
 
 ## Disposable lifecycle trial evidence (2026-09-25)
 
-Isolated adoption in the throwaway repository `Pukujan/pcm-dogfood-0024-lifecycle` (public; synthetic trial files plus the vendored open-source CLI, no secrets. Deletion was attempted on 2026-09-25 after its facts were recorded and is blocked by the session token's missing delete_repo scope; owner options on #53 comment 5831453842; no open issue depends on it). CLI under test: PCM `src` at branch head (package 0.5.0 line, Python 3.12.14).
+Isolated adoption in the throwaway repository `Pukujan/pcm-dogfood-0024-lifecycle` (public; synthetic trial files plus the vendored open-source CLI, no secrets. Disposition: ARCHIVED 2026-09-25 after its facts were recorded (writes frozen; all PR/CI/issue links stay live for the evidence cited in this file and on #53); deletion additionally needs a delete_repo token scope this session lacks (#53 comment 5831453842); no open issue depends on it). CLI under test: PCM `src` at branch head (package 0.5.0 line, Python 3.12.14).
 
 - Issue → bounded task: [trial issue #1](https://github.com/Pukujan/pcm-dogfood-0024-lifecycle/issues/1) written in the `issue-log-format` core tier; `continuity task new` projection; branch `task/TR-0001-coldstart`.
 - Checkpoint + push: `continuity checkpoint TR-0001` (request `tr0001-lifecycle-20260925`) pushed `af7fa3e7bbe6eebe2c47353cc948ebc72034d9a6`.
