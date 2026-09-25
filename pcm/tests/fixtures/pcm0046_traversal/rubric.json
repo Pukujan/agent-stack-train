@@ -42,5 +42,6 @@
    ]
   }
  },
- "arbiter": "verdicts are deterministic pure functions over stored artifacts; ambiguous signals are reported inconclusive and counted, never silently passed"
+ "arbiter": "verdicts are deterministic pure functions over stored artifacts; ambiguous signals are reported inconclusive and counted, never silently passed T4 fixtures use a minimal representative index format (see plan amendment 8), not live render_document_index output.",
+ "amendment": "2026-09-25 pre-launch amendment per docs/plans/PCM-0046-arm-plan.md"
 }
