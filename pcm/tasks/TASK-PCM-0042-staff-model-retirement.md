@@ -1,8 +1,8 @@
 # TASK-PCM-0042 — Staff model retirement
 
-<!-- continuity:task {"acceptance": ["docs/ASTRA_GROK_STAFF.md deleted and catalog de-registered with index regenerated and validate VALID", "module-doc example neutralized (fictional ABC-0001, no real writer name or task ID)", "CURRENT records the retirement with the ownership pointer to inference-recommendation-engine", "historical task/checkpoint/issue prose untouched (append-only)", "local gates green (unittest discovery with only the six known macOS-environmental failures, ruff, mypy, compileall, validate, index sync) and the six required hosted contexts pass on the exact merge candidate"], "depends_on": [], "goal": "Retire the one-time Astra/Grok staff-model document so no cold-start session adopts it as live guidance; orchestration recommendations belong to inference-recommendation-engine", "id": "PCM-0042", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/129", "next_action": "Open the PR (Refs #129), verify the six required contexts and merge, post the leaf receipt, then mark this projection completed in the closeout increment and close #129.", "owner": "owner/Astra planning", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "The document claims to be current operating guidance for a fresh session while describing a retired Windows-only inbox model with private paths; it already caused owner corrections this month and will confuse future sessions"} -->
+<!-- continuity:task {"acceptance": ["docs/ASTRA_GROK_STAFF.md deleted and catalog de-registered with index regenerated and validate VALID", "module-doc example neutralized (fictional ABC-0001, no real writer name or task ID)", "CURRENT records the retirement with the ownership pointer to inference-recommendation-engine", "historical task/checkpoint/issue prose untouched (append-only)", "local gates green (unittest discovery with only the six known macOS-environmental failures, ruff, mypy, compileall, validate, index sync) and the six required hosted contexts pass on the exact merge candidate"], "depends_on": [], "goal": "Retire the one-time Astra/Grok staff-model document so no cold-start session adopts it as live guidance; orchestration recommendations belong to inference-recommendation-engine", "id": "PCM-0042", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/129", "next_action": "None: #129 CLOSED (receipt 5837807514) after PR #132 merged at aa02a4c859f3aa1642d9be33af36c05c4a177168 with six contexts green; accidental-keyword closure disclosed and evidenced on #123.", "owner": "owner/Astra planning", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "The document claims to be current operating guidance for a fresh session while describing a retired Windows-only inbox model with private paths; it already caused owner corrections this month and will confuse future sessions"} -->
 
-- Status: active
+- Status: completed 2026-09-25 (#129 CLOSED)
 - Owner: owner/Astra planning
 - Priority: P2
 - Depends on: none
@@ -21,7 +21,7 @@ Hypothesis test recorded in [#129](https://github.com/Pukujan/project-continuity
 
 ## Checkpoint log
 
-No checkpoints yet.
+See the appended `continuity checkpoint` entries; retirement executed and delivered via PR #132 at `aa02a4c859f3aa1642d9be33af36c05c4a177168` (run 36175420479, six required contexts pass).
 
 ### 2026-09-25 18:45:13 UTC — owner/Astra planning
 
@@ -46,6 +46,29 @@ Blocked/uncertain:
 Next:
 - Open PR Refs #129, verify six contexts + merge, post receipts, close #129.
 
+### 2026-09-25 18:49:20 UTC — owner/Astra planning
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning","blocked":["None."],"changed":["tasks/TASK-PCM-0042-staff-model-retirement.md; checkpoints/CURRENT.md."],"completed":["Marked PCM-0042 completed; CURRENT active task cleared."],"decisions":["no new decisions"],"evidence":["PR #132 merged at aa02a4c; six contexts run 36175420479; receipt 5837807514; #123 second-instance evidence posted."],"next_action":"Merge the closeout PR under required checks; the retirement chain is then complete.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0042","timestamp":"2026-09-25T18:49:20Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3d282652eb78f466097ce175251b3896c9aef365a42174bcc5d081765747c446","request_id":"pcm0042-closeout-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0042"} -->
+
+Completed:
+- Marked PCM-0042 completed; CURRENT active task cleared.
+
+Evidence:
+- PR #132 merged at aa02a4c; six contexts run 36175420479; receipt 5837807514; #123 second-instance evidence posted.
+
+Decisions:
+- no new decisions
+
+Changed:
+- tasks/TASK-PCM-0042-staff-model-retirement.md; checkpoints/CURRENT.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge the closeout PR under required checks; the retirement chain is then complete.
+
 ## Handoff
 
-Read PROJECT → CURRENT → this task → #129. After the PR merges with required checks, post the leaf receipt on #129, close it, and record completion in a closeout increment.
+Read PROJECT → CURRENT → this task → #129. Complete: receipt posted (5837807514); #129 closed (accidental keyword mechanism disclosed on the receipt and on #123 as a second instance).
