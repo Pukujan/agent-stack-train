@@ -547,6 +547,29 @@ Blocked/uncertain:
 Next:
 - Re-render index, merge this PR, then post the dated #53 correction, patch #99 item 3, add the #110 no-release addendum, and file the checkpoint-index defect issue.
 
+### 2026-09-25 17:29:54 UTC — owner/Astra planning
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning","blocked":["None."],"changed":["checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md."],"completed":["Ledger-final hygiene: (1) appended this event because the prior entry pcm0024-ledger-followups-20260925 stated the trial custody line was set to archived while that sentence actually landed one commit later in #121 at 70874c0 (append-only: the earlier entry stands as written); (2) CURRENT's stale 'after this closeout merges' next-action refreshed to post-84fd300 reality; (3) attribution clarified: #53 item 41's auto-merge evidence is exactly one trial PR (#4, auto_squash_enabled 10:35:16Z \u2192 fired bd0a9ba) plus PCM's own auto-merged cycles #112-#118; trial PRs #2/#3/#9 were owner-merged with green required contexts."],"decisions":["No checkpoint history edited; corrections appended. Trial PR #6/issue #5 stay OPEN inside the archived repo by design: retained failed-check evidence per item 41; unarchiving to close them would delete the acceptance signal."],"evidence":["git show 01a12e9 still contained 'Deletion was attempted' (fixed in 70874c0); #53 receipts 5831418345/5832384113/5833266653; PR #117 both vectors (description + squash commit message) carried 'close #53' \u2014 defect #123 body updated to name both."],"next_action":"Merge this ledger-final increment under required CI and auto-merge; no lifecycle changes remain in the closure chain.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0024","timestamp":"2026-09-25T17:29:54Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"c3facc1e804e1cdbf83901cfbf4edba49d8e808a7fd3b2865a859ee89f6fd77b","request_id":"pcm0024-ledger-final-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0024"} -->
+
+Completed:
+- Ledger-final hygiene: (1) appended this event because the prior entry pcm0024-ledger-followups-20260925 stated the trial custody line was set to archived while that sentence actually landed one commit later in #121 at 70874c0 (append-only: the earlier entry stands as written); (2) CURRENT's stale 'after this closeout merges' next-action refreshed to post-84fd300 reality; (3) attribution clarified: #53 item 41's auto-merge evidence is exactly one trial PR (#4, auto_squash_enabled 10:35:16Z → fired bd0a9ba) plus PCM's own auto-merged cycles #112-#118; trial PRs #2/#3/#9 were owner-merged with green required contexts.
+
+Evidence:
+- git show 01a12e9 still contained 'Deletion was attempted' (fixed in 70874c0); #53 receipts 5831418345/5832384113/5833266653; PR #117 both vectors (description + squash commit message) carried 'close #53' — defect #123 body updated to name both.
+
+Decisions:
+- No checkpoint history edited; corrections appended. Trial PR #6/issue #5 stay OPEN inside the archived repo by design: retained failed-check evidence per item 41; unarchiving to close them would delete the acceptance signal.
+
+Changed:
+- checkpoints/CURRENT.md; docs/CONTINUITY_INDEX.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge this ledger-final increment under required CI and auto-merge; no lifecycle changes remain in the closure chain.
+
 ## Handoff
 
 Read issue #53, PROJECT, CURRENT, this task, and only relevant policy/test records. Confirm current GitHub state; do not rely on prior chat. Issue #33 remains open for cleanup/closeout, but does not block this owner-directed task.

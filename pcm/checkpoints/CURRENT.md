@@ -10,7 +10,7 @@ Predecessor state: [#66 / PCM-0025](https://github.com/Pukujan/project-continuit
 
 ## Next atomic action
 
-After this closeout merges, the chain to #99 is complete: no PCM task is active. Pick the next released slice from #100 (PCM-0028 phases, gated on the recorded #99 transfer) or #33/#15/#30/#35 backlog — each on its own task branch — or stop intentionally and record that choice here.
+The chain to #99 is complete: PCM-0024's closeout merged at `84fd300`, evidence supplements and the five-family trial record are posted (5832384113, 5833266653), and no PCM task is active. Pick the next released slice from #100 (PCM-0028 phases, gated on the recorded #99 transfer), the CLI defects #122/#123, or the #33/#15/#30/#35 backlog — each on its own task branch — or record an intentional stop here.
 
 ## Historical program state (superseded by projection above)
 
