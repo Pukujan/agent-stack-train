@@ -2,7 +2,7 @@
 
 <!-- continuity:task {"acceptance": ["Module doc docs/ISSUE_LOG_FORMAT.md carries the issue-log-format 1.0.0 marker, spec, exemplar and short-form example; registered in the document catalog and rendered index.", "CLI constant and guidance block propagated to the minimal and software generated guidance, the GitHub issue template, the static template copies, and PCM's own guidance; continuity-records references the module without duplicating it (version bumped to 1.3.0).", "continuity validate reports missing (warning), contradictory (error) and stale (warning) markers; deterministic tests cover each case, plus parity with generated output and preservation of existing adopter files during init.", "The existing-adopter update path is documented and the VERSIONING entry added; package source is 0.5.0.", "Normal checkpoint/PR flow with required checks, auto-merge, and verified reconciliation; the PR uses Refs #99."], "depends_on": [], "goal": "Ship the issue-log-format 1.0.0 module: one human-readable shape for issue logs, updates and PRs that any PCM adopter can apply mechanically", "id": "PCM-0027", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/99", "next_action": "None for PCM-0027: #99 CLOSED (PR #113 at 79337a6; receipt 5829746872; ledger corrections 5830303826). Evaluation-gate transfer recorded on #100 (5830322199).", "owner": "Astra/Codex planning; subagent implementation", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "Agents write issue records of uneven quality; the owner rates human-readable project records as one of the most valuable modules to solve"} -->
 
-- Status: active
+- Status: completed 2026-09-25 (#99 CLOSED)
 - Owner: Astra/Codex planning; subagent implementation
 - Priority: P1
 - Depends on: none
@@ -54,8 +54,8 @@ A fresh agent or person writing an issue log, progress update, or PR in a PCM ad
 ## Related records
 
 - Required leaf owning issue, parent ancestry and dependencies (or explicitly none): leaf #99, parent none, dependencies none.
-- Primary writer / branch / source issue revision / as-of status: subagent implementation on `task/PCM-0027-issue-log-format`; implementation complete pending PR as of 2026-09-25; the evaluation-run acceptance stays open on #99.
-- Related PR/CI evidence and push receipt (request ID / SHA): pending PR publication.
+- Primary writer / branch / source issue revision / as-of status: owner/Astra planning with subagent execution on `task/PCM-0027-issue-log-format`; delivered as of 2026-09-25T08:51:58Z merge; the evaluation-run acceptance transferred to #100 (5830322199).
+- Related PR/CI evidence and push receipt (request ID / SHA): [PR #113](https://github.com/Pukujan/project-continuity-modules/pull/113) at `79337a600bf282e98188bbb9ed37ff35468db39f`, closeout #114 at `84fd300`; request pcm0027-module-publish-20260925 pushed `f37c513`; run 36115136343; receipt 5829746872; corrections 5830303826.
 
 ## Checkpoint log
 
@@ -105,7 +105,7 @@ Blocked/uncertain:
 - None.
 
 Next:
-- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
+- None: closeout merged at `84fd300`, worktree verified-removed, #99 CLOSED.
 
 ### 2026-09-25 09:09:51 UTC — owner/Astra planning
 
@@ -128,8 +128,8 @@ Blocked/uncertain:
 - None.
 
 Next:
-- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
+- None: closeout merged at `84fd300`, worktree verified-removed, #99 CLOSED.
 
 ## Handoff
 
-Read PROJECT → CURRENT → this task → `docs/ISSUE_LOG_FORMAT.md`. The module, propagation, validator, and tests are on this branch; next action is publishing the PR with `Refs #99` and reconciling #99 per the owner close plan (evaluation results remain open there). Checkpoint before stopping.
+Read PROJECT → CURRENT → this task → `docs/ISSUE_LOG_FORMAT.md`. The module shipped on main (`79337a6` + closeout `84fd300`); evaluation adjudication continues under #100 (recorded there via 5830322199).
