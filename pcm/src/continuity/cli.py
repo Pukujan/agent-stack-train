@@ -3039,13 +3039,18 @@ def maybe_post_from_page(
 
 CLOSING_DIRECTIVE_RE = re.compile(
     r"(?i)\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)"
-    r"([-\s]+)(#[0-9]+|https?://[^ ]*issues/[0-9]+)"
+    r"(?:([-\s]+)|:\s*)((?:[\w.-]+/[\w.-]+)?#\d+|https?://[^ ]*issues/\d+)"
 )
+
+
+def _refs_replacement(match: re.Match[str]) -> str:
+    sep = match.group(1) or ": "
+    return f"Refs{sep}{match.group(2)}"
 
 
 def sanitize_closing_keywords(message: str) -> tuple[str, int]:
     """Rewrite GitHub issue-closing directives to the non-closing Refs form."""
-    return CLOSING_DIRECTIVE_RE.subn(lambda match: f"Refs{match.group(1)}{match.group(2)}", message)
+    return CLOSING_DIRECTIVE_RE.subn(_refs_replacement, message)
 
 
 def refresh_index_for_cataloged_change(root: Path, relative: str) -> bool:

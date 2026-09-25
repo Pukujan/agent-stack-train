@@ -14,8 +14,8 @@ from continuity.cli import ContinuityError, checkpoint_task, main
 FIXTURE = Path(__file__).parent / "fixtures" / "valid-minimal"
 
 EFFECTIVE_CLOSING = re.compile(
-    r"(?i)\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+"
-    r"(?:#\d+|https?://[^ ]*issues/\d+)"
+    r"(?i)\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*"
+    r"(?::\s*)?(?:#\d+|https?://[^ ]*issues/\d+|(?:[\w.-]+/[\w.-]+)?#\d+)"
 )
 
 
@@ -122,6 +122,32 @@ class ClosingKeywordSanitizationTests(HygieneCase):
 
         self.assertEqual(self.head_subject(root), "PCM checkpoint PCM-0001: run the full suite")
         self.assertNotIn("NOTE: closing keyword sanitized in commit message", output)
+
+    def test_colon_closing_form_is_sanitized_in_commit_message(self) -> None:
+        root, _ = self.make_repo()
+        output = self.checkpoint_via_cli(root, "Closes: #99 after this increment lands")
+
+        subject = self.head_subject(root)
+        self.assertNotRegex(subject, EFFECTIVE_CLOSING)
+        self.assertIn("Refs: #99", subject)
+        self.assertIn("NOTE: closing keyword sanitized in commit message", output)
+
+    def test_uppercase_colon_closing_form_is_sanitized(self) -> None:
+        root, _ = self.make_repo()
+        output = self.checkpoint_via_cli(root, "CLOSES:#99 immediately")
+
+        subject = self.head_subject(root)
+        self.assertNotRegex(subject, EFFECTIVE_CLOSING)
+        self.assertIn("NOTE: closing keyword sanitized in commit message", output)
+
+    def test_cross_repo_closing_form_is_sanitized(self) -> None:
+        root, _ = self.make_repo()
+        output = self.checkpoint_via_cli(root, "fixes octo-org/octo-repo#100 in the partner project")
+
+        subject = self.head_subject(root)
+        self.assertNotRegex(subject, EFFECTIVE_CLOSING)
+        self.assertIn("Refs octo-org/octo-repo#100", subject)
+        self.assertIn("NOTE: closing keyword sanitized in commit message", output)
 
 
 class IndexFreshnessAtPublishTests(HygieneCase):

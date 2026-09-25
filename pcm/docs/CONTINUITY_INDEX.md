@@ -215,7 +215,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `9877b229ca916c0926aa4ffaff3357f9423225133a46dabd96e148f324356b6c`
-- Current SHA-256: `abb5694ec023e22b8a3c6e85aa98cd630d9bcc84dd55c220e92c7d0d4c2ff066`
+- Current SHA-256: `ebb74304f53c0be13ebe7d0f14005fed6b48e9630ef27d5e54a58886172891a4`
 - Summary: Active task: widen checkpoint sanitizer to colon and cross-repo closing forms.
 - Search terms: `PCM-0051`, `closing-keyword`, `sanitizer`
 - Neighboring records: none
