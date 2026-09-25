@@ -1,8 +1,8 @@
 # TASK-PCM-0043 — Architecture Doc
 
-<!-- continuity:task {"acceptance": ["docs/ARCHITECTURE.md exists on main, mirrors SPEC \u00a72/\u00a75/\u00a78 in plain language with an explicit normative-source pointer", "registered in .continuity/documents.json and rendered into docs/CONTINUITY_INDEX.md (validate VALID, render --check SYNCHRONIZED)", "all four diagrams follow issue-log-format 1.1.0: graph TD, <=8 nodes, text alternative beside each, wide content collapsed in details", "continuity docs find 'how does pcm work architecture ownership' returns the record after fetch", "six required hosted contexts pass on the exact merge candidate; receipts posted; #128 and #134 closed after delivery"], "depends_on": [], "goal": "Promote the #128 how-PCM-works answer to docs/ARCHITECTURE.md, registered in the catalog, with 1.1.0-compliant diagrams", "id": "PCM-0043", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/134", "next_action": "Open the PR (Refs #134), verify six contexts + merge, post receipts, close #134 and #128.", "owner": "owner", "priority": "P3", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "The durable in-repo explanation of ownership, checkpoints, resumability, and self-vs-adopter behavior is the missing cold-start artifact the answer itself recommended"} -->
+<!-- continuity:task {"acceptance": ["docs/ARCHITECTURE.md exists on main, mirrors SPEC \u00a72/\u00a75/\u00a78 in plain language with an explicit normative-source pointer", "registered in .continuity/documents.json and rendered into docs/CONTINUITY_INDEX.md (validate VALID, render --check SYNCHRONIZED)", "all four diagrams follow issue-log-format 1.1.0: graph TD, <=8 nodes, text alternative beside each, wide content collapsed in details", "continuity docs find 'how does pcm work architecture ownership' returns the record after fetch", "six required hosted contexts pass on the exact merge candidate; receipts posted; #128 and #134 closed after delivery"], "depends_on": [], "goal": "Promote the #128 how-PCM-works answer to docs/ARCHITECTURE.md, registered in the catalog, with 1.1.0-compliant diagrams", "id": "PCM-0043", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/134", "next_action": "None: #134 CLOSED (receipt 5838053801) after PR #136 merged at 5c89db39231994621557455c67f752adad4d575b with six contexts green; #128 closed as delivered.", "owner": "owner", "priority": "P3", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "The durable in-repo explanation of ownership, checkpoints, resumability, and self-vs-adopter behavior is the missing cold-start artifact the answer itself recommended"} -->
 
-- Status: active
+- Status: completed 2026-09-25 (#134 CLOSED)
 - Owner: owner
 - Priority: P3
 - Depends on: none
@@ -75,6 +75,29 @@ Blocked/uncertain:
 
 Next:
 - PR Refs #134, verify six contexts + merge, receipts, close #134 and #128.
+
+### 2026-09-25 19:32:07 UTC — owner
+
+<!-- continuity:checkpoint {"agent":"owner","blocked":["None."],"changed":["tasks/TASK-PCM-0043-architecture-doc.md; checkpoints/CURRENT.md."],"completed":["Marked PCM-0043 completed; CURRENT cleared and updated with the delivered architecture doc."],"decisions":["no new decisions"],"evidence":["PR #136 merged at 5c89db3; six contexts green; receipt 5838053801; #134/#128 CLOSED."],"next_action":"Merge this closeout PR; then execute the released PCM-0046 P1 traversal holdout.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0043","timestamp":"2026-09-25T19:32:07Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"da5c3e9f564f6ee33461d7402cffe5662dc721a0e0b382b29021e8fec05764e4","request_id":"pcm0043-closeout-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0043"} -->
+
+Completed:
+- Marked PCM-0043 completed; CURRENT cleared and updated with the delivered architecture doc.
+
+Evidence:
+- PR #136 merged at 5c89db3; six contexts green; receipt 5838053801; #134/#128 CLOSED.
+
+Decisions:
+- no new decisions
+
+Changed:
+- tasks/TASK-PCM-0043-architecture-doc.md; checkpoints/CURRENT.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge this closeout PR; then execute the released PCM-0046 P1 traversal holdout.
 
 ## Handoff
 
