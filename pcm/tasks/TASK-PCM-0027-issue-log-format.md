@@ -105,7 +105,7 @@ Blocked/uncertain:
 - None.
 
 Next:
-- None: closeout merged at `84fd300`, worktree verified-removed, #99 CLOSED.
+- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
 
 ### 2026-09-25 09:09:51 UTC — owner/Astra planning
 
@@ -128,7 +128,30 @@ Blocked/uncertain:
 - None.
 
 Next:
-- None: closeout merged at `84fd300`, worktree verified-removed, #99 CLOSED.
+- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
+
+### 2026-09-25 12:18:59 UTC — owner/Astra planning
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning","blocked":["None."],"changed":["tasks/TASK-PCM-0027-issue-log-format.md; docs/CONTINUITY_INDEX.md."],"completed":["Restored the two verbatim checkpoint Next lines rewritten by PR #119 (01a12e9) in this file's 09:09 entries; post-merge state now lives only in the meta next_action and this appended entry."],"decisions":["Append-only correction per the records policy; no posted comment rewritten for this."],"evidence":["git diff 84562ef 01a12e9 showed the in-entry Next lines edited; restore commit reverts exactly those two lines; validate VALID; docs render SYNCHRONIZED after the append."],"next_action":"Merge the restore PR (Refs #99), then continue the audit follow-ups: #53 dated correction, #99 item-3 grep fix, #110 no-release addendum, checkpoint-index defect issue.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0027","timestamp":"2026-09-25T12:18:59Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"4d57c2d87e764596ad2a38d3f7f9b0c1509385edfc175dbe1b9cf72e76862596","request_id":"pcm0027-append-only-restore-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0027"} -->
+
+Completed:
+- Restored the two verbatim checkpoint Next lines rewritten by PR #119 (01a12e9) in this file's 09:09 entries; post-merge state now lives only in the meta next_action and this appended entry.
+
+Evidence:
+- git diff 84562ef 01a12e9 showed the in-entry Next lines edited; restore commit reverts exactly those two lines; validate VALID; docs render SYNCHRONIZED after the append.
+
+Decisions:
+- Append-only correction per the records policy; no posted comment rewritten for this.
+
+Changed:
+- tasks/TASK-PCM-0027-issue-log-format.md; docs/CONTINUITY_INDEX.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge the restore PR (Refs #99), then continue the audit follow-ups: #53 dated correction, #99 item-3 grep fix, #110 no-release addendum, checkpoint-index defect issue.
 
 ## Handoff
 
