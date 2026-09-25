@@ -1,6 +1,6 @@
 # TASK-PCM-0027 — Issue Log Format
 
-<!-- continuity:task {"acceptance":["Module doc docs/ISSUE_LOG_FORMAT.md carries the issue-log-format 1.0.0 marker, spec, exemplar and short-form example; registered in the document catalog and rendered index.","CLI constant and guidance block propagated to the minimal and software generated guidance, the GitHub issue template, the static template copies, and PCM's own guidance; continuity-records references the module without duplicating it (version bumped to 1.3.0).","continuity validate reports missing (warning), contradictory (error) and stale (warning) markers; deterministic tests cover each case, plus parity with generated output and preservation of existing adopter files during init.","The existing-adopter update path is documented and the VERSIONING entry added; package source is 0.5.0.","Normal checkpoint/PR flow with required checks, auto-merge, and verified reconciliation; the PR uses Refs #99."],"depends_on":[],"goal":"Ship the issue-log-format 1.0.0 module: one human-readable shape for issue logs, updates and PRs that any PCM adopter can apply mechanically","id":"PCM-0027","issue_url":"https://github.com/Pukujan/project-continuity-modules/issues/99","next_action":"Publish the PR (Refs #99), verify required CI and auto-merge on the exact candidate SHA, post the receipts, and close per the owner close plan on #99.","owner":"Astra/Codex planning; subagent implementation","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Agents write issue records of uneven quality; the owner rates human-readable project records as one of the most valuable modules to solve"} -->
+<!-- continuity:task {"acceptance": ["Module doc docs/ISSUE_LOG_FORMAT.md carries the issue-log-format 1.0.0 marker, spec, exemplar and short-form example; registered in the document catalog and rendered index.", "CLI constant and guidance block propagated to the minimal and software generated guidance, the GitHub issue template, the static template copies, and PCM's own guidance; continuity-records references the module without duplicating it (version bumped to 1.3.0).", "continuity validate reports missing (warning), contradictory (error) and stale (warning) markers; deterministic tests cover each case, plus parity with generated output and preservation of existing adopter files during init.", "The existing-adopter update path is documented and the VERSIONING entry added; package source is 0.5.0.", "Normal checkpoint/PR flow with required checks, auto-merge, and verified reconciliation; the PR uses Refs #99."], "depends_on": [], "goal": "Ship the issue-log-format 1.0.0 module: one human-readable shape for issue logs, updates and PRs that any PCM adopter can apply mechanically", "id": "PCM-0027", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/99", "next_action": "None for PCM-0027: #99 CLOSED by owner after PR #113 merged at 79337a600bf282e98188bbb9ed37ff35468db39f with all six required contexts green (leaf receipt comment 5829746872). The in-flight #99 blind evaluation continues on its frozen draft text; its adjudication and any 1.1.0 format revision belong to #100/PCM-0028.", "owner": "Astra/Codex planning; subagent implementation", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "Agents write issue records of uneven quality; the owner rates human-readable project records as one of the most valuable modules to solve"} -->
 
 - Status: active
 - Owner: Astra/Codex planning; subagent implementation
@@ -83,6 +83,52 @@ Blocked/uncertain:
 
 Next:
 - Open PR to main (Refs #99), verify six required contexts + auto-merge on the exact candidate, publish leaf/parent receipts keyed to the merged SHA, then the closeout increment marks PCM-0027 completed and removes the worktree.
+
+### 2026-09-25 09:09:30 UTC — owner/Astra planning
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning","blocked":["None."],"changed":["tasks/TASK-PCM-0027-issue-log-format.md; checkpoints/CURRENT.md."],"completed":["Recorded task completion + parent close-out: [leaf receipt 5829746872](https://github.com/Pukujan/project-continuity-modules/issues/99#issuecomment-5829746872) posted on #99; [#53 parent progression comment posted](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5828384182) remains the live aggregate link; issue #99 CLOSED."],"decisions":["Status flips to completed only after merge (active-task invariant); evaluation adjudication moved to #100 per owner close plan; worktree removal follows this merge."],"evidence":["PR #113 merged at 79337a600bf282e98188bbb9ed37ff35468db39f; six required contexts + auto-merge green on the exact candidate (run 36115136343); local suite state documented in the task file."],"next_action":"Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0027","timestamp":"2026-09-25T09:09:30Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"2ea7b28fc554c05d7298fb23406c0105c5eae807032e06de20a5a611bd56947e","request_id":"pcm0027-closeout-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0027"} -->
+
+Completed:
+- Recorded task completion + parent close-out: [leaf receipt 5829746872](https://github.com/Pukujan/project-continuity-modules/issues/99#issuecomment-5829746872) posted on #99; [#53 parent progression comment posted](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5828384182) remains the live aggregate link; issue #99 CLOSED.
+
+Evidence:
+- PR #113 merged at 79337a600bf282e98188bbb9ed37ff35468db39f; six required contexts + auto-merge green on the exact candidate (run 36115136343); local suite state documented in the task file.
+
+Decisions:
+- Status flips to completed only after merge (active-task invariant); evaluation adjudication moved to #100 per owner close plan; worktree removal follows this merge.
+
+Changed:
+- tasks/TASK-PCM-0027-issue-log-format.md; checkpoints/CURRENT.md.
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
+
+### 2026-09-25 09:09:51 UTC — owner/Astra planning
+
+<!-- continuity:checkpoint {"agent":"owner/Astra planning","blocked":["None."],"changed":["tasks/TASK-PCM-0027-issue-log-format.md (appended checkpoint)."],"completed":["Corrected wording only: [#99](https://github.com/Pukujan/project-continuity-modules/issues/99) is a top-level deliverable (parent: none), so its leaf receipt needs no parent progression post; the prior entry's \"parent close-out\" label referred to [#53 comment 5828384182](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5828384182), which is the PCM-0026 child close-out that points at #99 as the then-next slice. No facts change."],"decisions":["no new decisions"],"evidence":["Append-only correction preserved under the records policy; both comments verified live."],"next_action":"Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0027","timestamp":"2026-09-25T09:09:51Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"1e8945840b7ae307f90d03ac045d22656353982720d0cad267b5ae4402ed3875","request_id":"pcm0027-closeout-correction-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0027"} -->
+
+Completed:
+- Corrected wording only: [#99](https://github.com/Pukujan/project-continuity-modules/issues/99) is a top-level deliverable (parent: none), so its leaf receipt needs no parent progression post; the prior entry's "parent close-out" label referred to [#53 comment 5828384182](https://github.com/Pukujan/project-continuity-modules/issues/53#issuecomment-5828384182), which is the PCM-0026 child close-out that points at #99 as the then-next slice. No facts change.
+
+Evidence:
+- Append-only correction preserved under the records policy; both comments verified live.
+
+Decisions:
+- no new decisions
+
+Changed:
+- tasks/TASK-PCM-0027-issue-log-format.md (appended checkpoint).
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Merge the closeout PR, verify accepted history, then run continuity worktree remove PCM-0027.
 
 ## Handoff
 

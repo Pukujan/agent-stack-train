@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"PCM-0027","active_task_file":"tasks/TASK-PCM-0027-issue-log-format.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 ## Current projection — PCM-0027 issue-log-format module
 
@@ -10,7 +10,7 @@ Predecessor state: [#66 / PCM-0025](https://github.com/Pukujan/project-continuit
 
 ## Next atomic action
 
-Commit the CURRENT.md synchronization, publish `task/PCM-0027-issue-log-format` through `continuity checkpoint`, open the PR (Refs #99), verify the six required contexts and auto-merge on the exact candidate, post leaf/parent receipts keyed to the pushed SHA, then close #99 per the owner close plan.
+Merge this closeout increment, verify accepted history on `main`, then run `continuity worktree remove PCM-0027` and pick up the next released slice: #53's hosted-lifecycle acceptance or PCM-0028 phase 1 (#104) on its own task branch.
 
 ## Historical program state (superseded by projection above)
 
