@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"cfbfeaa9daf7d76b8846f4efdd71028ea9bfc3d85864d9b5016fb8afb8154807","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"b2cf1bfacc4bce816ed5fc40cca16c3ae5992a50b37bf9e0b324b8a1e03d5d0b","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -71,7 +71,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `d43df3e01bcb4a11b86716383c2d25ea6c4b609cbd0f6fc56664c0bc6af25cbb`
+- Current SHA-256: `506d0aae9a674f11891597c5508a0e505b9a20ea7aca8b82a87b9c9dc2298e19`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
@@ -82,8 +82,8 @@
 - File: [`docs/ISSUE_LOG_FORMAT.md`](../docs/ISSUE_LOG_FORMAT.md)
 - Local content status: **CURRENT**
 - Last reviewed at commit: `uncommitted`
-- Reviewed SHA-256: `8e88ae2bb1062e0f55821d45b42c28ec55723b3b6b82913fc6d78e7f4973ee7c`
-- Current SHA-256: `8e88ae2bb1062e0f55821d45b42c28ec55723b3b6b82913fc6d78e7f4973ee7c`
+- Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
+- Current SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
 - Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`

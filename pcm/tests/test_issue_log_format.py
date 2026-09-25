@@ -1,4 +1,4 @@
-"""Deterministic tests for the issue-log-format 1.0.0 module (PCM-0027, #99).
+"""Deterministic tests for the issue-log-format 1.1.0 module (PCM-0027, #99).
 
 Severity decisions (owner direction on #99, comment 5828143593, 2026-09-25):
 missing marker -> warning (adopters stay VALID); contradictory -> error;
@@ -40,8 +40,26 @@ class IssueLogFormatModuleTests(unittest.TestCase):
         self.assertIn(ISSUE_LOG_FORMAT_POLICY_MARKER, ISSUE_LOG_FORMAT_GUIDANCE)
         self.assertEqual(ISSUE_LOG_FORMAT_GUIDANCE.count(ISSUE_LOG_FORMAT_START_MARKER), 1)
         self.assertEqual(ISSUE_LOG_FORMAT_GUIDANCE.count(ISSUE_LOG_FORMAT_END_MARKER), 1)
-        self.assertIn("1.0.0", ISSUE_LOG_FORMAT_POLICY_MARKER)
-        self.assertEqual(ISSUE_LOG_FORMAT_POLICY_VERSION, "1.0.0")
+        self.assertIn("1.1.0", ISSUE_LOG_FORMAT_POLICY_MARKER)
+        self.assertEqual(ISSUE_LOG_FORMAT_POLICY_VERSION, "1.1.0")
+
+    def test_diagram_rules_ship_in_the_block(self) -> None:
+        g = ISSUE_LOG_FORMAT_GUIDANCE
+        for phrase in (
+            "Diagrams (mermaid)",
+            "graph TD",
+            "text list or table",
+            "4+ ordered steps",
+            "<details>",
+            "6-word labels",
+            "8 nodes",
+            "renderer URLs",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, g)
+        doc = (ROOT / "docs" / "ISSUE_LOG_FORMAT.md").read_text(encoding="utf-8")
+        self.assertIn("## Diagrams (mermaid)", doc)
+        self.assertIn("v11.17.2", doc)
 
     def test_marker_json_is_wellformed(self) -> None:
         payload = ISSUE_LOG_FORMAT_POLICY_MARKER.split("<!-- pcm:policy ", 1)[1]
@@ -152,7 +170,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
 
     def test_stale_marker_warns_and_prints_update_step(self) -> None:
         stale = ISSUE_LOG_FORMAT_GUIDANCE.replace(
-            '"policy_version":"1.0.0"', '"policy_version":"0.9.0"'
+            '"policy_version":"1.1.0"', '"policy_version":"0.9.0"'
         )
         (self.root / "AGENTS.md").write_text(
             "# Agent Operating Contract\n\n" + stale + "\n", encoding="utf-8"
@@ -175,7 +193,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
 
     def test_contradictory_versions_are_errors(self) -> None:
         other = ISSUE_LOG_FORMAT_GUIDANCE.replace(
-            '"policy_version":"1.0.0"', '"policy_version":"2.0.0"'
+            '"policy_version":"1.1.0"', '"policy_version":"2.0.0"'
         )
         (self.root / "HANDOFF.md").write_text(
             "# Current Handoff\n\n" + other + "\n", encoding="utf-8"
@@ -184,7 +202,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         self.assertEqual(len(errors), 1)
         self.assertIn("contradictory", errors[0])
-        self.assertIn("1.0.0", errors[0])
+        self.assertIn("1.1.0", errors[0])
         self.assertIn("2.0.0", errors[0])
         self.assertEqual(len(self.guidance_errors()), 1)
 
@@ -281,14 +299,14 @@ class IssueLogFormatInitTests(unittest.TestCase):
             handoff = root / "HANDOFF.md"
             text = handoff.read_text(encoding="utf-8")
             stale = text.replace(ISSUE_LOG_FORMAT_GUIDANCE, ISSUE_LOG_FORMAT_GUIDANCE.replace(
-                '"policy_version":"1.0.0"', '"policy_version":"0.9.0"'
+                '"policy_version":"1.1.0"', '"policy_version":"0.9.0"'
             ))
             handoff.write_text(stale, encoding="utf-8")
             _, warnings = issue_log_format_findings(root)
             self.assertEqual(len(warnings), 1)
             updated = handoff.read_text(encoding="utf-8").replace(
                 ISSUE_LOG_FORMAT_GUIDANCE.replace(
-                    '"policy_version":"1.0.0"', '"policy_version":"0.9.0"'
+                    '"policy_version":"1.1.0"', '"policy_version":"0.9.0"'
                 ),
                 ISSUE_LOG_FORMAT_GUIDANCE,
             )

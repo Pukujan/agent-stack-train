@@ -126,7 +126,7 @@
         "continuity-records-policy"
       ],
       "reviewed_commit": "uncommitted",
-      "reviewed_sha256": "8e88ae2bb1062e0f55821d45b42c28ec55723b3b6b82913fc6d78e7f4973ee7c",
+      "reviewed_sha256": "7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b",
       "summary": "One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.",
       "tasks": [],
       "title": "Issue log format"

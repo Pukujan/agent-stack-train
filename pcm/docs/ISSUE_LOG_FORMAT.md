@@ -2,14 +2,14 @@
 
 One plain-language shape for issue logs, progress updates and pull requests that any PCM adopter can apply mechanically. The continuity-records policy states the record contract; this module states the readable structure a writer applies to fill it. Pick the tier by the kind of issue, not by preference.
 
-<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
 
 <!-- pcm:issue-log-format:start -->
-## Issue log format (issue-log-format 1.0.0)
+## Issue log format (issue-log-format 1.1.0)
 
-<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
+<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
 
-Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
+Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. **Diagrams (mermaid):** when a record describes a flow with 4+ ordered steps or 2+ branches, add a fenced mermaid diagram *and* keep an adjacent text list or table so the record survives render failure; default to `graph TD` (vertical) because wide `LR` flows shrink to illegible strips on phones — reserve `LR` for 4 or fewer short nodes; cap 8 nodes and 6-word labels; wrap diagrams that may exceed the container width inside `<details>` (GitHub mounts the renderer lazily on expand); preview the rendered diagram before publishing (broken syntax shows a visible parse error) and never cite renderer URLs as standalone sources. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
 <!-- pcm:issue-log-format:end -->
 
 ## Core tier (every issue log)
@@ -38,6 +38,37 @@ Add this tier when the issue concerns an incident, failure, research question, o
 ## Writing rules (both tiers)
 
 Plain language first, technical names after. Use bold only for the key uncertainty or decision, not for decoration. Give exact numbers, times with a zone, and no private absolute paths or secrets. Don't use issue-closing keywords in progress text. Link rather than paste long logs.
+
+## Diagrams (mermaid)
+
+Fenced `mermaid` blocks render natively on GitHub in issue bodies, issue comments, PR bodies, PR comments, and repository file views. These rules keep a rendered diagram readable on desktop and on a phone. Verified 2026-09-25 against GitHub's renderer (a viewscreen iframe; a ` ```mermaid info ``` ` probe reports `v11.17.2`) in the disposable matrix [`Pukujan/pcm-mermaid-matrix`](https://github.com/Pukujan/pcm-mermaid-matrix): [issue #1 probes](https://github.com/Pukujan/pcm-mermaid-matrix/issues/1), [PR #2 surfaces](https://github.com/Pukujan/pcm-mermaid-matrix/pull/2), [file view](https://github.com/Pukujan/pcm-mermaid-matrix/blob/main/MERMAID_MATRIX.md).
+
+1. **Draw when multi-step.** A flow, state machine, decision tree, or pipeline with 4 or more ordered steps or 2 or more branches gets a diagram *in addition to* the text. Reason: prose is weakest exactly where a picture carries the shape.
+2. **Text alternative mandatory.** The adjacent step list or table stays in the record beside the diagram. Reason: the record must survive render failure, API-only readers, and search.
+3. **Vertical by default.** `graph TD` is the required direction. Reason: a 7-node `flowchart LR` measured 2120px wide inside an 878px container; GitHub scales it to fit, so on a 390px phone it becomes an illegible strip, while the same content as `graph TD` renders 441px wide and stays readable at both widths.
+4. **`LR` only for tiny graphs.** Reserve `LR` for at most 4 short-label nodes. Reason: a horizontal flow only stays legible while the whole graph fits near the container width.
+5. **Size caps.** At most 8 nodes and labels of at most 6 words (at most 2 lines per label). Reason: oversized nodes and labels are what push a diagram past the readable width.
+6. **Wide diagrams collapsed.** Anything that might exceed the container width goes inside `<details>` with a summary that names the diagram. Reason: mobile readers keep the text and desktop readers expand to inspect; GitHub mounts the renderer lazily, only after the reader expands, so the cost is paid on use.
+7. **Verify before publishing; never link the renderer.** The author must see the diagram render — preview it before publishing; broken syntax shows a visible "Syntax error in text" panel and the reader silently loses the information. Note the renderer version an info probe reports when you verify. Cite the markdown source location instead of renderer (viewscreen) URLs. Reason: a standalone viewscreen URL is an empty shell without the parent page's posted data, so a diagram cannot be deep-linked.
+
+Good — small vertical graph, readable at desktop and phone width (this document renders it), with the mandatory text list beside it:
+
+```mermaid
+graph TD
+    A[Write the record] --> B[Count steps and branches]
+    B --> C[Four or more steps or two or more branches]
+    C --> D[Add graph TD plus text list]
+    D --> E[Preview renders before publishing]
+```
+
+Text alternative: 1) write the record; 2) count steps and branches; 3) with 4+ steps or 2+ branches, add a `graph TD` diagram beside the text list; 4) preview the render before publishing.
+
+Bad — a 7-node horizontal flow, described here rather than rendered so this document does not ship a bad diagram:
+
+    flowchart LR
+        A[Observed matrix] --> B[Open issue] --> C[Implement] --> D[Holdout] --> E[Open PR] --> F[CI + auto-merge] --> G[Close]
+
+Why it fails: it measures 2120px wide in an 878px container, GitHub scales it to fit, and on a 390px phone the labels become an unreadable strip. Draw the same content as `graph TD`, or collapse it inside `<details>`.
 
 ## Pull requests and updates
 
@@ -79,4 +110,5 @@ The guidance block above is delimited by `<!-- pcm:issue-log-format:start -->` a
 
 ## Changelog
 
+- **1.1.0 (2026-09-25):** adds the diagram rules (when to draw, `graph TD` default, size caps, mandatory text alternative, collapsed wide diagrams, verify-before-publish, no standalone renderer links). Provenance: issue [#126](https://github.com/Pukujan/project-continuity-modules/issues/126), from browser-verified rendering evidence in the disposable matrix [`Pukujan/pcm-mermaid-matrix`](https://github.com/Pukujan/pcm-mermaid-matrix) ([issue #1](https://github.com/Pukujan/pcm-mermaid-matrix/issues/1), [PR #2](https://github.com/Pukujan/pcm-mermaid-matrix/pull/2), [blob view](https://github.com/Pukujan/pcm-mermaid-matrix/blob/main/MERMAID_MATRIX.md)).
 - **1.0.0 (2026-09-25):** initial release. Provenance: issue [#99](https://github.com/Pukujan/project-continuity-modules/issues/99) format spec, under the owner direction recorded in [comment 5828143593](https://github.com/Pukujan/project-continuity-modules/issues/99#issuecomment-5828143593) (severity contract: missing marker warns, contradictory versions error, stale markers warn with the update step).

@@ -39,6 +39,8 @@ PCM-0024 sets the backward-compatible CLI/package source version to **0.4.0**: i
 
 PCM-0027 sets the backward-compatible CLI/package source version to **0.5.0**: `continuity validate` gains the issue-log-format marker checks (missing and stale are warnings, contradictory or malformed is an error) and the generated guidance carries the new `issue-log-format` **1.0.0** module block ([`docs/ISSUE_LOG_FORMAT.md`](ISSUE_LOG_FORMAT.md)). Because that normative reference changes the record contract, continuity-records guidance is now policy **1.3.0**. This does not publish a package. The protocol remains **0.1.0-draft** because no required canonical object or schema meaning changes; existing adopters follow the marker-replacement update path in `docs/ISSUE_LOG_FORMAT.md`.
 
+PCM-0039 raises the `issue-log-format` policy module to **1.1.0** (2026-09-25, [#126](https://github.com/Pukujan/project-continuity-modules/issues/126)): the module and generated guidance gain diagram rules (when to draw, `graph TD` default, size caps, mandatory text alternative, collapsed wide diagrams, verify-before-publish, no standalone renderer links) verified against GitHub rendering in the `Pukujan/pcm-mermaid-matrix` evidence set. The CLI/package source version stays **0.5.0** — guidance text only, no new command or behavior contract — and no package is published. The protocol remains **0.1.0-draft**; existing adopters follow the marker-replacement update path in `docs/ISSUE_LOG_FORMAT.md`.
+
 ## Project declaration
 
 The Python distribution's version has one source of truth in
