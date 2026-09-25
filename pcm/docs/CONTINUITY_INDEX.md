@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"976bcd30c7d28b8edb5ff630a956d9b2f1d765ce30bff38b989b90a4947d67b0","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"61a020cdbfea9d286f138f70d9f9b6e1629dcb21eac87f8bc04a4b663691357f","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -148,6 +148,66 @@
 - Search terms: `issue-log-format`, `modules`, `registry`, `upgrade`, `versioning`
 - Neighboring records: `continuity-records-policy`
 - Task associations: none
+
+## PCM-0046 holdout arm runner plan (`pcm-0046-arm-plan`)
+
+- File: [`docs/plans/PCM-0046-arm-plan.md`](../docs/plans/PCM-0046-arm-plan.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113`
+- Current SHA-256: `381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113`
+- Summary: Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.
+- Search terms: `arms`, `holdout`, `scoring`, `traversal`
+- Neighboring records: `pcm-0050-research`
+- Task associations: `PCM-0046`
+
+## PCM-0048 task projection (`pcm-0048-task`)
+
+- File: [`tasks/TASK-PCM-0048-deployed-environment.md`](../tasks/TASK-PCM-0048-deployed-environment.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `1d3671d62ad8872b9798415da5b46d9ab7cffbe7`
+- Reviewed SHA-256: `cc2baa046a4a1b3408d7843b3a1f37186fab235d69ce4539fbd426adb9508a9e`
+- Current SHA-256: `cc2baa046a4a1b3408d7843b3a1f37186fab235d69ce4539fbd426adb9508a9e`
+- Summary: Decision-slice projection for PCM-0048.
+- Search terms: `PCM-0048`, `decision`, `projection`
+- Neighboring records: none
+- Task associations: `PCM-0048`
+
+## PCM-0049 task projection (`pcm-0049-task`)
+
+- File: [`tasks/TASK-PCM-0049-adopter-issue-filing.md`](../tasks/TASK-PCM-0049-adopter-issue-filing.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `1d3671d62ad8872b9798415da5b46d9ab7cffbe7`
+- Reviewed SHA-256: `19fb393e3d724bfcdd79beb17bcda5e08e5190b0c5a52125e6164aaf13aa3762`
+- Current SHA-256: `19fb393e3d724bfcdd79beb17bcda5e08e5190b0c5a52125e6164aaf13aa3762`
+- Summary: Decision-slice projection for PCM-0049.
+- Search terms: `PCM-0049`, `decision`, `projection`
+- Neighboring records: none
+- Task associations: `PCM-0049`
+
+## PCM-0050 epistemic bitemporal records research (`pcm-0050-research`)
+
+- File: [`docs/research/PCM-0050-epistemic-bitemporal-records.md`](../docs/research/PCM-0050-epistemic-bitemporal-records.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `4f591713d8ebbfda17111fecef6e533b4207f6410310974787b58a95ba60b91b`
+- Current SHA-256: `4f591713d8ebbfda17111fecef6e533b4207f6410310974787b58a95ba60b91b`
+- Summary: Bitemporal/PROV prior art, PCM-0015 S9 delta analysis, options O1-O4 for claim provenance, adopter ticket placement, and record aging.
+- Search terms: `adopter-feedback`, `bitemporal`, `claim`, `epistemic`, `provenance`, `supersession`
+- Neighboring records: `continuity-records-policy`, `issue-log-format`, `pcm-0015-plan`, `pcm-0015-research`
+- Task associations: `PCM-0050`
+
+## PCM-0050 task projection (`pcm-0050-task`)
+
+- File: [`tasks/TASK-PCM-0050-epistemic-records.md`](../tasks/TASK-PCM-0050-epistemic-records.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `1d3671d62ad8872b9798415da5b46d9ab7cffbe7`
+- Reviewed SHA-256: `dbbd6d7b5fa5a65342093a421eed3fbed7b5d852eed588871c3e15c5dda07599`
+- Current SHA-256: `ff58ee74966516c129346aa02cd241157bdae1c113ee7b82a498bac270f3514e`
+- Summary: Decision-slice projection for PCM-0050.
+- Search terms: `PCM-0050`, `decision`, `projection`
+- Neighboring records: none
+- Task associations: `PCM-0050`
 
 ## Testing policy (`testing-policy`)
 

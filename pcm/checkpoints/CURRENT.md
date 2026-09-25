@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task": "PCM-0046", "active_task_file": "tasks/TASK-PCM-0046-traversal-holdout.md", "protocol_version": "0.1.0-draft", "schema": "project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task": "PCM-0050", "active_task_file": "tasks/TASK-PCM-0050-epistemic-records.md", "protocol_version": "0.1.0-draft", "schema": "project-continuity.current.v1"} -->
 
 ## Current projection — parallel fan-out: PCM-0046/0047 executing, PCM-0048/0049/0050 decisions queued
 
@@ -10,7 +10,7 @@ Predecessor state: [#66 / PCM-0025](https://github.com/Pukujan/project-continuit
 
 ## Next atomic action
 
-For a fresh session: 1) `git fetch origin` and inspect `task/PCM-0046-traversal-holdout` / `task/PCM-0047-checkpoint-hygiene` logs — if a branch has all milestones (red, green, fixtures/projection, gates), open its PR under required CI + auto-merge; if mid-flight, resume the missing milestone instead of re-dispatching. 2) Run the 20 hidden holdout arms for PCM-0046 after its scorer merges (plan: parent task file + #139 method). 3) PCM-0050: the owner answers the five open questions on #144; implementation fans out only after. 4) PCM-0048/0049: owner decisions on #142/#143. Do not edit SPEC/AGENTS for PCM-0048/0049/0050 before those decisions.
+For a fresh session: 1) `git fetch origin` and inspect `task/PCM-0046-traversal-holdout` / `task/PCM-0047-checkpoint-hygiene` logs — if a branch has all milestones (red, green, fixtures/projection, gates), open its PR under required CI + auto-merge; if mid-flight, resume the missing milestone instead of re-dispatching. 2) Run the 20 hidden holdout arms for PCM-0046 after its scorer merges (plan: docs/plans/PCM-0046-arm-plan.md + #139 method). 3) PCM-0050: the owner answers the five open questions on #144; implementation fans out only after. 4) PCM-0048/0049: owner decisions on #142/#143. Do not edit SPEC/AGENTS for PCM-0048/0049/0050 before those decisions.
 
 ## Historical program state (superseded by projection above)
 

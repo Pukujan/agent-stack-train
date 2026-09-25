@@ -236,6 +236,102 @@
       "title": "PCM-0028 versioned modules design"
     },
     {
+      "id": "pcm-0046-arm-plan",
+      "keywords": [
+        "arms",
+        "holdout",
+        "scoring",
+        "traversal"
+      ],
+      "path": "docs/plans/PCM-0046-arm-plan.md",
+      "related": [
+        "pcm-0050-research"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113",
+      "summary": "Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.",
+      "tasks": [
+        "PCM-0046"
+      ],
+      "title": "PCM-0046 holdout arm runner plan"
+    },
+    {
+      "id": "pcm-0048-task",
+      "keywords": [
+        "PCM-0048",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0048-deployed-environment.md",
+      "related": [],
+      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
+      "reviewed_sha256": "cc2baa046a4a1b3408d7843b3a1f37186fab235d69ce4539fbd426adb9508a9e",
+      "summary": "Decision-slice projection for PCM-0048.",
+      "tasks": [
+        "PCM-0048"
+      ],
+      "title": "PCM-0048 task projection"
+    },
+    {
+      "id": "pcm-0049-task",
+      "keywords": [
+        "PCM-0049",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0049-adopter-issue-filing.md",
+      "related": [],
+      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
+      "reviewed_sha256": "19fb393e3d724bfcdd79beb17bcda5e08e5190b0c5a52125e6164aaf13aa3762",
+      "summary": "Decision-slice projection for PCM-0049.",
+      "tasks": [
+        "PCM-0049"
+      ],
+      "title": "PCM-0049 task projection"
+    },
+    {
+      "id": "pcm-0050-research",
+      "keywords": [
+        "adopter-feedback",
+        "bitemporal",
+        "claim",
+        "epistemic",
+        "provenance",
+        "supersession"
+      ],
+      "path": "docs/research/PCM-0050-epistemic-bitemporal-records.md",
+      "related": [
+        "continuity-records-policy",
+        "issue-log-format",
+        "pcm-0015-plan",
+        "pcm-0015-research"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4f591713d8ebbfda17111fecef6e533b4207f6410310974787b58a95ba60b91b",
+      "summary": "Bitemporal/PROV prior art, PCM-0015 S9 delta analysis, options O1-O4 for claim provenance, adopter ticket placement, and record aging.",
+      "tasks": [
+        "PCM-0050"
+      ],
+      "title": "PCM-0050 epistemic bitemporal records research"
+    },
+    {
+      "id": "pcm-0050-task",
+      "keywords": [
+        "PCM-0050",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0050-epistemic-records.md",
+      "related": [],
+      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
+      "reviewed_sha256": "dbbd6d7b5fa5a65342093a421eed3fbed7b5d852eed588871c3e15c5dda07599",
+      "summary": "Decision-slice projection for PCM-0050.",
+      "tasks": [
+        "PCM-0050"
+      ],
+      "title": "PCM-0050 task projection"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

@@ -35,7 +35,7 @@ PROV gives entity/activity/agent + attribution/derivation/delegation and bundles
 
 ### Independence of evidence
 
-A recurring multi-agent failure in the literature: N agents repeating one agent's claim is one datum, not N votes. Any ranking or trust scheme must key on evidence independence class (original observation vs derived assertion), not actor count. Source: Friedman et al., "Provenance-Based Belief" (MITRE), <https://www.mitre.org/news-insights/publication/provenance-based-belief>; TAPP 2020 paper <https://www.usenix.org/system/files/tapp2020-paper-friedman.pdf>.
+A recurring multi-agent failure in the literature: N agents repeating one agent's claim is one datum, not N votes. Any ranking or trust scheme must key on evidence independence class (original observation vs derived assertion), not actor count. Sources: Chapman, Blaustein & Elsaesser, "Provenance-Based Belief" (TaPP 2010), <https://www.mitre.org/news-insights/publication/provenance-based-belief> (HTTP 403 this session; content UNVERIFIED, cited by title/author); separately, Friedman, Rye, LaVergne, Thomsen, Allen & Tunis, "Provenance-Based Interpretation of Multi-Agent Information Analysis" (TaPP 2020), <https://www.usenix.org/system/files/tapp2020-paper-friedman.pdf>.
 
 ## 3. PCM current-state audit (observed in-repo)
 
@@ -77,3 +77,22 @@ Yes, conditionally (inferred): the failure modes PCM actually hit this month —
 ## 7. Next action
 
 File the bounded decision research issue (owner-approved), record this note as its evidence, and let the owner select O1–O4 before any normative change. No SPEC/AGENTS edits in this slice.
+
+## Addendum 2026-09-25 — delta over PCM-0015 prior art (advisory-driven; append-only)
+
+This note was drafted without first running the mandated `continuity docs find` lookup. The advisor caught what that lookup should have surfaced: **PCM-0015 already designed most of O2.** Observed in merged history:
+
+- `docs/plans/PCM-0015-implementation-plan.md` slice **S9 "scoped assertions"** (line 135): origin classes (user requirement / observation / external source / model proposal / inference), author/reviewer, evidence refs, independent assessment (supported/unknown/contradicted), freshness + supersession, "preserve historical observations", explicit anti-goals (no bulk extraction, no global truth score, stop if maintenance exceeds routine budget).
+- `docs/research/PCM-0015-epistemic-context.md` "Epistemic labels for planning": Fact / Reported / Standard / External / Recommendation / Inference / Open taxonomy.
+- `docs/research/PCM-0015-provenance.ttl`: a PROV-O record already using `pcm:epistemicStatus` (`user_requirement`, `prior_agent_proposal`, `observed_repo_fact`, `external_source`, …).
+
+**Consequence for the owner decision:** O2 is not new design work — it is *adopting and completing S9*, which PCM-0015 deliberately deferred ("not part of the minimum path; defer them unless the S7-S8 trial reveals a specific failure they solve", plan line 21). The S7-S8 trials have since run (holdouts #63, #126); this session's belief-desync incidents are the candidate "specific failure" trigger S9 named. The decision on #144 should therefore be framed as: promote S9 as specified, plus only the genuine deltas below.
+
+**Genuine deltas beyond S9 (new in this note):** (1) explicit **bitemporal** valid-time fields (`valid_from/valid_to`) — S9 has freshness/supersession but no valid-time interval; (2) **independence class** for the N-repeating-agents problem; (3) the **O4 adopter channel** with recorded filer identity; (4) **classification + pile-up aging** for issues; (5) the discovery finding below.
+
+**Discovery defect (observed):** `continuity docs find "epistemic provenance bitemporal scoped assertions claims" --task PCM-0050` returned NO_MATCHES even after `git fetch`, while the same terms without `--task` match `pcm-0015-research`. Cause is by design (`search_document_catalog`, cli.py:1293-1294: a task filter restricts to records whose `tasks` array names the task, plus declared neighbors): a brand-new task's mandated lookup is structurally guaranteed to miss prior art until someone registers the link. Chicken-and-egg — the anti-duplication lookup cannot prevent duplication at exactly the moment duplication happens. Candidate fix for a follow-up slice: when the task-filtered set is empty, fall back to unfiltered matches labelled `TASK_UNLINKED`, or have the task-creation flow seed the query against the unfiltered catalog.
+
+**Citation corrections (this addendum supersedes §2's original attribution; §2 line 38 has been rewritten in place to match):**
+- The MITRE page originally cited as "Friedman et al., Provenance-Based Belief" is **Chapman, Blaustein & Elsaesser, "Provenance-Based Belief", TaPP 2010** (https://www.mitre.org/news-insights/publication/provenance-based-belief ; fetch returned HTTP 403 this session — content UNVERIFIED, cited by title/author only). The independence claim ("N reports derived from one source are one datum") traces to **this** work.
+- The USENIX URL is a **different paper**: Friedman, Rye, LaVergne, Thomsen, Allen & Tunis, **"Provenance-Based Interpretation of Multi-Agent Information Analysis"**, TaPP 2020 (https://www.usenix.org/system/files/tapp2020-paper-friedman.pdf).
+- Both are provenance-for-belief work; neither is the other.
