@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"f47cd104886e5cc948b7513ec19eab6c26e834d528cd86496cb958ef3a25694d","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"1167ca9573ee14084fee5b8c36e7f753c6f4356b72408df66b3b870ed4663af9","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -232,6 +232,18 @@
 - Search terms: `closing-keyword`, `incident`, `sanitizer-bypass`, `stale-cli`, `version-drift`
 - Neighboring records: none
 - Task associations: `PCM-0052`
+
+## PCM-0053 stale-base guard: checkpoint refuses overlapping upstream edits (`pcm-0053-guard-plan`)
+
+- File: [`tasks/TASK-PCM-0053-stale-base-guard.md`](../tasks/TASK-PCM-0053-stale-base-guard.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `00b2e8bc91952312d8d9d8e5f009f9ae54273f2a09e35b29f5dd57276209e3bb`
+- Current SHA-256: `401d13f89c9795265202101d2679a3c85a4ff8bffc7df3fd71900c1ec171dd50`
+- Summary: Design decision + red-first evidence for the publish-path guard against silently reverting accepted history from a stale local base; incident provenance on #166/#162.
+- Search terms: `authoritative-remote`, `checkpoint-guard`, `publish-path`, `stale-base`
+- Neighboring records: none
+- Task associations: `PCM-0053`
 
 ## Testing policy (`testing-policy`)
 

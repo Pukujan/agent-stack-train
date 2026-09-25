@@ -3070,6 +3070,28 @@ def refresh_index_for_cataloged_change(root: Path, relative: str) -> bool:
     return True
 
 
+def _stale_base_overlap(root: Path, remote: str, extra_paths: list[str]) -> tuple[str, list[str]] | None:
+    """Files this branch touches that also changed upstream since the fork point.
+
+    Returns (base_ref, sorted overlap) or None when upstream state is not
+    determinable (offline origin, missing default branch, unrelated history).
+    """
+    try:
+        base_branch = remote_default_branch(root, github_repository(remote))
+        git_run(root, ["fetch", "origin", base_branch])
+        base_ref = f"origin/{base_branch}"
+        fork = git_value(root, ["merge-base", "HEAD", base_ref])
+        if not fork:
+            return None
+        upstream_touched = set(git_run(root, ["diff", "--name-only", fork, base_ref]).stdout.split())
+        local_touched = set(git_run(root, ["diff", "--name-only", fork, "HEAD"]).stdout.split())
+        local_touched.update(extra_paths)
+        overlap = sorted(upstream_touched & local_touched)
+    except ContinuityError:
+        return None
+    return base_ref, overlap
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
@@ -3078,6 +3100,7 @@ def publish_checkpoint(
     recovery: bool = False,
     request_id: str | None = None,
     allow_closing_keywords: bool = False,
+    allow_stale_base: bool = False,
 ) -> str:
     """Commit and push one checkpoint so the shared branch is the durable handoff."""
     root = root.resolve()
@@ -3100,6 +3123,16 @@ def publish_checkpoint(
             "checkpoint publishing requires product changes to be committed first; "
             f"uncommitted paths: {', '.join(line[3:] for line in unexpected)}"
         )
+
+    if not recovery and not allow_stale_base:
+        overlap = _stale_base_overlap(root, remote, [relative])
+        if overlap is not None and overlap[1]:
+            raise ContinuityError(
+                "refusing to publish a checkpoint from a stale base: these paths changed upstream since the "
+                f"fork of {overlap[0]} and this branch touches them too: {', '.join(overlap[1])}; "
+                "rebase onto the current default branch (or verify the overlap is intended) and rerun, "
+                "or pass --allow-stale-base to publish anyway"
+            )
 
     git_run(root, ["add", "--", relative])
     if refresh_index_for_cataloged_change(root, relative):
@@ -3374,6 +3407,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="keep GitHub issue-closing keywords from --next in the checkpoint commit message",
     )
+    p_checkpoint.add_argument(
+        "--allow-stale-base",
+        action="store_true",
+        help="publish even if this branch overlaps upstream changes on the origin default branch since the fork",
+    )
 
     p_recovery = sub.add_parser("recovery")
     recovery_sub = p_recovery.add_subparsers(dest="recovery_command", required=True)
@@ -3563,6 +3601,7 @@ def main(argv: list[str] | None = None) -> int:
                     args.next_action,
                     request_id=request_id,
                     allow_closing_keywords=args.allow_closing_keywords,
+                    allow_stale_base=args.allow_stale_base,
                 )
                 print(path)
                 print(f"PUSHED: {commit}")
