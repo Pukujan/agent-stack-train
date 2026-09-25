@@ -96,7 +96,7 @@ def score_dir(results: pathlib.Path) -> int:
                 if key.startswith("T2"):
                     out[key] = score_t2(path.read_text(), issue_state, projection)
                 else:
-                    out[key] = score_t3(path.read_text(), intent=False)
+                    out[key] = score_t3(path.read_text(), intent=True)  # amendment 10: prompt states closing intent
         tree = results / f"T4-{n}.tree"
         if tree.is_dir():
             out[f"T4-{n}"] = score_t4(tree_snapshot(tree))

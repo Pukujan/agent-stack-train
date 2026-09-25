@@ -332,6 +332,23 @@
       "title": "PCM-0050 task projection"
     },
     {
+      "id": "pcm-0051-task",
+      "keywords": [
+        "PCM-0051",
+        "closing-keyword",
+        "sanitizer"
+      ],
+      "path": "tasks/TASK-PCM-0051-sanitizer-forms.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "9877b229ca916c0926aa4ffaff3357f9423225133a46dabd96e148f324356b6c",
+      "summary": "Active task: widen checkpoint sanitizer to colon and cross-repo closing forms.",
+      "tasks": [
+        "PCM-0051"
+      ],
+      "title": "PCM-0051 sanitizer forms task projection"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

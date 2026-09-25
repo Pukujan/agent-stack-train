@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"61a020cdbfea9d286f138f70d9f9b6e1629dcb21eac87f8bc04a4b663691357f","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"6f25868d83a8cd1ae56912a717fcc5af9e213c04bc98fa3dc50bb91fb04caca5","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -155,7 +155,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113`
-- Current SHA-256: `237de512614416f2d295e21e8590b96fc7837a29edf2ad19a08e7060a734b6f0`
+- Current SHA-256: `91a761e018ca1a11538e5c25929808576bba6fffe7c82ee8d4b02c266e093335`
 - Summary: Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.
 - Search terms: `arms`, `holdout`, `scoring`, `traversal`
 - Neighboring records: `pcm-0050-research`
@@ -208,6 +208,18 @@
 - Search terms: `PCM-0050`, `decision`, `projection`
 - Neighboring records: none
 - Task associations: `PCM-0050`
+
+## PCM-0051 sanitizer forms task projection (`pcm-0051-task`)
+
+- File: [`tasks/TASK-PCM-0051-sanitizer-forms.md`](../tasks/TASK-PCM-0051-sanitizer-forms.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `9877b229ca916c0926aa4ffaff3357f9423225133a46dabd96e148f324356b6c`
+- Current SHA-256: `abb5694ec023e22b8a3c6e85aa98cd630d9bcc84dd55c220e92c7d0d4c2ff066`
+- Summary: Active task: widen checkpoint sanitizer to colon and cross-repo closing forms.
+- Search terms: `PCM-0051`, `closing-keyword`, `sanitizer`
+- Neighboring records: none
+- Task associations: `PCM-0051`
 
 ## Testing policy (`testing-policy`)
 
