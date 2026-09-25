@@ -32,6 +32,29 @@ Blocked/uncertain:
 Next:
 - Open PR for task/PCM-0052-stale-cli-incident, enable auto-merge, verify six contexts, then post merge receipt on #162 with the exact squash SHA.
 
+### 2026-09-25 22:52:01 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["Acceptance 2 owner decision on #162 unchanged."],"changed":["tasks/TASK-PCM-0052-stale-cli-incident.md"],"completed":["Dated correction to checkpoint entry pcm-0052-incident-20260925: its Evidence line claimed continuity validate showed only the device-local pcm-pinned error; at that same commit (2758479) validate reported TWO errors \u2014 the second was this task marker carrying a forbidden title key (schemas/v1/task.schema.json additionalProperties:false), fixed at 8bfeea5 before any PR opened. Binary provenance per run now recorded: 22:20Z checkpoint d854175 composed by uv-tool 0.4.0 (no sanitizer NOTE, raw keyword fired); 22:35Z checkpoint 2758479 composed after reinstall from checkout at 0.5.0 (index-regeneration NOTE printed; subject keyword-free because the source --next contained none). Pass-6 commit 2063136 (21:02Z) printed a sanitizer NOTE in a prior session whose PATH binary was not re-observed in this session; #123 addendum wording (stale installed binary) remains correct for the 22:20Z incident, and the pass-6 attribution stands as recorded on #140/#123."],"decisions":["Preserve the original entry unedited; correction appended. No rewrite of published history in this increment; forward commits only."],"evidence":["Re-ran continuity validate on a worktree of 2758479: 2 errors (unexpected key title + pcm-pinned). At current head: 1 error (pcm-pinned only, device-local, invisible to hosted CI which passed six contexts on #163)."],"next_action":"Open correction PR for this branch, auto-merge after six contexts, post merge receipt on #162; owner answers decision brief 5840695558 meanwhile.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0052","timestamp":"2026-09-25T22:52:01Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"f9e1d78e8cca6641425e5aaf9f47c8cde9eb3f9e54c11ba48475916071f0716b","request_id":"pcm-0052-correction-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0052"} -->
+
+Completed:
+- Dated correction to checkpoint entry pcm-0052-incident-20260925: its Evidence line claimed continuity validate showed only the device-local pcm-pinned error; at that same commit (2758479) validate reported TWO errors — the second was this task marker carrying a forbidden title key (schemas/v1/task.schema.json additionalProperties:false), fixed at 8bfeea5 before any PR opened. Binary provenance per run now recorded: 22:20Z checkpoint d854175 composed by uv-tool 0.4.0 (no sanitizer NOTE, raw keyword fired); 22:35Z checkpoint 2758479 composed after reinstall from checkout at 0.5.0 (index-regeneration NOTE printed; subject keyword-free because the source --next contained none). Pass-6 commit 2063136 (21:02Z) printed a sanitizer NOTE in a prior session whose PATH binary was not re-observed in this session; #123 addendum wording (stale installed binary) remains correct for the 22:20Z incident, and the pass-6 attribution stands as recorded on #140/#123.
+
+Evidence:
+- Re-ran continuity validate on a worktree of 2758479: 2 errors (unexpected key title + pcm-pinned). At current head: 1 error (pcm-pinned only, device-local, invisible to hosted CI which passed six contexts on #163).
+
+Decisions:
+- Preserve the original entry unedited; correction appended. No rewrite of published history in this increment; forward commits only.
+
+Changed:
+- tasks/TASK-PCM-0052-stale-cli-incident.md
+
+Blocked/uncertain:
+- Acceptance 2 owner decision on #162 unchanged.
+
+Next:
+- Open correction PR for this branch, auto-merge after six contexts, post merge receipt on #162; owner answers decision brief 5840695558 meanwhile.
+
 ## Handoff
 
 Read PROJECT -> CURRENT -> this task -> #162 (incident facts + decision options) -> #123 addendum. Correction slice only; no CLI edits until the owner answers acceptance 2.

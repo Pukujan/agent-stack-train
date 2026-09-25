@@ -67,6 +67,29 @@ Blocked/uncertain:
 Next:
 - After ~04:00Z 2026-09-26: launch the 20 frozen arms per this CURRENT next-action item 1 (v4 prompts verbatim), capture+score, report tallies on #139/#137, then closeout PR and close #139.
 
+### 2026-09-25 22:51:35 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["All 20 arms still provider-rate-gated (22:40Z probe retry-after opens ~04:00Z 2026-09-26); zero arms run."],"changed":["tasks/TASK-PCM-0046-traversal-holdout.md"],"completed":["Supersede the forward-looking directive in checkpoint entry pcm-0046-sync-20260925b: its Next line told the next session to issue a literal closing keyword naming this issue through continuity checkpoint. The directive is replaced by: transition #139 to CLOSED via an explicit closeout comment at merge time, never via a keyword in --next (PCM-0052 incident #162 fired exactly this text through a stale pre-sanitizer CLI at 22:20Z; the appended entry text itself is preserved per append-only)."],"decisions":["Append-only preserved: no edit to the 22:20 entry; supersession recorded here."],"evidence":["Line 68 of this file at a68286d is the superseded directive; this entry's own Next line is keyword-free and the installed CLI is now 0.5.0 from checkout, so both paths are covered."],"next_action":"After the window: launch the 20 frozen arms per docs/plans/PCM-0046-arm-plan.md amendments 1-12, capture+score, report tallies on #139/#137, then PCM-0046 closeout PR transitioning #139 to CLOSED via explicit comment (this entry supersedes the keyword directive).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-25T22:51:35Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"2d9aca83ca76d43d2da1ad7149512b8549faadaddef9a17399a139958f0803a6","request_id":"pcm-0046-nextfix-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- Supersede the forward-looking directive in checkpoint entry pcm-0046-sync-20260925b: its Next line told the next session to issue a literal closing keyword naming this issue through continuity checkpoint. The directive is replaced by: transition #139 to CLOSED via an explicit closeout comment at merge time, never via a keyword in --next (PCM-0052 incident #162 fired exactly this text through a stale pre-sanitizer CLI at 22:20Z; the appended entry text itself is preserved per append-only).
+
+Evidence:
+- Line 68 of this file at a68286d is the superseded directive; this entry's own Next line is keyword-free and the installed CLI is now 0.5.0 from checkout, so both paths are covered.
+
+Decisions:
+- Append-only preserved: no edit to the 22:20 entry; supersession recorded here.
+
+Changed:
+- tasks/TASK-PCM-0046-traversal-holdout.md
+
+Blocked/uncertain:
+- All 20 arms still provider-rate-gated (22:40Z probe retry-after opens ~04:00Z 2026-09-26); zero arms run.
+
+Next:
+- After the window: launch the 20 frozen arms per docs/plans/PCM-0046-arm-plan.md amendments 1-12, capture+score, report tallies on #139/#137, then PCM-0046 closeout PR transitioning #139 to CLOSED via explicit comment (this entry supersedes the keyword directive).
+
 ## Handoff
 
 Read PROJECT -> CURRENT -> this task -> #139 (method, pre-registered pass rules) -> docs/plans/PCM-0046-arm-plan.md. Scorer/fixtures/rubric are on this branch (14c65a8, d0f9de7); the 20 arms run only after merge with the rubric withheld from participants.
