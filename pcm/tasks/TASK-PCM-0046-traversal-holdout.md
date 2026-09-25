@@ -44,6 +44,29 @@ Blocked/uncertain:
 Next:
 - Open PR for task/PCM-0046-traversal-holdout, verify six required contexts + auto-merge, then run arms per docs/plans/PCM-0046-arm-plan.md.
 
+### 2026-09-25 22:20:06 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["All 20 PCM-0046 arms provider-rate-blocked until ~04:00Z 2026-09-26 (observed 429 retry-after); nothing else actionable without owner input (#144/#142/#143 decisions pending)."],"changed":["checkpoints/CURRENT.md; GitHub: #122 #123 closed"],"completed":["Post-#160 housekeeping increment: CURRENT projection re-synced to observed state (amendment set frozen/merged at 57d5b94, probe 22:04Z 429 retry-after opens ~04:00Z, zero arms run, bundles pristine); #122 and #123 closed with dated evidence closeout comments 5840415451/5840415434 reconciling the sanitizer dogfood split (passes 1-5 = index NOTE only; pass 6 commit 2063136 = sanitizer proof; colon/cross-repo at e3c6f25); next-action paragraph refreshed to v2-bundle/v4-launcher procedure with regeneration condition stated."],"decisions":["PCM-0028 phases 1-3 (#104/#105/#106) remain NOT released: owner direction 5830322199 on #100 requires a separate go; recorded in CURRENT so a fresh session does not start them. #122/#123 closeout by evidence comment rather than closing keyword per sanitized-keyword policy."],"evidence":["PR #160 MERGED via auto-merge at squash 57d5b94 with six required contexts green (quality/test 3.11+3.12/package/parity x2); gh issue view: #122 CLOSED #123 CLOSED; find /tmp/pcm0046-arms-v2 -newer manifest.json -type f -> empty (bundles unmodified, zero arms run); continuity docs render --check SYNCHRONIZED at this commit; two independent 429 probes at 22:04Z (subagent launches rejected pre-execution, retry-after ~5.9h)."],"next_action":"After ~04:00Z 2026-09-26: launch the 20 frozen arms per this CURRENT next-action item 1 (v4 prompts verbatim), capture+score, report tallies on #139/#137, then closeout PR and close #139.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-25T22:20:06Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3e08e16aea5145463b6d08fc4437ba13e9bcd4ed44c010ed4f9070a94992fd53","request_id":"pcm-0046-sync-20260925b","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- Post-#160 housekeeping increment: CURRENT projection re-synced to observed state (amendment set frozen/merged at 57d5b94, probe 22:04Z 429 retry-after opens ~04:00Z, zero arms run, bundles pristine); #122 and #123 closed with dated evidence closeout comments 5840415451/5840415434 reconciling the sanitizer dogfood split (passes 1-5 = index NOTE only; pass 6 commit 2063136 = sanitizer proof; colon/cross-repo at e3c6f25); next-action paragraph refreshed to v2-bundle/v4-launcher procedure with regeneration condition stated.
+
+Evidence:
+- PR #160 MERGED via auto-merge at squash 57d5b94 with six required contexts green (quality/test 3.11+3.12/package/parity x2); gh issue view: #122 CLOSED #123 CLOSED; find /tmp/pcm0046-arms-v2 -newer manifest.json -type f -> empty (bundles unmodified, zero arms run); continuity docs render --check SYNCHRONIZED at this commit; two independent 429 probes at 22:04Z (subagent launches rejected pre-execution, retry-after ~5.9h).
+
+Decisions:
+- PCM-0028 phases 1-3 (#104/#105/#106) remain NOT released: owner direction 5830322199 on #100 requires a separate go; recorded in CURRENT so a fresh session does not start them. #122/#123 closeout by evidence comment rather than closing keyword per sanitized-keyword policy.
+
+Changed:
+- checkpoints/CURRENT.md; GitHub: #122 #123 closed
+
+Blocked/uncertain:
+- All 20 PCM-0046 arms provider-rate-blocked until ~04:00Z 2026-09-26 (observed 429 retry-after); nothing else actionable without owner input (#144/#142/#143 decisions pending).
+
+Next:
+- After ~04:00Z 2026-09-26: launch the 20 frozen arms per this CURRENT next-action item 1 (v4 prompts verbatim), capture+score, report tallies on #139/#137, then closeout PR and close #139.
+
 ## Handoff
 
 Read PROJECT -> CURRENT -> this task -> #139 (method, pre-registered pass rules) -> docs/plans/PCM-0046-arm-plan.md. Scorer/fixtures/rubric are on this branch (14c65a8, d0f9de7); the 20 arms run only after merge with the rubric withheld from participants.
