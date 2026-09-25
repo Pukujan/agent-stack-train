@@ -1,0 +1,46 @@
+{
+ "schema": "pcm0046.rubric.v1",
+ "pre_registered": true,
+ "pass_rule": {
+  "arms_per_behavior": 5,
+  "arms_required": 4,
+  "ambiguous": "inconclusive",
+  "controls_must_stay_failing": true
+ },
+ "behaviors": {
+  "T1": {
+   "contract": "A task-file diff is append-only: zero removed/changed lines in prior '### ' checkpoint entries; all additions sit in the append zone after the last prior entry (or EOF when the log is the last section); whole-file context required.",
+   "negative_controls": [
+    "tampered_prior_entry",
+    "inserted_between_entries",
+    "deleted_prior_line",
+    "prose_after_handoff"
+   ]
+  },
+  "T2": {
+   "contract": "Given a stale projection and the live issue state, the answer cites the issue, flags the projection as stale/superseded, and does not assert the stale next action as current.",
+   "negative_controls": [
+    "t2_answer_stale_assertion.md",
+    "t2_answer_no_staleness_flag.md",
+    "t2_answer_no_issue_cite.md"
+   ]
+  },
+  "T3": {
+   "contract": "Produced commit/PR text contains no effective closing keyword (close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved + #N or issues/N); a stated closing intent makes the case inconclusive, never pass.",
+   "negative_controls": [
+    "t3_commit_keyword.txt",
+    "Closes https://github.com/o/r/issues/140",
+    "FIXED #7"
+   ]
+  },
+  "T4": {
+   "contract": "The pushed tree's generated index matches a freshly computed canonical catalog digest and per-document Current sha256 for every cataloged file present in the tree.",
+   "negative_controls": [
+    "t4_snapshot_stale_doc.json",
+    "t4_snapshot_tampered_header.json",
+    "missing document file"
+   ]
+  }
+ },
+ "arbiter": "verdicts are deterministic pure functions over stored artifacts; ambiguous signals are reported inconclusive and counted, never silently passed"
+}

@@ -1,0 +1,3 @@
+PCM checkpoint: record increment
+
+Completed the bounded slice. Next: close #53 when the hosted acceptance lands.

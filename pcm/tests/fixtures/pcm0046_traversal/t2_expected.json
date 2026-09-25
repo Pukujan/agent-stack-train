@@ -1,0 +1,27 @@
+{
+ "answers": {
+  "t2_answer_good.md": {
+   "verdict": "pass",
+   "failed_checks": []
+  },
+  "t2_answer_stale_assertion.md": {
+   "verdict": "fail",
+   "failed_checks": [
+    "follows_live_not_stale",
+    "flags_stale_projection"
+   ]
+  },
+  "t2_answer_no_staleness_flag.md": {
+   "verdict": "fail",
+   "failed_checks": [
+    "flags_stale_projection"
+   ]
+  },
+  "t2_answer_no_issue_cite.md": {
+   "verdict": "fail",
+   "failed_checks": [
+    "cites_issue"
+   ]
+  }
+ }
+}
