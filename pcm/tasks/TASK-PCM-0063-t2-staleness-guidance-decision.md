@@ -1,6 +1,6 @@
 # TASK-PCM-0063 — T2 Staleness Guidance Decision
 
-<!-- continuity:task {"acceptance": ["Owner records the A/B/C decision on #189.", "If A: T2-v2 holdout design pre-registered in docs/plans before any guidance edit; rule text in the guidance families generator + all copies, pinned by the policy test; re-measured arms reported honestly with inconclusive counts; six contexts + receipt on #189.", "(proposed) Pass bar unchanged at >=4/5 arms; baseline controls must still fail."], "depends_on": [], "goal": "Decide the read-time staleness-reconciliation rule the T2 holdout proved missing: what an agent must do when a stale projection and the live issue disagree (Refs #189).", "id": "PCM-0063", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/189", "next_action": "Owner picks option A (rule + pre-registered T2-v2 holdout), B (rule text only), or C (documented acceptance of the gap) on #189.", "owner": "owner/Astra planning", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "PCM-0046 hidden arms: T2 measured 0/5 — every fresh agent asserted the stale next action as current though the live issue state was attached; three stated the contradiction in their own words and still recommended it. Guidance today is write-time only."} -->
+<!-- continuity:task {"acceptance": ["Owner records the A/B/C decision on #189.", "If A: T2-v2 holdout design pre-registered in docs/plans before any guidance edit; rule text in the guidance families generator + all copies, pinned by the policy test; re-measured arms reported honestly with inconclusive counts; six contexts + receipt on #189.", "(proposed) Pass bar unchanged at >=4/5 arms; baseline controls must still fail."], "depends_on": [], "goal": "Decide the read-time staleness-reconciliation rule the T2 holdout proved missing: what an agent must do when a stale projection and the live issue disagree (Refs #189).", "id": "PCM-0063", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/189", "next_action": "Owner picks option A (rule + pre-registered T2-v2 holdout), B (rule text only), or C (documented acceptance of the gap) on #189.", "owner": "owner/Astra planning", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "PCM-0046 hidden arms: T2 measured 0/5 — every fresh agent asserted the stale next action as current though the live issue state was attached; all five stated the contradiction in their own words and still recommended it (REPORT.md correction 6 supersedes the original three-arm count). Guidance today is write-time only."} -->
 
 - Status: active
 - Owner: owner/Astra planning
@@ -37,7 +37,7 @@ A fresh agent handed a stale status document and the live issue it references st
 
 ## Evidence and sources
 
-T2 tallies + per-arm answers in accepted history at docs/plans/PCM-0046-arms-results/ (merge 969be11); counter-signal (3 arms saw the contradiction, none acted) recorded on #139 comment 5845193587.
+T2 tallies + per-arm answers in accepted history at docs/plans/PCM-0046-arms-results/ (merge 969be11); counter-signal (all five stated the closed-issue fact, none acted on it; correction 6 supersedes the initial count) recorded on #139 comment 5845193587.
 
 ## Related records
 
@@ -186,6 +186,29 @@ Blocked/uncertain:
 
 Next:
 - Push to update PR #199 (auto-merge stays armed); verify green on the new head; on merge, receipts on #189 and #201.
+
+### 2026-09-26 15:12:27 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Projection factual sync: marker why and Evidence line carried the pre-correction 'three arms' counter-signal count; REPORT.md correction 6 (merged 4044c80) established 5/5 from the committed answer files. Task markers are schema-checked, not digest-chained, so this is a legitimate current-state correction of my own live projection rather than an edit to any published checkpoint record. Owed-note from post-merge review now closed instead of deferred, per the explicit-completion requirement; no REPORT or history change needed (correction 6 already supersedes at the source)."],"decisions":["Small dedicated increment rather than fourth correction-fold: the advisory's own alternative (note as owed) leaves a knowingly inconsistent record I own; user directive is complete work."],"evidence":["grep: 'three stated'/'3 arms' gone from non-immutable fields; the two surviving hits sit only inside the hash-immutable 13:42:26Z entry (disclosed, unremovable pending #201); docs refresh pcm-0063-decision + render SYNCHRONIZED; suite at six known names."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T15:12:27Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"c6ee2f3f6463ad15748bc662e4d67aacfc9305494f0e01189236059e0d2ef775","request_id":"pcm-0063-countsync-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Projection factual sync: marker why and Evidence line carried the pre-correction 'three arms' counter-signal count; REPORT.md correction 6 (merged 4044c80) established 5/5 from the committed answer files. Task markers are schema-checked, not digest-chained, so this is a legitimate current-state correction of my own live projection rather than an edit to any published checkpoint record. Owed-note from post-merge review now closed instead of deferred, per the explicit-completion requirement; no REPORT or history change needed (correction 6 already supersedes at the source).
+
+Evidence:
+- grep: 'three stated'/'3 arms' gone from non-immutable fields; the two surviving hits sit only inside the hash-immutable 13:42:26Z entry (disclosed, unremovable pending #201); docs refresh pcm-0063-decision + render SYNCHRONIZED; suite at six known names.
+
+Decisions:
+- Small dedicated increment rather than fourth correction-fold: the advisory's own alternative (note as owed) leaves a knowingly inconsistent record I own; user directive is complete work.
+
+Changed:
+- tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189.
 
 ## Handoff
 
