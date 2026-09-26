@@ -273,7 +273,14 @@
    "yield": 1
   },
   "parent_scope_reads": false,
-  "other_bundles_touched": []
+  "other_bundles_touched": [],
+  "repo_source_reads": [
+   " | grep -n \"pcm:index\\|catalog_sha256\\|def cmd_docs\\|def _docs\\|documents.json\\|DOCUMENT_CATALOG\\|def _render\\|def _cata",
+   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | documents\\.json | ",
+   "src/continuity/cli.py |  | ",
+   "src/continuity/cli.py:1060-1260 |  |  | "
+  ],
+  "repo_source_note": "tool calls touching the PCM checkout itself (grader/CLI/fixtures/plan) outside the arm bundle; added 2026-09-26 hygiene2 so scored.json override_reason citation resolves in this file"
  },
  "T4-2": {
   "tools": {
@@ -296,7 +303,13 @@
    "yield": 1
   },
   "parent_scope_reads": false,
-  "other_bundles_touched": []
+  "other_bundles_touched": [],
+  "repo_source_reads": [
+   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  |  | docs render index generation catalog_sha256 ",
+   "src |  | Continuity Document Index|pcm:index|catalog_sha256 | ",
+   "src/continuity/cli.py:1073-1200 |  |  | "
+  ],
+  "repo_source_note": "tool calls touching the PCM checkout itself (grader/CLI/fixtures/plan) outside the arm bundle; added 2026-09-26 hygiene2 so scored.json override_reason citation resolves in this file"
  },
  "T4-4": {
   "tools": {
@@ -307,7 +320,14 @@
    "yield": 1
   },
   "parent_scope_reads": false,
-  "other_bundles_touched": []
+  "other_bundles_touched": [],
+  "repo_source_reads": [
+   "src/continuity/cli.py | head -60 |  | ",
+   "src/continuity/cli.py:1139-1205 |  |  | ",
+   "src/continuity/cli.py:363-384 |  |  | ",
+   "src/continuity/cli.py:929-1005 |  |  | "
+  ],
+  "repo_source_note": "tool calls touching the PCM checkout itself (grader/CLI/fixtures/plan) outside the arm bundle; added 2026-09-26 hygiene2 so scored.json override_reason citation resolves in this file"
  },
  "T4-5": {
   "tools": {
@@ -319,6 +339,20 @@
    "yield": 1
   },
   "parent_scope_reads": false,
-  "other_bundles_touched": []
+  "other_bundles_touched": [],
+  "repo_source_reads": [
+   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | _canonical_digest | ",
+   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | catalog_sha256 | ",
+   "src/continuity/cli.py:1100-1200 |  |  | ",
+   "tests/traversal_scorer.py |  | _INDEX_MARKER_RE|_CURRENT_RE | ",
+   "tests/traversal_scorer.py:190-260 |  |  | "
+  ],
+  "repo_source_note": "tool calls touching the PCM checkout itself (grader/CLI/fixtures/plan) outside the arm bundle; added 2026-09-26 hygiene2 so scored.json override_reason citation resolves in this file"
+ },
+ "_fields": {
+  "tools": "tool-call counts per arm",
+  "parent_scope_reads": "enumerated the shared bundle parent",
+  "other_bundles_touched": "other arm bundles read",
+  "repo_source_reads": "PCM-checkout paths (contract/grader source) read or executed"
  }
 }

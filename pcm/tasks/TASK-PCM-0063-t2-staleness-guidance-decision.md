@@ -95,6 +95,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189.
 
+### 2026-09-26 12:37:54 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["docs/plans/PCM-0046-arms-results/{isolation-audit.json,REPORT.md}"],"completed":["Cited-evidence gap closed: scored.json/overrides.json T4 reasons cite isolation-audit.json, which previously tracked only bundle paths and showed those arms clean; the audit now carries an additive per-arm repo_source_reads field regenerated from the same session logs (T4-1:4, T4-3:3, T4-4:4, T4-5:5 tool calls on src/continuity/cli.py, tests/traversal_scorer.py, fixtures, plan) plus a _fields legend. REPORT corrections extended: item 6 supersedes the 'three arms' counter-signal with the verified 5/5 (each committed answer states the issue closed); item 7 replaces correction 4's too-broad framing with the narrow defect \u2014 zero-commit gets AUDIT_CLEAN (cli.py:3166-3167) while not-on-origin gets the NOTE (:3155), and visibility is one branch."],"decisions":["Additive field + appended corrections rather than rewriting the merged correction 4; the refined framing lives as correction 7 pointing to it."],"evidence":["T2 count re-read directly from the five committed answer files; line cites observed from current cli.py at 3148/3155/3166-3167; docs render --check SYNCHRONIZED; prior correction items 1-4 untouched (append-only)."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T12:37:54Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ba58e8e5b21ccc9b297f4a259886090a9083f401a73b57eb87f0ba5680409af3","request_id":"pcm-0063-evidencefix-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Cited-evidence gap closed: scored.json/overrides.json T4 reasons cite isolation-audit.json, which previously tracked only bundle paths and showed those arms clean; the audit now carries an additive per-arm repo_source_reads field regenerated from the same session logs (T4-1:4, T4-3:3, T4-4:4, T4-5:5 tool calls on src/continuity/cli.py, tests/traversal_scorer.py, fixtures, plan) plus a _fields legend. REPORT corrections extended: item 6 supersedes the 'three arms' counter-signal with the verified 5/5 (each committed answer states the issue closed); item 7 replaces correction 4's too-broad framing with the narrow defect — zero-commit gets AUDIT_CLEAN (cli.py:3166-3167) while not-on-origin gets the NOTE (:3155), and visibility is one branch.
+
+Evidence:
+- T2 count re-read directly from the five committed answer files; line cites observed from current cli.py at 3148/3155/3166-3167; docs render --check SYNCHRONIZED; prior correction items 1-4 untouched (append-only).
+
+Decisions:
+- Additive field + appended corrections rather than rewriting the merged correction 4; the refined framing lives as correction 7 pointing to it.
+
+Changed:
+- docs/plans/PCM-0046-arms-results/{isolation-audit.json,REPORT.md}
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
