@@ -1,8 +1,8 @@
 # TASK-PCM-0046 — Traversal holdout
 
-<!-- continuity:task {"acceptance": ["Scorer unit tests green: positive control per T1-T4 and >=3 negative controls each failing exactly its intended check", "Property tests green: purity, determinism, vacuity rules, append-only invariant", "Metamorphic relations green: appended entry does not change prior verdicts; irrelevant text outside graded region is inert; independent-file reorder is inert; presentation permutation agrees", "20 hidden arms (5 fresh sessions x 4 behaviors) run with rubric withheld; per-behavior pass rate >=80% or result reported honestly with inconclusive counts", "Results posted on #139 and appended to #137; local gates clean and six required hosted contexts pass on the exact candidate"], "depends_on": [], "goal": "Run the released P1 reading-side traversal holdout (T1 append-only, T2 authority-over-staleness, T3 keyword-smuggling, T4 index-freshness) with a committed deterministic scorer", "id": "PCM-0046", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/139", "next_action": "Arms run + scored + recorded (docs/plans/PCM-0046-arms-results/); closeout PR merging under six contexts, post tallies to #139/#137, transition #139 closed by explicit comment, file three proposal follow-ups, then remove worktree.", "owner": "owner/Astra planning; subagent participants", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "Every experiment so far tested task-state discovery or record writing; reading-side traversal fidelity is the untested promise PCM sells on"} -->
+<!-- continuity:task {"acceptance": ["Scorer unit tests green: positive control per T1-T4 and >=3 negative controls each failing exactly its intended check", "Property tests green: purity, determinism, vacuity rules, append-only invariant", "Metamorphic relations green: appended entry does not change prior verdicts; irrelevant text outside graded region is inert; independent-file reorder is inert; presentation permutation agrees", "20 hidden arms (5 fresh sessions x 4 behaviors) run with rubric withheld; per-behavior pass rate >=80% or result reported honestly with inconclusive counts", "Results posted on #139 and appended to #137; local gates clean and six required hosted contexts pass on the exact candidate"], "depends_on": [], "goal": "Run the released P1 reading-side traversal holdout (T1 append-only, T2 authority-over-staleness, T3 keyword-smuggling, T4 index-freshness) with a committed deterministic scorer", "id": "PCM-0046", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/139", "next_action": "After this closeout PR merges: merge receipt on #139, verify live issue state (CLOSED COMPLETED), file parent progression note, then continuity worktree remove PCM-0046.", "owner": "owner/Astra planning; subagent participants", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "Every experiment so far tested task-state discovery or record writing; reading-side traversal fidelity is the untested promise PCM sells on"} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Astra planning; subagent participants
 - Priority: P2
 - Depends on: none
@@ -134,6 +134,29 @@ Blocked/uncertain:
 
 Next:
 - Push task/PCM-0046-traversal-holdout, open closeout PR (Refs #139), arm auto-merge after final push, verify six contexts; on merge post tallies to #139 and append to #137, transition the leaf issue via explicit comment, file the three proposal issues, remove the worktree.
+
+### 2026-09-26 10:26:56 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0046-traversal-holdout.md, tasks/TASK-PCM-0054-durability-receipt-audit.md, checkpoints/CURRENT.md, docs/plans/PCM-0046-arms-results/{REPORT.md,overrides.json,scored.json}, docs/CONTINUITY_INDEX.md"],"completed":["Task projection transitioned to completed with full delivery facts: 30 arms run+scored+recorded (PR #188 at 969be11 six contexts), tallies posted to #139 (receipt 5845193587) and append-only to #137 (5845214460), #139 CLOSED COMPLETED by explicit comment 5845205053 (never a keyword), three proposal issues filed (#189 T2 staleness guidance, #190 keyword-sentence rephrase, #191 holdout isolation gates). Post-close review caught and fixed: (a) REPORT/CURRENT headline overstated T4 vs the table, (b) a rescoring run clobbered overrides on the disk copy of scored.json (durable overrides.json added; raw verdicts preserved under original_verdict), (c) a fabricated comment id 5843855517 in five posted records corrected append-only via 5845406583/5845406851/5845435551/5845406962/5845407074. PCM-0054 projection sync (owed since #187) completed on this branch."],"decisions":["Closeout rides the PCM-0046 worktree on branch task/PCM-0046-closeout cut from origin/main 969be11; corrections to published records are append-only comments, never body rewrites (issue-log-format discipline)."],"evidence":["discover 274 tests = six known macOS-environmental names (test_worktrees 4F+1E, test_cli 2F), zero new failures; docs render --check SYNCHRONIZED; gh pr view 188 MERGED at 969be11 with quality/test 3.11+3.12/package/parity x2 pass on the exact candidate; live issue state: #139 CLOSED COMPLETED, #189/#190/#191 OPEN, corrections verified by API listing."],"next_action":"Push, open PCM-0046 closeout PR with Refs #139 (issue already closed by explicit comment; no closing keyword anywhere), arm auto-merge after this final push, verify six contexts on the exact candidate, post merge receipt on #139, then continuity worktree remove PCM-0046.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-26T10:26:56Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a6fed9aa9475d0b98cde9c554eb574bb686547a6cd0aaa98e0c18969bbb6406d","request_id":"pcm-0046-closeout-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- Task projection transitioned to completed with full delivery facts: 30 arms run+scored+recorded (PR #188 at 969be11 six contexts), tallies posted to #139 (receipt 5845193587) and append-only to #137 (5845214460), #139 CLOSED COMPLETED by explicit comment 5845205053 (never a keyword), three proposal issues filed (#189 T2 staleness guidance, #190 keyword-sentence rephrase, #191 holdout isolation gates). Post-close review caught and fixed: (a) REPORT/CURRENT headline overstated T4 vs the table, (b) a rescoring run clobbered overrides on the disk copy of scored.json (durable overrides.json added; raw verdicts preserved under original_verdict), (c) a fabricated comment id 5843855517 in five posted records corrected append-only via 5845406583/5845406851/5845435551/5845406962/5845407074. PCM-0054 projection sync (owed since #187) completed on this branch.
+
+Evidence:
+- discover 274 tests = six known macOS-environmental names (test_worktrees 4F+1E, test_cli 2F), zero new failures; docs render --check SYNCHRONIZED; gh pr view 188 MERGED at 969be11 with quality/test 3.11+3.12/package/parity x2 pass on the exact candidate; live issue state: #139 CLOSED COMPLETED, #189/#190/#191 OPEN, corrections verified by API listing.
+
+Decisions:
+- Closeout rides the PCM-0046 worktree on branch task/PCM-0046-closeout cut from origin/main 969be11; corrections to published records are append-only comments, never body rewrites (issue-log-format discipline).
+
+Changed:
+- tasks/TASK-PCM-0046-traversal-holdout.md, tasks/TASK-PCM-0054-durability-receipt-audit.md, checkpoints/CURRENT.md, docs/plans/PCM-0046-arms-results/{REPORT.md,overrides.json,scored.json}, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Push, open PCM-0046 closeout PR with Refs #139 (issue already closed by explicit comment; no closing keyword anywhere), arm auto-merge after this final push, verify six contexts on the exact candidate, post merge receipt on #139, then continuity worktree remove PCM-0046.
 
 ## Handoff
 

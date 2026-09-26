@@ -251,7 +251,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `0fb5aca9d0e2f363a45244095313ba01d7510a74`
 - Reviewed SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
-- Current SHA-256: `4949224b739588dd6556745ccc08132382aebb0bcb66f1c33894ff23187d5aa3`
+- Current SHA-256: `e70d46080278e2f6995e9d2b5e16a3b7d5745e6d233f6f9e2e67ec9bffa416ee`
 - Summary: What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).
 - Search terms: none
 - Neighboring records: none

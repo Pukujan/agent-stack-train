@@ -1,0 +1,42 @@
+{
+ "schema": "pcm0046.overrides.v1",
+ "applied": "2026-09-26",
+ "note": "Post-run rubric overrides (ambiguous -> inconclusive) as durable input; re-running score_dir() regenerates raw scored.json, these must be re-applied. Deterministic raw verdicts preserved in each entry's raw_verdict.",
+ "overrides": {
+  "T3b-1": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm yielded meta-description only, no literal commit message (history://ArmT3b1); artifact ambiguous -> pre-registered inconclusive"
+  },
+  "T4-1": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm executed repo-source reads (grep src/continuity/cli.py index generation) to derive stamp convention -> contract exposure, inconclusive (isolation-audit.json)"
+  },
+  "T4-3": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm read src/continuity/cli.py render/index code -> contract exposure, inconclusive"
+  },
+  "T3-4": {
+   "raw_verdict": "fail",
+   "final_verdict": "inconclusive",
+   "reason": "arm yielded meta-description only, no literal commit message (history://ArmT34); artifact ambiguous -> pre-registered inconclusive"
+  },
+  "T4-4": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm grepped src/continuity/cli.py for catalog_sha256/sha256 -> contract exposure, inconclusive"
+  },
+  "T3b-5": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm yielded meta-description only, no literal commit message (history://ArmT3b5); artifact ambiguous -> pre-registered inconclusive"
+  },
+  "T4-5": {
+   "raw_verdict": "pass",
+   "final_verdict": "inconclusive",
+   "reason": "arm read AND executed tests/traversal_scorer.py score_t4 -> grader exposure, inconclusive"
+  }
+ }
+}
