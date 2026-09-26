@@ -256,6 +256,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189. Queue then fully owner-gated.
 
+### 2026-09-26 15:58:29 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Supersedes paragraph, delivered as promised by #189 audit comment 5847664853: (a) the #204 checkpoint entry (push 8432493) opened 'the prior countsync increment fixed the marker why field and Evidence line but its prose Why paragraph still carried the pre-correction count' - false premise; b1fb4f0 had already rewritten line 16 identically, so #204's only effective delta to this file was catalog/index churn. That entry is hash-immutable and stands as recorded history; this paragraph supersedes its claim. (b) Correction 12's 'closed in full' ledger sentence was premature by the same non-assessment; not edited (published), superseded here per append-only. (c) Line 16 on current head 642b1ad verified correct text ('all five stated ... correction 6 supersedes the initial three-arm count'); non-immutable grep for the stale count: zero hits."],"decisions":["One final amendment entry instead of editing published text; no manifest re-pin performed - this increment changes no pinned artifact, per the explicit stop-repinning guidance."],"evidence":["gh pr view 204 -> MERGED 642b1ad 15:46:27Z; sed -n '16p' before/after b1fb4f0 diff comparison (git show b1fb4f0 task file line 16 vs 49c157e: identical); published-surface sweep (issue comments since 12:00Z + PR bodies/comments for #195-#204): zero occurrences outside immutable entries."],"next_action":"Open PR #205, arm auto-merge after this final push; on merge, one receipt on #189; then STOP: remaining queue fully owner-gated (#201 options A/B, #189-191, #181/182/185, #144/142/143/#135, #171/#110/#33).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T15:58:29Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"91cc2fc3e47be605875b83045812ed71f9a7b36595f108788bb25b5cc6dcc162","request_id":"pcm-0063-amend3-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Supersedes paragraph, delivered as promised by #189 audit comment 5847664853: (a) the #204 checkpoint entry (push 8432493) opened 'the prior countsync increment fixed the marker why field and Evidence line but its prose Why paragraph still carried the pre-correction count' - false premise; b1fb4f0 had already rewritten line 16 identically, so #204's only effective delta to this file was catalog/index churn. That entry is hash-immutable and stands as recorded history; this paragraph supersedes its claim. (b) Correction 12's 'closed in full' ledger sentence was premature by the same non-assessment; not edited (published), superseded here per append-only. (c) Line 16 on current head 642b1ad verified correct text ('all five stated ... correction 6 supersedes the initial three-arm count'); non-immutable grep for the stale count: zero hits.
+
+Evidence:
+- gh pr view 204 -> MERGED 642b1ad 15:46:27Z; sed -n '16p' before/after b1fb4f0 diff comparison (git show b1fb4f0 task file line 16 vs 49c157e: identical); published-surface sweep (issue comments since 12:00Z + PR bodies/comments for #195-#204): zero occurrences outside immutable entries.
+
+Decisions:
+- One final amendment entry instead of editing published text; no manifest re-pin performed - this increment changes no pinned artifact, per the explicit stop-repinning guidance.
+
+Changed:
+- tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR #205, arm auto-merge after this final push; on merge, one receipt on #189; then STOP: remaining queue fully owner-gated (#201 options A/B, #189-191, #181/182/185, #144/142/143/#135, #171/#110/#33).
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
