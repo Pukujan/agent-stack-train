@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"0dac8e15c4eb2b9d08650ee30f987a0dc8dffaf1ac9a449d90ea31f9dead7736","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"0b93a4bd23cc23105df4d3711768620e93dee327c79dc2f79687d9bd8dc7ed7a","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -358,8 +358,8 @@
 - File: [`tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md`](../tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md)
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
-- Reviewed SHA-256: `f4394ab928a538c5682b256a2b2bbf5baee1c30a632a97c5fb8932465a1be7c2`
-- Current SHA-256: `1f5557891aa4be18a8a40f4f0cc40db2c699646dfdb91409307695b6a2ee01e1`
+- Reviewed SHA-256: `9259295f9a37c5b40f64c687b1b930dc29590272165362d5040040a880510a57`
+- Current SHA-256: `2bbf413827034c8f6577c1c34f1118c8685f1717301e5af45c58e42fddc8dc72`
 - Summary: Decision task for the read-time staleness-reconciliation rule: PCM-0046 measured T2 at 0/5 (agents follow the stale projection over the closed live issue); owner picks A/B/C on #189 before any guidance slice.
 - Search terms: `63`, `decision`, `staleness`
 - Neighboring records: `pcm-0046-arm-plan`
