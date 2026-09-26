@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"1167ca9573ee14084fee5b8c36e7f753c6f4356b72408df66b3b870ed4663af9","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"f9f08a939330d7d441e69124c226a24e85fbc298acd36aa868c5b9d6ac78834b","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -244,6 +244,30 @@
 - Search terms: `authoritative-remote`, `checkpoint-guard`, `publish-path`, `stale-base`
 - Neighboring records: none
 - Task associations: `PCM-0053`
+
+## PCM-0054 durable-publication enforcement matrix + receipt-gap audit proposal (`pcm-0054-durability-receipt-audit`)
+
+- File: [`tasks/TASK-PCM-0054-durability-receipt-audit.md`](../tasks/TASK-PCM-0054-durability-receipt-audit.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `0fb5aca9d0e2f363a45244095313ba01d7510a74`
+- Reviewed SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
+- Current SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
+- Summary: What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).
+- Search terms: none
+- Neighboring records: none
+- Task associations: `PCM-0054`
+
+## PCM-0055 receipt JSON wire-format fix (`pcm-0055-receipt-json`)
+
+- File: [`tasks/TASK-PCM-0055-receipt-json-encoding.md`](../tasks/TASK-PCM-0055-receipt-json-encoding.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `b9969f3754738546f287b988cb8f4f7a666dae74858dee344f52f2e723eb8646`
+- Current SHA-256: `86028b5550e6fbaf3f924a39a86531ea6055459a78c4aefca3adb01a1d99802f`
+- Summary: gh api --input - needs JSON request parameters; red-first fix + shim test; checkpoint dogfoods the opt-in flags (Refs #171).
+- Search terms: none
+- Neighboring records: `pcm-0054-durability-receipt-audit`
+- Task associations: `PCM-0055`
 
 ## Testing policy (`testing-policy`)
 

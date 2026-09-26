@@ -60,7 +60,8 @@ class ReceiptLookupTests(unittest.TestCase):
             run=run,
         )
         self.assertEqual(decision, "post")
-        self.assertEqual(calls, [MARKER])
+        # PCM-0055: the post payload must be gh JSON request parameters, not raw text.
+        self.assertEqual([json.loads(call)["body"] for call in calls], [MARKER])
 
 
 if __name__ == "__main__":

@@ -2865,7 +2865,10 @@ def publish_issue_receipt(
             raise ContinuityError("receipt body is missing its marker")
         reject_receipt_secrets(body)
         path = github_issue_comment_path(repository, issue_number)
-        result = run(["gh", "api", "--method", "POST", path, "--input", "-"], body)
+        # `gh api --input -` parses stdin as JSON request parameters, not a
+        # plain body; posting the raw markdown returns HTTP 400 (PCM-0055).
+        payload = json.dumps({"body": body})
+        result = run(["gh", "api", "--method", "POST", path, "--input", "-"], payload)
         if result.returncode != 0:
             detail = (result.stderr or result.stdout or "GitHub comment post failed").strip()
             try:
