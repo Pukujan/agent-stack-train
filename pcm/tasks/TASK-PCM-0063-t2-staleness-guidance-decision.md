@@ -72,6 +72,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push; on merge, post receipt on #189.
 
+### 2026-09-26 12:15:02 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":[".continuity/documents.json, docs/CONTINUITY_INDEX.md, docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}"],"completed":["Post-review hygiene increment: PCM-0063/0064/0065 registered in the document catalog (siblings 0059/0060/0062 had records; docs find could not surface the new ones), AGENTS.md task-ID/writer/branch comments posted on #190/#191, REPORT.md gained an append-only corrections section (vacuous AUDIT_CLEAN dogfood claim disclaimed, T2 lexical-vs-behavioral check split, 05:42Z->~09:42Z timezone slip, meta isolation=clean understatement for the four repo-reading T4 arms), and #139's sync receipt corrected append-only."],"decisions":["All fixes are additive (catalog records, appended REPORT section, issue comments); no prior published claim edited in place, per append-only doctrine. T2's rubric limitation feeds #189's T2-v2 design note rather than re-scoring anything."],"evidence":["continuity docs add -> 3x REGISTERED; docs render --check SYNCHRONIZED; suite 274 = six known macOS-environmental names (test_worktrees 4F+1E, test_cli 2F), zero new; validate INVALID only the pre-existing device-local /private/tmp/pcm-pinned foreign worktree; posted comments visible via API (139/190/191 listings)."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T12:15:02Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"37d77c1790b23a977d0bc9300c587e02bfdd49958b799a17a3ad6543e0945e8c","request_id":"pcm-0063-hygiene-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Post-review hygiene increment: PCM-0063/0064/0065 registered in the document catalog (siblings 0059/0060/0062 had records; docs find could not surface the new ones), AGENTS.md task-ID/writer/branch comments posted on #190/#191, REPORT.md gained an append-only corrections section (vacuous AUDIT_CLEAN dogfood claim disclaimed, T2 lexical-vs-behavioral check split, 05:42Z->~09:42Z timezone slip, meta isolation=clean understatement for the four repo-reading T4 arms), and #139's sync receipt corrected append-only.
+
+Evidence:
+- continuity docs add -> 3x REGISTERED; docs render --check SYNCHRONIZED; suite 274 = six known macOS-environmental names (test_worktrees 4F+1E, test_cli 2F), zero new; validate INVALID only the pre-existing device-local /private/tmp/pcm-pinned foreign worktree; posted comments visible via API (139/190/191 listings).
+
+Decisions:
+- All fixes are additive (catalog records, appended REPORT section, issue comments); no prior published claim edited in place, per append-only doctrine. T2's rubric limitation feeds #189's T2-v2 design note rather than re-scoring anything.
+
+Changed:
+- .continuity/documents.json, docs/CONTINUITY_INDEX.md, docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.

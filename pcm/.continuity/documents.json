@@ -538,6 +538,59 @@
       "title": "PCM-0062 decision projection"
     },
     {
+      "id": "pcm-0063-decision",
+      "keywords": [
+        "63",
+        "decision",
+        "staleness"
+      ],
+      "path": "tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md",
+      "related": [
+        "pcm-0046-arm-plan"
+      ],
+      "reviewed_commit": "82f1e90413c2d45238cc9fb7b6b8a9cc17611e10",
+      "reviewed_sha256": "0b30810ddf5856b2af6dd3d8aae899ff5dd8318f98ec94acb6dac2e04ece9aba",
+      "summary": "Decision task for the read-time staleness-reconciliation rule: PCM-0046 measured T2 at 0/5 (agents follow the stale projection over the closed live issue); owner picks A/B/C on #189 before any guidance slice.",
+      "tasks": [
+        "PCM-0063"
+      ],
+      "title": "PCM-0063 \u2014 T2 staleness read-rule decision (leaf #189)"
+    },
+    {
+      "id": "pcm-0064-decision",
+      "keywords": [
+        "64",
+        "decision",
+        "keyword"
+      ],
+      "path": "tasks/TASK-PCM-0064-keyword-warning-rephrase-experiment.md",
+      "related": [],
+      "reviewed_commit": "82f1e90413c2d45238cc9fb7b6b8a9cc17611e10",
+      "reviewed_sha256": "ca7dadc381511260056b914faf7442d895a4b01235bf8f893ac3199dfbd54029",
+      "summary": "Decision task: the candidate keyword-warning sentence showed no measured benefit (T3 3/4 smuggled vs T3b 0/3); owner selects variants to pre-register on #190 before a re-measure ships any text.",
+      "tasks": [
+        "PCM-0064"
+      ],
+      "title": "PCM-0064 \u2014 Closing-keyword warning rephrase experiment (leaf #190)"
+    },
+    {
+      "id": "pcm-0065-decision",
+      "keywords": [
+        "65",
+        "decision",
+        "isolation"
+      ],
+      "path": "tasks/TASK-PCM-0065-holdout-isolation-gates.md",
+      "related": [],
+      "reviewed_commit": "82f1e90413c2d45238cc9fb7b6b8a9cc17611e10",
+      "reviewed_sha256": "49431b88781c6d600d3728eb2de1a50d0889041dfc5db65eab1e0d8722c3e152",
+      "summary": "Decision task: PCM-0046's own harness let arms reach the grader's repository and enumerate sibling bundles; owner picks gate set A/B/C on #191 for future holdouts.",
+      "tasks": [
+        "PCM-0065"
+      ],
+      "title": "PCM-0065 \u2014 Hidden-arm holdout isolation gates (leaf #191)"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

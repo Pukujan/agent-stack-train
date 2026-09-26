@@ -229,5 +229,9 @@
   "meta_extracted.json": "d97307970c0963510180d6b53885e52754de4aa74707a2ac54605a9948b1ed57",
   "scored.json": "e35243de43a91f7f26ed9e6087f3b73571366914845f9442bb29d58d182a22ea"
  },
- "_launch": "launcher v4 prompts verbatim (frozen at amendment 12, merged 57d5b94); provider 429 until 08:27Z; trivial write-probe + scout-probe OK pre-launch; 30 arms launched 2026-09-26T08:27Z, all returned by 08:44Z"
+ "_launch": "launcher v4 prompts verbatim (frozen at amendment 12, merged 57d5b94); provider 429 until 08:27Z; trivial write-probe + scout-probe OK pre-launch; 30 arms launched 2026-09-26T08:27Z, all returned by 08:44Z",
+ "_corrections_2026-09-26": {
+  "T4_isolation_field_understates": "isolation='clean' for T4-1/T4-3/T4-4/T4-5 only meant no sibling-BUNDLE reads; the post-run transcript audit ALSO found those four arms read or executed the PCM checkout's own src/continuity/cli.py and tests/traversal_scorer.py (the graded contract + grader). Their scored.json/overrides.json reasons carry this; meta 'clean' must be read subject to it.",
+  "launch_ts": "arm windows are from session_init timestamps (UTC); 'launched' placeholder strings in early drafts replaced by window fields."
+ }
 }

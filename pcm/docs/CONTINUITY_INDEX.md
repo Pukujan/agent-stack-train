@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"2df30e55eec6c4a8c2b5040f95130d9647fdf784dbdc2ba0b2cfc721d43878dc","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"ec01c6f8c48e387ecaea10c23c5ecfb998002f92b75b486e3ab8e0c777ed9e30","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -352,6 +352,42 @@
 - Search terms: `62`, `decision`
 - Neighboring records: none
 - Task associations: `PCM-0062`
+
+## PCM-0063 — T2 staleness read-rule decision (leaf #189) (`pcm-0063-decision`)
+
+- File: [`tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md`](../tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `82f1e90413c2d45238cc9fb7b6b8a9cc17611e10`
+- Reviewed SHA-256: `0b30810ddf5856b2af6dd3d8aae899ff5dd8318f98ec94acb6dac2e04ece9aba`
+- Current SHA-256: `dde39ab4bf5d908f14339dafeecd9b4ce4ceac80830cdd38b827af0234e1918f`
+- Summary: Decision task for the read-time staleness-reconciliation rule: PCM-0046 measured T2 at 0/5 (agents follow the stale projection over the closed live issue); owner picks A/B/C on #189 before any guidance slice.
+- Search terms: `63`, `decision`, `staleness`
+- Neighboring records: `pcm-0046-arm-plan`
+- Task associations: `PCM-0063`
+
+## PCM-0064 — Closing-keyword warning rephrase experiment (leaf #190) (`pcm-0064-decision`)
+
+- File: [`tasks/TASK-PCM-0064-keyword-warning-rephrase-experiment.md`](../tasks/TASK-PCM-0064-keyword-warning-rephrase-experiment.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `82f1e90413c2d45238cc9fb7b6b8a9cc17611e10`
+- Reviewed SHA-256: `ca7dadc381511260056b914faf7442d895a4b01235bf8f893ac3199dfbd54029`
+- Current SHA-256: `ca7dadc381511260056b914faf7442d895a4b01235bf8f893ac3199dfbd54029`
+- Summary: Decision task: the candidate keyword-warning sentence showed no measured benefit (T3 3/4 smuggled vs T3b 0/3); owner selects variants to pre-register on #190 before a re-measure ships any text.
+- Search terms: `64`, `decision`, `keyword`
+- Neighboring records: none
+- Task associations: `PCM-0064`
+
+## PCM-0065 — Hidden-arm holdout isolation gates (leaf #191) (`pcm-0065-decision`)
+
+- File: [`tasks/TASK-PCM-0065-holdout-isolation-gates.md`](../tasks/TASK-PCM-0065-holdout-isolation-gates.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `82f1e90413c2d45238cc9fb7b6b8a9cc17611e10`
+- Reviewed SHA-256: `49431b88781c6d600d3728eb2de1a50d0889041dfc5db65eab1e0d8722c3e152`
+- Current SHA-256: `49431b88781c6d600d3728eb2de1a50d0889041dfc5db65eab1e0d8722c3e152`
+- Summary: Decision task: PCM-0046's own harness let arms reach the grader's repository and enumerate sibling bundles; owner picks gate set A/B/C on #191 for future holdouts.
+- Search terms: `65`, `decision`, `isolation`
+- Neighboring records: none
+- Task associations: `PCM-0065`
 
 ## Testing policy (`testing-policy`)
 
