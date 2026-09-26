@@ -34,6 +34,7 @@ REQUIRED = (
     "without another checkpoint/push",
     "automatic issue-comment synchronization is not implemented",
     "required ci and github auto-merge are mandatory",
+    "arm auto-merge only after the increment's final push",
     "exact current-base or merge-queue candidate",
     "missing, failed, skipped, stale or unverified gates fail closed",
     "no completion or cleanup",

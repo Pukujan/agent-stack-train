@@ -414,6 +414,25 @@
       "title": "PCM-0055 receipt JSON wire-format fix"
     },
     {
+      "id": "pcm-0056-merge-window",
+      "keywords": [
+        "auto-merge",
+        "guidance",
+        "merge-window"
+      ],
+      "path": "tasks/TASK-PCM-0056-merge-window-guidance.md",
+      "related": [
+        "pcm-0053-guard-plan"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f2261f6600bfda57ebba2b477887977ca567b895bf4e5f66a7c6acfd11d9c635",
+      "summary": "Arm auto-merge only after the final push: one sentence in all 9 guidance copies + policy-test pin; parent decision #166 5842002451 (Refs #175).",
+      "tasks": [
+        "PCM-0056"
+      ],
+      "title": "PCM-0056 merge-window guidance fold"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",
