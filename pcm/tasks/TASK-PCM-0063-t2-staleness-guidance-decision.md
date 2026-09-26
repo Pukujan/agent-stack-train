@@ -164,6 +164,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189 and the gate note on #191.
 
+### 2026-09-26 14:20:40 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md (revert+this entry), docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}, .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Supersedes the unmerged entry pushed at 5acc4db: its 'sanitized in place' claim failed closed. Editing the recorded path string broke that entry's payload digest (validate: 'checkpoint 5 payload digest does not match'; PR #199 CI runs 36246963173/36247044038, test 3.11+3.12 fail) \u2014 the append-only invariant PCM-0046 measured enforced itself on this remediation within one hour. The task file is reverted to its merged (1d91487) content; the abbreviated foreign path therefore remains in one recorded, hash-immutable checkpoint entry on tracked head, disclosed rather than removed. Procedure defect filed as #201 (A: composition-time payload scan \u2014 recommended; B: digest-verifiable supersession class; C: rejected), superseding duplicate #200. REPORT.md correction 11 rewritten to tell this truth; manifest re-pinned; gate-(B) note 5846995405 posted to #191."],"decisions":["Prevention is the only rule-compliant lever under an immutable chain: post-hoc in-place edits are structurally impossible for checkpoint text, so scanning happens before hashing (#201 option A)."],"evidence":["gh run logs quote the digest error verbatim; grep over tasks/docs/checkpoints/.continuity: the only remaining tracked occurrence is inside the immutable 1d91487-era entry itself (REPORT.md and meta now 0); docs render --check after refresh; suite baseline six known names."],"next_action":"Push to update PR #199 (auto-merge stays armed); verify green on the new head; on merge, receipts on #189 and #201.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T14:20:40Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"4639f584d641b937db168dfd393938e9b3cfec54f5f7265d0263bd9c11944ff5","request_id":"pcm-0063-revert-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Supersedes the unmerged entry pushed at 5acc4db: its 'sanitized in place' claim failed closed. Editing the recorded path string broke that entry's payload digest (validate: 'checkpoint 5 payload digest does not match'; PR #199 CI runs 36246963173/36247044038, test 3.11+3.12 fail) — the append-only invariant PCM-0046 measured enforced itself on this remediation within one hour. The task file is reverted to its merged (1d91487) content; the abbreviated foreign path therefore remains in one recorded, hash-immutable checkpoint entry on tracked head, disclosed rather than removed. Procedure defect filed as #201 (A: composition-time payload scan — recommended; B: digest-verifiable supersession class; C: rejected), superseding duplicate #200. REPORT.md correction 11 rewritten to tell this truth; manifest re-pinned; gate-(B) note 5846995405 posted to #191.
+
+Evidence:
+- gh run logs quote the digest error verbatim; grep over tasks/docs/checkpoints/.continuity: the only remaining tracked occurrence is inside the immutable 1d91487-era entry itself (REPORT.md and meta now 0); docs render --check after refresh; suite baseline six known names.
+
+Decisions:
+- Prevention is the only rule-compliant lever under an immutable chain: post-hoc in-place edits are structurally impossible for checkpoint text, so scanning happens before hashing (#201 option A).
+
+Changed:
+- tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md (revert+this entry), docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}, .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Push to update PR #199 (auto-merge stays armed); verify green on the new head; on merge, receipts on #189 and #201.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
