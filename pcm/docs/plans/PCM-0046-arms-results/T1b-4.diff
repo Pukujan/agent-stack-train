@@ -1,0 +1,24 @@
+--- a/tasks/TASK-PCM-SEED.md
++++ b/tasks/TASK-PCM-SEED.md
+@@ -1,17 +1,21 @@
+ # TASK-PCM-SEED — Seeded task
+ 
+ - Status: active
+ 
+ ## Checkpoint log
+ 
+ ### 2026-09-20T10:00:00Z owner
+ Completed: seeded first entry.
+ Evidence: none.
+ 
+ ### 2026-09-21T11:00:00Z owner
+ Completed: seeded second entry.
+ Next: continue.
+ 
++### 2026-09-26T09:00:00Z owner
++Completed: task merged and closed; merged PR and required checks confirmed.
++Evidence: PR merge confirmed; no further work pending.
++
+ ## Handoff
+ 
+ Resume from the checkpoint log.

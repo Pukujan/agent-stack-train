@@ -1,6 +1,6 @@
 # TASK-PCM-0046 — Traversal holdout
 
-<!-- continuity:task {"acceptance": ["Scorer unit tests green: positive control per T1-T4 and >=3 negative controls each failing exactly its intended check", "Property tests green: purity, determinism, vacuity rules, append-only invariant", "Metamorphic relations green: appended entry does not change prior verdicts; irrelevant text outside graded region is inert; independent-file reorder is inert; presentation permutation agrees", "20 hidden arms (5 fresh sessions x 4 behaviors) run with rubric withheld; per-behavior pass rate >=80% or result reported honestly with inconclusive counts", "Results posted on #139 and appended to #137; local gates clean and six required hosted contexts pass on the exact candidate"], "depends_on": [], "goal": "Run the released P1 reading-side traversal holdout (T1 append-only, T2 authority-over-staleness, T3 keyword-smuggling, T4 index-freshness) with a committed deterministic scorer", "id": "PCM-0046", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/139", "next_action": "Build fixtures and scorer red-to-green, then run the 20 hidden arms and report.", "owner": "owner/Astra planning; subagent participants", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "Every experiment so far tested task-state discovery or record writing; reading-side traversal fidelity is the untested promise PCM sells on"} -->
+<!-- continuity:task {"acceptance": ["Scorer unit tests green: positive control per T1-T4 and >=3 negative controls each failing exactly its intended check", "Property tests green: purity, determinism, vacuity rules, append-only invariant", "Metamorphic relations green: appended entry does not change prior verdicts; irrelevant text outside graded region is inert; independent-file reorder is inert; presentation permutation agrees", "20 hidden arms (5 fresh sessions x 4 behaviors) run with rubric withheld; per-behavior pass rate >=80% or result reported honestly with inconclusive counts", "Results posted on #139 and appended to #137; local gates clean and six required hosted contexts pass on the exact candidate"], "depends_on": [], "goal": "Run the released P1 reading-side traversal holdout (T1 append-only, T2 authority-over-staleness, T3 keyword-smuggling, T4 index-freshness) with a committed deterministic scorer", "id": "PCM-0046", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/139", "next_action": "Arms run + scored + recorded (docs/plans/PCM-0046-arms-results/); closeout PR merging under six contexts, post tallies to #139/#137, transition #139 closed by explicit comment, file three proposal follow-ups, then remove worktree.", "owner": "owner/Astra planning; subagent participants", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "Every experiment so far tested task-state discovery or record writing; reading-side traversal fidelity is the untested promise PCM sells on"} -->
 
 - Status: active
 - Owner: owner/Astra planning; subagent participants
@@ -44,6 +44,28 @@ Blocked/uncertain:
 Next:
 - Open PR for task/PCM-0046-traversal-holdout, verify six required contexts + auto-merge, then run arms per docs/plans/PCM-0046-arm-plan.md.
 
+### 2026-09-25 20:50:47 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["External provider rate window; no code or repository work is blocked."],"changed":["tasks/TASK-PCM-0046-traversal-holdout.md (this entry)"],"completed":["Scorer merged to main at 09638d8 (#148, six contexts green, merge receipt 5839360783). 20-arm bundles staged and verified intact (rubric/expected excluded); launcher + pure rescoring harness persisted via #151 with repo-root-relative paths (private absolute path removed pre-merge per reviewer)."],"decisions":["Arms remain the only open acceptance item; #139 stays open until tallies post to #139/#137. Baseline guidance variants defined in docs/plans (rewrite-sections + no-keyword sentence) for the delta arms."],"evidence":["Probe arm T3a1probe at 21:15Z returned provider 429 retry-after ~7.2h (window opens ~04:15Z 2026-09-26); all 20 launches at 20:40Z failed identically pre-execution, so no arm ran and bundles are unmodified (sha256 tree verified against tests/fixtures)."],"next_action":"After ~04:15Z: spawn 20 arms per docs/plans/PCM-0046-arm-launcher.sh, score with docs/plans/PCM-0046-arm-scorer.py, report, closeout PR, close #139, remove worktree.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-25T20:50:47Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"d706a1ca211d5bc7af9b8dba517b3cd76331492d3221371df7f7e8f7d20a6800","request_id":"pcm-0046-armswait-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- Scorer merged to main at 09638d8 (#148, six contexts green, merge receipt 5839360783). 20-arm bundles staged and verified intact (rubric/expected excluded); launcher + pure rescoring harness persisted via #151 with repo-root-relative paths (private absolute path removed pre-merge per reviewer).
+
+Evidence:
+- Probe arm T3a1probe at 21:15Z returned provider 429 retry-after ~7.2h (window opens ~04:15Z 2026-09-26); all 20 launches at 20:40Z failed identically pre-execution, so no arm ran and bundles are unmodified (sha256 tree verified against tests/fixtures).
+
+Decisions:
+- Arms remain the only open acceptance item; #139 stays open until tallies post to #139/#137. Baseline guidance variants defined in docs/plans (rewrite-sections + no-keyword sentence) for the delta arms.
+
+Changed:
+- tasks/TASK-PCM-0046-traversal-holdout.md (this entry)
+
+Blocked/uncertain:
+- External provider rate window; no code or repository work is blocked.
+
+Next:
+- After ~04:15Z: spawn 20 arms per docs/plans/PCM-0046-arm-launcher.sh, score with docs/plans/PCM-0046-arm-scorer.py, report, closeout PR, close #139, remove worktree.
 ### 2026-09-25 22:20:06 UTC — owner/Astra
 
 <!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["All 20 PCM-0046 arms provider-rate-blocked until ~04:00Z 2026-09-26 (observed 429 retry-after); nothing else actionable without owner input (#144/#142/#143 decisions pending)."],"changed":["checkpoints/CURRENT.md; GitHub: #122 #123 closed"],"completed":["Post-#160 housekeeping increment: CURRENT projection re-synced to observed state (amendment set frozen/merged at 57d5b94, probe 22:04Z 429 retry-after opens ~04:00Z, zero arms run, bundles pristine); #122 and #123 closed with dated evidence closeout comments 5840415451/5840415434 reconciling the sanitizer dogfood split (passes 1-5 = index NOTE only; pass 6 commit 2063136 = sanitizer proof; colon/cross-repo at e3c6f25); next-action paragraph refreshed to v2-bundle/v4-launcher procedure with regeneration condition stated."],"decisions":["PCM-0028 phases 1-3 (#104/#105/#106) remain NOT released: owner direction 5830322199 on #100 requires a separate go; recorded in CURRENT so a fresh session does not start them. #122/#123 closeout by evidence comment rather than closing keyword per sanitized-keyword policy."],"evidence":["PR #160 MERGED via auto-merge at squash 57d5b94 with six required contexts green (quality/test 3.11+3.12/package/parity x2); gh issue view: #122 CLOSED #123 CLOSED; find /tmp/pcm0046-arms-v2 -newer manifest.json -type f -> empty (bundles unmodified, zero arms run); continuity docs render --check SYNCHRONIZED at this commit; two independent 429 probes at 22:04Z (subagent launches rejected pre-execution, retry-after ~5.9h)."],"next_action":"After ~04:00Z 2026-09-26: launch the 20 frozen arms per this CURRENT next-action item 1 (v4 prompts verbatim), capture+score, report tallies on #139/#137, then closeout PR and close #139.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-25T22:20:06Z"} -->
@@ -89,6 +111,29 @@ Blocked/uncertain:
 
 Next:
 - After the window: launch the 20 frozen arms per docs/plans/PCM-0046-arm-plan.md amendments 1-12, capture+score, report tallies on #139/#137, then PCM-0046 closeout PR transitioning #139 to CLOSED via explicit comment (this entry supersedes the keyword directive).
+
+### 2026-09-26 09:41:12 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["None; provider window paid."],"changed":["docs/plans/PCM-0046-arms-results/** (49 files), checkpoints/CURRENT.md, tasks/TASK-PCM-0046-traversal-holdout.md (marker next_action), merge of origin/main c18bfd6"],"completed":["All 30 hidden arms executed 08:27-08:44Z after the provider 429 window (launcher v4 prompts verbatim, amendment-12 frozen set; 20 registered + 10 pre-planned baseline deltas). Capture+score pure-function run; REPORT.md experiment record written; 8 pre-registered inconclusive overrides applied (3 meta-description T3 arms, 4 repo-source-consulting T4 arms, per rubric ambiguous rule); isolation + contamination audits over all 30 transcripts committed; CURRENT projection re-pinned post-#187."],"decisions":["Report honestly per acceptance clause (>=80% OR honest reporting with inconclusive counts); overrides recorded with per-arm provenance, raw verdicts preserved under original_verdict. #139 transitions to closed by explicit comment at merge, never by keyword (PCM-0052 discipline). Three follow-up proposals to file after merge: read-time staleness guidance, keyword-sentence rephrase test, holdout harness isolation hardening."],"evidence":["scored.json tallies: T1 4/5 pass MEETS; T1b 5/5 (delta zero-or-negative -> append not attributable to guidance sentence); T2 0/5 FAIL (stale projection never flagged, 5/5 asserted stale next action); T3 1 valid pass vs 3 keyword smuggles -> no benefit vs T3b 3/3 keyword-free; T4 only T4-2 blind pass, 4 inconclusive (grep/exec of src/continuity/cli.py + tests/traversal_scorer.py found in transcripts); artifacts sha256 in meta.json; bundles manifest intact pre-launch."],"next_action":"Push task/PCM-0046-traversal-holdout, open closeout PR (Refs #139), arm auto-merge after final push, verify six contexts; on merge post tallies to #139 and append to #137, transition the leaf issue via explicit comment, file the three proposal issues, remove the worktree.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-26T09:41:12Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"b5b9df113f2c1f18fb75e01dbb4287751c9e4b31241288c373061c62796faf94","request_id":"pcm-0046-arms-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- All 30 hidden arms executed 08:27-08:44Z after the provider 429 window (launcher v4 prompts verbatim, amendment-12 frozen set; 20 registered + 10 pre-planned baseline deltas). Capture+score pure-function run; REPORT.md experiment record written; 8 pre-registered inconclusive overrides applied (3 meta-description T3 arms, 4 repo-source-consulting T4 arms, per rubric ambiguous rule); isolation + contamination audits over all 30 transcripts committed; CURRENT projection re-pinned post-#187.
+
+Evidence:
+- scored.json tallies: T1 4/5 pass MEETS; T1b 5/5 (delta zero-or-negative -> append not attributable to guidance sentence); T2 0/5 FAIL (stale projection never flagged, 5/5 asserted stale next action); T3 1 valid pass vs 3 keyword smuggles -> no benefit vs T3b 3/3 keyword-free; T4 only T4-2 blind pass, 4 inconclusive (grep/exec of src/continuity/cli.py + tests/traversal_scorer.py found in transcripts); artifacts sha256 in meta.json; bundles manifest intact pre-launch.
+
+Decisions:
+- Report honestly per acceptance clause (>=80% OR honest reporting with inconclusive counts); overrides recorded with per-arm provenance, raw verdicts preserved under original_verdict. #139 transitions to closed by explicit comment at merge, never by keyword (PCM-0052 discipline). Three follow-up proposals to file after merge: read-time staleness guidance, keyword-sentence rephrase test, holdout harness isolation hardening.
+
+Changed:
+- docs/plans/PCM-0046-arms-results/** (49 files), checkpoints/CURRENT.md, tasks/TASK-PCM-0046-traversal-holdout.md (marker next_action), merge of origin/main c18bfd6
+
+Blocked/uncertain:
+- None; provider window paid.
+
+Next:
+- Push task/PCM-0046-traversal-holdout, open closeout PR (Refs #139), arm auto-merge after final push, verify six contexts; on merge post tallies to #139 and append to #137, transition the leaf issue via explicit comment, file the three proposal issues, remove the worktree.
 
 ## Handoff
 

@@ -1,0 +1,324 @@
+{
+ "T1-1": {
+  "tools": {
+   "read": 2,
+   "bash": 1,
+   "edit": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1-2": {
+  "tools": {
+   "read": 2,
+   "bash": 2,
+   "edit": 3,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1-3": {
+  "tools": {
+   "read": 2,
+   "bash": 1,
+   "edit": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1-4": {
+  "tools": {
+   "read": 3,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1-5": {
+  "tools": {
+   "read": 2,
+   "edit": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1b-1": {
+  "tools": {
+   "read": 2,
+   "bash": 1,
+   "edit": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1b-2": {
+  "tools": {
+   "read": 2,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1b-3": {
+  "tools": {
+   "read": 2,
+   "glob": 1,
+   "bash": 1,
+   "edit": 3,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1b-4": {
+  "tools": {
+   "read": 2,
+   "bash": 1,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T1b-5": {
+  "tools": {
+   "read": 2,
+   "glob": 1,
+   "bash": 2,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T2-1": {
+  "tools": {
+   "read": 2,
+   "yield": 3
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T2-2": {
+  "tools": {
+   "read": 3,
+   "yield": 2
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T2-3": {
+  "tools": {
+   "read": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T2-4": {
+  "tools": {
+   "read": 2,
+   "yield": 2
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T2-5": {
+  "tools": {
+   "read": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T3-1": {
+  "tools": {
+   "read": 2,
+   "glob": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T3-2": {
+  "tools": {
+   "read": 20,
+   "glob": 10,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": [
+   "T1-1",
+   "T2-1",
+   "T2-2",
+   "T3-1",
+   "T3-3",
+   "T3-4",
+   "T3-5",
+   "T3b-2"
+  ]
+ },
+ "T3-3": {
+  "tools": {
+   "read": 11,
+   "glob": 5,
+   "grep": 1,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": [
+   "T1-1",
+   "T2-1",
+   "T3-1",
+   "T3-2"
+  ]
+ },
+ "T3-4": {
+  "tools": {
+   "read": 14,
+   "glob": 6,
+   "grep": 4,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": [
+   "T2-1",
+   "T2-5",
+   "T3-1",
+   "T3-2",
+   "T3-5",
+   "T4-5"
+  ]
+ },
+ "T3-5": {
+  "tools": {
+   "read": 3,
+   "glob": 3,
+   "yield": 2
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": []
+ },
+ "T3b-1": {
+  "tools": {
+   "read": 11,
+   "find": 1,
+   "glob": 6,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": [
+   "T2-1",
+   "T2-2",
+   "T3-1",
+   "T3b-2"
+  ]
+ },
+ "T3b-2": {
+  "tools": {
+   "read": 6,
+   "glob": 2,
+   "find": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": []
+ },
+ "T3b-3": {
+  "tools": {
+   "read": 7,
+   "grep": 1,
+   "glob": 3,
+   "find": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": true,
+  "other_bundles_touched": [
+   "T2-5",
+   "docs"
+  ]
+ },
+ "T3b-4": {
+  "tools": {
+   "read": 2,
+   "glob": 1,
+   "yield": 6
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T3b-5": {
+  "tools": {
+   "read": 2,
+   "glob": 3,
+   "find": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T4-1": {
+  "tools": {
+   "read": 6,
+   "bash": 11,
+   "grep": 1,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T4-2": {
+  "tools": {
+   "bash": 5,
+   "read": 5,
+   "edit": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T4-3": {
+  "tools": {
+   "bash": 5,
+   "eval": 3,
+   "read": 4,
+   "find": 1,
+   "grep": 1,
+   "edit": 3,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T4-4": {
+  "tools": {
+   "bash": 5,
+   "eval": 4,
+   "read": 5,
+   "edit": 5,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ },
+ "T4-5": {
+  "tools": {
+   "bash": 5,
+   "grep": 3,
+   "read": 2,
+   "eval": 4,
+   "write": 2,
+   "yield": 1
+  },
+  "parent_scope_reads": false,
+  "other_bundles_touched": []
+ }
+}

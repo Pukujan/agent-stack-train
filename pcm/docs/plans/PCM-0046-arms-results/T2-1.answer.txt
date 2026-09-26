@@ -1,0 +1,1 @@
+The GitHub issue #53 "Make GitHub authority and checkpoint evidence real" is currently closed in the issue tracker. Per CURRENT.md, this work is tracked as Leaf #53 with status "open", and the next action is to execute the hosted two-user acceptance on the parent issue.

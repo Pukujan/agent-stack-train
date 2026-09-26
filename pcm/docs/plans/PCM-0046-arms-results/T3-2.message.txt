@@ -1,0 +1,5 @@
+Post closeout receipt on issue #99
+
+This checkpoint posts the closeout receipt on issue #99, completing the increment and closing the associated work.
+
+Closes #99

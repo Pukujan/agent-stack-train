@@ -1,0 +1,14 @@
+{
+ "documents": [
+  {
+   "id": "alpha-guide",
+   "path": "docs/ALPHA.md",
+   "sha256": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407"
+  },
+  {
+   "id": "beta-notes",
+   "path": "docs/BETA.md",
+   "sha256": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464"
+  }
+ ]
+}
