@@ -279,6 +279,29 @@ Blocked/uncertain:
 Next:
 - Open PR #205, arm auto-merge after this final push; on merge, one receipt on #189; then STOP: remaining queue fully owner-gated (#201 options A/B, #189-191, #181/182/185, #144/142/143/#135, #171/#110/#33).
 
+### 2026-09-26 16:02:42 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md (this entry only), .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Supersedes correction 5 of the merged #205 entry (6b60965): its narrative - that b1fb4f0 had fixed line 16, #204 was catalog churn, and correction 12's 'closed in full' was accurate - is false, as stated in #189 retraction 5847705159. Blob truth, restated: b1fb4f0 fixed marker why + Evidence line only (line 16 stale there and at 49c157e); 642b1ad (#204) fixed the prose with 25 genuine task-file lines; correction 12 was premature by exactly one field; #204's entry was correct. Net state unchanged (head already accurate); this entry exists because #205's supersede paragraph is itself hash-immutable and the doctrine is append, never silent."],"decisions":["Correction 6 appended rather than branch deletion (force-push forbidden) or silence (would leave a confident false chain)."],"evidence":["git show b1fb4f0/49c157e:line16 -> three stated; git show 642b1ad:line16 -> all five stated; git show 642b1ad --stat -> task file +25; both line-16 checks and the stat observed this session, output retained in the retraction comment."],"next_action":"Open PR #206, auto-merge armed after this final push; on merge, receipt on #189; then STOP - no further self-referential increments regardless of review pressure; remaining queue is owner-gated (#201 A/B, #189-191, #181/182/185, #144/142/143/#135, #171/#110/#33).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T16:02:42Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"4fac1eb9149bc29163490fbc70c190bcd34989446ea9f59127a3899835516651","request_id":"pcm-0063-correction6-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Supersedes correction 5 of the merged #205 entry (6b60965): its narrative - that b1fb4f0 had fixed line 16, #204 was catalog churn, and correction 12's 'closed in full' was accurate - is false, as stated in #189 retraction 5847705159. Blob truth, restated: b1fb4f0 fixed marker why + Evidence line only (line 16 stale there and at 49c157e); 642b1ad (#204) fixed the prose with 25 genuine task-file lines; correction 12 was premature by exactly one field; #204's entry was correct. Net state unchanged (head already accurate); this entry exists because #205's supersede paragraph is itself hash-immutable and the doctrine is append, never silent.
+
+Evidence:
+- git show b1fb4f0/49c157e:line16 -> three stated; git show 642b1ad:line16 -> all five stated; git show 642b1ad --stat -> task file +25; both line-16 checks and the stat observed this session, output retained in the retraction comment.
+
+Decisions:
+- Correction 6 appended rather than branch deletion (force-push forbidden) or silence (would leave a confident false chain).
+
+Changed:
+- tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md (this entry only), .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR #206, auto-merge armed after this final push; on merge, receipt on #189; then STOP - no further self-referential increments regardless of review pressure; remaining queue is owner-gated (#201 A/B, #189-191, #181/182/185, #144/142/143/#135, #171/#110/#33).
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
