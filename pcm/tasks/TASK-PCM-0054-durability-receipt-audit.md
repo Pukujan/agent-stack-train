@@ -17,7 +17,7 @@ The 2026-09-25 durability audit found three contract-required merge receipts nev
 
 ## Allowed files
 
-- Filing slice (this increment): this task file, `checkpoints/CURRENT.md`, `.continuity/documents.json`, `docs/CONTINUITY_INDEX.md` (generated). Implementation slice (only after the owner answers the design question on #169): `src/continuity/cli.py`, `tests/test_receipt_audit.py` (new), plus regenerated catalog/index.
+- Filing slice (merged in `0fb5aca`): this task file, `checkpoints/CURRENT.md`, `.continuity/documents.json`, `docs/CONTINUITY_INDEX.md` (generated). Docs slice (named in the filed audit record): the stale "Issue #67 remains open" sentence corrected in all 9 guidance copies — `AGENTS.md`, `HANDOFF.md`, `src/continuity/cli.py` (`GITHUB_PROGRESSION_GUIDANCE`), `templates/v1/{minimal/PROJECT.md,minimal/HANDOFF.md,software/AGENTS.md,software/README.md}`, `.github/{pull_request_template.md,ISSUE_TEMPLATE/task.md}` — required-phrase test `automatic issue-comment synchronization is not implemented` kept intact. Implementation slice (only after the owner answers the design question on #169): `src/continuity/cli.py`, `tests/test_receipt_audit.py` (new), plus regenerated catalog/index.
 
 ## Human outcome
 
@@ -47,9 +47,36 @@ A fresh session running one deterministic command learns, from the repository an
 - Primary writer: owner/Astra (omp session); branch task/PCM-0053-closeout (filing increment rides the PCM-0053 closeout push); source issue revision: #169 body at filing; as-of 2026-09-25T23:58Z.
 - Push receipt: continuity checkpoint request pcm-0054-filed-20260925 (posted to #169 after push).
 
+## Docs slice (stale #67 prose correction)
+
+The filed record named this one-line prose defect; it is now corrected in all 9 copies of the guidance block: "Issue #67 remains open" -> "#67 is CLOSED (owner freeze decision 2026-09-25) and its unmet guaranteed-completion acceptance transferred to #110" (observed: #67 CLOSED/COMPLETED; #110 OPEN). The `tests/test_github_progression_policy.py` REQUIRED phrase "automatic issue-comment synchronization is not implemented" is preserved in every copy; guidance/records tests 33 OK; full discover 259 = six known environmental failures; docs render --check SYNCHRONIZED.
+
 ## Checkpoint log
 
 No checkpoints yet.
+
+### 2026-09-26 00:46:29 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["Acceptance 2 on #169 (owner decision) unchanged; PCM-0046 arms still provider-429."],"changed":["AGENTS.md, HANDOFF.md, src/continuity/cli.py (GITHUB_PROGRESSION_GUIDANCE only), templates/v1/minimal/PROJECT.md, templates/v1/minimal/HANDOFF.md, templates/v1/software/AGENTS.md, templates/v1/software/README.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md, checkpoints/CURRENT.md, tasks/TASK-PCM-0054-durability-receipt-audit.md, docs/CONTINUITY_INDEX.md"],"completed":["Stale guidance sentence 'Issue #67 remains open' corrected in all 9 copies (AGENTS, HANDOFF, GITHUB_PROGRESSION_GUIDANCE in cli.py, 4 templates, 2 .github templates): #67 is CLOSED (owner freeze) and the unmet guaranteed-completion acceptance transferred to #110; REQUIRED contract phrase preserved in every copy; task projection documents the slice."],"decisions":["Docs-only slice: no opt-in/default-on semantics changed; acceptance-2 owner question on #169 untouched."],"evidence":["gh issue view 67 -> CLOSED (COMPLETED), 110 -> OPEN; tests.test_github_progression_policy + issue-log-format + records-policy 33 OK; full discover 259 = six known macOS-environmental failures; docs render --check SYNCHRONIZED."],"next_action":"Open PR for task/PCM-0054-guidance-prose, verify six contexts + auto-merge, post merge receipt on #169.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0054","timestamp":"2026-09-26T00:46:29Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"56eb838af16d16b62b3b4245b004007d146c3d0b1d925818a59b60f96308c59f","request_id":"pcm-0054-docs-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0054"} -->
+
+Completed:
+- Stale guidance sentence 'Issue #67 remains open' corrected in all 9 copies (AGENTS, HANDOFF, GITHUB_PROGRESSION_GUIDANCE in cli.py, 4 templates, 2 .github templates): #67 is CLOSED (owner freeze) and the unmet guaranteed-completion acceptance transferred to #110; REQUIRED contract phrase preserved in every copy; task projection documents the slice.
+
+Evidence:
+- gh issue view 67 -> CLOSED (COMPLETED), 110 -> OPEN; tests.test_github_progression_policy + issue-log-format + records-policy 33 OK; full discover 259 = six known macOS-environmental failures; docs render --check SYNCHRONIZED.
+
+Decisions:
+- Docs-only slice: no opt-in/default-on semantics changed; acceptance-2 owner question on #169 untouched.
+
+Changed:
+- AGENTS.md, HANDOFF.md, src/continuity/cli.py (GITHUB_PROGRESSION_GUIDANCE only), templates/v1/minimal/PROJECT.md, templates/v1/minimal/HANDOFF.md, templates/v1/software/AGENTS.md, templates/v1/software/README.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md, checkpoints/CURRENT.md, tasks/TASK-PCM-0054-durability-receipt-audit.md, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- Acceptance 2 on #169 (owner decision) unchanged; PCM-0046 arms still provider-429.
+
+Next:
+- Open PR for task/PCM-0054-guidance-prose, verify six contexts + auto-merge, post merge receipt on #169.
 
 ## Handoff
 

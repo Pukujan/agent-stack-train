@@ -248,10 +248,10 @@
 ## PCM-0054 durable-publication enforcement matrix + receipt-gap audit proposal (`pcm-0054-durability-receipt-audit`)
 
 - File: [`tasks/TASK-PCM-0054-durability-receipt-audit.md`](../tasks/TASK-PCM-0054-durability-receipt-audit.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `0fb5aca9d0e2f363a45244095313ba01d7510a74`
 - Reviewed SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
-- Current SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
+- Current SHA-256: `783010131af4eb63543bc989bd38d47689a5d947c2ddcb5103465e63addd3ec7`
 - Summary: What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).
 - Search terms: none
 - Neighboring records: none
