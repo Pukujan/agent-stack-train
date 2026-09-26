@@ -65,7 +65,7 @@ Each session follows the same short cycle:
 
 ## Evidence and boundaries
 
-**What is real today:** the protocol is `0.1.0-draft`, and the CLI package source is version `0.5.0`, which **has not been published** to any package index. Building or testing the package does not publish it. The issue log format module is documented in [`docs/ISSUE_LOG_FORMAT.md`](docs/ISSUE_LOG_FORMAT.md): one plain-language shape for issue logs, updates and PRs that adopters can apply mechanically. Everything below was checked at commit [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/).
+**What is real today:** the protocol is `0.1.0-draft`, and the CLI package source is version `0.6.0` (PCM-0057 version-drift NOTE + PCM-0055 receipt wire-format change; the table below stays pinned to [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/) and still shows `0.5.0`), which **has not been published** to any package index. Building or testing the package does not publish it. The issue log format module is documented in [`docs/ISSUE_LOG_FORMAT.md`](docs/ISSUE_LOG_FORMAT.md): one plain-language shape for issue logs, updates and PRs that adopters can apply mechanically. Everything below was checked at commit [`0b3be9c`](https://github.com/Pukujan/project-continuity-modules/blob/0b3be9ca80da816de4621ac4e85612990084216e/).
 
 | Claim | Status | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- | --- |

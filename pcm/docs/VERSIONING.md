@@ -41,6 +41,8 @@ PCM-0027 sets the backward-compatible CLI/package source version to **0.5.0**: `
 
 PCM-0039 raises the `issue-log-format` policy module to **1.1.0** (2026-09-25, [#126](https://github.com/Pukujan/project-continuity-modules/issues/126)): the module and generated guidance gain diagram rules (when to draw, `graph TD` default, size caps, mandatory text alternative, collapsed wide diagrams, verify-before-publish, no standalone renderer links) verified against GitHub rendering in the `Pukujan/pcm-mermaid-matrix` evidence set. The CLI/package source version stays **0.5.0** — guidance text only, no new command or behavior contract — and no package is published. The protocol remains **0.1.0-draft**; existing adopters follow the marker-replacement update path in `docs/ISSUE_LOG_FORMAT.md`.
 
+PCM-0057 raises the CLI/package source version to **0.6.0**: `continuity checkpoint` now prints a version-drift NOTE comparing the installed build against the checkout's declared version (owner decision B on [#162](https://github.com/Pukujan/project-continuity-modules/issues/162), observability only — never a refusal), and PCM-0055 changed the receipt POST wire format behind the same 0.5.0 label, so `continuity --version` must distinguish the two behaviors (the #162 stale-binary hazard class). This is a backward-compatible safety capability per the PATCH/MINOR rule above; no package is published. The protocol remains **0.1.0-draft**.
+
 ## Project declaration
 
 The Python distribution's version has one source of truth in

@@ -91,7 +91,7 @@ Two ledgers that never overwrite each other: the **progress ledger** is the GitH
 Version tracking has three independent classes ([SPEC §7](../SPEC.md), [VERSIONING.md](VERSIONING.md)):
 
 1. **Protocol** — `protocol_version` in `.continuity/config.json`: the shape of required core objects (project/current/task/checkpoint). Minor = backward-compatible additions; major = incompatible; migrations preserve historical checkpoint evidence.
-2. **CLI/package** — `__version__` in `src/continuity/__init__.py`: the tool's own release line (currently 0.5.0, source only, unpublished).
+2. **CLI/package** — `__version__` in `src/continuity/__init__.py`: the tool's own release line (currently 0.6.0, source only, unpublished).
 3. **Policy modules** — `<!-- pcm:policy {"id":…,"policy_version":…} -->` stamps inside guidance text (e.g. `continuity-records` 1.3.0, `issue-log-format` 1.1.0, this guide 1.0.0). Adopters carry copies; `continuity validate` scans the copies present and warns on stale markers, printing the exact update step (replace the block between the start/end markers). A doc's version lives inside the doc, per copy, and drift is machine-detectable.
 
 Discovery: `.continuity/documents.json` is the machine-readable inventory (id/title/summary/keywords/path/related/tasks/reviewed hashes); `continuity docs add/find/refresh/render` maintain it; `docs/CONTINUITY_INDEX.md` is the generated human view (`validate` fails on drift); `continuity docs find "<terms>" --task <ID>` answers with freshness states CURRENT / NEEDS_REVIEW / REMOTE_UNKNOWN.

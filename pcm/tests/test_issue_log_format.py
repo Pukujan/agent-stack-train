@@ -339,7 +339,7 @@ class IssueLogFormatRolloutTests(unittest.TestCase):
     def test_package_version_bumped(self) -> None:
         from continuity import __version__
 
-        self.assertEqual(__version__, "0.5.0")
+        self.assertEqual(__version__, "0.6.0")
 
 
 if __name__ == "__main__":

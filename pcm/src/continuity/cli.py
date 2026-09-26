@@ -3056,6 +3056,32 @@ def sanitize_closing_keywords(message: str) -> tuple[str, int]:
     return CLOSING_DIRECTIVE_RE.subn(_refs_replacement, message)
 
 
+def version_drift_note(root: Path) -> str | None:
+    """Compare the running CLI against the checkout's declared version.
+
+    Owner decision B on #162: observability only, never a refusal. Returns a
+    NOTE string when the checkout declares a different version; None when the
+    versions match, the checkout is not a Python package, or the version file
+    is unreadable/malformed (degrade silently — there is nothing to compare).
+    """
+    init_py = root / "src" / "continuity" / "__init__.py"
+    try:
+        text = init_py.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', text, re.MULTILINE)
+    if match is None:
+        return None
+    checkout_version = match.group(1)
+    if checkout_version == __version__:
+        return None
+    return (
+        f"NOTE: version drift — installed CLI {__version__} != checkout {checkout_version} "
+        "(reinstall from the checkout before checkpointing; the composing binary may lack "
+        "current safety behavior, see #162)"
+    )
+
+
 def refresh_index_for_cataloged_change(root: Path, relative: str) -> bool:
     """Regenerate and stage the document index when a committed path is cataloged."""
     if not (root / DOCUMENT_CATALOG_PATH).is_file():
@@ -3118,6 +3144,10 @@ def publish_checkpoint(
     if branch == "HEAD":
         raise ContinuityError("checkpoint publishing requires an attached task branch")
     remote = git_value(root, ["remote", "get-url", "origin"], None)
+
+    drift = version_drift_note(root)
+    if drift is not None:
+        print(drift)
 
     status = git_run(root, ["status", "--porcelain", "--untracked-files=all"]).stdout.splitlines()
     unexpected = [line for line in status if line[3:] != relative]
