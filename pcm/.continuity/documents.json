@@ -471,6 +471,73 @@
       "title": "PCM-0058 readability rules for tool-composed records"
     },
     {
+      "id": "pcm-0059-decision",
+      "keywords": [
+        "59",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0059-distributed-runtime-promotion.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0059"
+      ],
+      "title": "PCM-0059 decision projection"
+    },
+    {
+      "id": "pcm-0060-decision",
+      "keywords": [
+        "60",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0060-host-capability-honesty.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0060"
+      ],
+      "title": "PCM-0060 decision projection"
+    },
+    {
+      "id": "pcm-0061-status-refresh",
+      "keywords": [
+        "lifecycle",
+        "readme",
+        "status"
+      ],
+      "path": "tasks/TASK-PCM-0061-status-refresh.md",
+      "related": [
+        "pcm-0058-readability"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "7ee1d641b07afeae34b34be783b32feb17923191ee50d5c8dce6d3352940619c",
+      "summary": "README evidence table re-pinned to d46e0b7, normative 1.2.0 refs, close-outs for #175/#177/#180 + superseded PRs #93/#111 (Refs #184).",
+      "tasks": [
+        "PCM-0061"
+      ],
+      "title": "PCM-0061 status refresh and lifecycle hygiene"
+    },
+    {
+      "id": "pcm-0062-decision",
+      "keywords": [
+        "62",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0062-agent-labeling-convention.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0062"
+      ],
+      "title": "PCM-0062 decision projection"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

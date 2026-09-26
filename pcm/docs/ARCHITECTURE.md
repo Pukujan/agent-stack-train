@@ -2,7 +2,7 @@
 
 <!-- pcm:policy {"id":"architecture-guide","policy_version":"1.0.0","protocol_version":"0.1.0-draft"} -->
 
-This document is the human-readable explanation of how Project Continuity Modules works: who owns what, what a checkpoint is, how a session resumes, and how PCM-for-itself differs from PCM-for-adopters. It mirrors the normative rules ([SPEC.md](../SPEC.md) §2, §5, §8 — authority, session lifecycle, bounded authority) in plain language; where wording differs, SPEC is normative. Provenance: the answer recorded in issue [#128](https://github.com/Pukujan/project-continuity-modules/issues/128), promoted by [#134](https://github.com/Pukujan/project-continuity-modules/issues/134); diagrams follow the [`issue-log-format` 1.1.0](ISSUE_LOG_FORMAT.md) rules.
+This document is the human-readable explanation of how Project Continuity Modules works: who owns what, what a checkpoint is, how a session resumes, and how PCM-for-itself differs from PCM-for-adopters. It mirrors the normative rules ([SPEC.md](../SPEC.md) §2, §5, §8 — authority, session lifecycle, bounded authority) in plain language; where wording differs, SPEC is normative. Provenance: the answer recorded in issue [#128](https://github.com/Pukujan/project-continuity-modules/issues/128), promoted by [#134](https://github.com/Pukujan/project-continuity-modules/issues/134); diagrams follow the [`issue-log-format` 1.2.0](ISSUE_LOG_FORMAT.md) rules.
 
 ## The ownership model
 
@@ -92,7 +92,7 @@ Version tracking has three independent classes ([SPEC §7](../SPEC.md), [VERSION
 
 1. **Protocol** — `protocol_version` in `.continuity/config.json`: the shape of required core objects (project/current/task/checkpoint). Minor = backward-compatible additions; major = incompatible; migrations preserve historical checkpoint evidence.
 2. **CLI/package** — `__version__` in `src/continuity/__init__.py`: the tool's own release line (currently 0.6.0, source only, unpublished).
-3. **Policy modules** — `<!-- pcm:policy {"id":…,"policy_version":…} -->` stamps inside guidance text (e.g. `continuity-records` 1.3.0, `issue-log-format` 1.1.0, this guide 1.0.0). Adopters carry copies; `continuity validate` scans the copies present and warns on stale markers, printing the exact update step (replace the block between the start/end markers). A doc's version lives inside the doc, per copy, and drift is machine-detectable.
+3. **Policy modules** — `<!-- pcm:policy {"id":…,"policy_version":…} -->` stamps inside guidance text (e.g. `continuity-records` 1.3.0, `issue-log-format` 1.2.0, this guide 1.0.0). Adopters carry copies; `continuity validate` scans the copies present and warns on stale markers, printing the exact update step (replace the block between the start/end markers). A doc's version lives inside the doc, per copy, and drift is machine-detectable.
 
 Discovery: `.continuity/documents.json` is the machine-readable inventory (id/title/summary/keywords/path/related/tasks/reviewed hashes); `continuity docs add/find/refresh/render` maintain it; `docs/CONTINUITY_INDEX.md` is the generated human view (`validate` fails on drift); `continuity docs find "<terms>" --task <ID>` answers with freshness states CURRENT / NEEDS_REVIEW / REMOTE_UNKNOWN.
 

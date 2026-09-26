@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"d314252c01688bbb4cbcce824d0ddcc7a47c2554251c2a26cfccf5557b9cd454","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"2df30e55eec6c4a8c2b5040f95130d9647fdf784dbdc2ba0b2cfc721d43878dc","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -23,7 +23,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
-- Current SHA-256: `f67218729b6775c9cb1c5a1ccb66df879959ee72d8b6ef29ab36cff65f6ccb4c`
+- Current SHA-256: `4e3d490452169a87e5c7200834e09d88cf450e4c1f45c6bb96aa2a3f6377063c`
 - Summary: How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.
 - Search terms: `architecture`, `checkpoint`, `doc-system`, `ownership`, `resume`
 - Neighboring records: `continuity-records-policy`, `issue-log-format`
@@ -71,7 +71,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `506d0aae9a674f11891597c5508a0e505b9a20ea7aca8b82a87b9c9dc2298e19`
+- Current SHA-256: `85e4a9ae275753cfeb28bbde8dcedb87fa6d6b1d9f114ee55b7b1a004451362d`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
@@ -251,7 +251,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `0fb5aca9d0e2f363a45244095313ba01d7510a74`
 - Reviewed SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
-- Current SHA-256: `763404a2af81e9c094b78bec7377f0e2a29f5911402b90c3b8d694626f8e8761`
+- Current SHA-256: `9ab371440435c25db0a91f5f20214d9f0abb6f6fcd9c3c209e038dab445a9f25`
 - Summary: What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).
 - Search terms: none
 - Neighboring records: none
@@ -263,7 +263,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `b9969f3754738546f287b988cb8f4f7a666dae74858dee344f52f2e723eb8646`
-- Current SHA-256: `a088794f586d9f8279db63bb69b3cc79e0a049baf6bb9302e53727ccaf101a0e`
+- Current SHA-256: `68fa8f658cb13cbc5e7382905fad7b8a86ab517ef6e2ed24cd0314599b4945e2`
 - Summary: gh api --input - needs JSON request parameters; red-first fix + shim test; checkpoint dogfoods the opt-in flags (Refs #171).
 - Search terms: none
 - Neighboring records: `pcm-0054-durability-receipt-audit`
@@ -275,7 +275,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `f2261f6600bfda57ebba2b477887977ca567b895bf4e5f66a7c6acfd11d9c635`
-- Current SHA-256: `1218580e69d118d4c92844d69771f27ffca341f34dbc52f8daa1d03669b9d2e9`
+- Current SHA-256: `adef641e5766451b2223099d3bd2cd5253c459ada119413240202a4335919b48`
 - Summary: Arm auto-merge only after the final push: one sentence in all 9 guidance copies + policy-test pin; parent decision #166 5842002451 (Refs #175).
 - Search terms: `auto-merge`, `guidance`, `merge-window`
 - Neighboring records: `pcm-0053-guard-plan`
@@ -304,6 +304,54 @@
 - Search terms: `issue-log-format`, `readability`, `records`
 - Neighboring records: `pcm-0057-version-note`
 - Task associations: `PCM-0058`
+
+## PCM-0059 decision projection (`pcm-0059-decision`)
+
+- File: [`tasks/TASK-PCM-0059-distributed-runtime-promotion.md`](../tasks/TASK-PCM-0059-distributed-runtime-promotion.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6`
+- Current SHA-256: `0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6`
+- Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
+- Search terms: `59`, `decision`
+- Neighboring records: none
+- Task associations: `PCM-0059`
+
+## PCM-0060 decision projection (`pcm-0060-decision`)
+
+- File: [`tasks/TASK-PCM-0060-host-capability-honesty.md`](../tasks/TASK-PCM-0060-host-capability-honesty.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
+- Current SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
+- Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
+- Search terms: `60`, `decision`
+- Neighboring records: none
+- Task associations: `PCM-0060`
+
+## PCM-0061 status refresh and lifecycle hygiene (`pcm-0061-status-refresh`)
+
+- File: [`tasks/TASK-PCM-0061-status-refresh.md`](../tasks/TASK-PCM-0061-status-refresh.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `7ee1d641b07afeae34b34be783b32feb17923191ee50d5c8dce6d3352940619c`
+- Current SHA-256: `5dc8e5a553d8e428182cbfe00dd19748d9b80f1a9ba3d3019bedf520ae82aefe`
+- Summary: README evidence table re-pinned to d46e0b7, normative 1.2.0 refs, close-outs for #175/#177/#180 + superseded PRs #93/#111 (Refs #184).
+- Search terms: `lifecycle`, `readme`, `status`
+- Neighboring records: `pcm-0058-readability`
+- Task associations: `PCM-0061`
+
+## PCM-0062 decision projection (`pcm-0062-decision`)
+
+- File: [`tasks/TASK-PCM-0062-agent-labeling-convention.md`](../tasks/TASK-PCM-0062-agent-labeling-convention.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66`
+- Current SHA-256: `dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66`
+- Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
+- Search terms: `62`, `decision`
+- Neighboring records: none
+- Task associations: `PCM-0062`
 
 ## Testing policy (`testing-policy`)
 
