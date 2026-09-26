@@ -452,6 +452,25 @@
       "title": "PCM-0057 version-drift NOTE + 0.6.0 bump"
     },
     {
+      "id": "pcm-0058-readability",
+      "keywords": [
+        "issue-log-format",
+        "readability",
+        "records"
+      ],
+      "path": "tasks/TASK-PCM-0058-readability-rules.md",
+      "related": [
+        "pcm-0057-version-note"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f95ffb23ad984d439b5d3dc339b6ea657ff799474b7b1fa18efeabd4d3a910f1",
+      "summary": "issue-log-format 1.2.0: plain-word meaning before identifiers, claim-first evidence, no bare acronyms; generator+copies+doc+red pins (Refs #180).",
+      "tasks": [
+        "PCM-0058"
+      ],
+      "title": "PCM-0058 readability rules for tool-composed records"
+    },
+    {
       "id": "testing-policy",
       "keywords": [
         "blind",

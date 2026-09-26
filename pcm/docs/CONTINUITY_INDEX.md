@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"0254d598596e47641cfe31b331631437c672d69e0d4e5e9694139de92d3e3c2b","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"d314252c01688bbb4cbcce824d0ddcc7a47c2554251c2a26cfccf5557b9cd454","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -83,7 +83,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
-- Current SHA-256: `569625b28335029c844eb0e2a6510bcf09a1e1b0bbb62d23d634af96e95f54c4`
+- Current SHA-256: `a9cd7d61a96772125e99b6718729678b1d9c01dbc29710de1e20fae25d8a1c56`
 - Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`
@@ -292,6 +292,18 @@
 - Search terms: `checkpoint`, `observability`, `version-drift`
 - Neighboring records: `pcm-0052-incident`
 - Task associations: `PCM-0057`
+
+## PCM-0058 readability rules for tool-composed records (`pcm-0058-readability`)
+
+- File: [`tasks/TASK-PCM-0058-readability-rules.md`](../tasks/TASK-PCM-0058-readability-rules.md)
+- Local content status: **NEEDS_REVIEW**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `f95ffb23ad984d439b5d3dc339b6ea657ff799474b7b1fa18efeabd4d3a910f1`
+- Current SHA-256: `8a110e8a1878065fb5e86cea9f4b3d76b28916d04e785c0c4e5f9eded938d422`
+- Summary: issue-log-format 1.2.0: plain-word meaning before identifiers, claim-first evidence, no bare acronyms; generator+copies+doc+red pins (Refs #180).
+- Search terms: `issue-log-format`, `readability`, `records`
+- Neighboring records: `pcm-0057-version-note`
+- Task associations: `PCM-0058`
 
 ## Testing policy (`testing-policy`)
 
