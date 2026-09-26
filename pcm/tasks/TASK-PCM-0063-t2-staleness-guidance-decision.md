@@ -141,6 +141,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189 and a pointer on #191.
 
+### 2026-09-26 13:42:26 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["docs/plans/PCM-0015-implementation-plan.md, docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}, .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Correction 9 states plainly that the #197 redaction cannot and does not rewrite history: the device path stays reachable at 5d6d9ad, no force-push per contract, head clean. Repo-wide rescan (scope advisory) found a SECOND pre-existing breach the first scan's prefix missed: PCM-0015 implementation plan line 11 carried another machine's Windows home path (C:/Users/pujan/...) since b379ba3; sanitized with the verification claims intact, disclosed as correction 10, catalog entry refreshed. meta.json _pin_history placeholder minute replaced with the observed 13:15Z/d33cb35 value; manifest re-pinned with superseded-entry chain for REPORT.md corrections 9-10."],"decisions":["Sanitize-in-place + numbered disclosure (records rule bans private absolute paths; the withheld string carried no verification load), rather than leaving a blanket clean claim."],"evidence":["grep -r for C:/Users/ and the macOS prefix across docs/.continuity/checkpoints/tasks: 0 remaining hits (ignored __pycache__ aside); pins loop zero stale; docs render --check SYNCHRONIZED after refresh pcm-0015-plan; suite at six known names."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189 and the gate note on #191.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T13:42:26Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"cf42ab8df0c923b3f3c30f0c2d2d1cf639794d429e89878abfd6d2b039ec67de","request_id":"pcm-0063-residual-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Correction 9 states plainly that the #197 redaction cannot and does not rewrite history: the device path stays reachable at 5d6d9ad, no force-push per contract, head clean. Repo-wide rescan (scope advisory) found a SECOND pre-existing breach the first scan's prefix missed: PCM-0015 implementation plan line 11 carried another machine's Windows home path (C:/Users/pujan/...) since b379ba3; sanitized with the verification claims intact, disclosed as correction 10, catalog entry refreshed. meta.json _pin_history placeholder minute replaced with the observed 13:15Z/d33cb35 value; manifest re-pinned with superseded-entry chain for REPORT.md corrections 9-10.
+
+Evidence:
+- grep -r for C:/Users/ and the macOS prefix across docs/.continuity/checkpoints/tasks: 0 remaining hits (ignored __pycache__ aside); pins loop zero stale; docs render --check SYNCHRONIZED after refresh pcm-0015-plan; suite at six known names.
+
+Decisions:
+- Sanitize-in-place + numbered disclosure (records rule bans private absolute paths; the withheld string carried no verification load), rather than leaving a blanket clean claim.
+
+Changed:
+- docs/plans/PCM-0015-implementation-plan.md, docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}, .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189 and the gate note on #191.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.

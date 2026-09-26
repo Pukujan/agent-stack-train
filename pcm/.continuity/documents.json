@@ -147,8 +147,8 @@
         "pcm-0015-research",
         "testing-policy"
       ],
-      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
-      "reviewed_sha256": "dfe970f11964ecf93e78ba72281f7ac37283ff3afc2ebba7d192ddc1472d5e1c",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "92cac86f4a5443c7652d359378e77b75bee83bd83b530df652bcc0e55edebe8a",
       "summary": "Prior bounded plan for provenance-backed continuity, focused context and long-running project work.",
       "tasks": [
         "PCM-0018"

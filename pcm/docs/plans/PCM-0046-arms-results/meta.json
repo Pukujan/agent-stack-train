@@ -180,7 +180,7 @@
   "isolation": "clean"
  },
  "_artifacts_sha256": {
-  "REPORT.md": "51cdd821c162c0c86165259acb0b72ec2d35333fccd9fe0f4b1a8f0f6cf38b0f",
+  "REPORT.md": "6657c51a681ebd99feea84f28f4f5dae714520f7c7ead12cdd940a2e440ab20d",
   "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
   "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
   "T1-3.diff": "002edec5872faf5a1e299b2d2874ce78589c30deba243e48336ae7085fa008e1",
@@ -245,9 +245,10 @@
    "isolation-audit.json": {
     "pinned": "4d9b2bd4a8c1 at first capture",
     "changed_by": "PR #196 (repo_source_reads + _fields); pathfix increment (device-prefix normalization)"
-   }
+   },
+   "REPORT.md": "2ff47d3-era digest superseded by corrections 9-10 (residual-history + repo-wide scan disclosures)"
   },
-  "note": "_artifacts_sha256 re-pinned 2026-09-26 ~13:0xZ to current bytes of every file in this directory (first capture predated REPORT.md, overrides.json and later legitimate edits). meta.json is not self-pinned.",
+  "note": "_artifacts_sha256 re-pinned 2026-09-26 13:15Z (commit d33cb35; merged via #197 as 2ff47d3, 13:19:13Z) to current bytes of every file in this directory (first capture predated REPORT.md, overrides.json and later legitimate edits). meta.json is not self-pinned.",
   "original_first_capture": {
    "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
    "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
