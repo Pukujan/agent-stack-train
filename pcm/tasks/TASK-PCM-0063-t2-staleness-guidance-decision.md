@@ -118,6 +118,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189.
 
+### 2026-09-26 13:15:26 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["docs/plans/PCM-0046-arms-results/{isolation-audit.json,REPORT.md,meta.json}"],"completed":["Device-absolute-path breach fixed in current head: 4 repo_source_reads entries normalized to repo-relative form, disclosed as REPORT correction 8 (not silently amended). Provenance chain repaired: meta.json _artifacts_sha256 re-pinned to current bytes with _pin_history recording the superseded digests (scored.json changed by #192 overrides; isolation-audit.json by #196 field + this normalization) and the original first-capture map preserved verbatim. Full-directory leak scan: zero /Users hits outside ignored __pycache__."],"decisions":["Amend-current-head (accepted correction) for data-hygiene since the #151 precedent strips this class, with append-only disclosure; no rewrite of any published verdict."],"evidence":["python normalization replaced exactly 4 prefixes; re-pin verification loop: zero stale pins; grep -rc over the results directory: 0 hits; docs render --check SYNCHRONIZED; suite 274 = six known names."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189 and a pointer on #191.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T13:15:26Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3a3c32e415d52b75c65da708dc1a7a7c105d19e882ef807999bd1d2753cc80e5","request_id":"pcm-0063-pathfix-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Device-absolute-path breach fixed in current head: 4 repo_source_reads entries normalized to repo-relative form, disclosed as REPORT correction 8 (not silently amended). Provenance chain repaired: meta.json _artifacts_sha256 re-pinned to current bytes with _pin_history recording the superseded digests (scored.json changed by #192 overrides; isolation-audit.json by #196 field + this normalization) and the original first-capture map preserved verbatim. Full-directory leak scan: zero /Users hits outside ignored __pycache__.
+
+Evidence:
+- python normalization replaced exactly 4 prefixes; re-pin verification loop: zero stale pins; grep -rc over the results directory: 0 hits; docs render --check SYNCHRONIZED; suite 274 = six known names.
+
+Decisions:
+- Amend-current-head (accepted correction) for data-hygiene since the #151 precedent strips this class, with append-only disclosure; no rewrite of any published verdict.
+
+Changed:
+- docs/plans/PCM-0046-arms-results/{isolation-audit.json,REPORT.md,meta.json}
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189 and a pointer on #191.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.

@@ -180,6 +180,7 @@
   "isolation": "clean"
  },
  "_artifacts_sha256": {
+  "REPORT.md": "51cdd821c162c0c86165259acb0b72ec2d35333fccd9fe0f4b1a8f0f6cf38b0f",
   "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
   "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
   "T1-3.diff": "002edec5872faf5a1e299b2d2874ce78589c30deba243e48336ae7085fa008e1",
@@ -225,13 +226,77 @@
   "T4-5.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
   "T4-5.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
   "T4-5.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
-  "isolation-audit.json": "4d9b2bd4a8c1151b76527e849c863a5ee81af397fa4bc28bcadc9de113944d9a",
+  "isolation-audit.json": "273b01d563628550d49c4bc473420b304cf85e528e0226d649db75af8d849f58",
   "meta_extracted.json": "d97307970c0963510180d6b53885e52754de4aa74707a2ac54605a9948b1ed57",
-  "scored.json": "e35243de43a91f7f26ed9e6087f3b73571366914845f9442bb29d58d182a22ea"
+  "overrides.json": "78538a4427556f7f026a533e89b94cae3b908fc6d0820618e105714d4ed99743",
+  "scored.json": "5619d226377f53ff1b37dca6b1c546d96a4c6af46a1ca13a2afe117615f861bd"
  },
  "_launch": "launcher v4 prompts verbatim (frozen at amendment 12, merged 57d5b94); provider 429 until 08:27Z; trivial write-probe + scout-probe OK pre-launch; 30 arms launched 2026-09-26T08:27Z, all returned by 08:44Z",
  "_corrections_2026-09-26": {
   "T4_isolation_field_understates": "isolation='clean' for T4-1/T4-3/T4-4/T4-5 only meant no sibling-BUNDLE reads; the post-run transcript audit ALSO found those four arms read or executed the PCM checkout's own src/continuity/cli.py and tests/traversal_scorer.py (the graded contract + grader). Their scored.json/overrides.json reasons carry this; meta 'clean' must be read subject to it.",
   "launch_ts": "arm windows are from session_init timestamps (UTC); 'launched' placeholder strings in early drafts replaced by window fields."
+ },
+ "_pin_history": {
+  "superseded": {
+   "scored.json": {
+    "pinned": "e35243de43a9 at first capture",
+    "changed_by": "PR #192 (T4 inconclusive overrides + note append)"
+   },
+   "isolation-audit.json": {
+    "pinned": "4d9b2bd4a8c1 at first capture",
+    "changed_by": "PR #196 (repo_source_reads + _fields); pathfix increment (device-prefix normalization)"
+   }
+  },
+  "note": "_artifacts_sha256 re-pinned 2026-09-26 ~13:0xZ to current bytes of every file in this directory (first capture predated REPORT.md, overrides.json and later legitimate edits). meta.json is not self-pinned.",
+  "original_first_capture": {
+   "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
+   "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
+   "T1-3.diff": "002edec5872faf5a1e299b2d2874ce78589c30deba243e48336ae7085fa008e1",
+   "T1-4.diff": "bdf04a235c85e528ca6e836d9f9f93ce06e5e9540faa3c188649980f198e0f15",
+   "T1-5.diff": "6e90e667b38190e180dd9d2e3cbeaea1d6a798000134d7a303a89503f0c903a2",
+   "T1b-1.diff": "65b0c0c5d84a556cd1f978b8f98b780c7b924d1d5d86fb23d3d65409dc148fb7",
+   "T1b-2.diff": "742dbcc54f1054c52a99126b11aa47279f5c068dfaf6e542a32a7fe9b3ee0a1b",
+   "T1b-3.diff": "3384d175a62e6406f304429268c26a304d3e088449201a92deb192b8b28356d7",
+   "T1b-4.diff": "85f3703ffd7f2517938f0506166ad8e3ab9b4ef02c2e90f7918d8454babcd9e9",
+   "T1b-5.diff": "26548f203369b6300177c30339a6b0a14676e37b2e27bd575baa48c95a1f1d1e",
+   "T2-1.answer.txt": "610b23046b1d9852a850bd204e941fb8e2b248de83f3734a62ecbb6683497533",
+   "T2-2.answer.txt": "4b720f8d0ec4b4094bd711562b58b19d076c6c40b602536bf975e3dfd74381a4",
+   "T2-3.answer.txt": "a2f42560005c7576a9611f32b6132ab11b38cf07336f3fc428b19fb599ba4be0",
+   "T2-4.answer.txt": "265ea1103a75cece041f8bc560c2e9f4e98d88cf50dc44eb2eded501c4a32948",
+   "T2-5.answer.txt": "96832db306d29aa1cede0251b462b789f3e2d96b32ec4074377d86c9aece5419",
+   "T3-1.message.txt": "063ce9c3abd43f693f0383e61c005f4c95e179097cfaafd7e2a130d4ce60a93b",
+   "T3-2.message.txt": "72fa8dcd45f6a5fbe5be103232c5fbcf7689b9aafd78d539544a15722d0f82c4",
+   "T3-3.message.txt": "aa3fa6aa91cc02e3152916a0a0168754ca1a22dbd05725dc9b101edd6f99238e",
+   "T3-4.message.txt": "c42c17e0de5ac07f1aa7ec8f7134ddd779d1d6735f6562c3a7e0f6e60cc6d818",
+   "T3-5.message.txt": "d8cc4c67600ada7d17a43f25ce708c7c3c8ed9e30c7de61368b1072751018723",
+   "T3b-1.message.txt": "022630ffe1dc49516c09dd77f57b474bc6084008113aa238bf4646580a62d235",
+   "T3b-2.message.txt": "1265f5840e8658437db896f252789ffd55ab6b80351b4b0cc769f468905877dc",
+   "T3b-3.message.txt": "434d951a8dd0de4b58d6a763402a576951c5c4166b3ed67391af561d59b15816",
+   "T3b-4.message.txt": "99cf4f97a3840f8cf6925317fc1aeb9f444ba525b966706026bb5e4470070459",
+   "T3b-5.message.txt": "c9c0f5a31f7f1e9a7d43a7108d5a75b33951e645943686f70343815c55ff8e66",
+   "T4-1.tree/.continuity/documents.json": "fb7b90260ab999f6b56f88e6d827da51b976171dcdfa16547012aaa44b7d38b0",
+   "T4-1.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
+   "T4-1.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
+   "T4-1.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
+   "T4-2.tree/.continuity/documents.json": "f6411fccb121cd65c2cae0516ad0a729bae1b45de09196d397984ff4de8fe1ce",
+   "T4-2.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
+   "T4-2.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
+   "T4-2.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
+   "T4-3.tree/.continuity/documents.json": "fb7b90260ab999f6b56f88e6d827da51b976171dcdfa16547012aaa44b7d38b0",
+   "T4-3.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
+   "T4-3.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
+   "T4-3.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
+   "T4-4.tree/.continuity/documents.json": "fb7b90260ab999f6b56f88e6d827da51b976171dcdfa16547012aaa44b7d38b0",
+   "T4-4.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
+   "T4-4.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
+   "T4-4.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
+   "T4-5.tree/.continuity/documents.json": "fb7b90260ab999f6b56f88e6d827da51b976171dcdfa16547012aaa44b7d38b0",
+   "T4-5.tree/docs/ALPHA.md": "011083b27457e3ad093863bc0c9630e6eb7b2b069ca080691ad17fdff2e70407",
+   "T4-5.tree/docs/BETA.md": "9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464",
+   "T4-5.tree/docs/CONTINUITY_INDEX.md": "3ef6abf3fe4e992c39b3d19662fc70592d1c738d5667205fd0b09e1f08dea0a1",
+   "isolation-audit.json": "4d9b2bd4a8c1151b76527e849c863a5ee81af397fa4bc28bcadc9de113944d9a",
+   "meta_extracted.json": "d97307970c0963510180d6b53885e52754de4aa74707a2ac54605a9948b1ed57",
+   "scored.json": "e35243de43a91f7f26ed9e6087f3b73571366914845f9442bb29d58d182a22ea"
+  }
  }
 }

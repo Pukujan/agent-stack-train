@@ -276,7 +276,7 @@
   "other_bundles_touched": [],
   "repo_source_reads": [
    " | grep -n \"pcm:index\\|catalog_sha256\\|def cmd_docs\\|def _docs\\|documents.json\\|DOCUMENT_CATALOG\\|def _render\\|def _cata",
-   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | documents\\.json | ",
+   "<checkout-root> |  | documents\\.json | ",
    "src/continuity/cli.py |  | ",
    "src/continuity/cli.py:1060-1260 |  |  | "
   ],
@@ -305,7 +305,7 @@
   "parent_scope_reads": false,
   "other_bundles_touched": [],
   "repo_source_reads": [
-   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  |  | docs render index generation catalog_sha256 ",
+   "<checkout-root> |  |  | docs render index generation catalog_sha256 ",
    "src |  | Continuity Document Index|pcm:index|catalog_sha256 | ",
    "src/continuity/cli.py:1073-1200 |  |  | "
   ],
@@ -341,8 +341,8 @@
   "parent_scope_reads": false,
   "other_bundles_touched": [],
   "repo_source_reads": [
-   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | _canonical_digest | ",
-   "/Users/teresaguajardo/Documents/Projects/project-continuity-modules |  | catalog_sha256 | ",
+   "<checkout-root> |  | _canonical_digest | ",
+   "<checkout-root> |  | catalog_sha256 | ",
    "src/continuity/cli.py:1100-1200 |  |  | ",
    "tests/traversal_scorer.py |  | _INDEX_MARKER_RE|_CURRENT_RE | ",
    "tests/traversal_scorer.py:190-260 |  |  | "
