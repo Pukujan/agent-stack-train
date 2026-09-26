@@ -158,6 +158,29 @@ Blocked/uncertain:
 Next:
 - Push, open PCM-0046 closeout PR with Refs #139 (issue already closed by explicit comment; no closing keyword anywhere), arm auto-merge after this final push, verify six contexts on the exact candidate, post merge receipt on #139, then continuity worktree remove PCM-0046.
 
+### 2026-09-26 11:03:18 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0058-readability-rules.md, docs/CONTINUITY_INDEX.md"],"completed":["Disclosed sync-residue delivery: PCM-0058 task projection was left active after its #183 merge (same owed-sync class disclosed at the 01:35Z CURRENT entry for PCM-0054/0055); completed with delivery facts and re-rendered the generated index. Installed CLI drift fixed in passing: uv tool was 0.5.0 (pre-receipt-command, the exact PCM-0052 class); reinstalled from accepted history -> 0.6.0, receipt audit now available system-wide (AUDIT_CLEAN for PCM-0046)."],"decisions":["Sync rides the PCM-0046 lifecycle closeout branch; no protocol change."],"evidence":["continuity --version 0.6.0; receipt audit PCM-0046 -> AUDIT_CLEAN; docs render --check SYNCHRONIZED; gh: #183 merged d46e0b7 six contexts, #180 CLOSED COMPLETED (receipt 5842744084 + self-correction 5842754216)."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #139.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0046","timestamp":"2026-09-26T11:03:18Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"fede16aeb360a9f686ee04c071167d28dcfae404298a36fd75b5cd81e36bc702","request_id":"pcm-0046-sync2-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0046"} -->
+
+Completed:
+- Disclosed sync-residue delivery: PCM-0058 task projection was left active after its #183 merge (same owed-sync class disclosed at the 01:35Z CURRENT entry for PCM-0054/0055); completed with delivery facts and re-rendered the generated index. Installed CLI drift fixed in passing: uv tool was 0.5.0 (pre-receipt-command, the exact PCM-0052 class); reinstalled from accepted history -> 0.6.0, receipt audit now available system-wide (AUDIT_CLEAN for PCM-0046).
+
+Evidence:
+- continuity --version 0.6.0; receipt audit PCM-0046 -> AUDIT_CLEAN; docs render --check SYNCHRONIZED; gh: #183 merged d46e0b7 six contexts, #180 CLOSED COMPLETED (receipt 5842744084 + self-correction 5842754216).
+
+Decisions:
+- Sync rides the PCM-0046 lifecycle closeout branch; no protocol change.
+
+Changed:
+- tasks/TASK-PCM-0058-readability-rules.md, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #139.
+
 ## Handoff
 
 Read PROJECT -> CURRENT -> this task -> #139 (method, pre-registered pass rules) -> docs/plans/PCM-0046-arm-plan.md. Scorer/fixtures/rubric are on this branch (14c65a8, d0f9de7); the 20 arms run only after merge with the rubric withheld from participants.
