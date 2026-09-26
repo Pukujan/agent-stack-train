@@ -210,6 +210,29 @@ Blocked/uncertain:
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189.
 
+### 2026-09-26 15:23:35 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}"],"completed":["Correction 12 appended: (a) the feared second published surface (squash commit message of 1d91487) was queried via the commits API and contains zero occurrences - composition discipline held for commit messages even where it failed for checkpoint payloads; (b) the PCM-0063 count-sync owed-note is closed on the record (fixed in b1fb4f0), not deferred; (c) meta note timestamp reworded to '~13:15Z (approximate, just before the checkpoint commit)' per review nit rather than asserting the commit time as the re-pin instant."],"decisions":["Folded this correction into the current touch instead of leaving the commit-message question open in the record; no rewrite, no new micro-cycle beyond this single increment."],"evidence":["commits API for 1d91487 and 4044c80: 0 username hits each (re-checked on main b1fb4f0 after the countsync merge, which itself contains no new literal); ledger of the foreign username: full form 0 tracked/0 commit messages, abbreviated form exactly 2 hits inside the one immutable entry, all disclosed in corrections 8-12; docs render --check SYNCHRONIZED; suite 274 at six known names; pins loop zero stale."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189, then stop: remaining queue is owner-gated (#201, #189-191, #181/182/185, #144/142/143).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T15:23:35Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3a7b66ba9a5a1a07c870566a4f3ee14a9a72a3708a08819b3f994ffd3e86df87","request_id":"pcm-0063-c12-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Correction 12 appended: (a) the feared second published surface (squash commit message of 1d91487) was queried via the commits API and contains zero occurrences - composition discipline held for commit messages even where it failed for checkpoint payloads; (b) the PCM-0063 count-sync owed-note is closed on the record (fixed in b1fb4f0), not deferred; (c) meta note timestamp reworded to '~13:15Z (approximate, just before the checkpoint commit)' per review nit rather than asserting the commit time as the re-pin instant.
+
+Evidence:
+- commits API for 1d91487 and 4044c80: 0 username hits each (re-checked on main b1fb4f0 after the countsync merge, which itself contains no new literal); ledger of the foreign username: full form 0 tracked/0 commit messages, abbreviated form exactly 2 hits inside the one immutable entry, all disclosed in corrections 8-12; docs render --check SYNCHRONIZED; suite 274 at six known names; pins loop zero stale.
+
+Decisions:
+- Folded this correction into the current touch instead of leaving the commit-message question open in the record; no rewrite, no new micro-cycle beyond this single increment.
+
+Changed:
+- docs/plans/PCM-0046-arms-results/{REPORT.md,meta.json}
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189, then stop: remaining queue is owner-gated (#201, #189-191, #181/182/185, #144/142/143).
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.

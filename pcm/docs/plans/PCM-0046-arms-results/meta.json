@@ -180,7 +180,7 @@
   "isolation": "clean"
  },
  "_artifacts_sha256": {
-  "REPORT.md": "19b0094c4c8364525a77dcfabfb65f56252e6e083aa475b83e6db4c9cc75207f",
+  "REPORT.md": "1547b280f3a8838079727885e5927c3b485f0c572cbd77294c0a0350be2f3b53",
   "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
   "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
   "T1-3.diff": "002edec5872faf5a1e299b2d2874ce78589c30deba243e48336ae7085fa008e1",
@@ -246,9 +246,9 @@
     "pinned": "4d9b2bd4a8c1 at first capture",
     "changed_by": "PR #196 (repo_source_reads + _fields); pathfix increment (device-prefix normalization)"
    },
-   "REPORT.md": "2ff47d3-era digest superseded by corrections 9-10 (residual-history + repo-wide scan disclosures) ; 1d91487-era digest superseded by correction 11 (self-leak of the disclaimed path in checkpoint text)"
+   "REPORT.md": "2ff47d3-era digest superseded by corrections 9-10 (residual-history + repo-wide scan disclosures) ; 1d91487-era digest superseded by correction 11 (self-leak of the disclaimed path in checkpoint text) ; b1fb4f0-era digest superseded by correction 12 (commit-message verification + count-sync closure ledger)"
   },
-  "note": "_artifacts_sha256 re-pinned 2026-09-26 13:15Z (commit d33cb35; merged via #197 as 2ff47d3, 13:19:13Z) to current bytes of every file in this directory (first capture predated REPORT.md, overrides.json and later legitimate edits). meta.json is not self-pinned.",
+  "note": "_artifacts_sha256 re-pinned 2026-09-26 ~13:15Z (task/PCM-0063-pathfix, merged #197 2ff47d3); the timestamp approximates when the re-pin ran, just before the checkpoint commit to current bytes of every file in this directory (first capture predated REPORT.md, overrides.json and later legitimate edits). meta.json is not self-pinned.",
   "original_first_capture": {
    "T1-1.diff": "fe87c9d7d086811ac0612b249cfd3132d6f869717391f895491a68934f7ed75c",
    "T1-2.diff": "1351a3daf714d750fca5712d50845fcdb67e052e19b08ba793877ce351e5bb83",
