@@ -3040,6 +3040,164 @@ def maybe_post_from_page(
     )
 
 
+def receipt_coverage(bodies: list[str]) -> tuple[set[str], set[str]]:
+    """Collect receipt evidence from issue comment bodies.
+
+    v2 markers contribute their exact `sha=` and `request=` fields; historical
+    manual `pcm:receipt` comments contribute every hex token they name (full or
+    short SHA). Prose outside a receipt marker is ignored.
+    """
+    shas: set[str] = set()
+    requests: set[str] = set()
+    for body in bodies:
+        parsed = parse_receipt_marker(body)
+        if parsed is not None:
+            start = body.find(_RECEIPT_V2_PREFIX)
+            end = body.find("-->", start)
+            for field in body[start + len(_RECEIPT_V2_PREFIX) : end].split():
+                key, _, value = field.partition("=")
+                if key == "sha" and value:
+                    shas.add(value)
+                elif key == "request" and value:
+                    requests.add(value)
+        elif "<!-- pcm:receipt " in body:
+            shas.update(re.findall(r"\b[0-9a-f]{7,40}\b", body))
+    return shas, requests
+
+
+def audit_receipt_gaps(
+    commits: list[tuple[str, str]],
+    coverage: tuple[set[str], set[str]],
+    *,
+    lookup_complete: bool,
+) -> tuple[str, list[tuple[str, str]]]:
+    """Compare pushed checkpoint commits against leaf receipt evidence.
+
+    A commit is covered when a receipt names its full sha, any recorded token
+    is a proper prefix of it, or the commit's request id appears in a v2
+    marker. An unproven-complete lookup never fabricates gaps: it degrades.
+    """
+    if not lookup_complete:
+        return "degraded", []
+    shas, requests = coverage
+    gaps = [
+        (sha, request)
+        for sha, request in commits
+        if not (
+            sha in shas
+            or (request and request in requests)
+            or any(token != sha and sha.startswith(token) for token in shas)
+        )
+    ]
+    return ("gaps" if gaps else "ok"), gaps
+
+
+def checkpoint_request_ids_at(root: Path, sha: str, task_rel: str) -> list[str]:
+    """Request ids whose checkpoint-operation marker this commit added."""
+    result = git_run(root, ["show", "--format=", "-U0", sha, "--", task_rel])
+    requests: list[str] = []
+    for line in result.stdout.splitlines():
+        if not line.startswith("+") or "continuity:checkpoint-operation" not in line:
+            continue
+        match = re.search(r"continuity:checkpoint-operation\s+(\{.*\})\s*-->", line)
+        if match is None:
+            continue
+        try:
+            data = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict) and str(data.get("request_id") or ""):
+            requests.append(str(data["request_id"]))
+    return requests
+
+
+def audit_task_receipts(
+    root: Path,
+    task_id: str,
+    repository: str | None,
+    issue_number: str | None,
+    page_size: int = 100,
+) -> int:
+    """Report pushed task-branch checkpoint commits lacking a keyed leaf receipt.
+
+    Exit 0 with AUDIT_CLEAN when every pushed checkpoint commit is covered, 1
+    with MISSING lines on gaps, and 0 with a NOTE when the remote branch or the
+    GitHub lookup is unresolvable — a degraded audit is never a false gap list,
+    and a clean audit is never silence about what was not checked.
+    """
+    root = root.resolve()
+    if TASK_ID_RE.fullmatch(task_id) is None:
+        raise ContinuityError(f"invalid task id: {task_id}")
+    config = load_config(root)
+    task_path = find_task(root, config, task_id)
+    relative = task_path.relative_to(root).as_posix()
+    if not repository or not issue_number:
+        meta = task_metadata(task_path) or {}
+        url = str(meta.get("issue_url") or "")
+        if not url:
+            raise ContinuityError(
+                f"receipt audit needs --repository and --issue or an issue_url on {task_id}"
+            )
+        repository, issue_number = validate_github_issue_url(url)
+    origin_repo = github_repository(git_value(root, ["remote", "get-url", "origin"], ""))
+    if origin_repo is not None and origin_repo != repository:
+        raise ContinuityError(
+            f"receipt audit repository {repository} does not match origin {origin_repo}; "
+            "refusing to judge the wrong ledger"
+        )
+    branch = git_value(root, ["rev-parse", "--abbrev-ref", "HEAD"])
+    if branch == "HEAD":
+        raise ContinuityError("receipt audit requires an attached branch")
+    try:
+        git_run(root, ["fetch", "--quiet", "origin", branch])
+        tip = git_value(root, ["rev-parse", "FETCH_HEAD"])
+    except ContinuityError:
+        print(f"NOTE: audit degraded — {branch} is not on origin; nothing published to audit yet")
+        return 0
+    log = git_run(root, ["log", "--format=%H\x1f%s", tip]).stdout.splitlines()
+    prefix = f"PCM checkpoint {task_id}:"
+    commits: list[tuple[str, str]] = []
+    for line in log:
+        sha, _, subject = line.partition("\x1f")
+        if not subject.startswith(prefix):
+            continue
+        requests = checkpoint_request_ids_at(root, sha, relative)
+        commits.append((sha, requests[0] if requests else ""))
+    if not commits:
+        print(f"AUDIT_CLEAN: no pushed checkpoint commits for {task_id} on {branch}")
+        return 0
+    comment_path = github_issue_comment_path(repository, issue_number)
+    bodies: list[str] = []
+    try:
+        page = 1
+        while True:
+            result = run_external(
+                ["gh", "api", "--method", "GET", f"{comment_path}?per_page={page_size}&page={page}"],
+                root,
+            )
+            if result.returncode != 0:
+                detail = (result.stderr or result.stdout or "GitHub comment lookup failed").strip()
+                print(f"NOTE: audit degraded — {detail}; no gap verdict from {repository}#{issue_number}")
+                return 0
+            page_bodies = comment_bodies(result.stdout)
+            bodies.extend(page_bodies)
+            if page_is_complete(len(page_bodies), page_size):
+                break
+            page += 1
+    except ContinuityError as exc:
+        print(f"NOTE: audit degraded — {exc}; no gap verdict from {repository}#{issue_number}")
+        return 0
+    status, gaps = audit_receipt_gaps(commits, receipt_coverage(bodies), lookup_complete=True)
+    if status == "gaps":
+        for sha, request in gaps:
+            suffix = f" (request {request})" if request else ""
+            print(f"MISSING: {sha}{suffix} has no keyed leaf receipt on {repository}#{issue_number}")
+        print(f"AUDIT_GAPS: {len(gaps)}")
+        return 1
+    print(f"AUDIT_CLEAN: {len(commits)} pushed checkpoint commits covered on {repository}#{issue_number}")
+    return 0
+
+
 CLOSING_DIRECTIVE_RE = re.compile(
     r"(?i)\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)"
     r"(?:([-\s]+)|:\s*)((?:[\w.-]+/[\w.-]+)?#\d+|https?://[^ ]*issues/\d+)"
@@ -3408,6 +3566,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_issue_verify = issue_sub.add_parser("verify")
     p_issue_verify.add_argument("task_id")
     p_issue_verify.add_argument("--root", default=".")
+
+    p_receipt = sub.add_parser("receipt")
+    receipt_sub = p_receipt.add_subparsers(dest="receipt_command", required=True)
+    p_receipt_audit = receipt_sub.add_parser("audit")
+    p_receipt_audit.add_argument("task_id")
+    p_receipt_audit.add_argument("--root", default=".")
+    p_receipt_audit.add_argument("--repository", default=None, help="owner/name; defaults from the task's issue_url")
+    p_receipt_audit.add_argument("--issue", default=None, help="leaf issue number; defaults from issue_url")
 
     p_checkpoint = sub.add_parser("checkpoint")
     p_checkpoint.add_argument("task_id")
@@ -3874,6 +4040,15 @@ def main(argv: list[str] | None = None) -> int:
             path = pack_task(Path(args.root).resolve(), args.task_id, output)
             print(path)
             return 0
+
+        if args.command == "receipt" and args.receipt_command == "audit":
+            return audit_task_receipts(
+                Path(args.root).resolve(),
+                args.task_id,
+                args.repository,
+                args.issue,
+            )
+
 
         if args.command == "worktree" and args.worktree_command == "create":
             workspace_root = Path(args.root).resolve()
