@@ -308,10 +308,10 @@
 ## PCM-0059 decision projection (`pcm-0059-decision`)
 
 - File: [`tasks/TASK-PCM-0059-distributed-runtime-promotion.md`](../tasks/TASK-PCM-0059-distributed-runtime-promotion.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6`
-- Current SHA-256: `0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6`
+- Current SHA-256: `9fae10473dcd88037c818c852b5eae6eec3d4b47f3d2e430962f205af3dd93a8`
 - Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
 - Search terms: `59`, `decision`
 - Neighboring records: none
@@ -320,10 +320,10 @@
 ## PCM-0060 decision projection (`pcm-0060-decision`)
 
 - File: [`tasks/TASK-PCM-0060-host-capability-honesty.md`](../tasks/TASK-PCM-0060-host-capability-honesty.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
-- Current SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
+- Current SHA-256: `2691ff90ac4624e1edfe50d24c801571e17c47b430ea4d37d1d175900709f816`
 - Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
 - Search terms: `60`, `decision`
 - Neighboring records: none
@@ -344,10 +344,10 @@
 ## PCM-0062 decision projection (`pcm-0062-decision`)
 
 - File: [`tasks/TASK-PCM-0062-agent-labeling-convention.md`](../tasks/TASK-PCM-0062-agent-labeling-convention.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66`
-- Current SHA-256: `dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66`
+- Current SHA-256: `6a6842a4abc9491485a37504226b5cef045e57254355d3eb02288e7e510eab49`
 - Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
 - Search terms: `62`, `decision`
 - Neighboring records: none
