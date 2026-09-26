@@ -251,7 +251,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `0fb5aca9d0e2f363a45244095313ba01d7510a74`
 - Reviewed SHA-256: `1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22`
-- Current SHA-256: `783010131af4eb63543bc989bd38d47689a5d947c2ddcb5103465e63addd3ec7`
+- Current SHA-256: `763404a2af81e9c094b78bec7377f0e2a29f5911402b90c3b8d694626f8e8761`
 - Summary: What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).
 - Search terms: none
 - Neighboring records: none
@@ -263,7 +263,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `b9969f3754738546f287b988cb8f4f7a666dae74858dee344f52f2e723eb8646`
-- Current SHA-256: `86028b5550e6fbaf3f924a39a86531ea6055459a78c4aefca3adb01a1d99802f`
+- Current SHA-256: `a088794f586d9f8279db63bb69b3cc79e0a049baf6bb9302e53727ccaf101a0e`
 - Summary: gh api --input - needs JSON request parameters; red-first fix + shim test; checkpoint dogfoods the opt-in flags (Refs #171).
 - Search terms: none
 - Neighboring records: `pcm-0054-durability-receipt-audit`

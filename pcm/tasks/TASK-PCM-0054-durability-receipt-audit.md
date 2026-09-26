@@ -18,6 +18,7 @@ The 2026-09-25 durability audit found three contract-required merge receipts nev
 ## Allowed files
 
 - Filing slice (merged in `0fb5aca`): this task file, `checkpoints/CURRENT.md`, `.continuity/documents.json`, `docs/CONTINUITY_INDEX.md` (generated). Docs slice (named in the filed audit record): the stale "Issue #67 remains open" sentence corrected in all 9 guidance copies — `AGENTS.md`, `HANDOFF.md`, `src/continuity/cli.py` (`GITHUB_PROGRESSION_GUIDANCE`), `templates/v1/{minimal/PROJECT.md,minimal/HANDOFF.md,software/AGENTS.md,software/README.md}`, `.github/{pull_request_template.md,ISSUE_TEMPLATE/task.md}` — required-phrase test `automatic issue-comment synchronization is not implemented` kept intact. Implementation slice (only after the owner answers the design question on #169): `src/continuity/cli.py`, `tests/test_receipt_audit.py` (new), plus regenerated catalog/index.
+- Amendment 2026-09-26 01:2xZ: the guidance-text fix in the docs slice edited `src/continuity/cli.py` but touched only the `GITHUB_PROGRESSION_GUIDANCE` string constant — no behavior, schema, or flag change — so it needs no #169 decision; the code-path restriction stands.
 
 ## Human outcome
 
@@ -31,7 +32,7 @@ A fresh session running one deterministic command learns, from the repository an
 
 ## Acceptance criteria
 
-- [ ] Filing slice merged under six required hosted contexts with merge receipt on #169: task projection + CURRENT entry record the enforcement matrix (code-enforced: branch/uncommitted/stale-base/sanitizer/push; convention+opt-in: receipt posting, merge-window discipline) with path:line evidence at `690b7f8`, and the three backfilled receipt ids (5841258606, 5841258803, 5841258608).
+- [x] Filing slice merged under six required hosted contexts with merge receipt on #169: task projection + CURRENT entry record the enforcement matrix (code-enforced: branch/uncommitted/stale-base/sanitizer/push; convention+opt-in: receipt posting, merge-window discipline) with path:line evidence at `690b7f8`, and the three backfilled receipt ids (5841258606, 5841258803, 5841258608). DELIVERED: filing merged `0fb5aca` (#170, receipt 5841456903); docs slice merged `d5021a3` (#173, tool-posted push receipt 5841654302, merge receipt 5841856423); catalog registration correction + baseline-naming/version-identity fixes recorded append-only in 5841856422.
 - [ ] Owner decision recorded on #169 (one of: default-on receipts when `trackers.github=true` / additive `continuity receipt audit` command / explicit keep-as-convention) — mirrors the #162 acceptance-2 gate; no CLI change before it.
 - [ ] If implementation approved: red-first tests prove audit exits non-zero on a local bare-remote fixture with a pushed SHA lacking a keyed comment, zero when the marker exists, and degrades without network; full suite stays at baseline.
 
@@ -45,7 +46,7 @@ A fresh session running one deterministic command learns, from the repository an
 
 - Leaf #169 (PCM-0054); parent: none; depends: none; related #67, #162, #166, #139.
 - Primary writer: owner/Astra (omp session); branch task/PCM-0053-closeout (filing increment rides the PCM-0053 closeout push); source issue revision: #169 body at filing; as-of 2026-09-25T23:58Z.
-- Push receipt: continuity checkpoint request pcm-0054-filed-20260925 (posted to #169 after push).
+- Receipt lineage (supersedes the earlier citation "request pcm-0054-filed-20260925", which was never a real request id — correction recorded on #169 in 5841856422): filing increment rode the PCM-0053 closeout checkpoint push `2f8dc7a` (request pcm-0053-closeout-20260925, receipt 5841406124 on #166) and merged in `0fb5aca` (receipt 5841456903 on #169); docs slice used request pcm-0054-docs-20260926, push `6af92aa`, tool receipt 5841654302, merge `d5021a3` (receipt 5841856423).
 
 ## Docs slice (stale #67 prose correction)
 
@@ -77,6 +78,29 @@ Blocked/uncertain:
 
 Next:
 - Open PR for task/PCM-0054-guidance-prose, verify six contexts + auto-merge, post merge receipt on #169.
+
+### 2026-09-26 01:21:06 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":["Acceptance 2 on #169 (owner decision); PCM-0046 arms provider-429 (~04:05Z)."],"changed":["tasks/TASK-PCM-0054-durability-receipt-audit.md, tasks/TASK-PCM-0055-receipt-json-encoding.md, checkpoints/CURRENT.md, docs/CONTINUITY_INDEX.md"],"completed":["Projection sync: acceptance 1 checked with delivered evidence (filing 0fb5aca + docs slice d5021a3; receipts 5841456903/5841654302/5841856423); false request-id citation replaced with corrected lineage; allowed-files amendment 2 (guidance-text fix needs no #169 decision); audit-correction pointer 5841856422 (PR #170 catalog claim, PR #172 citation, baseline names 5F+1E, 0.5.0 version identity); DB-posture question + answer recorded on #144 (5841877756). PCM-0055 closed out on this branch (cac15b4)."],"decisions":["Acceptance 2 stays owner-gated; DuckDB/OTEL analytics-substrate question to be filed as its own decision issue rather than folded here."],"evidence":["detached-worktree baseline discover at 690b7f8: same six broken names as current 259-test discover (worktrees 4F+1E, test_cli 2F) \u2014 zero regressions; gh comments API verified all cited ids; validate = device-local pcm-pinned error only."],"next_action":"Merge PR task/PCM-0054-projection-sync under six contexts, post merge receipt on #169, then owner answers the pending decision briefs (#162 5840695558, #169 acceptance 2, #144 O1-O4, #142, #143, #166 caveat).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0054","timestamp":"2026-09-26T01:21:06Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"7fb29414aada88d1261c00d19520e72766f7be8de74dc96d0d3ad03b8dc69757","request_id":"pcm-0054-sync-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0054"} -->
+
+Completed:
+- Projection sync: acceptance 1 checked with delivered evidence (filing 0fb5aca + docs slice d5021a3; receipts 5841456903/5841654302/5841856423); false request-id citation replaced with corrected lineage; allowed-files amendment 2 (guidance-text fix needs no #169 decision); audit-correction pointer 5841856422 (PR #170 catalog claim, PR #172 citation, baseline names 5F+1E, 0.5.0 version identity); DB-posture question + answer recorded on #144 (5841877756). PCM-0055 closed out on this branch (cac15b4).
+
+Evidence:
+- detached-worktree baseline discover at 690b7f8: same six broken names as current 259-test discover (worktrees 4F+1E, test_cli 2F) — zero regressions; gh comments API verified all cited ids; validate = device-local pcm-pinned error only.
+
+Decisions:
+- Acceptance 2 stays owner-gated; DuckDB/OTEL analytics-substrate question to be filed as its own decision issue rather than folded here.
+
+Changed:
+- tasks/TASK-PCM-0054-durability-receipt-audit.md, tasks/TASK-PCM-0055-receipt-json-encoding.md, checkpoints/CURRENT.md, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- Acceptance 2 on #169 (owner decision); PCM-0046 arms provider-429 (~04:05Z).
+
+Next:
+- Merge PR task/PCM-0054-projection-sync under six contexts, post merge receipt on #169, then owner answers the pending decision briefs (#162 5840695558, #169 acceptance 2, #144 O1-O4, #142, #143, #166 caveat).
 
 ## Handoff
 
