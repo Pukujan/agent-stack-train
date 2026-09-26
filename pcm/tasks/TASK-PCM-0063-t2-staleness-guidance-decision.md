@@ -13,7 +13,7 @@ Decide the read-time staleness-reconciliation rule the T2 holdout proved missing
 
 ## Why
 
-PCM-0046 hidden arms: T2 measured 0/5 — every fresh agent asserted the stale next action as current though the live issue state was attached; three stated the contradiction in their own words and still recommended it. Guidance today is write-time only.
+PCM-0046 hidden arms: T2 measured 0/5 — every fresh agent asserted the stale next action as current though the live issue state was attached; all five stated the contradiction in their own words and still recommended it (REPORT.md correction 6 supersedes the initial three-arm count). Guidance today is write-time only.
 
 ## Allowed files
 
@@ -232,6 +232,29 @@ Blocked/uncertain:
 
 Next:
 - Open PR, arm auto-merge after this final push, post merge receipt on #189, then stop: remaining queue is owner-gated (#201, #189-191, #181/182/185, #144/142/143).
+
+### 2026-09-26 15:44:30 UTC — owner/Astra
+
+<!-- continuity:checkpoint {"agent":"owner/Astra","blocked":[],"changed":["tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md"],"completed":["Final live-record field synced: the prose Why paragraph (line 16) carried the superseded 'three stated' count while the marker why and Evidence lines were fixed in b1fb4f0; now reads all-five with the correction-6 pointer. Attempts in two earlier increments mis-assessed this field as already fixed (the countsync2 claim was wrong, and that commit was discarded before merge for other reasons) - disclosed so the record reflects exactly when each field converged: this entry."],"decisions":["Correction-12's 'closed in full' claim about the count-sync ledger was premature by one field; the immutable corrections 6/12 are not edited - this entry and the corrected prose are the record."],"evidence":["grep on origin/main 49c157e showed the stale prose before this branch; after: zero live-field hits, remaining occurrences only inside hash-immutable checkpoint entries describing history; docs refresh + render SYNCHRONIZED; suite 274 at six known names; validate single pre-existing device-local error."],"next_action":"Open PR, arm auto-merge after this final push, post merge receipt on #189. Queue then fully owner-gated.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0063","timestamp":"2026-09-26T15:44:30Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"0aed36f1a9f2fb8854df16affe9b2c65add03e20e3038d32c72a8f623b7b6703","request_id":"pcm-0063-whysync-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0063"} -->
+
+Completed:
+- Final live-record field synced: the prose Why paragraph (line 16) carried the superseded 'three stated' count while the marker why and Evidence lines were fixed in b1fb4f0; now reads all-five with the correction-6 pointer. Attempts in two earlier increments mis-assessed this field as already fixed (the countsync2 claim was wrong, and that commit was discarded before merge for other reasons) - disclosed so the record reflects exactly when each field converged: this entry.
+
+Evidence:
+- grep on origin/main 49c157e showed the stale prose before this branch; after: zero live-field hits, remaining occurrences only inside hash-immutable checkpoint entries describing history; docs refresh + render SYNCHRONIZED; suite 274 at six known names; validate single pre-existing device-local error.
+
+Decisions:
+- Correction-12's 'closed in full' claim about the count-sync ledger was premature by one field; the immutable corrections 6/12 are not edited - this entry and the corrected prose are the record.
+
+Changed:
+- tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md, .continuity/documents.json, docs/CONTINUITY_INDEX.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open PR, arm auto-merge after this final push, post merge receipt on #189. Queue then fully owner-gated.
 
 ## Handoff
 

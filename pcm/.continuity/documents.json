@@ -549,7 +549,7 @@
         "pcm-0046-arm-plan"
       ],
       "reviewed_commit": "uncommitted",
-      "reviewed_sha256": "6d4550544e50f303894f8c80e7b871e530482191165cd314ea3d2fa99879d2cb",
+      "reviewed_sha256": "f4394ab928a538c5682b256a2b2bbf5baee1c30a632a97c5fb8932465a1be7c2",
       "summary": "Decision task for the read-time staleness-reconciliation rule: PCM-0046 measured T2 at 0/5 (agents follow the stale projection over the closed live issue); owner picks A/B/C on #189 before any guidance slice.",
       "tasks": [
         "PCM-0063"
