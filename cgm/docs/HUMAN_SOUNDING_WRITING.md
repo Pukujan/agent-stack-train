@@ -1,5 +1,7 @@
 # Human-sounding writing and plain charts
 
+Official short name: **hsw** (also HSW). Canonical module id: `human-sounding-writing`.
+
 This guide helps agents write posts, blogs, social copy, general prose, and
 papers or data writeups that do not read as AI-smoothed averages. Follow the
 rules when instinct conflicts with them. Tags in brackets point at the research

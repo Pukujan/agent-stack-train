@@ -2,11 +2,16 @@
 name: human-sounding-writing
 description: >
   Use for posts, blogs, social copy, general agent prose, and papers or data
-  writeups that must sound human and avoid AI tells. Do not use for README or
-  product-entry copy — load writing-direction and docs/WRITING_ROUTING.md instead.
+  writeups that must sound human and avoid AI tells. Official short name: hsw
+  (also HSW); canonical module id remains human-sounding-writing. Do not use for
+  README or product-entry copy — load writing-direction and docs/WRITING_ROUTING.md
+  instead.
 ---
 
 # Human-sounding writing
+
+Official short name: **hsw** (also HSW). Canonical module id remains
+`human-sounding-writing`.
 
 Write so a careful reader hears a person with evidence, not a model averaging
 safe phrases. Specifics beat synonyms. This module is for posts, blogs, social,

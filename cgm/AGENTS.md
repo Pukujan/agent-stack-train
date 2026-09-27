@@ -40,8 +40,10 @@ Do not hand off a README that is only a module index, setup checklist, architect
 Use the soft router in [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md):
 
 - README / product entry → `writing-direction` (keep scan-first selective bold);
-- posts / blogs / social / general agent prose → `human-sounding-writing`;
-- papers / data writeups → `human-sounding-writing` (including chart rules).
+- posts / blogs / social / general agent prose → `human-sounding-writing` (official short name **hsw** / HSW);
+- papers / data writeups → `human-sounding-writing` (including chart rules; short name **hsw**).
+
+Agents asked for "hsw" should load `human-sounding-writing`. The canonical module id remains `human-sounding-writing`.
 
 Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken the README scanability contract.
 

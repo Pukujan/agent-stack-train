@@ -31,3 +31,10 @@ rules.
 - `writing-direction` remains the README and product-entry module.
 - Claim-evidence v2 requirements from `0.4.x` remain in force for targets that
   pin `0.5.0`.
+
+## Short name (0.5.1+)
+
+**hsw** / **HSW** is a documentation short name for `human-sounding-writing`.
+Adapters keep the module id `human-sounding-writing` in their modules list;
+do not rename the folder or replace the id with `hsw`.
+

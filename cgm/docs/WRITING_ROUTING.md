@@ -7,8 +7,15 @@ not fight each other.
 | Situation | Load | Notes |
 | --- | --- | --- |
 | README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | Keep scan-first selective bold and the README scanability contract. |
-| Posts / blogs / social / general agent prose | `human-sounding-writing` | Human voice, AI-tell scrub, restrained bold. |
-| Papers / data writeups | `human-sounding-writing` (+ chart rules in that module and guide) | Same voice rules; apply takeaway titles and plain-chart guidance. |
+| Posts / blogs / social / general agent prose | `human-sounding-writing` (short name **hsw** / HSW) | Human voice, AI-tell scrub, restrained bold. Agents asked for "hsw" should load this module. |
+| Papers / data writeups | `human-sounding-writing` (short name **hsw** / HSW) (+ chart rules in that module and guide) | Same voice rules; apply takeaway titles and plain-chart guidance. Agents asked for "hsw" should load this module. |
+
+
+## Short name
+
+**hsw** (also **HSW**) is the official short name for `human-sounding-writing`.
+Agents asked for "hsw" should load [`modules/human-sounding-writing/SKILL.md`](../modules/human-sounding-writing/SKILL.md).
+The canonical module id and folder name remain `human-sounding-writing`.
 
 ## Conflict to avoid
 
