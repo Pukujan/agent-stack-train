@@ -8,7 +8,7 @@ from scripts.validate_content_system import check, check_adapter, check_project_
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "visual-direction", "image-generation", "html-demo"})
+MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"})
 COMMIT = "a" * 40
 SOURCE_URI = f"https://github.com/Pukujan/demo/blob/{COMMIT}/src/app.py#L2-L6"
 
@@ -45,7 +45,7 @@ def write_adapter(adapter: Path, brief_version="v2"):
         "system-version.json": {
             "schema_version": "content-generation.adapter.v1",
             "helper_repository": "https://github.com/Pukujan/content-generation-modules",
-            "helper_version": "0.4.0",
+            "helper_version": "0.5.0",
             "helper_commit": COMMIT,
             "modules": MODULES,
         },
@@ -60,7 +60,7 @@ def write_adapter(adapter: Path, brief_version="v2"):
         },
         "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "A useful promise", "avoid": ["hype"]},
         "visual-style.json": {"schema_version": "content-generation.visual-style.v1", "reference_asset": "hero.png", "generation_workflow": "built-in image_gen", "narrative_roles": ["hero", "problem", "supporting"], "palette": {"background": "#000"}, "roles": {"hero": {}}, "reject_when": ["busy"]},
-        "asset-manifest.json": {"schema_version": "content-generation.asset-manifest.v1", "system_version": "0.4.0", "assets": [{"path": "diagram.png", "role": "diagram"}]},
+        "asset-manifest.json": {"schema_version": "content-generation.asset-manifest.v1", "system_version": "0.5.0", "assets": [{"path": "diagram.png", "role": "diagram"}]},
         "review-rubric.json": {"schema_version": "content-generation.review-rubric.v1", "dimensions": [{"id": "clarity", "question": "clear?"}], "decision_rule": "human review"},
     }
     for name, value in files.items():
@@ -130,7 +130,7 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "helper_repository": "https://example.invalid/helper",
                     "helper_version": "0.1.1",
                     "helper_commit": "abc123",
-                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "visual-direction", "image-generation", "html-demo"}),
+                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"}),
                 },
                 "project-brief.json": {"schema_version": "content-generation.project-brief.v1", "project": "Demo", "audience": ["people"], "problem": "problem", "solution": "solution", "evidence": [{"claim": "claim", "source": "README.md"}], "boundaries": ["boundary"]},
                 "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "promise", "avoid": ["hype"]},
@@ -155,7 +155,7 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "helper_repository": "https://example.invalid/helper",
                     "helper_version": "0.3.1",
                     "helper_commit": "abc123",
-                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "visual-direction", "image-generation", "html-demo"}),
+                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"}),
                 },
                 "project-brief.json": {"schema_version": "content-generation.project-brief.v1", "project": "Demo", "audience": ["people"], "problem": "problem", "solution": "solution", "evidence": [{"claim": "claim", "source": "README.md"}], "boundaries": ["boundary"]},
                 "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "promise", "avoid": ["hype"]},

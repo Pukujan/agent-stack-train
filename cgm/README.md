@@ -74,14 +74,14 @@ brief -> brand -> writing / visual / image / HTML direction
 
 1. **Read the repository first.** Find the user, situation, evidence, prior work, and boundaries.
 2. **Build the source map.** Record supported claims, status, terminology, and limitations.
-3. **Choose the modules.** Load only the brand, context, writing, visual, image, or HTML guidance the requested output needs.
+3. **Choose the modules.** Load only the brand, context, writing, visual, image, or HTML guidance the requested output needs. For writing, follow [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md): README/product entry → `writing-direction`; posts, blogs, social, general prose, and papers/data writeups → `human-sounding-writing`.
 4. **Write for the scan.** Use descriptive headings, short sections, bullets, and selective bold anchors that let a reader recover the point quickly.
 5. **Make the visual explain something.** Generate a role-specific asset, inspect it at its actual use size, and record its prompt, alt text, crop, and review decision.
 6. **Review before handoff.** Check the evidence, human flow, accessibility, and next action before treating the output as complete.
 
 ## Evidence and boundaries
 
-The helper contract is **shipped as repository structure and guidance**: six module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
+The helper contract is **shipped as repository structure and guidance**: seven module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
 
 For each important claim, the new v2 brief makes the explanation explicit: **what does this source support, and what does it leave unproven?** Repository evidence points to an exact revision and useful locator; external claims use direct citations. A citation makes the path inspectable—it does not certify that the source is correct.
 
@@ -112,6 +112,9 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) explains how existing `0.1.x` target repositories adopted the human-facing contract.
 - [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) explains how existing `0.2.x` target repositories adopt the scan-first and anime-inspired visual direction.
 - [`docs/MIGRATING_TO_0.4.md`](docs/MIGRATING_TO_0.4.md) explains how to add bounded claim explanations and revision-pinned citations while preserving the target's image contract.
+- [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md) explains how adapters add `human-sounding-writing` and follow the soft writing router without changing README scan/bold rules.
+- [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) routes README/product entry to `writing-direction` and posts/papers/general prose to `human-sounding-writing`.
+- [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md) is the vendored human-voice and plain-chart guide.
 - [`templates/`](templates/) contains starter project, brand, visual, image, asset, review, and README files.
 - [`schemas/`](schemas/) defines both project-brief versions, the asset manifest, review rubric, and README contract shapes.
 
@@ -156,4 +159,4 @@ Then pin the helper release or commit, read the playbook and image guide, inspec
 
 ## Current version
 
-The current helper contract is `0.4.0` (`v0.4.0`). It adds a versioned claim record (`supports`, `limits`, `source_revision`, and record time), optional valid-time intervals for time-bound claims, citation and provenance guidance, and PDD/SDD/TDD acceptance criteria. The story order, brand, generated visuals, narrative-raster rules, prompt records, and image review requirements continue from `0.3.1` unchanged. Existing target repositories remain on their pinned contract until they deliberately migrate.
+The current helper contract is `0.5.0` (`v0.5.0`). It adds the required `human-sounding-writing` module and soft writing router while keeping the `0.4.x` claim-evidence contract (`supports`, `limits`, `source_revision`, record time, optional valid-time bounds, citation guidance, and PDD/SDD/TDD acceptance). README scanability and `writing-direction` selective bold rules are unchanged. Story order, brand, generated visuals, narrative-raster rules, prompt records, and image review requirements continue. Existing target repositories remain on their pinned contract until they deliberately migrate.

@@ -6,7 +6,7 @@ Before changing or using the system:
 
 1. read `README.md`;
 2. read `system-version.json`;
-3. read only the module `SKILL.md` files relevant to the requested output;
+3. read only the module `SKILL.md` files relevant to the requested output; for writing work, follow [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) so README/product entry uses `writing-direction` while posts, blogs, social, general prose, and papers/data writeups use `human-sounding-writing`;
 4. inspect the target repository's `.content-system/` adapter and evidence before making claims;
 5. for README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, `docs/PROVENANCE_AND_CITATION.md`, `docs/README_QUALITY_PDD.md`, `docs/README_QUALITY_SDD.md`, `docs/README_QUALITY_TDD.md`, and `templates/readme-contract.json`;
 6. inspect prior reviewed outputs in the target repository and the helper's prior-work references before inventing a new story or visual direction;
@@ -34,6 +34,16 @@ Every README deliverable must:
 - name relevant prior work or reviewed examples instead of pretending the pattern was invented in the current draft.
 
 Do not hand off a README that is only a module index, setup checklist, architecture summary, or one-line product description. Use the [README contract](templates/readme-contract.json), the PDD/SDD/TDD acceptance documents, and the validator. A citation proves traceability, not truth. Keep the target's visual identity and image-generation contract intact.
+
+## Writing modules
+
+Use the soft router in [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md):
+
+- README / product entry → `writing-direction` (keep scan-first selective bold);
+- posts / blogs / social / general agent prose → `human-sounding-writing`;
+- papers / data writeups → `human-sounding-writing` (including chart rules).
+
+Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken the README scanability contract.
 
 ## Versioning
 

@@ -17,6 +17,7 @@ EXPECTED_MODULES = {
     "brand-foundation",
     "content-context",
     "writing-direction",
+    "human-sounding-writing",
     "visual-direction",
     "image-generation",
     "html-demo",
@@ -58,6 +59,10 @@ REQUIRED_HELPER_DOCS = (
     "docs/README_QUALITY_TDD.md",
     "docs/PROVENANCE_AND_CITATION.md",
     "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
+    "docs/WRITING_ROUTING.md",
+    "docs/HUMAN_SOUNDING_WRITING.md",
+    "docs/human-sounding-rules.json",
+    "docs/MIGRATING_TO_0.5.md",
 )
 
 

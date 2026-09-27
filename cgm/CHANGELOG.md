@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — draft
+
+- added the `human-sounding-writing` module for posts, blogs, social copy, general agent prose, and papers or data writeups;
+- vendored `docs/HUMAN_SOUNDING_WRITING.md` and `docs/human-sounding-rules.json` so adapters do not depend on box-only shared refs;
+- added soft writing router `docs/WRITING_ROUTING.md` so README/product entry keeps `writing-direction` scan/bold rules while other prose uses human-sounding guidance;
+- updated `AGENTS.md` and README module-selection guidance to point at the router;
+- treated the new required module as a breaking helper contract and versioned the helper from `0.4.0` to `0.5.0`;
+- added `docs/MIGRATING_TO_0.5.md` so adapters add `human-sounding-writing` to their modules list and bump the pin.
+
+
 ## 0.3.1 — draft
 
 - added a deterministic `0.3.x` narrative-image gate that rejects SVG substitutions, missing built-in image-generation provenance, missing exact title/subtitle records, missing prompt records, and stale file hashes;
