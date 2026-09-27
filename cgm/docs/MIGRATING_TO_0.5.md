@@ -18,11 +18,11 @@ rules.
    `.content-system/system-version.json` (or equivalent adapter pin).
 2. Add `human-sounding-writing` to the adapter `modules` list so it matches the
    helper contract.
-3. Route writing work with [`WRITING_ROUTING.md`](WRITING_ROUTING.md) /
-   [`writing-routing.json`](writing-routing.json):
+3. **MUST load** writing modules with [`WRITING_ROUTING.md`](WRITING_ROUTING.md) /
+   [`writing-routing.json`](writing-routing.json) (`required_load`):
    - README / product entry → `writing-direction` (keep scan/bold).
-   - PR / issue titles and bodies, issue-log titles, non-README docs,
-     changelog prose → `human-sounding-writing`.
+   - PR / issue titles and bodies, issue-log titles, **commit messages /
+     commit subjects**, non-README docs, changelog prose → `human-sounding-writing`.
    - Posts / blogs / social / general prose → `human-sounding-writing`.
    - Papers / data writeups → `human-sounding-writing` (+ chart rules).
 4. Run `python scripts/validate_content_system.py --root .` (and the target
@@ -48,5 +48,14 @@ do not rename the folder or replace the id with `hsw`.
   non-README docs, and changelog prose → `human-sounding-writing`.
 - Machine-readable contract: `docs/writing-routing.json`.
 - ACS entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing`.
-- Prefer full helper (and helper+adapter) for install completeness; pin **0.5.2+**.
+- Prefer full helper (and helper+adapter) for install completeness; pin **0.5.3+** (0.5.2+ for verify entrypoint without commit must-load).
+
+## Apply + commits in router (0.5.3+)
+
+- Commit messages and commit subjects are **in** the soft router → hsw (**MUST load**).
+- `docs/writing-routing.json` declares `application: must_load`, per-route
+  `required_load`, `apply_checklist`, and `acs_prompt_inject`.
+- ACS must inject `acs_prompt_inject.instruction` into agent prompts after
+  hotload verify (see [`ACS_VERIFY.md`](ACS_VERIFY.md)).
+- Soft still means no NLP prose CI — pin **0.5.3+**.
 

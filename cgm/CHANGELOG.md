@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.3 — draft
+
+- soft writing router now **includes commit messages and commit subjects** → `human-sounding-writing` (**hsw**); README/product entry stays on `writing-direction`;
+- contract language strengthened to **MUST load / APPLY** (`application: must_load`, per-route `required_load: true`, `apply_checklist`); no longer "prefer" or "outside the soft router" for commits;
+- added machine-readable `acs_prompt_inject` so ACS can inject the MUST-load contract into agent prompts on hotload (documented in `docs/ACS_VERIFY.md`);
+- validator checks commit surfaces, `required_load`, `apply_checklist`, and `acs_prompt_inject`; still no prose-style NLP CI gate.
+
+
 ## 0.5.2 — draft
 
 - expanded soft writing router so PR titles/bodies, issue titles/bodies, issue-log titles, non-README docs, and changelog prose load `human-sounding-writing` (**hsw**); README/product entry stays on `writing-direction`;

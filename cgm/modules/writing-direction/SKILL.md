@@ -1,16 +1,19 @@
 ---
 name: writing-direction
 description: >
-  Produce human-oriented README and product-entry language from a project brief
-  and brand foundation with concrete narrative structure and selective emphasis.
-  For PR/issue titles and bodies, issue-log titles, non-README docs, and general
-  prose, load human-sounding-writing per docs/WRITING_ROUTING.md instead.
+  MUST load for human-oriented README and product-entry language from a project
+  brief and brand foundation with concrete narrative structure and selective
+  emphasis. For PR/issue titles and bodies, issue-log titles, commit
+  messages/subjects, non-README docs, and general prose, MUST load
+  human-sounding-writing per docs/WRITING_ROUTING.md instead.
 ---
 
 # Writing direction
 
-For route selection (README vs PR/issue/docs prose), follow
-[`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md).
+**MUST load** this module for README / product-entry work. For route selection
+(README vs PR/issue/commit/docs prose), follow
+[`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md)
+(`required_load: true` on each route). Soft = no NLP CI grade; not optional load.
 
 ## Story order
 

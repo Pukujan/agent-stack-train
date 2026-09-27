@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.2` (`v0.5.2`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
+**Current helper version: `0.5.3` (`v0.5.3`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -20,8 +20,8 @@ Load only the modules the requested output needs. Paths are relative to this hel
 | --- | --- | --- | --- |
 | `brand-foundation` | [`modules/brand-foundation`](modules/brand-foundation) | Audience, promise, personality, language boundaries, claim limits | Before public copy or visuals |
 | `content-context` | [`modules/content-context`](modules/content-context) | Evidence-bounded project brief from the target repo | Entering a repo or when the product story changed |
-| `writing-direction` | [`modules/writing-direction`](modules/writing-direction) | Scan-first README / product-entry story and selective bold | README or product entry pages |
-| `human-sounding-writing` | [`modules/human-sounding-writing`](modules/human-sounding-writing) | Human voice, AI-tell scrub, restrained bold (short name **hsw** / HSW) | PRs, issues, issue-log titles, non-README docs, changelog prose, posts, blogs, social, general prose, papers / data writeups |
+| `writing-direction` | [`modules/writing-direction`](modules/writing-direction) | Scan-first README / product-entry story and selective bold | **MUST load** for README or product entry pages |
+| `human-sounding-writing` | [`modules/human-sounding-writing`](modules/human-sounding-writing) | Human voice, AI-tell scrub, restrained bold (short name **hsw** / HSW) | **MUST load** for PRs, issues, issue-log titles, commit messages/subjects, non-README docs, changelog prose, posts, blogs, social, general prose, papers / data writeups |
 | `visual-direction` | [`modules/visual-direction`](modules/visual-direction) | Palette, composition, responsive roles, rejection rules | Before generating or placing visuals |
 | `image-generation` | [`modules/image-generation`](modules/image-generation) | Reproducible image briefs, prompts, and asset records | Creating or reviewing narrative raster assets |
 | `html-demo` | [`modules/html-demo`](modules/html-demo) | Accessible responsive HTML demo of the story | Demo pages that must hold up at mobile / tablet / desktop |
@@ -30,17 +30,18 @@ Load only the modules the requested output needs. Paths are relative to this hel
 
 ## Writing router
 
-Soft router — CGM does not hard-enforce it. Use it so bold and voice rules do not fight:
+Soft router — soft means no NLP CI grade of prose, **not** optional load. Agents **MUST load** the routed module (`required_load`) so bold and voice rules do not fight:
 
 | Situation | Load | Notes |
 | --- | --- | --- |
-| README / product entry | `writing-direction` (+ brand / context as needed) | Keep scan-first selective bold |
-| PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | Human-facing GitHub prose |
-| Non-README docs, changelog prose | `human-sounding-writing` (**hsw**) | Guides and narrative changelog text |
-| Posts / blogs / social / general prose | `human-sounding-writing` (**hsw**) | Human voice; restrained bold |
-| Papers / data writeups | `human-sounding-writing` (**hsw**) | Same voice; apply chart / takeaway guidance |
+| README / product entry | `writing-direction` (+ brand / context as needed) | **MUST load.** Keep scan-first selective bold |
+| PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose |
+| Commit messages / commit subjects | `human-sounding-writing` (**hsw**) | **MUST load.** Plain human subject; in scope as of 0.5.3 |
+| Non-README docs, changelog prose | `human-sounding-writing` (**hsw**) | **MUST load.** Guides and narrative changelog text |
+| Posts / blogs / social / general prose | `human-sounding-writing` (**hsw**) | **MUST load.** Human voice; restrained bold |
+| Papers / data writeups | `human-sounding-writing` (**hsw**) | **MUST load.** Same voice; apply chart / takeaway guidance |
 
-Full table and conflict notes: [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · machine-readable [`docs/writing-routing.json`](docs/writing-routing.json). Guide + rules: [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md), [`docs/human-sounding-rules.json`](docs/human-sounding-rules.json). ACS verify: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · machine-readable [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`, `acs_prompt_inject`). Guide + rules: [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md), [`docs/human-sounding-rules.json`](docs/human-sounding-rules.json). ACS verify + inject: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
 
 **This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy.
 
@@ -123,7 +124,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.2`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.3`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -198,7 +199,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.2`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.3`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

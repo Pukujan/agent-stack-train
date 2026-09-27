@@ -464,14 +464,20 @@ def check_writing_contract(root: Path) -> list[str]:
     readme_route = by_id.get("readme_product_entry") or {}
     if readme_route.get("load") != "writing-direction":
         errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry must load writing-direction")
+    if readme_route.get("required_load") is not True:
+        errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry required_load must be true")
     prose_route = by_id.get("github_and_docs_prose") or {}
     if prose_route.get("load") != "human-sounding-writing":
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")
+    if prose_route.get("required_load") is not True:
+        errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose required_load must be true")
     surfaces = {str(s).lower() for s in prose_route.get("surfaces", [])}
     for needle in (
         "pull request",
         "issue title",
         "issue log",
+        "commit message",
+        "commit subject",
         "non-readme",
         "changelog",
     ):
@@ -480,9 +486,44 @@ def check_writing_contract(root: Path) -> list[str]:
                 f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose surfaces must mention {needle}"
             )
 
+    if contract.get("application") != "must_load":
+        errors.append(f"{WRITING_ROUTER_CONTRACT} application must be must_load")
+
+    checklist = contract.get("apply_checklist")
+    if not isinstance(checklist, list) or len(checklist) < 3:
+        errors.append(f"{WRITING_ROUTER_CONTRACT} apply_checklist must be a list with at least 3 steps")
+
+    not_routed = contract.get("not_routed")
+    if not isinstance(not_routed, list):
+        errors.append(f"{WRITING_ROUTER_CONTRACT} not_routed must be a list")
+    else:
+        for item in not_routed:
+            surface = str((item or {}).get("surface", "")).lower() if isinstance(item, dict) else str(item).lower()
+            if "commit" in surface:
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} commit surfaces must be routed to human-sounding-writing, not not_routed"
+                )
+
     entry = contract.get("acs_verify_entrypoint")
     if not isinstance(entry, dict) or not entry.get("writing") or not entry.get("full_helper"):
         errors.append(f"{WRITING_ROUTER_CONTRACT} must declare acs_verify_entrypoint.writing and full_helper")
+
+    inject = contract.get("acs_prompt_inject")
+    if not isinstance(inject, dict):
+        errors.append(f"{WRITING_ROUTER_CONTRACT} must declare acs_prompt_inject object")
+    else:
+        instruction = inject.get("instruction")
+        if not isinstance(instruction, str) or "MUST load" not in instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention MUST load"
+            )
+        if "commit" not in str(instruction).lower():
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention commit surfaces"
+            )
+        fields = inject.get("fields")
+        if not isinstance(fields, list) or "routes" not in fields:
+            errors.append(f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include routes")
 
     return errors
 

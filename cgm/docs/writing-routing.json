@@ -1,7 +1,8 @@
 {
   "schema_version": "content-generation.writing-routing.v1",
   "enforcement": "soft",
-  "note": "Agents must load the listed module for each surface. CGM does not CI-enforce prose style; presence of modules + this contract is what validate_content_system checks.",
+  "application": "must_load",
+  "note": "Agents MUST load the listed module before writing each surface (APPLY, not prefer). CGM does not CI-enforce prose style; presence of modules + this contract is what validate_content_system checks. ACS should inject required_load / apply_checklist into agent prompts on hotload (see acs_prompt_inject).",
   "routes": [
     {
       "id": "readme_product_entry",
@@ -10,6 +11,7 @@
         "product entry pages"
       ],
       "load": "writing-direction",
+      "required_load": true,
       "also_load_optional": [
         "brand-foundation",
         "content-context"
@@ -24,6 +26,8 @@
         "issue titles",
         "issue bodies",
         "issue log titles",
+        "commit messages",
+        "commit subjects",
         "non-README docs",
         "changelog prose",
         "posts",
@@ -34,18 +38,21 @@
         "data writeups"
       ],
       "load": "human-sounding-writing",
+      "required_load": true,
       "short_name": [
         "hsw",
         "HSW"
       ],
-      "notes": "Human voice, AI-tell scrub, restrained bold. Includes chart/takeaway guidance for papers and data writeups."
+      "notes": "Human voice, AI-tell scrub, restrained bold. Includes chart/takeaway guidance for papers and data writeups. Commit messages and commit subjects are in scope — MUST load hsw before writing them."
     }
   ],
-  "not_routed": [
-    {
-      "surface": "commit messages",
-      "reason": "Not part of the soft router contract and not CI-enforced. Prefer a plain human subject when writing one."
-    }
+  "not_routed": [],
+  "apply_checklist": [
+    "Identify the writing surface (README, PR title/body, issue title/body, issue-log title, commit message/subject, non-README doc, changelog prose, post/blog/social, paper/data writeup).",
+    "Look up the surface in routes[].surfaces in docs/writing-routing.json (or the table in docs/WRITING_ROUTING.md).",
+    "MUST load modules/<load>/SKILL.md for that route before drafting — required_load is true; do not skip because the surface is short or 'just a commit'.",
+    "Apply the module rules to the draft (voice, AI-tell scrub, bold policy as the module states).",
+    "README / product entry stays on writing-direction; do not apply hsw bold restraints there."
   ],
   "required_writing_modules": [
     "writing-direction",
@@ -55,5 +62,15 @@
     "writing": "python scripts/validate_content_system.py --root <cgm-checkout> --mode writing",
     "full_helper": "python scripts/validate_content_system.py --root <cgm-checkout>",
     "helper_and_adapter": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project>"
+  },
+  "acs_prompt_inject": {
+    "source": "docs/writing-routing.json",
+    "fields": [
+      "application",
+      "routes",
+      "apply_checklist"
+    ],
+    "when": "After hotload_check / CGM_VERIFY succeeds, before the agent writes human-facing GitHub or docs prose.",
+    "instruction": "Inject into the agent system or task prompt: For every route with required_load true, you MUST load modules/<load>/SKILL.md before writing any listed surface. README and product entry pages → writing-direction. Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, and papers/data writeups → human-sounding-writing (hsw). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY, not prefer. Follow apply_checklist in this file."
   }
 }

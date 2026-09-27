@@ -260,7 +260,7 @@ class ContentSystemValidationTests(unittest.TestCase):
             (staging / "docs" / "WRITING_ROUTING.md").write_text("# router\n", encoding="utf-8")
             version = {
                 "system": "content-generation-modules",
-                "version": "0.5.2",
+                "version": "0.5.3",
                 "modules": [
                     "brand-foundation",
                     "content-context",
@@ -296,6 +296,73 @@ class ContentSystemValidationTests(unittest.TestCase):
             (staging / "docs" / "writing-routing.json").write_text(json.dumps(bad), encoding="utf-8")
             errors = check_writing_contract(staging)
             self.assertTrue(any("pull request" in e for e in errors))
+
+
+    def test_writing_contract_rejects_missing_commit_surfaces(self):
+        import json
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            (staging / "modules" / "writing-direction").mkdir(parents=True)
+            (staging / "modules" / "human-sounding-writing").mkdir(parents=True)
+            (staging / "modules" / "writing-direction" / "SKILL.md").write_text("# wd\n", encoding="utf-8")
+            (staging / "modules" / "human-sounding-writing" / "SKILL.md").write_text("# hsw\n", encoding="utf-8")
+            (staging / "docs").mkdir()
+            (staging / "docs" / "WRITING_ROUTING.md").write_text("# router\n", encoding="utf-8")
+            version = {
+                "system": "content-generation-modules",
+                "version": "0.5.3",
+                "modules": [
+                    "brand-foundation",
+                    "content-context",
+                    "writing-direction",
+                    "human-sounding-writing",
+                    "visual-direction",
+                    "image-generation",
+                    "html-demo",
+                ],
+            }
+            (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
+            bad = {
+                "schema_version": "content-generation.writing-routing.v1",
+                "enforcement": "soft",
+                "application": "must_load",
+                "required_writing_modules": ["writing-direction", "human-sounding-writing"],
+                "apply_checklist": ["a", "b", "c"],
+                "not_routed": [],
+                "routes": [
+                    {
+                        "id": "readme_product_entry",
+                        "surfaces": ["README.md"],
+                        "load": "writing-direction",
+                        "required_load": True,
+                    },
+                    {
+                        "id": "github_and_docs_prose",
+                        "surfaces": [
+                            "pull request titles",
+                            "issue titles",
+                            "issue log titles",
+                            "non-README docs",
+                            "changelog prose",
+                        ],
+                        "load": "human-sounding-writing",
+                        "required_load": True,
+                    },
+                ],
+                "acs_verify_entrypoint": {
+                    "writing": "python scripts/validate_content_system.py --root . --mode writing",
+                    "full_helper": "python scripts/validate_content_system.py --root .",
+                },
+                "acs_prompt_inject": {
+                    "fields": ["routes", "apply_checklist"],
+                    "instruction": "MUST load modules before writing commit messages.",
+                },
+            }
+            (staging / "docs" / "writing-routing.json").write_text(json.dumps(bad), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("commit message" in e for e in errors), errors)
 
 
 if __name__ == "__main__":

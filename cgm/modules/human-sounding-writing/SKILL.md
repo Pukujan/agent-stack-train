@@ -1,12 +1,13 @@
 ---
 name: human-sounding-writing
-description: >
-  Use for pull request and issue titles/bodies, issue-log titles, non-README
-  docs, changelog prose, posts, blogs, social copy, general agent prose, and
-  papers or data writeups that must sound human and avoid AI tells. Official
-  short name: hsw (also HSW); canonical module id remains human-sounding-writing.
-  Do not use for README or product-entry copy — load writing-direction and
-  docs/WRITING_ROUTING.md instead.
+description: >-
+  MUST load for pull request and issue titles/bodies, issue-log titles, commit
+  messages and commit subjects, non-README docs, changelog prose, posts, blogs,
+  social copy, general agent prose, and papers or data writeups that must sound
+  human and avoid AI tells. Official short name: hsw (also HSW); canonical
+  module id remains human-sounding-writing. Do not use for README or
+  product-entry copy — load writing-direction and docs/WRITING_ROUTING.md
+  instead.
 ---
 
 # Human-sounding writing
@@ -14,11 +15,16 @@ description: >
 Official short name: **hsw** (also HSW). Canonical module id remains
 `human-sounding-writing`.
 
+**MUST load** this module before writing any surface routed to it in
+[`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md) /
+[`docs/writing-routing.json`](../../docs/writing-routing.json)
+(`required_load: true`). Soft = no NLP CI grade; not optional load.
+
 Write so a careful reader hears a person with evidence, not a model averaging
 safe phrases. Specifics beat synonyms. This module is for pull request and issue
-titles/bodies, issue-log titles, non-README docs, changelog prose, posts, blogs,
-social, general agent prose, and papers or data writeups. It is **not** for
-README or product-entry pages.
+titles/bodies, issue-log titles, **commit messages and commit subjects**,
+non-README docs, changelog prose, posts, blogs, social, general agent prose, and
+papers or data writeups. It is **not** for README or product-entry pages.
 
 ## When not to use this module
 
@@ -47,7 +53,8 @@ contract itself.
 2. **Open with something concrete.** Use a real record, question, case, or
    scene from the material, then zoom out to the broader point and numbers.
    Use a plain title that states what happened. Avoid colon-reveal titles and
-   slogan formulas.
+   slogan formulas. For **commit subjects**, keep one plain human line that
+   states what changed; scrub AI-tell phrasing.
 3. **Write as people.** Prefer “we” or a clear narrator, active verbs, and
    present tense for findings. Say what you did and what surprised you.
 4. **Keep the main text short.** Numbered plain findings work well: each opens
@@ -83,3 +90,4 @@ contract itself.
   averages?
 - Did bold stay restrained (for non-README work)?
 - Do headings and claims still match the verified numbers?
+- For commits: is the subject a plain human line that states what changed?
