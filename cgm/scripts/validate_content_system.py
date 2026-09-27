@@ -23,6 +23,16 @@ EXPECTED_MODULES = {
     "html-demo",
 }
 
+WRITING_MODULES = (
+    "writing-direction",
+    "human-sounding-writing",
+)
+
+WRITING_ROUTER_DOC = "docs/WRITING_ROUTING.md"
+WRITING_ROUTER_CONTRACT = "docs/writing-routing.json"
+WRITING_ROUTER_SCHEMA = "content-generation.writing-routing.v1"
+REQUIRED_ROUTER_ROUTE_IDS = ("readme_product_entry", "github_and_docs_prose")
+
 NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
 NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 REQUIRED_NARRATIVE_ASSET_FIELDS = (
@@ -60,6 +70,8 @@ REQUIRED_HELPER_DOCS = (
     "docs/PROVENANCE_AND_CITATION.md",
     "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
     "docs/WRITING_ROUTING.md",
+    "docs/writing-routing.json",
+    "docs/ACS_VERIFY.md",
     "docs/HUMAN_SOUNDING_WRITING.md",
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md",
@@ -394,6 +406,100 @@ def check_readme(root: Path) -> list[str]:
     return errors
 
 
+def check_writing_contract(root: Path) -> list[str]:
+    """Presence check for writing modules + soft router (ACS hotload entrypoint)."""
+    errors: list[str] = []
+    version_path = root / "system-version.json"
+    try:
+        version = load_json(version_path)
+    except ValueError as exc:
+        return [str(exc)]
+
+    modules = set(version.get("modules", []))
+    for module in WRITING_MODULES:
+        if module not in modules:
+            errors.append(f"system-version.json modules missing required writing module: {module}")
+        skill = root / "modules" / module / "SKILL.md"
+        if not skill.is_file():
+            errors.append(f"missing writing module entry point: {skill.relative_to(root)}")
+        elif len(skill.read_text(encoding="utf-8").splitlines()) > 500:
+            errors.append(f"writing module entry point is over 500 lines: {skill.relative_to(root)}")
+
+    router_doc = root / WRITING_ROUTER_DOC
+    if not router_doc.is_file():
+        errors.append(f"missing soft writing router: {WRITING_ROUTER_DOC}")
+
+    contract_path = root / WRITING_ROUTER_CONTRACT
+    try:
+        contract = load_json(contract_path)
+    except ValueError as exc:
+        errors.append(str(exc))
+        return errors
+
+    if contract.get("schema_version") != WRITING_ROUTER_SCHEMA:
+        errors.append(f"{WRITING_ROUTER_CONTRACT} must declare {WRITING_ROUTER_SCHEMA}")
+    if contract.get("enforcement") != "soft":
+        errors.append(f"{WRITING_ROUTER_CONTRACT} enforcement must be soft")
+    required_modules = contract.get("required_writing_modules")
+    if list(required_modules or []) != list(WRITING_MODULES):
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} required_writing_modules must be exactly {list(WRITING_MODULES)}"
+        )
+
+    routes = contract.get("routes")
+    if not isinstance(routes, list):
+        errors.append(f"{WRITING_ROUTER_CONTRACT} routes must be a list")
+        return errors
+    by_id = {route.get("id"): route for route in routes if isinstance(route, dict)}
+    for route_id in REQUIRED_ROUTER_ROUTE_IDS:
+        route = by_id.get(route_id)
+        if not route:
+            errors.append(f"{WRITING_ROUTER_CONTRACT} missing route id: {route_id}")
+            continue
+        if not isinstance(route.get("surfaces"), list) or not route.get("surfaces"):
+            errors.append(f"{WRITING_ROUTER_CONTRACT} route {route_id} needs non-empty surfaces")
+        if not route.get("load"):
+            errors.append(f"{WRITING_ROUTER_CONTRACT} route {route_id} missing load")
+
+    readme_route = by_id.get("readme_product_entry") or {}
+    if readme_route.get("load") != "writing-direction":
+        errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry must load writing-direction")
+    prose_route = by_id.get("github_and_docs_prose") or {}
+    if prose_route.get("load") != "human-sounding-writing":
+        errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")
+    surfaces = {str(s).lower() for s in prose_route.get("surfaces", [])}
+    for needle in (
+        "pull request",
+        "issue title",
+        "issue log",
+        "non-readme",
+        "changelog",
+    ):
+        if not any(needle in surface for surface in surfaces):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose surfaces must mention {needle}"
+            )
+
+    entry = contract.get("acs_verify_entrypoint")
+    if not isinstance(entry, dict) or not entry.get("writing") or not entry.get("full_helper"):
+        errors.append(f"{WRITING_ROUTER_CONTRACT} must declare acs_verify_entrypoint.writing and full_helper")
+
+    return errors
+
+
+def _writing_verify_line(root: Path, errors: list[str], mode: str) -> str:
+    wd = (root / "modules" / "writing-direction" / "SKILL.md").is_file()
+    hsw = (root / "modules" / "human-sounding-writing" / "SKILL.md").is_file()
+    router = (root / WRITING_ROUTER_CONTRACT).is_file() and (root / WRITING_ROUTER_DOC).is_file()
+    status = "OK" if not errors else "FAIL"
+    return (
+        f"CGM_VERIFY mode={mode} status={status} "
+        f"writing_direction={'present' if wd else 'missing'} "
+        f"human_sounding_writing={'present' if hsw else 'missing'} "
+        f"writing_router={'present' if router else 'missing'}"
+    )
+
+
 def check(root: Path) -> list[str]:
     errors: list[str] = []
     version_path = root / "system-version.json"
@@ -483,6 +589,7 @@ def check(root: Path) -> list[str]:
         if not (root / path).is_file():
             errors.append(f"missing helper guide: {path}")
     errors.extend(check_readme(root))
+    errors.extend(check_writing_contract(root))
     return errors
 
 
@@ -558,15 +665,45 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
     return errors
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate the content-generation helper contract. "
+            "ACS hotload: --mode writing checks writing-direction + human-sounding-writing + soft router."
+        )
+    )
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--adapter", type=Path)
     parser.add_argument("--project-root", type=Path)
-    args = parser.parse_args()
-    errors = check(args.root.resolve())
+    parser.add_argument(
+        "--mode",
+        choices=("helper", "writing"),
+        default="helper",
+        help="helper=full CGM contract (default); writing=ACS entrypoint for writing modules + soft router only",
+    )
+    args = parser.parse_args(argv)
+    root = args.root.resolve()
+    if args.mode == "writing":
+        errors = check_writing_contract(root)
+        print(_writing_verify_line(root, errors, "writing"))
+        if errors:
+            print("INVALID")
+            for error in errors:
+                print(f"- {error}")
+            return 1
+        print("VALID: content-generation-modules writing contract")
+        return 0
+
+    errors = check(root)
     if args.adapter:
-        errors.extend(check_adapter(args.adapter.resolve(), args.project_root.resolve() if args.project_root else None))
+        errors.extend(
+            check_adapter(
+                args.adapter.resolve(),
+                args.project_root.resolve() if args.project_root else None,
+            )
+        )
+    # Always emit CGM_VERIFY for ACS parsers on helper runs too.
+    print(_writing_verify_line(root, errors, "helper"))
     if errors:
         print("INVALID")
         for error in errors:

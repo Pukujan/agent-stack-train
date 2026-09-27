@@ -4,7 +4,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_content_system import check, check_adapter, check_project_brief_v2, check_readme
+from scripts.validate_content_system import (
+    check,
+    check_adapter,
+    check_project_brief_v2,
+    check_readme,
+    check_writing_contract,
+    main,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -216,6 +223,79 @@ class ContentSystemValidationTests(unittest.TestCase):
             write_adapter(adapter, "v1")
             errors = check_adapter(adapter)
             self.assertTrue(any("require project-brief.v2" in error for error in errors), errors)
+
+
+
+    def test_writing_contract_accepts_helper_checkout(self):
+        self.assertEqual(check_writing_contract(ROOT), [])
+
+    def test_writing_mode_entrypoint_prints_cgm_verify(self):
+        import io
+        from contextlib import redirect_stdout
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = main(["--root", str(ROOT), "--mode", "writing"])
+        out = buf.getvalue()
+        self.assertEqual(code, 0)
+        self.assertIn("CGM_VERIFY mode=writing status=OK", out)
+        self.assertIn("writing_direction=present", out)
+        self.assertIn("human_sounding_writing=present", out)
+        self.assertIn("writing_router=present", out)
+        self.assertIn("VALID: content-generation-modules writing contract", out)
+
+    def test_writing_contract_rejects_missing_github_surfaces(self):
+        import json
+        import tempfile
+        import shutil
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            # Minimal tree: copy only what writing check needs
+            (staging / "modules" / "writing-direction").mkdir(parents=True)
+            (staging / "modules" / "human-sounding-writing").mkdir(parents=True)
+            (staging / "modules" / "writing-direction" / "SKILL.md").write_text("# wd\n", encoding="utf-8")
+            (staging / "modules" / "human-sounding-writing" / "SKILL.md").write_text("# hsw\n", encoding="utf-8")
+            (staging / "docs").mkdir()
+            (staging / "docs" / "WRITING_ROUTING.md").write_text("# router\n", encoding="utf-8")
+            version = {
+                "system": "content-generation-modules",
+                "version": "0.5.2",
+                "modules": [
+                    "brand-foundation",
+                    "content-context",
+                    "writing-direction",
+                    "human-sounding-writing",
+                    "visual-direction",
+                    "image-generation",
+                    "html-demo",
+                ],
+            }
+            (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
+            bad = {
+                "schema_version": "content-generation.writing-routing.v1",
+                "enforcement": "soft",
+                "required_writing_modules": ["writing-direction", "human-sounding-writing"],
+                "routes": [
+                    {
+                        "id": "readme_product_entry",
+                        "surfaces": ["README.md"],
+                        "load": "writing-direction",
+                    },
+                    {
+                        "id": "github_and_docs_prose",
+                        "surfaces": ["posts", "blogs"],
+                        "load": "human-sounding-writing",
+                    },
+                ],
+                "acs_verify_entrypoint": {
+                    "writing": "python scripts/validate_content_system.py --root . --mode writing",
+                    "full_helper": "python scripts/validate_content_system.py --root .",
+                },
+            }
+            (staging / "docs" / "writing-routing.json").write_text(json.dumps(bad), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("pull request" in e for e in errors))
 
 
 if __name__ == "__main__":

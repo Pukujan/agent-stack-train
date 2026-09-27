@@ -1,9 +1,16 @@
 ---
 name: writing-direction
-description: Produce human-oriented README, marketing, UX, and product language from a project brief and brand foundation with concrete narrative structure and selective emphasis.
+description: >
+  Produce human-oriented README and product-entry language from a project brief
+  and brand foundation with concrete narrative structure and selective emphasis.
+  For PR/issue titles and bodies, issue-log titles, non-README docs, and general
+  prose, load human-sounding-writing per docs/WRITING_ROUTING.md instead.
 ---
 
 # Writing direction
+
+For route selection (README vs PR/issue/docs prose), follow
+[`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md).
 
 ## Story order
 

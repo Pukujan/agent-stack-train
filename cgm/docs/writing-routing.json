@@ -1,0 +1,59 @@
+{
+  "schema_version": "content-generation.writing-routing.v1",
+  "enforcement": "soft",
+  "note": "Agents must load the listed module for each surface. CGM does not CI-enforce prose style; presence of modules + this contract is what validate_content_system checks.",
+  "routes": [
+    {
+      "id": "readme_product_entry",
+      "surfaces": [
+        "README.md",
+        "product entry pages"
+      ],
+      "load": "writing-direction",
+      "also_load_optional": [
+        "brand-foundation",
+        "content-context"
+      ],
+      "notes": "Keep scan-first selective bold and the README scanability contract."
+    },
+    {
+      "id": "github_and_docs_prose",
+      "surfaces": [
+        "pull request titles",
+        "pull request bodies",
+        "issue titles",
+        "issue bodies",
+        "issue log titles",
+        "non-README docs",
+        "changelog prose",
+        "posts",
+        "blogs",
+        "social",
+        "general agent prose",
+        "papers",
+        "data writeups"
+      ],
+      "load": "human-sounding-writing",
+      "short_name": [
+        "hsw",
+        "HSW"
+      ],
+      "notes": "Human voice, AI-tell scrub, restrained bold. Includes chart/takeaway guidance for papers and data writeups."
+    }
+  ],
+  "not_routed": [
+    {
+      "surface": "commit messages",
+      "reason": "Not part of the soft router contract and not CI-enforced. Prefer a plain human subject when writing one."
+    }
+  ],
+  "required_writing_modules": [
+    "writing-direction",
+    "human-sounding-writing"
+  ],
+  "acs_verify_entrypoint": {
+    "writing": "python scripts/validate_content_system.py --root <cgm-checkout> --mode writing",
+    "full_helper": "python scripts/validate_content_system.py --root <cgm-checkout>",
+    "helper_and_adapter": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project>"
+  }
+}

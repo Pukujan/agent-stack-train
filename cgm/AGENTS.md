@@ -6,11 +6,11 @@ Before changing or using the system:
 
 1. read `README.md`;
 2. read `system-version.json`;
-3. read only the module `SKILL.md` files relevant to the requested output; for writing work, follow [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) so README/product entry uses `writing-direction` while posts, blogs, social, general prose, and papers/data writeups use `human-sounding-writing`;
+3. read only the module `SKILL.md` files relevant to the requested output; for writing work, follow [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) / [`docs/writing-routing.json`](docs/writing-routing.json) so README/product entry uses `writing-direction` while PR/issue titles and bodies, issue-log titles, non-README docs, changelog prose, posts, blogs, social, general prose, and papers/data writeups use `human-sounding-writing`;
 4. inspect the target repository's `.content-system/` adapter and evidence before making claims;
 5. for README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, `docs/PROVENANCE_AND_CITATION.md`, `docs/README_QUALITY_PDD.md`, `docs/README_QUALITY_SDD.md`, `docs/README_QUALITY_TDD.md`, and `templates/readme-contract.json`;
 6. inspect prior reviewed outputs in the target repository and the helper's prior-work references before inventing a new story or visual direction;
-7. run `python scripts/validate_content_system.py --root .` before handoff.
+7. run `python scripts/validate_content_system.py --root .` before handoff (ACS hotload may call `--mode writing` first; see [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md)).
 
 The helper system defines methods and constraints. It does not define product facts. Product facts, claims, audience, and project-specific visual identity belong in the target repository.
 
@@ -37,15 +37,18 @@ Do not hand off a README that is only a module index, setup checklist, architect
 
 ## Writing modules
 
-Use the soft router in [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md):
+Use the soft router in [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) (JSON: [`docs/writing-routing.json`](docs/writing-routing.json)):
 
 - README / product entry → `writing-direction` (keep scan-first selective bold);
-- posts / blogs / social / general agent prose → `human-sounding-writing` (official short name **hsw** / HSW);
+- PR titles/bodies, issue titles/bodies, issue-log titles, non-README docs, changelog prose → `human-sounding-writing` (**hsw** / HSW);
+- posts / blogs / social / general agent prose → `human-sounding-writing` (**hsw** / HSW);
 - papers / data writeups → `human-sounding-writing` (including chart rules; short name **hsw**).
 
-Agents asked for "hsw" should load `human-sounding-writing`. The canonical module id remains `human-sounding-writing`.
+Commit messages are outside the soft router. Agents asked for "hsw" should load `human-sounding-writing`. The canonical module id remains `human-sounding-writing`.
 
 Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken the README scanability contract.
+
+ACS / multi-agent-hotload verify entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing` (full helper or helper+adapter as needed). Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
 
 ## Versioning
 

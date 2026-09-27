@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2 — draft
+
+- expanded soft writing router so PR titles/bodies, issue titles/bodies, issue-log titles, non-README docs, and changelog prose load `human-sounding-writing` (**hsw**); README/product entry stays on `writing-direction`;
+- added machine-readable soft router `docs/writing-routing.json` (`content-generation.writing-routing.v1`) checked by the validator;
+- added ACS hotload verify entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing` emits a stable `CGM_VERIFY` line; documented for ACS in `docs/ACS_VERIFY.md`;
+- no prose-style CI gate — presence + agent discipline only.
+
 ## 0.5.1 — draft
 
 - documented official short name **hsw** (also HSW) for the `human-sounding-writing` module in the skill frontmatter/body, soft writing router, AGENTS, README, and human-sounding guide;

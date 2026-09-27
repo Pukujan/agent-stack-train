@@ -2,11 +2,13 @@
 
 Official short name: **hsw** (also HSW). Canonical module id: `human-sounding-writing`.
 
-This guide helps agents write posts, blogs, social copy, general prose, and
-papers or data writeups that do not read as AI-smoothed averages. Follow the
-rules when instinct conflicts with them. Tags in brackets point at the research
-corpus summarized in section 8. Machine-checkable versions live in
-[`human-sounding-rules.json`](human-sounding-rules.json).
+This guide helps agents write pull request and issue titles/bodies, issue-log
+titles, non-README docs, changelog prose, posts, blogs, social copy, general
+prose, and papers or data writeups that do not read as AI-smoothed averages.
+Follow the rules when instinct conflicts with them. Tags in brackets point at
+the research corpus summarized in section 8. Machine-checkable versions live in
+[`human-sounding-rules.json`](human-sounding-rules.json). Soft router:
+[`WRITING_ROUTING.md`](WRITING_ROUTING.md) / [`writing-routing.json`](writing-routing.json).
 
 **Out of scope here:** README and product-entry pages. Those keep
 `writing-direction` scan/bold rules. See [`WRITING_ROUTING.md`](WRITING_ROUTING.md).

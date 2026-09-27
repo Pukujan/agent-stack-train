@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -32,13 +32,15 @@
     "docs/README_QUALITY_TDD.md",
     "docs/PROVENANCE_AND_CITATION.md",
     "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
+    "docs/WRITING_ROUTING.md",
+    "docs/writing-routing.json",
+    "docs/ACS_VERIFY.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
     "docs/HOLDOUT_EVALUATION.md",
     "docs/MIGRATING_TO_0.2.md",
     "docs/MIGRATING_TO_0.3.md",
     "docs/MIGRATING_TO_0.4.md",
-    "docs/WRITING_ROUTING.md",
     "docs/HUMAN_SOUNDING_WRITING.md",
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md"
