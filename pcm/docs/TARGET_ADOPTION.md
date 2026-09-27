@@ -73,3 +73,21 @@ Before every push synchronize applicable docs/checkpoint/catalog/index and recor
 ## Mandatory GitHub enforcement (every adopter)
 
 **PR-only to `main`, required status check `gates`, and prefer auto-merge-when-green are mandatory for every PCM adopter.** See [`docs/adopter-enforcement.md`](adopter-enforcement.md) for the exact ruleset/CI shape, apply steps, and verify checklist. Missing or unverified gates fail closed.
+
+## Continuity path naming (binding for new paths)
+
+New continuity-managed filesystem paths (task files, claim-related paths, adopter source folders, and new checkpoint prose filenames) follow [`docs/CONTINUITY_PATH_NAMING.md`](CONTINUITY_PATH_NAMING.md). Prefer pronounceable words a newcomer can say aloud; keep existing public paths stable; apply forward-only — never rewrite merged history for naming alone.
+
+**Ownership split:** PCM owns those source-path conventions. Generated artifact / media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)); adopters pin and apply that helper when generating content. PCM does not reimplement it.
+
+`continuity init` and the optional `--github-templates` install surface point agents at these rules via the profile templates (`templates/v1/software/AGENTS.md`, `templates/v1/minimal/HANDOFF.md`, and the matching generators).
+
+### Adoption checklist
+
+- [ ] New continuity-managed source paths follow the pronounceable rule in [`CONTINUITY_PATH_NAMING.md`](CONTINUITY_PATH_NAMING.md).
+- [ ] When the adopter generates content artifacts, pin and apply the CGM filename helper from [content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26) (multi-dimension labels: pitch vs speed must not collapse to one opaque token).
+- [ ] ACS / full PCM+CGM hotload checklist gains a filenames row (not titles-only) — see [`acs-hotload-path-checklist.md`](acs-hotload-path-checklist.md).
+
+### ACS / full PCM+CGM hotload note
+
+Titles human-readable (existing CGM HSW) **and** output/artifact filenames via the CGM #26 helper once pinned **and** continuity source paths per [`CONTINUITY_PATH_NAMING.md`](CONTINUITY_PATH_NAMING.md). Details: [`acs-hotload-path-checklist.md`](acs-hotload-path-checklist.md).

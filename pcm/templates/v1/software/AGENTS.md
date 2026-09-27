@@ -36,6 +36,10 @@ If the remote is temporarily unavailable, use the degraded recovery-receipt path
 
 For continuity issues, progress updates, pull requests, and PCM-owned project-state documents, explain the human problem and outcome first, then scope, status, linked evidence, and one next action. Cite external factual claims and tie repository claims to a revision, issue, PR, or CI result. Record reproduction details only when needed to verify the claim. Keep PR openings skimmable; link or collapse long logs. Preserve the project's existing ownership outside PCM continuity. GitHub's issue-closing keywords in PR descriptions and commit messages remain active under negation; use them only when the issue should complete at merge, and verify issue status afterward.
 
+## Continuity path naming
+
+New continuity-managed source paths (tasks, claims, adopter folders, new prose filenames) use pronounceable words a newcomer can say aloud. See `docs/CONTINUITY_PATH_NAMING.md`. Keep existing public paths stable; do not rewrite merged history for naming alone. Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)) — pin and apply that helper when generating content; do not reimplement it in PCM.
+
 ## Verification
 
 Each task names its human-visible outcome and proportionate checks. Use deterministic regression tests by default. Add a fresh-session holdout only when the task promises that a new agent can discover or follow repository guidance; its checks must come from visible requirements, and ambiguous criteria are inconclusive. Do not create separate PDD/SDD/TDD paperwork or a sub-issue for every test type.

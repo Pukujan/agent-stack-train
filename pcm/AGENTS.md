@@ -101,6 +101,10 @@ Never promote an unsupported previous-session statement into project fact.
 
 For continuity issues, progress updates, pull requests, and PCM-owned project-state documents, orient the reader to the human problem and consequence, observable outcome, scope, status, evidence, and next action. Link external claims to direct sources and repository claims to a commit/revision, issue, PR, CI run, or artifact. Record enough inputs and commands to reproduce a result only when the claim depends on an experiment, research, or failure reproduction. Keep PR openings skimmable; link or collapse long logs and technical detail. Preserve the target project's ownership of unrelated writing and documents. GitHub's issue-closing keywords in PR descriptions and commit messages remain active under negation; use them only when the issue should complete at merge, and verify issue status afterward. See docs/CONTINUITY_RECORDS_POLICY.md.
 
+## Continuity path naming
+
+New continuity-managed source paths (tasks, claims, adopter folders, new prose filenames) use pronounceable words a newcomer can say aloud. See `docs/CONTINUITY_PATH_NAMING.md`. Keep existing public paths stable; do not rewrite merged history for naming alone. Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)) — pin and apply that helper when generating content; do not reimplement it in PCM.
+
 ## Verification rule
 
 Name the human-visible outcome and choose checks in proportion to the promise being changed. Deterministic regression tests are the default; fresh-session holdouts are reserved for agent-facing workflow promises and must use the visible-contract fairness rules. Do not add process documents or test-type sub-issues by default. See `docs/TESTING_POLICY.md`.

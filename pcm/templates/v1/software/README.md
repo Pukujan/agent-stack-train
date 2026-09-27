@@ -4,6 +4,11 @@ This repository uses Project Continuity Protocol.
 
 Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.
 
+
+## Continuity path naming
+
+New continuity-managed source paths use pronounceable words a newcomer can say aloud (`docs/CONTINUITY_PATH_NAMING.md`). Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)).
+
 <!-- pcm:github-progression:start -->
 ## GitHub-owned progression
 

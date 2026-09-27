@@ -46,6 +46,10 @@ possible future use; see `docs/AGENT_LIFECYCLE.md`.
 
 Write continuity issues, updates, pull requests, and project-state documents so a new reader can understand the problem, human outcome, scope, evidence, and next action without the original chat. Cite external claims and link repository claims to their revision or CI evidence. Include reproduction detail only when it is needed to verify the claim. Keep PR openings skimmable; put long logs in linked artifacts. Preserve project ownership outside continuity. Do not claim automatic tracker sync or chat capture unless implemented and tested. GitHub's issue-closing keywords in PR descriptions and commit messages remain active under negation; use them only when the issue should complete at merge, and verify issue status afterward.
 
+## Continuity path naming
+
+New continuity-managed source paths (tasks, claims, adopter folders, new prose filenames) use pronounceable words a newcomer can say aloud. See `docs/CONTINUITY_PATH_NAMING.md`. Keep existing public paths stable; do not rewrite merged history for naming alone. Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)) — pin and apply that helper when generating content; do not reimplement it in PCM.
+
 ## Verification
 
 Each task names the useful outcome for a person and the smallest checks that can verify it. Prefer deterministic checks. Use a fresh-session holdout only when the promise is about what a new session can discover or do; judge it against visible requirements, not hidden expectations. A passing test does not replace the promised human-visible result.

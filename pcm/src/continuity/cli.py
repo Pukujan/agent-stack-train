@@ -58,6 +58,11 @@ Before every push, synchronize relevant docs and task/checkpoint projections, CU
 Required CI and GitHub auto-merge are mandatory. Arm auto-merge only after the increment's final push: a later push races the merge window and strands outside accepted history. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
 <!-- pcm:github-progression:end -->"""
 
+PATH_NAMING_GUIDANCE = """## Continuity path naming
+
+New continuity-managed source paths (tasks, claims, adopter folders, new prose filenames) use pronounceable words a newcomer can say aloud. See `docs/CONTINUITY_PATH_NAMING.md`. Keep existing public paths stable; do not rewrite merged history for naming alone. Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)) — pin and apply that helper when generating content; do not reimplement it in PCM."""
+
+
 GITHUB_ISSUE_LIFECYCLE_GUIDANCE = (
     "When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. "
     "GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. "
@@ -572,6 +577,8 @@ def handoff_template(workspace_mode: str) -> str:
         + "\n\n"
         + ISSUE_LOG_FORMAT_GUIDANCE
         + "\n\n"
+        + PATH_NAMING_GUIDANCE
+        + "\n\n"
         + workspace_policy_text(workspace_mode)
         + "## Finding earlier project documents\n\n"
         "When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find \"<issue title and task-objective terms>\" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.\n\n"
@@ -595,6 +602,8 @@ def agents_template(workspace_mode: str) -> str:
         + GITHUB_PROGRESSION_GUIDANCE
         + "\n\n"
         + ISSUE_LOG_FORMAT_GUIDANCE
+        + "\n\n"
+        + PATH_NAMING_GUIDANCE
         + "\n\n"
         "Store checkout roots only in the private per-device registry with `continuity workspace register --root <checkout>`. Before creating a worktree, inspect registered roots and Git's worktree list. Reuse one clean, unlocked matching task branch; stop on dirty, locked, conflicting, or ambiguous matches. Do not scan drives or copy absolute paths into shared handoffs.\n\n"
         "## Scope\n\n"
@@ -722,6 +731,7 @@ def readme_template(name: str) -> str:
         "Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.\n"
         f"\n{GITHUB_PROGRESSION_GUIDANCE}\n"
         f"\n{ISSUE_LOG_FORMAT_GUIDANCE}\n"
+        f"\n{PATH_NAMING_GUIDANCE}\n"
     )
 
 
