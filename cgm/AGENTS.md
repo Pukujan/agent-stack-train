@@ -6,7 +6,7 @@ Before changing or using the system:
 
 1. read `README.md`;
 2. read `system-version.json`;
-3. read only the module `SKILL.md` files relevant to the requested output; for writing work, **MUST load** the routed module per [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) / [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`): README/product entry → `writing-direction`; PR/issue titles and bodies, issue-log titles, **commit messages/subjects**, non-README docs, changelog prose, posts, blogs, social, general prose, and papers/data writeups → `human-sounding-writing`;
+3. read only the module `SKILL.md` files relevant to the requested output; for writing work, **MUST load** the routed module per [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) / [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`): README/product entry → `writing-direction`; PR/issue titles and bodies, issue-log titles, **commit messages/subjects**, non-README docs, changelog prose, posts, blogs, social, general prose, and papers/data writeups → `human-sounding-writing`; generated artifact filenames / asset-manifest paths / committed media basenames / filename legends → `human-output-naming`;
 4. inspect the target repository's `.content-system/` adapter and evidence before making claims;
 5. for README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, `docs/PROVENANCE_AND_CITATION.md`, `docs/README_QUALITY_PDD.md`, `docs/README_QUALITY_SDD.md`, `docs/README_QUALITY_TDD.md`, and `templates/readme-contract.json`;
 6. inspect prior reviewed outputs in the target repository and the helper's prior-work references before inventing a new story or visual direction;
@@ -44,9 +44,10 @@ Do not hand off a README that is only a module index, setup checklist, architect
 - README / product entry → `writing-direction` (keep scan-first selective bold);
 - PR titles/bodies, issue titles/bodies, issue-log titles, **commit messages and commit subjects**, non-README docs, changelog prose → `human-sounding-writing` (**hsw** / HSW);
 - posts / blogs / social / general agent prose → `human-sounding-writing` (**hsw** / HSW);
-- papers / data writeups → `human-sounding-writing` (including chart rules; short name **hsw**).
+- papers / data writeups → `human-sounding-writing` (including chart rules; short name **hsw**);
+- generated artifact filenames / asset-manifest paths / committed media basenames / filename legends → `human-output-naming` (**hon** / HON).
 
-Soft means no NLP CI grade of prose — not optional load. Follow `apply_checklist` in the JSON. Agents asked for "hsw" must load `human-sounding-writing`. The canonical module id remains `human-sounding-writing`.
+Soft means no NLP CI grade of prose — not optional load. Follow `apply_checklist` in the JSON. Agents asked for "hsw" must load `human-sounding-writing`. Agents asked for "hon" must load `human-output-naming`, call `scripts/human_filename` (speakable by default; optional safe_twin), and keep a per-feature filename legend. Canonical module ids remain the folder names.
 
 Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken the README scanability contract.
 

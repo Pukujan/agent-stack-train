@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.5 — draft
+
+- added `human-output-naming` (**hon**) module + `scripts/human_filename.py` with **speakable** default basenames (e.g. `Song Food – up 8.mp3`; omit defaults) and optional kebab-safe twin (`song-food--up-8.mp3`); rejects hashy junk (`song_food-p0-00e86d.mp3`) and robot key=value stems (`song-food_pitch-plus-8st_speed-0pct.mp3`);
+- required **per-feature filename legends** (`docs/filename-legends/<feature>.{md,json}` helper; `.content-system/filename-legends/<feature>.json` adapter) — glossary of human terms → meaning, then associated file paths (not one global dump);
+- extended soft writing router + `acs_prompt_inject` with filename + legend surfaces; sibling contract `docs/HUMAN_OUTPUT_NAMING.md` / `docs/human-output-naming.json`;
+- validator: `EXPECTED_MODULES` is now eight; fail closed if the filename helper API or sample legend is missing when claimed; adapter smoke (helper ≥ 0.5.5) rejects hashy and robot basenames and checks feature↔legend membership when `feature` is claimed (hash may remain an asset field);
+- ACS / full adapters must re-pin to **0.5.5** and include the 8th module; do not rewrite published blob history; HTML explorer UI is out of scope for CGM (markdown/JSON legend contracts only).
+
 ## 0.5.4 — draft
 
 - **adopter README product-only contract:** target READMEs must cover audience, problem, features, how it works, evidence for *their* claims, and a next action — not CGM, image-gen pipeline narration, or writing-methodology teaching;

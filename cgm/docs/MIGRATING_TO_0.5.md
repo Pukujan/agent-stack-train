@@ -67,3 +67,17 @@ do not rename the folder or replace the id with `hsw`.
 - Pin helper **0.5.4+**. With `--adapter` + `--project-root`, the validator rejects `CGM` / `content-generation-modules` and the exact `## Image generation and use` heading in the target README.
 - The helper repository's own README may still document CGM workflow — that is unchanged.
 
+## Human output naming (0.5.5+)
+
+- New required module: `human-output-naming` (**hon**) for generated artifact filenames, asset-manifest paths, committed media basenames, and **per-feature filename legends**.
+- Python API: `scripts/human_filename.py` — default **speakable** basenames (`Song Food – up 8.mp3`); optional `style="safe_twin"`; reject hashy junk and robot key=value stems.
+- Soft router + ACS inject mention output filenames and legends (not titles only).
+- Before / after: `song_food-p0-00e86d.mp3` (and rejected robot draft `song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`.
+- Adapter steps:
+  1. Pin helper **0.5.5+** (version and commit).
+  2. Add `human-output-naming` to the adapter `modules` list (eight modules total).
+  3. Use `build_basename` (speakable by default) for **new** asset paths; keep content hash as a separate asset field.
+  4. Add `.content-system/filename-legends/<feature>.json` (glossary + file list) when claiming new generated assets for a feature.
+  5. Do **not** rewrite published blob history unless a scoped migration requires it.
+- Docs: [`HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md), [`human-output-naming.json`](human-output-naming.json), [`filename-legends/`](filename-legends/).
+

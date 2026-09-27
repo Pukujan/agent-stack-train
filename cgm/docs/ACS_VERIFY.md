@@ -14,9 +14,9 @@ PR body or commit subject "sounds human."
 
 | Call | Checks |
 | --- | --- |
-| `--root <cgm>` (default / `--mode helper`) | Full helper: `system-version.json`, all seven `EXPECTED_MODULES` (including `writing-direction` and `human-sounding-writing`), schemas, templates, helper docs (including `docs/WRITING_ROUTING.md` and `docs/writing-routing.json`), README contract. |
+| `--root <cgm>` (default / `--mode helper`) | Full helper: `system-version.json`, all eight `EXPECTED_MODULES` (including `writing-direction` and `human-sounding-writing`), schemas, templates, helper docs (including `docs/WRITING_ROUTING.md` and `docs/writing-routing.json`), README contract. |
 | `--root <cgm> --mode writing` | **ACS hotload entrypoint:** both writing modules’ `SKILL.md`, soft router markdown + JSON contract (`content-generation.writing-routing.v1`), commit surfaces routed to hsw, `required_load` / `apply_checklist` / `acs_prompt_inject`, and that `system-version.json` lists both writing modules. Prints a stable `CGM_VERIFY` line. |
-| `--root <cgm> --adapter <project>/.content-system --project-root <project>` | Full helper **plus** target adapter: adapter `modules` must equal the full seven-module helper set (so HSW cannot be omitted on a 0.5.x pin). |
+| `--root <cgm> --adapter <project>/.content-system --project-root <project>` | Full helper **plus** target adapter: adapter `modules` must equal the full eight-module helper set (so HSW cannot be omitted on a 0.5.x pin). |
 
 Alex direction: ACS + adopters need **full PCM + full CGM**. Prefer the helper
 (or helper+adapter) path for install completeness; use `--mode writing` when
@@ -49,6 +49,27 @@ VALID: content-generation-modules writing contract
 
 Non-zero exit + `CGM_VERIFY ... status=FAIL` means the pin is incomplete.
 
+
+## Output filenames (0.5.5+)
+
+ACS prompt inject must mention **output filenames**, asset-manifest paths, and
+**per-feature filename legends**, not titles only. After verify:
+
+- Generated artifact filenames / asset-manifest paths / committed media basenames
+  / filename legends → `human-output-naming` (**hon**) (`required_load: true`)
+- Call `scripts/human_filename.build_basename` (speakable by default; optional
+  `style="safe_twin"`) before writing new media
+- Omit default pitch/speed from the basename (`Song Food – up 8.mp3`, not robot
+  `song-food_pitch-plus-8st_speed-0pct.mp3`)
+- Keep a per-feature legend under `docs/filename-legends/` (helper) or
+  `.content-system/filename-legends/` (adapter): glossary + associated paths
+- Do not emit classic `name-pN-<6hex>.ext` or robot key=value stems on helper
+  pins ≥ 0.5.5
+- Hash may remain a separate asset-manifest field
+
+Full contract: [`HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). Soft router
+row: [`WRITING_ROUTING.md`](WRITING_ROUTING.md).
+
 ## Soft router (MUST load after pin)
 
 After verify passes, agents **MUST load** modules per
@@ -59,6 +80,8 @@ After verify passes, agents **MUST load** modules per
 - PR titles/bodies, issue titles/bodies, issue-log titles, **commit messages /
   commit subjects**, non-README docs, changelog prose, posts/blogs/social/
   general prose/papers → `human-sounding-writing` (**hsw**) (`required_load: true`)
+- Generated artifact filenames, asset-manifest paths, committed media basenames, filename legends
+  → `human-output-naming` (**hon**) (`required_load: true`; speakable + per-feature legend)
 
 No prose-style CI gate is implied. Soft = no NLP grader; still APPLY for agents.
 
@@ -94,10 +117,10 @@ Suggested ACS wiring:
 
 ## ACS follow-up (owning repo)
 
-1. Re-pin hotload docs from CGM **0.5.3** to this release (**0.5.4+**)
-   after merge.
+1. Re-pin hotload docs from CGM **0.5.4** to this release (**0.5.5+**)
+   after merge (eight modules, including `human-output-naming`).
 2. Call the entrypoint above from `hotload_check.py` (subprocess; fail install
    if non-zero).
 3. Inject `acs_prompt_inject` into agent prompts (see above).
-4. Bump adopter `.content-system/system-version.json` to the full seven-module
-   0.5.4+ set (ACS main was observed still on 0.4.0 without HSW).
+4. Bump adopter `.content-system/system-version.json` to the full eight-module
+   0.5.5+ set (including `human-output-naming` / **hon**).

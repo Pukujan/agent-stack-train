@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -8,6 +8,7 @@
     "content-context",
     "writing-direction",
     "human-sounding-writing",
+    "human-output-naming",
     "visual-direction",
     "image-generation",
     "html-demo"
@@ -43,7 +44,9 @@
     "docs/MIGRATING_TO_0.4.md",
     "docs/HUMAN_SOUNDING_WRITING.md",
     "docs/human-sounding-rules.json",
-    "docs/MIGRATING_TO_0.5.md"
+    "docs/MIGRATING_TO_0.5.md",
+    "docs/HUMAN_OUTPUT_NAMING.md",
+    "docs/human-output-naming.json"
   ],
   "human_output_contract": {
     "version": "content-generation.readme-contract.v2",
@@ -59,7 +62,9 @@
     "test_design": "docs/README_QUALITY_TDD.md",
     "provenance": "docs/PROVENANCE_AND_CITATION.md",
     "reverse_analysis": "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
-    "technical_details_order": "after-human-story"
+    "technical_details_order": "after-human-story",
+    "filename_naming": "docs/HUMAN_OUTPUT_NAMING.md",
+    "filename_naming_contract": "docs/human-output-naming.json"
   },
   "claim_explanation_contract": {
     "version": "content-generation.claim-evidence.v2",

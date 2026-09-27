@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.4` (`v0.5.4`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
+**Current helper version: `0.5.5` (`v0.5.5`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -22,11 +22,14 @@ Load only the modules the requested output needs. Paths are relative to this hel
 | `content-context` | [`modules/content-context`](modules/content-context) | Evidence-bounded project brief from the target repo | Entering a repo or when the product story changed |
 | `writing-direction` | [`modules/writing-direction`](modules/writing-direction) | Scan-first README / product-entry story and selective bold | **MUST load** for README or product entry pages |
 | `human-sounding-writing` | [`modules/human-sounding-writing`](modules/human-sounding-writing) | Human voice, AI-tell scrub, restrained bold (short name **hsw** / HSW) | **MUST load** for PRs, issues, issue-log titles, commit messages/subjects, non-README docs, changelog prose, posts, blogs, social, general prose, papers / data writeups |
+| `human-output-naming` | [`modules/human-output-naming`](modules/human-output-naming) | Speakable generated artifact / asset filenames + per-feature legends (short name **hon** / HON) | **MUST load** before naming generated media, asset-manifest paths, committed media basenames, or filename legends |
 | `visual-direction` | [`modules/visual-direction`](modules/visual-direction) | Palette, composition, responsive roles, rejection rules | Before generating or placing visuals |
 | `image-generation` | [`modules/image-generation`](modules/image-generation) | Reproducible image briefs, prompts, and asset records | Creating or reviewing narrative raster assets |
 | `html-demo` | [`modules/html-demo`](modules/html-demo) | Accessible responsive HTML demo of the story | Demo pages that must hold up at mobile / tablet / desktop |
 
 **Load id for hsw remains `human-sounding-writing`.** Agents asked for "hsw" or "HSW" load that module; do not invent a separate folder or adapter id.
+
+**Load id for hon remains `human-output-naming`.** Agents asked for "hon" or "HON" load that module; call `scripts/human_filename.build_basename` (speakable by default; optional `style="safe_twin"`) and keep a per-feature filename legend.
 
 ## Writing router
 
@@ -40,8 +43,11 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 | Non-README docs, changelog prose | `human-sounding-writing` (**hsw**) | **MUST load.** Guides and narrative changelog text |
 | Posts / blogs / social / general prose | `human-sounding-writing` (**hsw**) | **MUST load.** Human voice; restrained bold |
 | Papers / data writeups | `human-sounding-writing` (**hsw**) | **MUST load.** Same voice; apply chart / takeaway guidance |
+| Generated artifact filenames / asset-manifest paths / committed media / filename legends | `human-output-naming` (**hon**) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend; never opaque `p0`/hex or robot key=value stems |
 
-Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · machine-readable [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`, `acs_prompt_inject`). Guide + rules: [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md), [`docs/human-sounding-rules.json`](docs/human-sounding-rules.json). ACS verify + inject: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · machine-readable [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`, `acs_prompt_inject`). Guide + rules: [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md), [`docs/human-sounding-rules.json`](docs/human-sounding-rules.json). Filename contract: [`docs/HUMAN_OUTPUT_NAMING.md`](docs/HUMAN_OUTPUT_NAMING.md), [`docs/human-output-naming.json`](docs/human-output-naming.json). ACS verify + inject: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+
+**Filename before/after (0.5.5+):** `song_food-p0-00e86d.mp3` (and rejected robot draft `song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`. Defaults omitted; optional safe twin `song-food--up-8.mp3`. Per-feature legends live under [`docs/filename-legends/`](docs/filename-legends/). Hash stays an asset field (or suffix after human labels), never the basename.
 
 **This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy.
 
@@ -124,7 +130,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.4`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.5`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -145,11 +151,11 @@ python -m unittest discover -s tests -v
 
 ACS / multi-agent-hotload should call `--mode writing` (and prefer full helper or helper+adapter for install completeness). Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
 
-Migration notes for adding `human-sounding-writing` / hsw: [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md).
+Migration notes for adding `human-sounding-writing` / hsw and `human-output-naming` / hon: [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md).
 
 ## Evidence and boundaries
 
-The helper contract is **shipped as repository structure and guidance**: seven module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
+The helper contract is **shipped as repository structure and guidance**: eight module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
 
 For each important claim, the v2 brief makes the explanation explicit: **what does this source support, and what does it leave unproven?** Repository evidence points to an exact revision and useful locator; external claims use direct citations. A citation makes the path inspectable—it does not certify that the source is correct.
 
@@ -201,7 +207,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.4`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.5`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

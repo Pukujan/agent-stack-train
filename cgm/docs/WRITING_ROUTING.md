@@ -19,6 +19,23 @@ documented in `acs_prompt_inject` inside the JSON contract.
 | Non-README docs and changelog prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Guides, ops notes, CHANGELOG narrative — not the root README. |
 | Posts / blogs / social / general agent prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human voice, AI-tell scrub, restrained bold. Agents asked for "hsw" should load this module. |
 | Papers / data writeups | `human-sounding-writing` (short name **hsw** / HSW) (+ chart rules in that module and guide) | **MUST load.** Same voice rules; apply takeaway titles and plain-chart guidance. |
+| Generated artifact filenames / asset-manifest paths / committed media basenames / filename legends | `human-output-naming` (short name **hon** / HON) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend required. Never opaque `p0`/hex or robot key=value stems. See [`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). |
+
+
+## Filename surfaces (0.5.5+)
+
+Generated artifact filenames, asset-manifest paths, committed media basenames,
+and **per-feature filename legends** **MUST** load `human-output-naming`
+(**hon**). Use HSW voice for *what* you call dimensions; the filesystem shape
+and legend companion are owned by **hon** and
+[`scripts/human_filename.py`](../scripts/human_filename.py).
+
+Before / after: `song_food-p0-00e86d.mp3` (and the rejected robot draft
+`song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`. Optional
+safe twin: `song-food--up-8.mp3`. Full contract:
+[`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md) /
+[`docs/human-output-naming.json`](human-output-naming.json). Sample legend:
+[`docs/filename-legends/`](filename-legends/).
 
 ## Apply checklist (agents)
 
@@ -27,6 +44,7 @@ documented in `acs_prompt_inject` inside the JSON contract.
 3. **MUST** load `modules/<load>/SKILL.md` for that route before drafting (`required_load: true`).
 4. Apply the module rules to the draft.
 5. Do not skip load because the surface is short or "just a commit message."
+6. If naming a generated artifact, asset-manifest path, committed media file, or filename legend, MUST load `human-output-naming` (**hon**), call `scripts/human_filename` (speakable by default), and keep a per-feature legend.
 
 ## Short name
 
@@ -51,7 +69,8 @@ over README scan/bold rules.
 
 After verify passes, ACS should inject the MUST-load contract into agent
 prompts using `acs_prompt_inject` in [`writing-routing.json`](writing-routing.json)
-(fields: `application`, `routes`, `apply_checklist`). See
+(fields: `application`, `routes`, `apply_checklist`). The inject text must mention
+**output filenames** / asset-manifest paths / filename legends (hon, speakable), not titles only. See
 [`ACS_VERIFY.md`](ACS_VERIFY.md).
 
 ## References
@@ -62,3 +81,6 @@ prompts using `acs_prompt_inject` in [`writing-routing.json`](writing-routing.js
 - [`docs/human-sounding-rules.json`](human-sounding-rules.json)
 - [`docs/writing-routing.json`](writing-routing.json)
 - [`docs/ACS_VERIFY.md`](ACS_VERIFY.md)
+- [`modules/human-output-naming/SKILL.md`](../modules/human-output-naming/SKILL.md)
+- [`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md)
+- [`docs/human-output-naming.json`](human-output-naming.json)

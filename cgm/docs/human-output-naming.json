@@ -1,0 +1,108 @@
+{
+  "schema_version": "content-generation.human-output-naming.v1",
+  "enforcement": "soft_labels_structural_basenames_and_legends",
+  "application": "must_load",
+  "module": "human-output-naming",
+  "short_name": [
+    "hon",
+    "HON"
+  ],
+  "python_api": {
+    "module": "scripts.human_filename",
+    "path": "scripts/human_filename.py",
+    "required_symbols": [
+      "build_basename",
+      "build_basename_from_dimensions",
+      "build_relative_path",
+      "is_accepted_basename",
+      "is_hashy_junk_basename",
+      "is_robot_key_value_basename",
+      "pitch_phrase",
+      "sanitize_label",
+      "speed_phrase"
+    ],
+    "required_from_helper_version": "0.5.5"
+  },
+  "basename_styles": {
+    "default": "speakable",
+    "optional": "safe_twin",
+    "order": [
+      "identity",
+      "pitch",
+      "speed"
+    ],
+    "omit_defaults": true,
+    "separator_speakable": "–",
+    "separator_safe_twin": "--"
+  },
+  "surfaces": [
+    "generated artifact filenames",
+    "asset-manifest paths",
+    "committed media basenames",
+    "filename legends"
+  ],
+  "filename_legends": {
+    "required_from_helper_version": "0.5.5",
+    "helper_path": "docs/filename-legends/<feature>.{md,json}",
+    "adapter_path": ".content-system/filename-legends/<feature>.json",
+    "schema_version": "content-generation.filename-legend.v1",
+    "required_sections": [
+      "glossary",
+      "files"
+    ],
+    "sample_feature": "voice-audio-song-food",
+    "note": "Per module/feature — not one global dump. Glossary in plain language, then associated file paths."
+  },
+  "rules": [
+    "Default basenames are speakable: identity first, then pitch, then speed; omit default dimensions.",
+    "Optional style=safe_twin yields a machine-safe twin (kebab segments joined by --).",
+    "Never emit opaque p0/hex stems or robot key=value stems (pitch-plus-8st / speed-0pct).",
+    "Same identity+pitch+speed+style -> same basename (deterministic).",
+    "Content hash may append as a short suffix AFTER human labels, never instead of them.",
+    "asset-manifest stores the human path; hash stays a separate asset field.",
+    "When new generated assets are claimed (helper >= 0.5.5), a per-feature filename legend MUST exist; listed paths must match speakable or safe-twin helper output.",
+    "Do not rewrite published blob history; stop emitting new hashy or robot basenames on pins >= 0.5.5."
+  ],
+  "rejected_patterns": [
+    "stem-pN-<6hex>.ext (e.g. song_food-p0-00e86d.mp3)",
+    "robot key=value stems (e.g. song-food_pitch-plus-8st_speed-0pct.mp3)"
+  ],
+  "examples": [
+    {
+      "before": "song_food-p0-00e86d.mp3",
+      "also_rejected": "song-food_pitch-plus-8st_speed-0pct.mp3",
+      "after_speakable": "Song Food.mp3",
+      "identity": "Song Food",
+      "pitch": null,
+      "speed_pct": null
+    },
+    {
+      "before": "song_food-p0-00e86d.mp3",
+      "also_rejected": "song-food_pitch-plus-8st_speed-0pct.mp3",
+      "after_speakable": "Song Food – up 8.mp3",
+      "after_safe_twin": "song-food--up-8.mp3",
+      "identity": "Song Food",
+      "pitch": 8,
+      "speed_pct": null
+    },
+    {
+      "before": "song_food-p20-8eb807.mp3",
+      "also_rejected": "song-food_pitch-plus-8st_speed-20pct.mp3",
+      "after_speakable": "Song Food – up 8, 20% faster.mp3",
+      "after_safe_twin": "song-food--up-8--20-pct-faster.mp3",
+      "identity": "Song Food",
+      "pitch": 8,
+      "speed_pct": 20
+    }
+  ],
+  "apply_checklist": [
+    "Identify the naming surface (generated artifact filename, asset-manifest path, committed media basename, or filename legend).",
+    "Choose identity; set pitch/speed only when non-default.",
+    "MUST load modules/human-output-naming/SKILL.md and call scripts/human_filename.build_basename before write (optional style=safe_twin).",
+    "Write or update the per-feature filename legend (glossary + associated paths).",
+    "Record the human path in the manifest; keep hash as a field (suffix only after human labels if needed).",
+    "Do not rewrite published blob history unless a scoped migration requires it."
+  ],
+  "required_from_helper_version": "0.5.5",
+  "acs_prompt_inject_note": "After hotload verify, mention output filenames, asset-manifest paths, and per-feature filename legends (not titles only): MUST load human-output-naming (hon) before naming generated artifacts; use speakable basenames (omit defaults); keep a legend per feature."
+}

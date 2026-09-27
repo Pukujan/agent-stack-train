@@ -16,7 +16,7 @@ from scripts.validate_content_system import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"})
+MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "human-output-naming", "visual-direction", "image-generation", "html-demo"})
 COMMIT = "a" * 40
 SOURCE_URI = f"https://github.com/Pukujan/demo/blob/{COMMIT}/src/app.py#L2-L6"
 
@@ -138,7 +138,7 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "helper_repository": "https://example.invalid/helper",
                     "helper_version": "0.1.1",
                     "helper_commit": "abc123",
-                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"}),
+                    "modules": MODULES,
                 },
                 "project-brief.json": {"schema_version": "content-generation.project-brief.v1", "project": "Demo", "audience": ["people"], "problem": "problem", "solution": "solution", "evidence": [{"claim": "claim", "source": "README.md"}], "boundaries": ["boundary"]},
                 "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "promise", "avoid": ["hype"]},
@@ -163,7 +163,7 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "helper_repository": "https://example.invalid/helper",
                     "helper_version": "0.3.1",
                     "helper_commit": "abc123",
-                    "modules": sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "visual-direction", "image-generation", "html-demo"}),
+                    "modules": MODULES,
                 },
                 "project-brief.json": {"schema_version": "content-generation.project-brief.v1", "project": "Demo", "audience": ["people"], "problem": "problem", "solution": "solution", "evidence": [{"claim": "claim", "source": "README.md"}], "boundaries": ["boundary"]},
                 "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "promise", "avoid": ["hype"]},
@@ -242,6 +242,7 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertIn("CGM_VERIFY mode=writing status=OK", out)
         self.assertIn("writing_direction=present", out)
         self.assertIn("human_sounding_writing=present", out)
+        self.assertIn("human_output_naming=present", out)
         self.assertIn("writing_router=present", out)
         self.assertIn("VALID: content-generation-modules writing contract", out)
 
@@ -366,6 +367,21 @@ class ContentSystemValidationTests(unittest.TestCase):
             self.assertTrue(any("commit message" in e for e in errors), errors)
 
 
+
+
+    def test_writing_router_lists_artifact_filename_surfaces(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        by_id = {route["id"]: route for route in contract["routes"]}
+        route = by_id["generated_artifact_filenames"]
+        surfaces = {str(s).lower() for s in route["surfaces"]}
+        self.assertEqual(route["load"], "human-output-naming")
+        self.assertTrue(route["required_load"])
+        self.assertTrue(any("generated artifact" in s for s in surfaces))
+        self.assertTrue(any("asset-manifest" in s for s in surfaces))
+        self.assertTrue(any("committed media" in s for s in surfaces))
+        instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
+        self.assertTrue("filename" in instruction or "human-output-naming" in instruction)
 
     def test_adopter_readme_rejects_cgm_promotion(self):
         errors = check_adopter_readme_product_only(

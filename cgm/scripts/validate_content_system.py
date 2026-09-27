@@ -18,6 +18,7 @@ EXPECTED_MODULES = {
     "content-context",
     "writing-direction",
     "human-sounding-writing",
+    "human-output-naming",
     "visual-direction",
     "image-generation",
     "html-demo",
@@ -31,7 +32,29 @@ WRITING_MODULES = (
 WRITING_ROUTER_DOC = "docs/WRITING_ROUTING.md"
 WRITING_ROUTER_CONTRACT = "docs/writing-routing.json"
 WRITING_ROUTER_SCHEMA = "content-generation.writing-routing.v1"
-REQUIRED_ROUTER_ROUTE_IDS = ("readme_product_entry", "github_and_docs_prose")
+FILENAME_CONTRACT_DOC = "docs/HUMAN_OUTPUT_NAMING.md"
+FILENAME_CONTRACT = "docs/human-output-naming.json"
+FILENAME_CONTRACT_SCHEMA = "content-generation.human-output-naming.v1"
+FILENAME_HELPER_PATH = "scripts/human_filename.py"
+FILENAME_HELPER_SYMBOLS = (
+    "build_basename",
+    "build_basename_from_dimensions",
+    "build_relative_path",
+    "is_accepted_basename",
+    "is_hashy_junk_basename",
+    "is_robot_key_value_basename",
+    "pitch_phrase",
+    "sanitize_label",
+    "speed_phrase",
+)
+HASHY_BASENAME_RE = re.compile(
+    r"(?i)^.+-p\d+-[0-9a-f]{6}\.[a-z0-9]+$"
+)
+ROBOT_KV_BASENAME_RE = re.compile(r"(?i)_(?:pitch|speed|rate)-[a-z0-9.+-]+")
+FILENAME_LEGEND_DIR = "docs/filename-legends"
+FILENAME_LEGEND_SCHEMA = "content-generation.filename-legend.v1"
+ADAPTER_FILENAME_LEGEND_DIR = ".content-system/filename-legends"
+REQUIRED_ROUTER_ROUTE_IDS = ("readme_product_entry", "github_and_docs_prose", "generated_artifact_filenames")
 
 NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
 NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -409,6 +432,249 @@ def check_readme(root: Path) -> list[str]:
     return errors
 
 
+
+def check_human_output_naming_contract(root: Path) -> list[str]:
+    """Fail closed if the filename contract claims a helper that is missing."""
+    errors: list[str] = []
+    skill = root / "modules" / "human-output-naming" / "SKILL.md"
+    if not skill.is_file():
+        errors.append("missing module entry point: modules/human-output-naming/SKILL.md")
+    elif len(skill.read_text(encoding="utf-8").splitlines()) > 500:
+        errors.append("module entry point is over 500 lines: modules/human-output-naming/SKILL.md")
+
+    helper_path = root / FILENAME_HELPER_PATH
+    if not helper_path.is_file():
+        errors.append(
+            f"filename contract claims {FILENAME_HELPER_PATH} but the helper module/API is missing"
+        )
+    else:
+        # Structural symbol check without importing (keeps validate dependency-free
+        # beyond stdlib and avoids package-path surprises in adapters).
+        source = helper_path.read_text(encoding="utf-8")
+        for symbol in FILENAME_HELPER_SYMBOLS:
+            if f"def {symbol}(" not in source:
+                errors.append(
+                    f"{FILENAME_HELPER_PATH} missing required API symbol: {symbol}"
+                )
+
+    doc = root / FILENAME_CONTRACT_DOC
+    if not doc.is_file():
+        errors.append(f"missing filename contract guide: {FILENAME_CONTRACT_DOC}")
+
+    contract_path = root / FILENAME_CONTRACT
+    try:
+        contract = load_json(contract_path)
+    except ValueError as exc:
+        errors.append(str(exc))
+        return errors
+
+    if contract.get("schema_version") != FILENAME_CONTRACT_SCHEMA:
+        errors.append(f"{FILENAME_CONTRACT} must declare {FILENAME_CONTRACT_SCHEMA}")
+    if contract.get("module") != "human-output-naming":
+        errors.append(f"{FILENAME_CONTRACT} module must be human-output-naming")
+    if contract.get("application") != "must_load":
+        errors.append(f"{FILENAME_CONTRACT} application must be must_load")
+    surfaces = {str(s).lower() for s in (contract.get("surfaces") or [])}
+    for needle in ("generated artifact", "asset-manifest", "committed media", "filename legend"):
+        if not any(needle in surface for surface in surfaces):
+            errors.append(f"{FILENAME_CONTRACT} surfaces must mention {needle}")
+    styles = contract.get("basename_styles") or {}
+    if styles.get("default") != "speakable":
+        errors.append(f"{FILENAME_CONTRACT} basename_styles.default must be speakable")
+    if "safe_twin" not in str(styles.get("optional") or ""):
+        errors.append(f"{FILENAME_CONTRACT} basename_styles.optional must mention safe_twin")
+    legends = contract.get("filename_legends") or {}
+    if legends.get("schema_version") != FILENAME_LEGEND_SCHEMA:
+        errors.append(f"{FILENAME_CONTRACT} filename_legends.schema_version must be {FILENAME_LEGEND_SCHEMA}")
+    api = contract.get("python_api") or {}
+    if api.get("path") != FILENAME_HELPER_PATH:
+        errors.append(f"{FILENAME_CONTRACT} python_api.path must be {FILENAME_HELPER_PATH}")
+    required_syms = list(api.get("required_symbols") or [])
+    for symbol in FILENAME_HELPER_SYMBOLS:
+        if symbol not in required_syms:
+            errors.append(f"{FILENAME_CONTRACT} python_api.required_symbols must include {symbol}")
+    checklist = contract.get("apply_checklist")
+    if not isinstance(checklist, list) or len(checklist) < 3:
+        errors.append(f"{FILENAME_CONTRACT} apply_checklist must be a list with at least 3 steps")
+
+    errors.extend(check_filename_legends(root, adapter=False))
+    return errors
+
+
+def is_hashy_junk_basename(name: str) -> bool:
+    """Detect classic stem-pN-<6hex>.ext basenames in asset-manifest paths."""
+    base = str(name or "").replace("\\", "/").rsplit("/", 1)[-1].strip()
+    return bool(HASHY_BASENAME_RE.fullmatch(base))
+
+
+def is_robot_key_value_basename(name: str) -> bool:
+    """Detect rejected robot key=value stems like pitch-plus-8st_speed-0pct."""
+    base = str(name or "").replace("\\", "/").rsplit("/", 1)[-1].strip()
+    if not base or is_hashy_junk_basename(base):
+        return False
+    return bool(ROBOT_KV_BASENAME_RE.search(base))
+
+
+def check_filename_legends(root: Path, *, adapter: bool = False) -> list[str]:
+    """Require per-feature legends with glossary + files; paths must be speakable/safe-twin."""
+    errors: list[str] = []
+    if adapter:
+        base = root / "filename-legends"
+        label = ADAPTER_FILENAME_LEGEND_DIR
+    else:
+        base = root / FILENAME_LEGEND_DIR
+        label = FILENAME_LEGEND_DIR
+
+    if not base.is_dir():
+        if not adapter:
+            errors.append(f"missing filename legends directory: {label}")
+        return errors
+
+    json_files = sorted(base.glob("*.json"))
+    if not adapter and not json_files:
+        errors.append(f"{label} must contain at least one per-feature legend JSON")
+        return errors
+
+    for legend_path in json_files:
+        try:
+            legend = load_json(legend_path)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+        rel = f"{label}/{legend_path.name}"
+        if legend.get("schema_version") != FILENAME_LEGEND_SCHEMA:
+            errors.append(f"{rel} must declare {FILENAME_LEGEND_SCHEMA}")
+        if not legend.get("feature"):
+            errors.append(f"{rel} missing feature id")
+        glossary = legend.get("glossary")
+        if not isinstance(glossary, list) or len(glossary) < 1:
+            errors.append(f"{rel} glossary must be a non-empty list")
+        else:
+            for index, entry in enumerate(glossary, start=1):
+                if not isinstance(entry, dict) or not entry.get("token") or not entry.get("meaning"):
+                    errors.append(f"{rel} glossary entry {index} needs token and meaning")
+        files = legend.get("files")
+        if not isinstance(files, list) or len(files) < 1:
+            errors.append(f"{rel} files must be a non-empty list")
+            continue
+        for index, entry in enumerate(files, start=1):
+            if not isinstance(entry, dict):
+                errors.append(f"{rel} files entry {index} must be an object")
+                continue
+            file_path = str(entry.get("path") or "")
+            if not file_path:
+                errors.append(f"{rel} files entry {index} missing path")
+                continue
+            if is_hashy_junk_basename(file_path):
+                errors.append(
+                    f"{rel} files entry {index} uses hashy junk basename: {file_path}"
+                )
+            if is_robot_key_value_basename(file_path):
+                errors.append(
+                    f"{rel} files entry {index} uses robot key=value basename: {file_path}"
+                )
+            identity = entry.get("identity")
+            style = str(entry.get("style") or "speakable")
+            if identity is not None:
+                # Import lazily so validate stays usable when scripts/ is on sys.path.
+                try:
+                    from scripts.human_filename import build_basename as _build
+                except Exception:
+                    # Structural-only fallback already covered hashy/robot above.
+                    continue
+                expected = _build(
+                    str(identity),
+                    file_path.rsplit(".", 1)[-1] if "." in file_path else "mp3",
+                    pitch=entry.get("pitch"),
+                    speed_pct=entry.get("speed_pct"),
+                    style="safe_twin" if style == "safe_twin" else "speakable",
+                )
+                basename = file_path.replace("\\", "/").rsplit("/", 1)[-1]
+                if basename != expected:
+                    errors.append(
+                        f"{rel} files entry {index} path {file_path!r} does not match "
+                        f"helper output {expected!r}"
+                    )
+        md_twin = legend_path.with_suffix(".md")
+        if not adapter and not md_twin.is_file():
+            errors.append(f"missing markdown twin for legend: {label}/{md_twin.name}")
+    return errors
+
+
+def check_asset_manifest_human_paths(
+    manifest: dict,
+    helper_version: tuple[int, int, int],
+    *,
+    adapter_root: Path | None = None,
+) -> list[str]:
+    """For helper >= 0.5.5, reject hashy/robot basenames; enforce feature legends when claimed.
+
+    Historical published blobs are not rewritten; adopters pin 0.5.5+ only when
+    new (and migrated) path entries use speakable or safe-twin names. Hash may
+    remain as a separate asset field.
+    """
+    errors: list[str] = []
+    if helper_version < (0, 5, 5):
+        return errors
+    assets = manifest.get("assets") or []
+    if not isinstance(assets, list):
+        return errors
+
+    legend_index: dict[str, set[str]] = {}
+    if adapter_root is not None:
+        legend_dir = adapter_root / "filename-legends"
+        if legend_dir.is_dir():
+            for legend_path in sorted(legend_dir.glob("*.json")):
+                try:
+                    legend = load_json(legend_path)
+                except ValueError:
+                    continue
+                feature = str(legend.get("feature") or legend_path.stem)
+                paths = set()
+                for entry in legend.get("files") or []:
+                    if isinstance(entry, dict) and entry.get("path"):
+                        paths.add(str(entry["path"]).replace("\\", "/"))
+                legend_index[feature] = paths
+
+    for index, asset in enumerate(assets, start=1):
+        if not isinstance(asset, dict):
+            continue
+        asset_path = str(asset.get("path") or "")
+        if not asset_path:
+            continue
+        if is_hashy_junk_basename(asset_path):
+            errors.append(
+                f"asset-manifest path entry {index} uses a hashy junk basename "
+                f"(stem-pN-<6hex>.ext): {asset_path}; "
+                "use scripts/human_filename.build_basename (hash may remain an asset field)"
+            )
+        elif is_robot_key_value_basename(asset_path):
+            errors.append(
+                f"asset-manifest path entry {index} uses a robot key=value basename: "
+                f"{asset_path}; use speakable or safe_twin style from scripts/human_filename"
+            )
+        feature = asset.get("feature")
+        if feature and adapter_root is not None:
+            feature_id = str(feature)
+            if feature_id not in legend_index:
+                errors.append(
+                    f"asset-manifest path entry {index} claims feature {feature_id!r} "
+                    f"but {ADAPTER_FILENAME_LEGEND_DIR}/{feature_id}.json is missing"
+                )
+            else:
+                normalized = asset_path.replace("\\", "/")
+                basename = normalized.rsplit("/", 1)[-1]
+                allowed = legend_index[feature_id]
+                if normalized not in allowed and basename not in allowed:
+                    errors.append(
+                        f"asset-manifest path entry {index} path {asset_path!r} is not listed "
+                        f"in filename legend for feature {feature_id!r}"
+                    )
+    if adapter_root is not None:
+        errors.extend(check_filename_legends(adapter_root, adapter=True))
+    return errors
+
+
 def check_writing_contract(root: Path) -> list[str]:
     """Presence check for writing modules + soft router (ACS hotload entrypoint)."""
     errors: list[str] = []
@@ -474,6 +740,22 @@ def check_writing_contract(root: Path) -> list[str]:
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")
     if prose_route.get("required_load") is not True:
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose required_load must be true")
+
+    filename_route = by_id.get("generated_artifact_filenames") or {}
+    if filename_route.get("load") != "human-output-naming":
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} generated_artifact_filenames must load human-output-naming"
+        )
+    if filename_route.get("required_load") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} generated_artifact_filenames required_load must be true"
+        )
+    filename_surfaces = {str(s).lower() for s in filename_route.get("surfaces", [])}
+    for needle in ("generated artifact", "asset-manifest", "committed media", "filename legend"):
+        if not any(needle in surface for surface in filename_surfaces):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} generated_artifact_filenames surfaces must mention {needle}"
+            )
     surfaces = {str(s).lower() for s in prose_route.get("surfaces", [])}
     for needle in (
         "pull request",
@@ -524,22 +806,34 @@ def check_writing_contract(root: Path) -> list[str]:
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention commit surfaces"
             )
+        lowered_instruction = str(instruction).lower()
+        if "filename" not in lowered_instruction and "human-output-naming" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention output filenames"
+            )
+        if "legend" not in lowered_instruction and "speakable" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention speakable names or filename legends"
+            )
         fields = inject.get("fields")
         if not isinstance(fields, list) or "routes" not in fields:
             errors.append(f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include routes")
 
+    errors.extend(check_human_output_naming_contract(root))
     return errors
 
 
 def _writing_verify_line(root: Path, errors: list[str], mode: str) -> str:
     wd = (root / "modules" / "writing-direction" / "SKILL.md").is_file()
     hsw = (root / "modules" / "human-sounding-writing" / "SKILL.md").is_file()
+    hon = (root / "modules" / "human-output-naming" / "SKILL.md").is_file()
     router = (root / WRITING_ROUTER_CONTRACT).is_file() and (root / WRITING_ROUTER_DOC).is_file()
     status = "OK" if not errors else "FAIL"
     return (
         f"CGM_VERIFY mode={mode} status={status} "
         f"writing_direction={'present' if wd else 'missing'} "
         f"human_sounding_writing={'present' if hsw else 'missing'} "
+        f"human_output_naming={'present' if hon else 'missing'} "
         f"writing_router={'present' if router else 'missing'}"
     )
 
@@ -634,6 +928,8 @@ def check(root: Path) -> list[str]:
             errors.append(f"missing helper guide: {path}")
     errors.extend(check_readme(root))
     errors.extend(check_writing_contract(root))
+    # Filename contract is also required on full helper (fail closed if claimed/missing).
+    # check_writing_contract already extends it; keep an explicit call only if writing skipped.
     return errors
 
 
@@ -745,6 +1041,7 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
                 errors.append(f"asset does not exist under project root: {asset_path}")
     if helper_version >= (0, 3, 0):
         errors.extend(check_narrative_assets(visual, manifest, project_root))
+    errors.extend(check_asset_manifest_human_paths(manifest, helper_version, adapter_root=adapter))
     if project_root and (project_root / "README.md").is_file():
         adopter_readme = (project_root / "README.md").read_text(encoding="utf-8")
         if helper_version >= (0, 5, 4):
