@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.validate_content_system import (
     check,
     check_adapter,
+    check_adopter_readme_product_only,
     check_project_brief_v2,
     check_readme,
     check_writing_contract,
@@ -364,6 +365,46 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_writing_contract(staging)
             self.assertTrue(any("commit message" in e for e in errors), errors)
 
+
+
+    def test_adopter_readme_rejects_cgm_promotion(self):
+        errors = check_adopter_readme_product_only(
+            "# Demo\n\nBuilt with CGM and content-generation-modules.\n"
+        )
+        self.assertTrue(any("CGM" in e for e in errors))
+        self.assertTrue(any("content-generation-modules" in e for e in errors))
+
+    def test_adopter_readme_rejects_image_generation_heading(self):
+        errors = check_adopter_readme_product_only(
+            "# Demo\n\n## Image generation and use\n\nWe used ChatGPT.\n"
+        )
+        self.assertTrue(any("Image generation and use" in e for e in errors))
+
+    def test_adopter_readme_allows_product_only_copy(self):
+        self.assertEqual(
+            check_adopter_readme_product_only(
+                "# Demo\n\n## Why this exists\n\nReaders need a clear product story.\n"
+            ),
+            [],
+        )
+
+    def test_adapter_0_5_4_enforces_adopter_readme_guard(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter)
+            system = json.loads((adapter / "system-version.json").read_text(encoding="utf-8"))
+            system["helper_version"] = "0.5.4"
+            (adapter / "system-version.json").write_text(json.dumps(system), encoding="utf-8")
+            (project / "diagram.png").write_bytes(b"png")
+            (project / "README.md").write_text(
+                "# Demo\n\nPowered by CGM.\n\n## Image generation and use\n\nPrompts live here.\n",
+                encoding="utf-8",
+            )
+            errors = check_adapter(adapter, project)
+            self.assertTrue(any("CGM" in e for e in errors))
+            self.assertTrue(any("Image generation and use" in e for e in errors))
 
 if __name__ == "__main__":
     unittest.main()

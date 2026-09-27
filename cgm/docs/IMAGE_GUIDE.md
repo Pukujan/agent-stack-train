@@ -1,5 +1,7 @@
 # Image generation and use guide
 
+> **Audience note (0.5.4+):** This guide is for agents and maintainers creating or reviewing assets. Put image provenance in `.content-system/asset-manifest.json` (or linked prompt records). **Do not copy this guide, its workflow, or an “Image generation and use” section into an adopter / target README.** Adopter READMEs may show images with useful alt text beside product ideas; they must not narrate the generation pipeline. The helper repository's own README may document this workflow because image tooling is part of CGM's product.
+
 Images in a repository README should help a person understand one idea before they read the technical explanation. This guide covers the complete path from visual question to committed asset.
 
 The helper's default visual direction is documented in [`BRAND_DIRECTION.md`](BRAND_DIRECTION.md). It is anime-inspired editorial content UX: a recurring human and friendly companion, deep blue-violet lighting, warm accents, readable title copy, and one clear workflow or relationship per image. A target repository with its own accepted visual system takes precedence.
@@ -26,7 +28,7 @@ Use one dominant idea per asset. A supporting visual should teach a different pa
 4. **Inspect at use size.** Review the original and the rendered README/HTML at wide, tablet, and narrow widths. Check the subject, copy, crop, contrast, and alt-text meaning.
 5. **Reject clearly.** Reject garbled or crowded text, competing focal points, covered subjects, wrong aspect ratios, dense fake UI, unsupported product claims, and any image that becomes decorative noise.
 6. **Commit the accepted asset.** Use a stable path under the target repository, add it to `asset-manifest.json`, and give it useful alt text in the README or HTML.
-7. **Record the decision.** Link the prompt record from the README or the project's visual documentation. Record accepted and rejected directions when they change the story.
+7. **Record the decision.** Store the prompt record in the adapter (asset-manifest / linked notes). Do not add an image-pipeline section to an adopter README; optional maintainer docs outside the product README are fine. Record accepted and rejected directions when they change the story.
 8. **Review the human flow.** Ask whether the image makes the adjacent paragraph easier to understand. If it does not, change the image role or remove it.
 
 ## Prompt skeleton

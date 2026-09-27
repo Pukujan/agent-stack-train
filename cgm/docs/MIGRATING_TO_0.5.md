@@ -59,3 +59,11 @@ do not rename the folder or replace the id with `hsw`.
   hotload verify (see [`ACS_VERIFY.md`](ACS_VERIFY.md)).
 - Soft still means no NLP prose CI — pin **0.5.3+**.
 
+## Adopter README product-only (0.5.4+)
+
+- Adopter / target READMEs must be about the **target product** only (audience, problem, features, mechanism, evidence for product claims, next action).
+- Do **not** cite/promote CGM, narrate image generation, or teach writing-style methodology in the target README.
+- Drop any copied “Image generation and use” or “Templates and guides” sections from target READMEs; keep image provenance in `.content-system/asset-manifest.json`.
+- Pin helper **0.5.4+**. With `--adapter` + `--project-root`, the validator rejects `CGM` / `content-generation-modules` and the exact `## Image generation and use` heading in the target README.
+- The helper repository's own README may still document CGM workflow — that is unchanged.
+

@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.3` (`v0.5.3`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
+**Current helper version: `0.5.4` (`v0.5.4`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`.
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -124,7 +124,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.3`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.4`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -167,6 +167,8 @@ For a new target repository, **copy the method, not the characters or scene**. S
 
 ## Templates and guides
 
+> **Helper README note:** This section documents CGM itself. Adopter / target READMEs (0.5.4+) must stay product-only and must not copy this section, cite CGM, or narrate image-gen / writing methodology — see `adopter_readme_policy` in [`templates/readme-contract.json`](templates/readme-contract.json).
+
 Start with the [README template](templates/README.template.md) and its [machine-readable contract](templates/readme-contract.json). The template puts the human situation, promise, usefulness, mechanism, evidence, images, prior work, scan test, and next action in a deliberate order.
 
 - [`docs/CONTENT_RESEARCH.md`](docs/CONTENT_RESEARCH.md) — UX, accessibility, and marketing research behind scan-first writing.
@@ -199,7 +201,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.3`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.4`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

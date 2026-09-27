@@ -4,6 +4,17 @@
 
 ![Short description of the project's main human-facing idea](path/to/hero.png)
 
+<!--
+Adopter README contract (CGM 0.5.4+):
+- Write ONLY about this target repository: audience, problem, features, how it works,
+  evidence/citations for THIS product's claims, and a next action.
+- Do NOT cite or promote Content Generation Modules (CGM).
+- Do NOT narrate how images were generated or how the prose was written.
+- Image provenance (role, prompt, dimensions, review) belongs in
+  .content-system/asset-manifest.json (or linked prompt records), not as README story.
+- Optional product-lineage notes are fine; helper templates/guides are not product features.
+-->
+
 ## Why this exists
 
 Start with a situation the reader recognizes. Show one concrete example of what the person is trying to do, where the current path breaks, and what consequence follows. Explain why this project deserves to exist. Ground the example in repository evidence or label it as hypothetical.
@@ -26,23 +37,11 @@ Explain the mechanism in reader-sized steps. Introduce technical terms at the mo
 
 ## Evidence and boundaries
 
-Link important claims directly to code, tests, data, committed artifacts, experiments, or external sources. Label work as shipped, experimentally supported, planned, or unknown. State what the cited evidence supports, what it leaves unproven, and what the project does not claim. Pin repository citations to the inspected commit and useful path/line or heading; use direct external links.
+Link important **product** claims directly to code, tests, data, committed artifacts, experiments, or external sources. Label work as shipped, experimentally supported, planned, or unknown. State what the cited evidence supports, what it leaves unproven, and what the project does not claim. Pin repository citations to the inspected commit and useful path/line or heading; use direct external links. Do not cite CGM to justify the product story.
 
 | Claim | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- |
-| [One material claim] | [A plain-language description] | [Its boundary] | [Direct citation] |
-
-## Image generation and use
-
-Link the image prompt record or [`docs/IMAGE_GUIDE.md`](docs/IMAGE_GUIDE.md). For each committed image, record its role, exact text, dimensions, prompt intent, alt text, intended placement, crop behavior, rejection conditions, and review decision.
-
-## Templates and guides
-
-Point to the files a future maintainer should read next, including the project brief, brand language, visual style, asset manifest, review rubric, README playbook, and image guide.
-
-## Prior work and references
-
-Link to reviewed examples, earlier projects, or source research that shaped the current story. Explain what was reused and what was changed.
+| [One material product claim] | [A plain-language description] | [Its boundary] | [Direct citation] |
 
 ## Try it
 
@@ -50,4 +49,4 @@ Give the smallest useful path to a first result, then link to the technical setu
 
 ### Scan test
 
-Read only the headings, bold phrases, and link text. They should communicate the problem, promise, mechanism, boundary, and next action. See [`docs/CONTENT_RESEARCH.md`](../docs/CONTENT_RESEARCH.md).
+Read only the headings, bold phrases, and link text. They should communicate the problem, promise, mechanism, boundary, and next action.

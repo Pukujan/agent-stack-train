@@ -371,6 +371,9 @@ def check_readme(root: Path) -> list[str]:
     expected_claim_fields = ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"]
     if contract.get("schema_version") != "content-generation.readme-contract.v2":
         errors.append("README contract must declare content-generation.readme-contract.v2")
+    adopter_policy = contract.get("adopter_readme_policy") or {}
+    if not adopter_policy.get("must_not") or not adopter_policy.get("image_provenance"):
+        errors.append("README contract must declare adopter_readme_policy with must_not and image_provenance")
     story_policy = contract.get("story_policy", {})
     if not story_policy.get("sequence") or not story_policy.get("worked_example") or not story_policy.get("reader_paths"):
         errors.append("README contract must define its story sequence, worked example, and reader paths")
@@ -634,6 +637,45 @@ def check(root: Path) -> list[str]:
     return errors
 
 
+
+ADOPTER_README_FORBIDDEN_SUBSTRINGS = (
+    "content-generation-modules",
+)
+ADOPTER_README_FORBIDDEN_CGM = re.compile(r"\bCGM\b")
+ADOPTER_README_FORBIDDEN_HEADINGS = re.compile(
+    r"(?im)^##\s+Image generation and use\s*$"
+)
+
+
+def check_adopter_readme_product_only(readme_text: str) -> list[str]:
+    """Soft-contract deterministic guard for target README leakage (0.5.4+).
+
+    Forbids promoting CGM / content-generation-modules and the exact helper
+    heading that narrates image generation. Does not grade writing style.
+    """
+    errors: list[str] = []
+    lowered_hits = []
+    for needle in ADOPTER_README_FORBIDDEN_SUBSTRINGS:
+        if needle in readme_text:
+            lowered_hits.append(needle)
+    if lowered_hits:
+        errors.append(
+            "adopter README must not cite or promote the helper ("
+            + ", ".join(lowered_hits)
+            + "); keep the README about the target product"
+        )
+    if ADOPTER_README_FORBIDDEN_CGM.search(readme_text):
+        errors.append(
+            "adopter README must not cite or promote CGM; keep the README about the target product"
+        )
+    if ADOPTER_README_FORBIDDEN_HEADINGS.search(readme_text):
+        errors.append(
+            "adopter README must not include an 'Image generation and use' section; "
+            "put image provenance in .content-system/asset-manifest instead"
+        )
+    return errors
+
+
 def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
     errors: list[str] = []
     required = {
@@ -703,6 +745,10 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
                 errors.append(f"asset does not exist under project root: {asset_path}")
     if helper_version >= (0, 3, 0):
         errors.extend(check_narrative_assets(visual, manifest, project_root))
+    if project_root and (project_root / "README.md").is_file():
+        adopter_readme = (project_root / "README.md").read_text(encoding="utf-8")
+        if helper_version >= (0, 5, 4):
+            errors.extend(check_adopter_readme_product_only(adopter_readme))
     return errors
 
 

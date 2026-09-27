@@ -1,16 +1,37 @@
 {
   "schema_version": "content-generation.readme-contract.v2",
-  "purpose": "Make README and human-facing project documentation welcoming before technical details become necessary.",
+  "purpose": "Make adopter README and human-facing product documentation about the target repository \u2014 audience, problem, features, and provenance for the product's own claims \u2014 welcoming before technical details become necessary.",
   "required_sections": [
-    {"id": "why_this_exists", "heading": "Why this exists", "question": "What human situation and consequence make this project matter?"},
-    {"id": "what_this_project_is", "heading": "What this project is", "question": "Who is it for, what does it do, and what does it not claim?"},
-    {"id": "what_you_can_make_or_use", "heading": "What you can make or use", "question": "What useful output, workflow, or decision can the reader reach?"},
-    {"id": "how_it_works", "heading": "How it works", "question": "Can the mechanism be understood before the architecture?"},
-    {"id": "evidence_and_boundaries", "heading": "Evidence and boundaries", "question": "Which claims are supported and where does the project stop?"},
-    {"id": "image_generation_and_use", "heading": "Image generation and use", "question": "Can a person generate, review, place, and reuse the visuals safely?"},
-    {"id": "templates_and_guides", "heading": "Templates and guides", "question": "Can a maintainer find the next source file or guide?"},
-    {"id": "prior_work_and_references", "heading": "Prior work and references", "question": "Does the README preserve relevant prior research and reviewed examples?"},
-    {"id": "try_it", "heading": "Try it", "question": "Is there a smallest useful next action?"}
+    {
+      "id": "why_this_exists",
+      "heading": "Why this exists",
+      "question": "What human situation and consequence make this project matter?"
+    },
+    {
+      "id": "what_this_project_is",
+      "heading": "What this project is",
+      "question": "Who is it for, what does it do, and what does it not claim?"
+    },
+    {
+      "id": "what_you_can_make_or_use",
+      "heading": "What you can make or use",
+      "question": "What useful output, workflow, or decision can the reader reach?"
+    },
+    {
+      "id": "how_it_works",
+      "heading": "How it works",
+      "question": "Can the mechanism be understood before the architecture?"
+    },
+    {
+      "id": "evidence_and_boundaries",
+      "heading": "Evidence and boundaries",
+      "question": "Which product claims are supported and where does the project stop?"
+    },
+    {
+      "id": "try_it",
+      "heading": "Try it",
+      "question": "Is there a smallest useful next action?"
+    }
   ],
   "required_references": [
     "docs/CONTENT_RESEARCH.md",
@@ -29,37 +50,89 @@
     "docs/MIGRATING_TO_0.2.md",
     "templates/README.template.md"
   ],
+  "adopter_readme_policy": {
+    "scope": "Applies to README.md (and equivalent product-entry pages) in target/adopter repositories. Does not restrict this helper repository's own README, which documents CGM.",
+    "must_be_about": [
+      "target audience and recognizable situation",
+      "problem and consequence the product addresses",
+      "what the product is and is not",
+      "features, outputs, or workflows the reader can use",
+      "how the product works at reader altitude",
+      "provenance and citations only for the target product's own claims",
+      "a clear next action"
+    ],
+    "must_not": [
+      "cite, promote, justify, or defend Content Generation Modules (CGM) or content-generation-modules",
+      "narrate how images were generated (provider, prompt pipeline, seed, model, ChatGPT workflow)",
+      "narrate writing-style methodology (writing-direction, hsw, scan-first recipe, bold heuristics) as README story",
+      "link IMAGE_GUIDE, prompt records, or helper templates as if they were product features",
+      "treat image regeneration instructions as README content"
+    ],
+    "image_provenance": "Record role, prompt, exact text, dimensions, alt intent, crop, rejection, and review in .content-system/asset-manifest.json (or linked prompt records under the adapter). Place images in the README with useful alt text beside the product idea they explain; do not turn the README into an image-pipeline guide.",
+    "citations": "Cite only sources that support the target product's claims. Helper research, brand, and image guides stay in the pinned CGM checkout for agents \u2014 not in adopter README prose.",
+    "optional_product_lineage": "A short prior-work note is allowed only when it explains the target product's own lineage or related products. Do not paste CGM prior-work catalogs or helper migration guides."
+  },
   "scanability_policy": {
     "heading_rule": "Use descriptive headings that tell the reader what they will learn or gain.",
-    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
+    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2\u20138 words, for a problem, outcome, mechanism, proof, or boundary.",
     "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
     "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
   },
   "story_policy": {
-    "sequence": ["reader_situation", "friction_and_consequence", "project_response", "plain_language_mechanism", "evidence_and_limits", "next_action"],
+    "sequence": [
+      "reader_situation",
+      "friction_and_consequence",
+      "project_response",
+      "plain_language_mechanism",
+      "evidence_and_limits",
+      "next_action"
+    ],
     "worked_example": "Include at least one concrete example grounded in the target repository; label hypothetical examples clearly.",
     "reader_paths": "Explain for the primary human reader first; add a distinct developer or researcher path when it helps them act or reproduce the work."
   },
   "evidence_policy": {
-    "claim_fields": ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"],
-    "supports_rule": "Say what the cited source establishes in plain language.",
+    "claim_fields": [
+      "claim",
+      "source",
+      "status",
+      "supports",
+      "limits",
+      "source_revision",
+      "recorded_at"
+    ],
+    "supports_rule": "Say what the cited source establishes in plain language about the target product.",
     "limits_rule": "Say what the same source leaves unproven; do not claim more than its evidence supports.",
-    "citation_rule": "Link important public claims directly to immutable repository evidence or a direct external source near the claim.",
+    "citation_rule": "Link important public product claims directly to immutable repository evidence or a direct external source near the claim. Do not cite CGM to justify the product story.",
     "truth_boundary": "A valid citation establishes traceability, not truth; preserve source quality limits and human review."
   },
   "visual_policy": {
     "use_when": "the target repository has a visual contract, committed narrative assets, or a request for visual direction",
     "minimum_narrative_images_for_this_helper": 2,
-    "required_image_record_fields": ["role", "exact_text", "dimensions", "prompt_intent", "alt_text", "usage", "crop_behavior", "rejection_conditions", "review_decision"],
-    "required_guides": ["docs/IMAGE_GUIDE.md", "assets/marketing/IMAGE_NOTES.md"]
+    "required_image_record_fields": [
+      "role",
+      "exact_text",
+      "dimensions",
+      "prompt_intent",
+      "alt_text",
+      "usage",
+      "crop_behavior",
+      "rejection_conditions",
+      "review_decision"
+    ],
+    "required_guides": [
+      "docs/IMAGE_GUIDE.md",
+      "assets/marketing/IMAGE_NOTES.md"
+    ],
+    "readme_vs_manifest": "Helper and agents use required_guides and required_image_record_fields when creating assets. Adopter README shows the image with alt text; provenance fields live in the adapter asset manifest, not as a README 'Image generation and use' section."
   },
   "review_questions": [
     "Can a first-time reader explain why the project exists after twenty seconds?",
     "Does the first screen feel welcoming before it becomes technical?",
     "Can the reader distinguish shipped evidence from plans and unknowns?",
-    "Can a reviewer see what the evidence supports and what it does not establish?",
+    "Can a reviewer see what the product evidence supports and what it does not establish?",
     "Can a fresh agent reproduce the source trail from the target repository and this pinned contract?",
     "Do the visuals clarify one human idea and remain useful when stacked on a narrow screen?",
-    "Can another maintainer regenerate or reuse each visual from the recorded guide?"
+    "Is image provenance recorded in .content-system/asset-manifest (or linked records) rather than narrated in the README?",
+    "Does the adopter README avoid citing CGM, describing the image-gen pipeline, or teaching writing-style methodology?"
   ]
 }

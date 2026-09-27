@@ -94,10 +94,10 @@ Suggested ACS wiring:
 
 ## ACS follow-up (owning repo)
 
-1. Re-pin hotload docs from CGM **0.5.2** to this release (**0.5.3+**)
+1. Re-pin hotload docs from CGM **0.5.3** to this release (**0.5.4+**)
    after merge.
 2. Call the entrypoint above from `hotload_check.py` (subprocess; fail install
    if non-zero).
 3. Inject `acs_prompt_inject` into agent prompts (see above).
 4. Bump adopter `.content-system/system-version.json` to the full seven-module
-   0.5.3+ set (ACS main was observed still on 0.4.0 without HSW).
+   0.5.4+ set (ACS main was observed still on 0.4.0 without HSW).

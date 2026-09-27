@@ -31,6 +31,32 @@ Use this sequence unless the format has a strong reason not to:
 
 Treat a repository README as a welcoming product entry point before treating it as a technical manual. Use the repository's `templates/readme-contract.json` and `docs/README_PLAYBOOK.md` as the acceptance source.
 
+### Adopter README scope (0.5.4+)
+
+An **adopter / target** README must be about the **target repository only**:
+
+- audience and situation;
+- problem and consequence;
+- what the product is / is not;
+- features, outputs, or workflows;
+- how it works at reader altitude;
+- provenance and citations for **that product's** claims;
+- a next action.
+
+**Anti-rules — do not put these in an adopter README:**
+
+- cite, promote, justify, or defend CGM / `content-generation-modules`;
+- narrate how images were generated (provider, prompt pipeline, seed, model);
+- narrate writing-style methodology (this module, hsw, scan-first recipes, bold heuristics) as story;
+- “Image generation and use” or “Templates and guides” sections that surface helper docs as product features.
+
+Image provenance (role, prompt, dimensions, review) belongs in
+`.content-system/asset-manifest.json` or linked prompt records. Place images with
+useful alt text beside the product idea they explain.
+
+The **helper** README (content-generation-modules itself) may document CGM,
+image workflow, and templates — that is its product.
+
 The README must make these questions easy to answer in order:
 
 1. What human situation brings the reader here?
@@ -38,10 +64,10 @@ The README must make these questions easy to answer in order:
 3. Why does this project exist, and who is it for?
 4. What can the reader make, use, or understand with it?
 5. How does it work at the reader's altitude?
-6. What evidence supports the story, and where does the project stop?
+6. What evidence supports the **product** story, and where does the project stop?
 7. What should the reader do next?
 
-Place architecture, commands, schemas, and implementation vocabulary after the first human explanation. When the target repository has a visual contract or committed assets, the README should use a meaningful hero or lead visual and link to the image-generation/use guide and asset record.
+Place architecture, commands, schemas, and implementation vocabulary after the first human explanation. When the target repository has a visual contract or committed assets, the README should use a meaningful hero or lead visual with useful alt text. Do **not** link the image-generation guide or prompt record from adopter README prose; keep those in the adapter.
 
 ## Paragraph recipe
 
@@ -67,7 +93,7 @@ At least one early example should show the problem unfolding for the target read
 
 ## Scan-first formatting
 
-Use [`docs/CONTENT_RESEARCH.md`](../../docs/CONTENT_RESEARCH.md) as the research source for this contract.
+Use [`docs/CONTENT_RESEARCH.md`](../../docs/CONTENT_RESEARCH.md) as the research source for this contract. Apply these as craft rules; **do not teach them inside an adopter README.**
 
 - Make the heading tell the reader what they will learn or gain.
 - Put the main point early in the section and keep one idea per paragraph.
@@ -82,6 +108,6 @@ Use [`docs/CONTENT_RESEARCH.md`](../../docs/CONTENT_RESEARCH.md) as the research
 
 Ask what a first-time reader can repeat after twenty seconds. If the answer is only a category (“an AI-powered evaluation platform”), the copy needs a more concrete situation and mechanism.
 
-For helper `0.4.x`, also ask: does each material claim explain what its cited source supports, what remains unproven, which exact revision was inspected, and when this evidence record was recorded? Keep valid-time bounds separate for claims that only apply during a known period. Put direct citations beside important public claims. A citation provides traceability, not a truth guarantee.
+For helper `0.4.x`+, also ask: does each material **product** claim explain what its cited source supports, what remains unproven, which exact revision was inspected, and when this evidence record was recorded? Keep valid-time bounds separate for claims that only apply during a known period. Put direct citations beside important public claims. A citation provides traceability, not a truth guarantee. Do not cite CGM to prop up the product story.
 
-Also ask: can the reader find why the project exists, see one visual idea, understand how that visual was generated and should be used, find prior reviewed examples, and reach a useful next action without reading the technical appendix?
+Also ask: can the reader find why the project exists, see one visual idea that clarifies the product, find evidence for product claims, and reach a useful next action — without being taught CGM, image-gen process, or writing methodology?

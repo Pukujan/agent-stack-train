@@ -20,20 +20,22 @@ Do not treat model-generated scores as objective truth. Deterministic checks and
 
 README, product documentation, marketing copy, image briefs, and HTML demos are human-facing deliverables. Treat the reader's situation and reason to care as the primary output; put architecture and implementation details after the story has earned the reader's attention.
 
-Every README deliverable must:
+Every **adopter / target** README deliverable must:
 
 - explain why the project exists through a recognizable human situation and consequence;
 - develop that situation with a concrete, repository-grounded example before architecture;
 - say what the project is, who it helps, and what it does not claim;
 - show the mechanism in plain language before introducing internal names or architecture;
-- connect important claims to revision-pinned evidence, explain what each source supports and leaves unproven, and label shipped, experimental, planned, or unknown work;
+- connect important **product** claims to revision-pinned evidence, explain what each source supports and leaves unproven, and label shipped, experimental, planned, or unknown work;
 - give the reader a next action, example, or smallest useful path;
-- use the target repository's visual contract when one exists;
-- use descriptive headings, short sections, selective bold anchors, and the heading-and-bold scan test;
-- include image role, prompt, text, dimensions, use, crop/accessibility, rejection, and review guidance for every committed raster asset;
-- name relevant prior work or reviewed examples instead of pretending the pattern was invented in the current draft.
+- use the target repository's visual contract when one exists (place images with useful alt text; do not narrate the generation pipeline in the README);
+- use descriptive headings, short sections, selective bold anchors, and the heading-and-bold scan test as craft — do not teach that methodology in the README;
+- record image role, prompt, text, dimensions, use, crop/accessibility, rejection, and review for every committed raster asset in `.content-system/asset-manifest.json` (or linked prompt records), **not** as README story;
+- when naming prior work, name the **target product's** lineage — do not cite or promote CGM.
 
-Do not hand off a README that is only a module index, setup checklist, architecture summary, or one-line product description. Use the [README contract](templates/readme-contract.json), the PDD/SDD/TDD acceptance documents, and the validator. A citation proves traceability, not truth. Keep the target's visual identity and image-generation contract intact.
+**Adopter README anti-rules (0.5.4+):** do not cite/promote CGM or `content-generation-modules`; do not narrate how images were generated; do not narrate writing-style methodology; do not add “Image generation and use” or “Templates and guides” helper sections. The helper repository's own README may document CGM, image workflow, and templates because that is its product.
+
+Do not hand off a README that is only a module index, setup checklist, architecture summary, one-line product description, or a CGM/image/writing-method defense. Use the [README contract](templates/readme-contract.json) (`adopter_readme_policy`), the PDD/SDD/TDD acceptance documents, and the validator. A citation proves traceability, not truth. Keep the target's visual identity and adapter image-generation records intact.
 
 ## Writing modules
 

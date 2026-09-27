@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.4 — draft
+
+- **adopter README product-only contract:** target READMEs must cover audience, problem, features, how it works, evidence for *their* claims, and a next action — not CGM, image-gen pipeline narration, or writing-methodology teaching;
+- removed `image_generation_and_use` and `templates_and_guides` (and prior-work) from required README sections; added `adopter_readme_policy` anti-rules to `templates/readme-contract.json` + schema;
+- updated playbook, writing-direction, README template, AGENTS human-facing gate, and IMAGE_GUIDE audience note so image provenance stays in `.content-system/asset-manifest` (or linked records);
+- optional deterministic adapter guard (helper ≥ 0.5.4): forbid `content-generation-modules` / `CGM` and the exact `## Image generation and use` heading in adopter README when `--adapter` is used;
+- helper README may still document CGM, images, and templates (that is this product). Soft/docs+contract only — no prose NLP CI gate.
+
+
 ## 0.5.3 — draft
 
 - soft writing router now **includes commit messages and commit subjects** → `human-sounding-writing` (**hsw**); README/product entry stays on `writing-direction`;
