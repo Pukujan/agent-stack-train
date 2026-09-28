@@ -29,7 +29,12 @@
       "fixtures_users": "modules/coordination/jev-oss-compare/v0.1.0/fixtures/claude_tx/users.jsonl",
       "fixtures_tools": "modules/coordination/jev-oss-compare/v0.1.0/fixtures/claude_tx/tools.jsonl",
       "fixtures_meta": "modules/coordination/jev-oss-compare/v0.1.0/fixtures/claude_tx/export_meta.json"
-    }
+    },
+    "sha": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+    "commit": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+    "branch": "task/ACS-25-dual-jev-gates",
+    "pr": 26,
+    "issue": 28
   },
   "users": [
     {
