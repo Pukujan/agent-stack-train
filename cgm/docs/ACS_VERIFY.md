@@ -50,6 +50,14 @@ VALID: content-generation-modules writing contract
 Non-zero exit + `CGM_VERIFY ... status=FAIL` means the pin is incomplete.
 
 
+## Human-facing default (0.5.6+)
+
+After verify, ACS must treat **hsw** as default ON for every human-facing
+deliverable: GitHub prose, docs, posts, papers, **HTML reports**, **compare
+HTML / compare UIs**, appendable HTML, and other agent-produced human-readable
+HTML. Do not gate HSW behind a per-report flag. Exceptions remain
+README/product entry (`writing-direction`) and filename-only surfaces (**hon**).
+
 ## Output filenames (0.5.5+)
 
 ACS prompt inject must mention **output filenames**, asset-manifest paths, and
@@ -79,11 +87,15 @@ After verify passes, agents **MUST load** modules per
 - README / product entry → `writing-direction` (`required_load: true`)
 - PR titles/bodies, issue titles/bodies, issue-log titles, **commit messages /
   commit subjects**, non-README docs, changelog prose, posts/blogs/social/
-  general prose/papers → `human-sounding-writing` (**hsw**) (`required_load: true`)
+  general prose/papers, **HTML reports / compare HTML / compare UIs / appendable
+  HTML / agent human-readable HTML** → `human-sounding-writing` (**hsw**)
+  (`required_load: true`, `default_on: true`)
 - Generated artifact filenames, asset-manifest paths, committed media basenames, filename legends
   → `human-output-naming` (**hon**) (`required_load: true`; speakable + per-feature legend)
 
-No prose-style CI gate is implied. Soft = no NLP grader; still APPLY for agents.
+**Human-facing default (0.5.6+):** HSW is ON for every human-facing task/output
+unless the surface is README/product entry or filename-only. No per-report
+opt-in. Soft = no NLP grader; still APPLY / default_on for agents.
 
 ## ACS prompt inject (required for application)
 
@@ -92,19 +104,22 @@ CGM does not rewrite agent prompts inside ACS. After `hotload_check` /
 agent system or task prompt so adopters actually apply the modules.
 
 **Source file:** `docs/writing-routing.json`  
-**Fields to read:** `application`, `routes` (each with `surfaces`, `load`,
-`required_load`), `apply_checklist`  
+**Fields to read:** `application`, `human_facing_default`, `routes` (each with
+`surfaces`, `load`, `required_load`, and for HSW `default_on`), `apply_checklist`  
 **Canonical instruction text** (also in `acs_prompt_inject.instruction`):
 
-> Inject into the agent system or task prompt: For every route with
+> Inject into the agent system or task prompt: HSW (human-sounding-writing) is
+> ON by default for EVERY human-facing task/output. For every route with
 > `required_load` true, you MUST load `modules/<load>/SKILL.md` before writing
 > any listed surface. README and product entry pages → `writing-direction`.
 > Pull request titles/bodies, issue titles/bodies, issue-log titles, commit
 > messages, commit subjects, non-README docs, changelog prose,
-> posts/blogs/social/general prose, and papers/data writeups →
-> `human-sounding-writing` (hsw). Soft enforcement means no NLP CI grade of
-> prose; the contract language is MUST/APPLY, not prefer. Follow
-> `apply_checklist` in this file.
+> posts/blogs/social/general prose, papers/data writeups, HTML reports, compare
+> HTML, compare UIs, appendable HTML reports, and other agent-produced
+> human-readable HTML → `human-sounding-writing` (hsw). Do NOT treat HSW as
+> optional, per-report, or only-when-writing-posts. Soft enforcement means no
+> NLP CI grade of prose; the contract language is MUST/APPLY/default_on, not
+> prefer. Follow `apply_checklist` and `human_facing_default` in this file.
 
 Suggested ACS wiring:
 
@@ -117,10 +132,12 @@ Suggested ACS wiring:
 
 ## ACS follow-up (owning repo)
 
-1. Re-pin hotload docs from CGM **0.5.4** to this release (**0.5.5+**)
-   after merge (eight modules, including `human-output-naming`).
+1. Re-pin hotload docs from CGM **0.5.5** to this release (**0.5.6+**)
+   after merge (eight modules; HSW default ON for HTML reports / compare UIs).
 2. Call the entrypoint above from `hotload_check.py` (subprocess; fail install
    if non-zero).
-3. Inject `acs_prompt_inject` into agent prompts (see above).
-4. Bump adopter `.content-system/system-version.json` to the full eight-module
-   0.5.5+ set (including `human-output-naming` / **hon**).
+3. Inject `acs_prompt_inject` (including `human_facing_default`) into agent
+   prompts so compare HTML / human-facing reports always load **hsw** — no
+   per-report opt-in (see above).
+4. Keep adopter `.content-system/system-version.json` on the full eight-module
+   0.5.6+ set (including `human-output-naming` / **hon**).

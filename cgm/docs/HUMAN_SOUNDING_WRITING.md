@@ -4,17 +4,21 @@ Official short name: **hsw** (also HSW). Canonical module id: `human-sounding-wr
 
 This guide helps agents write pull request and issue titles/bodies, issue-log
 titles, **commit messages and commit subjects**, non-README docs, changelog
-prose, posts, blogs, social copy, general prose, and papers or data writeups
-that do not read as AI-smoothed averages. Agents **MUST load** the
-`human-sounding-writing` module before drafting those surfaces
-(`required_load`). Follow the rules when instinct conflicts with them. Tags in
-brackets point at the research corpus summarized in section 8.
-Machine-checkable versions live in
+prose, posts, blogs, social copy, general prose, papers or data writeups,
+**HTML reports**, **compare HTML / compare UIs**, appendable HTML, and other
+agent-produced human-readable HTML that do not read as AI-smoothed averages.
+Agents **MUST load** the `human-sounding-writing` module before drafting those
+surfaces (`required_load`, `default_on`). HSW is the default for every
+human-facing deliverable except README/product entry — no per-report opt-in.
+Follow the rules when instinct conflicts with them. Tags in brackets point at
+the research corpus summarized in section 8. Machine-checkable versions live in
 [`human-sounding-rules.json`](human-sounding-rules.json). Soft router:
 [`WRITING_ROUTING.md`](WRITING_ROUTING.md) / [`writing-routing.json`](writing-routing.json).
 
 **Out of scope here:** README and product-entry pages. Those keep
-`writing-direction` scan/bold rules. See [`WRITING_ROUTING.md`](WRITING_ROUTING.md).
+`writing-direction` scan/bold rules. Filename basenames use
+`human-output-naming` (**hon**); visible prose inside HTML still uses this
+guide. See [`WRITING_ROUTING.md`](WRITING_ROUTING.md).
 
 ## 1. Why AI text sounds like AI
 

@@ -81,3 +81,15 @@ do not rename the folder or replace the id with `hsw`.
   5. Do **not** rewrite published blob history unless a scoped migration requires it.
 - Docs: [`HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md), [`human-output-naming.json`](human-output-naming.json), [`filename-legends/`](filename-legends/).
 
+## HSW default for human-facing HTML (0.5.6+)
+
+- **HSW is ON by default** for every human-facing deliverable: GitHub prose, docs, posts, papers, **HTML reports**, **compare HTML / compare UIs**, appendable HTML, and other agent-produced human-readable HTML.
+- `docs/writing-routing.json` adds `human_facing_default` and expands HSW surfaces; `acs_prompt_inject` forbids per-report / optional skip.
+- Exceptions remain README/product entry (`writing-direction`) and filename-only surfaces (`human-output-naming` / **hon** for basenames).
+- Adapter / ACS steps:
+  1. Pin helper **0.5.6+** (version and commit).
+  2. Keep the eight-module set (no new module).
+  3. Inject `acs_prompt_inject` including `human_facing_default` so compare HTML / human-facing reports always load **hsw**.
+  4. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
+- Soft still means no NLP prose CI — pin **0.5.6+**.
+

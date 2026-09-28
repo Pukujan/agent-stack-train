@@ -1,13 +1,15 @@
 ---
 name: human-sounding-writing
 description: >-
-  MUST load for pull request and issue titles/bodies, issue-log titles, commit
+  Default MUST load for every human-facing deliverable except README/product
+  entry: pull request and issue titles/bodies, issue-log titles, commit
   messages and commit subjects, non-README docs, changelog prose, posts, blogs,
-  social copy, general agent prose, and papers or data writeups that must sound
-  human and avoid AI tells. Official short name: hsw (also HSW); canonical
-  module id remains human-sounding-writing. Do not use for README or
-  product-entry copy — load writing-direction and docs/WRITING_ROUTING.md
-  instead.
+  social copy, general agent prose, papers or data writeups, HTML reports,
+  compare HTML/UIs, appendable HTML, and other agent-produced human-readable
+  HTML that must sound human and avoid AI tells. Official short name: hsw
+  (also HSW); canonical module id remains human-sounding-writing. Do not use
+  for README or product-entry copy — load writing-direction and
+  docs/WRITING_ROUTING.md instead. Not optional / not per-report.
 ---
 
 # Human-sounding writing
@@ -18,13 +20,16 @@ Official short name: **hsw** (also HSW). Canonical module id remains
 **MUST load** this module before writing any surface routed to it in
 [`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md) /
 [`docs/writing-routing.json`](../../docs/writing-routing.json)
-(`required_load: true`). Soft = no NLP CI grade; not optional load.
+(`required_load: true`, `default_on: true`). Soft = no NLP CI grade; not
+optional load and not per-report opt-in. HSW is the human-facing default.
 
 Write so a careful reader hears a person with evidence, not a model averaging
 safe phrases. Specifics beat synonyms. This module is for pull request and issue
 titles/bodies, issue-log titles, **commit messages and commit subjects**,
-non-README docs, changelog prose, posts, blogs, social, general agent prose, and
-papers or data writeups. It is **not** for README or product-entry pages.
+non-README docs, changelog prose, posts, blogs, social, general agent prose,
+papers or data writeups, **HTML reports**, **compare HTML / compare UIs**,
+appendable HTML, and other agent-produced human-readable HTML. It is **not** for
+README or product-entry pages.
 
 ## When not to use this module
 

@@ -369,6 +369,129 @@ class ContentSystemValidationTests(unittest.TestCase):
 
 
 
+
+    def test_writing_router_lists_html_report_and_compare_surfaces(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        by_id = {route["id"]: route for route in contract["routes"]}
+        route = by_id["github_and_docs_prose"]
+        surfaces = {str(s).lower() for s in route["surfaces"]}
+        self.assertEqual(route["load"], "human-sounding-writing")
+        self.assertTrue(route["required_load"])
+        self.assertTrue(route.get("default_on"))
+        self.assertTrue(any("html report" in s for s in surfaces))
+        self.assertTrue(any("compare html" in s for s in surfaces))
+        self.assertTrue(any("compare ui" in s for s in surfaces))
+        self.assertTrue(any("human-readable html" in s for s in surfaces))
+        human_default = contract["human_facing_default"]
+        self.assertEqual(human_default["load"], "human-sounding-writing")
+        self.assertTrue(human_default["required_load"])
+        self.assertTrue(human_default["default_on"])
+        covers = {str(c).lower() for c in human_default["covers"]}
+        self.assertTrue(any("every human-facing" in c for c in covers))
+        instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
+        self.assertTrue("html report" in instruction or "compare html" in instruction)
+        self.assertTrue("every human-facing" in instruction or "default" in instruction)
+        self.assertTrue("per-report" in instruction or "optional" in instruction)
+        self.assertIn("human_facing_default", contract["acs_prompt_inject"]["fields"])
+        when = str(contract["acs_prompt_inject"]["when"]).lower()
+        self.assertTrue("html" in when or "compare" in when)
+
+    def test_writing_contract_rejects_missing_html_report_surfaces(self):
+        import json
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            (staging / "modules" / "writing-direction").mkdir(parents=True)
+            (staging / "modules" / "human-sounding-writing").mkdir(parents=True)
+            (staging / "modules" / "writing-direction" / "SKILL.md").write_text("# wd\n", encoding="utf-8")
+            (staging / "modules" / "human-sounding-writing" / "SKILL.md").write_text("# hsw\n", encoding="utf-8")
+            (staging / "docs").mkdir()
+            (staging / "docs" / "WRITING_ROUTING.md").write_text("# router\n", encoding="utf-8")
+            version = {
+                "system": "content-generation-modules",
+                "version": "0.5.6",
+                "modules": [
+                    "brand-foundation",
+                    "content-context",
+                    "writing-direction",
+                    "human-sounding-writing",
+                    "visual-direction",
+                    "image-generation",
+                    "html-demo",
+                ],
+            }
+            (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
+            bad = {
+                "schema_version": "content-generation.writing-routing.v1",
+                "enforcement": "soft",
+                "application": "must_load",
+                "required_writing_modules": ["writing-direction", "human-sounding-writing"],
+                "apply_checklist": ["a", "b", "c"],
+                "not_routed": [],
+                "human_facing_default": {
+                    "load": "human-sounding-writing",
+                    "required_load": True,
+                    "default_on": True,
+                    "covers": [
+                        "every human-facing task/output",
+                        "HTML reports",
+                        "compare HTML",
+                    ],
+                },
+                "routes": [
+                    {
+                        "id": "readme_product_entry",
+                        "surfaces": ["README.md"],
+                        "load": "writing-direction",
+                        "required_load": True,
+                    },
+                    {
+                        "id": "github_and_docs_prose",
+                        "surfaces": [
+                            "pull request titles",
+                            "issue titles",
+                            "issue log titles",
+                            "commit messages",
+                            "commit subjects",
+                            "non-README docs",
+                            "changelog prose",
+                        ],
+                        "load": "human-sounding-writing",
+                        "required_load": True,
+                        "default_on": True,
+                    },
+                    {
+                        "id": "generated_artifact_filenames",
+                        "surfaces": [
+                            "generated artifact filenames",
+                            "asset-manifest paths",
+                            "committed media basenames",
+                            "filename legends",
+                        ],
+                        "load": "human-output-naming",
+                        "required_load": True,
+                    },
+                ],
+                "acs_verify_entrypoint": {
+                    "writing": "python scripts/validate_content_system.py --root . --mode writing",
+                    "full_helper": "python scripts/validate_content_system.py --root .",
+                },
+                "acs_prompt_inject": {
+                    "fields": ["routes", "apply_checklist", "human_facing_default"],
+                    "when": "before HTML reports and compare deliverables",
+                    "instruction": (
+                        "MUST load hsw for every human-facing task including HTML reports "
+                        "and compare HTML; do not treat as optional or per-report."
+                    ),
+                },
+            }
+            (staging / "docs" / "writing-routing.json").write_text(json.dumps(bad), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("html report" in e for e in errors), errors)
+
+
     def test_writing_router_lists_artifact_filename_surfaces(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))

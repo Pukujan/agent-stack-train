@@ -765,11 +765,42 @@ def check_writing_contract(root: Path) -> list[str]:
         "commit subject",
         "non-readme",
         "changelog",
+        "html report",
+        "compare html",
+        "compare ui",
+        "human-readable html",
     ):
         if not any(needle in surface for surface in surfaces):
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose surfaces must mention {needle}"
             )
+    if prose_route.get("default_on") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose default_on must be true"
+        )
+
+    human_default = contract.get("human_facing_default")
+    if not isinstance(human_default, dict):
+        errors.append(f"{WRITING_ROUTER_CONTRACT} must declare human_facing_default object")
+    else:
+        if human_default.get("load") != "human-sounding-writing":
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} human_facing_default.load must be human-sounding-writing"
+            )
+        if human_default.get("required_load") is not True:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} human_facing_default.required_load must be true"
+            )
+        if human_default.get("default_on") is not True:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} human_facing_default.default_on must be true"
+            )
+        covers = {str(c).lower() for c in human_default.get("covers", [])}
+        for needle in ("every human-facing", "html report", "compare"):
+            if not any(needle in cover for cover in covers):
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} human_facing_default.covers must mention {needle}"
+                )
 
     if contract.get("application") != "must_load":
         errors.append(f"{WRITING_ROUTER_CONTRACT} application must be must_load")
@@ -815,9 +846,30 @@ def check_writing_contract(root: Path) -> list[str]:
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention speakable names or filename legends"
             )
+        if "html report" not in lowered_instruction and "compare html" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention HTML reports or compare HTML"
+            )
+        if "every human-facing" not in lowered_instruction and "default" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention every human-facing default"
+            )
+        if "per-report" not in lowered_instruction and "optional" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must forbid per-report/optional HSW skip"
+            )
         fields = inject.get("fields")
         if not isinstance(fields, list) or "routes" not in fields:
             errors.append(f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include routes")
+        if not isinstance(fields, list) or "human_facing_default" not in fields:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include human_facing_default"
+            )
+        when = str(inject.get("when") or "").lower()
+        if "html" not in when and "compare" not in when:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.when must mention HTML or compare deliverables"
+            )
 
     errors.extend(check_human_output_naming_contract(root))
     return errors

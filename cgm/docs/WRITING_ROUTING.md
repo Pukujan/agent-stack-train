@@ -3,6 +3,9 @@
 Soft router for choosing a writing module. **Soft** means CGM does not
 NLP-grade prose in CI. It does **not** mean optional: agents **MUST load** the
 routed module before writing the listed surfaces (APPLY / `required_load`).
+**HSW is ON by default** for every human-facing deliverable except README /
+product entry (`writing-direction`) and filename-only surfaces
+(`human-output-naming`). No per-report or per-HTML opt-in.
 
 Machine-readable twin: [`docs/writing-routing.json`](writing-routing.json)
 (`content-generation.writing-routing.v1`). ACS / hotload verify entrypoint:
@@ -19,8 +22,20 @@ documented in `acs_prompt_inject` inside the JSON contract.
 | Non-README docs and changelog prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Guides, ops notes, CHANGELOG narrative — not the root README. |
 | Posts / blogs / social / general agent prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human voice, AI-tell scrub, restrained bold. Agents asked for "hsw" should load this module. |
 | Papers / data writeups | `human-sounding-writing` (short name **hsw** / HSW) (+ chart rules in that module and guide) | **MUST load.** Same voice rules; apply takeaway titles and plain-chart guidance. |
+| HTML reports / compare HTML / compare UIs / appendable HTML / agent human-readable HTML | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load (default ON).** Visible prose and labels in human-facing HTML — including ACS compare reports. No per-report opt-in. Basenames still use **hon**. |
 | Generated artifact filenames / asset-manifest paths / committed media basenames / filename legends | `human-output-naming` (short name **hon** / HON) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend required. Never opaque `p0`/hex or robot key=value stems. See [`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). |
 
+
+## Human-facing default (0.5.6+)
+
+`human_facing_default` in [`writing-routing.json`](writing-routing.json) sets
+**hsw** as the default load for every human-facing deliverable. Exceptions:
+
+- README / product entry → `writing-direction`
+- Generated artifact filenames / legends → `human-output-naming` (**hon**) for
+  *basenames*; visible prose inside HTML still uses **hsw**
+
+ACS and sibling adapters must not treat HSW as optional or per-report.
 
 ## Filename surfaces (0.5.5+)
 
@@ -39,12 +54,13 @@ safe twin: `song-food--up-8.mp3`. Full contract:
 
 ## Apply checklist (agents)
 
-1. Identify the writing surface (README, PR, issue, commit message/subject, doc, etc.).
-2. Look up the surface in the table above or in `docs/writing-routing.json` `routes[].surfaces`.
+1. Identify the writing surface (README, PR, issue, commit message/subject, doc, HTML report, compare UI, etc.).
+2. Look up the surface in the table above or in `docs/writing-routing.json` `routes[].surfaces`. If it is human-facing and not README/product entry and not filename-only, default to **hsw** (`human_facing_default`).
 3. **MUST** load `modules/<load>/SKILL.md` for that route before drafting (`required_load: true`).
 4. Apply the module rules to the draft.
 5. Do not skip load because the surface is short or "just a commit message."
 6. If naming a generated artifact, asset-manifest path, committed media file, or filename legend, MUST load `human-output-naming` (**hon**), call `scripts/human_filename` (speakable by default), and keep a per-feature legend.
+7. Never treat HSW as optional, soft-skip, or per-report opt-in for HTML reports, compare UIs, or other human-facing HTML.
 
 ## Short name
 
@@ -62,15 +78,18 @@ instead.
 If the task is a README or product entry, do not apply `human-sounding-writing`
 bold restraints. If the task is a PR, issue, issue-log title, commit
 message/subject, non-README doc, changelog prose, post, blog, social update,
-general prose, paper, or data writeup, **MUST** use `human-sounding-writing`
-over README scan/bold rules.
+general prose, paper, data writeup, HTML report, compare HTML/UI, or other
+human-facing HTML, **MUST** use `human-sounding-writing` over README scan/bold
+rules. Default is ON — do not wait for a per-report flag.
 
 ## ACS inject
 
 After verify passes, ACS should inject the MUST-load contract into agent
 prompts using `acs_prompt_inject` in [`writing-routing.json`](writing-routing.json)
-(fields: `application`, `routes`, `apply_checklist`). The inject text must mention
-**output filenames** / asset-manifest paths / filename legends (hon, speakable), not titles only. See
+(fields: `application`, `human_facing_default`, `routes`, `apply_checklist`). The
+inject text must say HSW is **default ON for every human-facing task/output**,
+including **HTML reports / compare HTML**, and must mention **output filenames** /
+asset-manifest paths / filename legends (hon, speakable), not titles only. See
 [`ACS_VERIFY.md`](ACS_VERIFY.md).
 
 ## References

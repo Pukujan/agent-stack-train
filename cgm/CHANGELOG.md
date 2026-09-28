@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.6 — draft
+
+- **HSW default ON for every human-facing deliverable:** HTML reports, compare HTML/UIs, appendable HTML, and other agent-produced human-readable HTML join the soft router → `human-sounding-writing` (**hsw**) with `required_load` / `default_on`;
+- added `human_facing_default` to `docs/writing-routing.json` (HSW by default; exceptions only README/product entry and filename-only surfaces); no per-report or per-HTML opt-in;
+- strengthened `acs_prompt_inject.when` / `instruction` so ACS hotload cannot treat HSW as optional for compare HTML or human-facing reports;
+- validator + tests assert HTML report / compare surfaces, `human_facing_default`, and inject needles; still no prose-style NLP CI gate;
+- docs (WRITING_ROUTING, ACS_VERIFY, SKILL, README, AGENTS, HUMAN_SOUNDING_WRITING, MIGRATING) updated; EXPECTED_MODULES remains eight; **hon** still owns basenames only.
+
 ## 0.5.5 — draft
 
 - added `human-output-naming` (**hon**) module + `scripts/human_filename.py` with **speakable** default basenames (e.g. `Song Food – up 8.mp3`; omit defaults) and optional kebab-safe twin (`song-food--up-8.mp3`); rejects hashy junk (`song_food-p0-00e86d.mp3`) and robot key=value stems (`song-food_pitch-plus-8st_speed-0pct.mp3`);
