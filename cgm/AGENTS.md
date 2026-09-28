@@ -10,7 +10,7 @@ Before changing or using the system:
 4. inspect the target repository's `.content-system/` adapter and evidence before making claims;
 5. for README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, `docs/PROVENANCE_AND_CITATION.md`, `docs/README_QUALITY_PDD.md`, `docs/README_QUALITY_SDD.md`, `docs/README_QUALITY_TDD.md`, and `templates/readme-contract.json`;
 6. inspect prior reviewed outputs in the target repository and the helper's prior-work references before inventing a new story or visual direction;
-7. run `python scripts/validate_content_system.py --root .` before handoff (ACS hotload may call `--mode writing` first; see [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md)).
+7. run `python scripts/validate_content_system.py --root .` before handoff (adopters may call `--mode writing` first; confirm HSW automation with `python scripts/verify_hsw_applied.py --root .` and optional `--html <file>`; see [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md));
 
 The helper system defines methods and constraints. It does not define product facts. Product facts, claims, audience, and project-specific visual identity belong in the target repository.
 
@@ -52,7 +52,19 @@ Soft means no NLP CI grade of prose — not optional load and not per-report opt
 
 Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken the README scanability contract.
 
-ACS / multi-agent-hotload verify entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing` (full helper or helper+adapter as needed). After verify, ACS must inject `acs_prompt_inject` from the JSON into agent prompts. Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+**Every CGM adopter** (ACS is one consumer) must inject the always-on block at agent start: `acs_prompt_inject.system_block` in [`docs/writing-routing.json`](docs/writing-routing.json) (`always_on: true`, `opt_in_forbidden: true`). Verify entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing`. Confirm automation: `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+
+
+## Operational issue intake
+
+When an **operational** issue is logged against CGM (Alex or an agent forwarding his ask — pin/install/hotload succeeded but a documented MUST/default did not auto-apply):
+
+1. **Reproduce first** — do not believe the report alone.
+2. Treat it as a **product defect for EVERY CGM adopter**, not one consumer.
+3. **Fix pin / contract / validate** so automation lands for all adopters.
+4. **Never** open ACS-only or single-adopter tickets for that class of failure.
+
+Machine + human contract: [`docs/issue-log-contract.json`](docs/issue-log-contract.json) / [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md). Use the GitHub template `.github/ISSUE_TEMPLATE/operational.yml`. Done-when must include validate needles and adopter-facing docs.
 
 ## Versioning
 

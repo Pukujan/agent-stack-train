@@ -10,8 +10,8 @@ product entry (`writing-direction`) and filename-only surfaces
 Machine-readable twin: [`docs/writing-routing.json`](writing-routing.json)
 (`content-generation.writing-routing.v1`). ACS / hotload verify entrypoint:
 `python scripts/validate_content_system.py --root <cgm-checkout> --mode writing`
-(see [`docs/ACS_VERIFY.md`](ACS_VERIFY.md)). ACS prompt inject path is
-documented in `acs_prompt_inject` inside the JSON contract.
+(see [`docs/ACS_VERIFY.md`](ACS_VERIFY.md)). Always-on inject for every adopter is
+documented in `acs_prompt_inject.system_block` inside the JSON contract.
 
 | Situation | Load | Notes |
 | --- | --- | --- |
@@ -82,15 +82,24 @@ general prose, paper, data writeup, HTML report, compare HTML/UI, or other
 human-facing HTML, **MUST** use `human-sounding-writing` over README scan/bold
 rules. Default is ON — do not wait for a per-report flag.
 
-## ACS inject
+## Always-on inject (every CGM adopter — 0.5.7+)
 
-After verify passes, ACS should inject the MUST-load contract into agent
-prompts using `acs_prompt_inject` in [`writing-routing.json`](writing-routing.json)
-(fields: `application`, `human_facing_default`, `routes`, `apply_checklist`). The
-inject text must say HSW is **default ON for every human-facing task/output**,
-including **HTML reports / compare HTML**, and must mention **output filenames** /
-asset-manifest paths / filename legends (hon, speakable), not titles only. See
-[`ACS_VERIFY.md`](ACS_VERIFY.md).
+After pin/verify, **every CGM adopter** must paste
+`acs_prompt_inject.system_block` from [`writing-routing.json`](writing-routing.json)
+into the agent system prompt at **boot** (`always_on: true`,
+`opt_in_forbidden: true`, `audience: every_cgm_adopter`). ACS is one consumer;
+the field name is kept for pin compatibility.
+
+Confirm automation:
+
+```bash
+python scripts/verify_hsw_applied.py --root <cgm-checkout>
+python scripts/verify_hsw_applied.py --root <cgm-checkout> --mode acs-html --html <compare.html>
+```
+
+The inject must say HSW is **default ON for every human-facing task/output**,
+including **HTML reports / compare HTML**, forbid per-task opt-in, and mention
+**output filenames** / legends (**hon**). See [`ACS_VERIFY.md`](ACS_VERIFY.md).
 
 ## References
 

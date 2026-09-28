@@ -8,6 +8,7 @@ from scripts.validate_content_system import (
     check,
     check_adapter,
     check_adopter_readme_product_only,
+    check_issue_log_contract,
     check_project_brief_v2,
     check_readme,
     check_writing_contract,
@@ -505,6 +506,215 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertTrue(any("committed media" in s for s in surfaces))
         instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
         self.assertTrue("filename" in instruction or "human-output-naming" in instruction)
+
+
+    def test_writing_router_requires_always_on_inject(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        inject = contract["acs_prompt_inject"]
+        self.assertIs(inject["always_on"], True)
+        self.assertIs(inject["opt_in_forbidden"], True)
+        self.assertTrue(str(inject.get("audience", "")).lower().find("every") >= 0 or "adopter" in str(inject.get("audience", "")).lower())
+        self.assertIn("system_block", inject["fields"])
+        self.assertIn("always_on", inject["fields"])
+        block = inject["system_block"].lower()
+        self.assertIn("always-on", block)
+        self.assertIn("human-sounding-writing", block)
+        self.assertIn("opt-in is forbidden", block)
+        self.assertIn("html", block)
+        self.assertIs(contract["always_on_system_block"]["always_on"], True)
+        self.assertTrue(contract["acs_verify_entrypoint"].get("hsw_automation"))
+        instruction = inject["instruction"].lower()
+        self.assertTrue("always_on" in instruction or "always-on" in instruction)
+        self.assertIn("adopter", instruction)
+
+    def test_writing_contract_rejects_missing_always_on_inject(self):
+        import json
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            (staging / "modules" / "writing-direction").mkdir(parents=True)
+            (staging / "modules" / "human-sounding-writing").mkdir(parents=True)
+            (staging / "modules" / "human-output-naming").mkdir(parents=True)
+            (staging / "modules" / "writing-direction" / "SKILL.md").write_text("# wd\n", encoding="utf-8")
+            (staging / "modules" / "human-sounding-writing" / "SKILL.md").write_text("# hsw\n", encoding="utf-8")
+            (staging / "modules" / "human-output-naming" / "SKILL.md").write_text("# hon\n", encoding="utf-8")
+            (staging / "scripts").mkdir()
+            (staging / "scripts" / "verify_hsw_applied.py").write_text("# stub\n", encoding="utf-8")
+            (staging / "docs").mkdir()
+            (staging / "docs" / "WRITING_ROUTING.md").write_text("# router\n", encoding="utf-8")
+            # Minimal filename contract so this failure focuses on always_on inject
+            (staging / "docs" / "HUMAN_OUTPUT_NAMING.md").write_text("# hon\n", encoding="utf-8")
+            (staging / "docs" / "human-output-naming.json").write_text(
+                json.dumps({
+                    "schema_version": "content-generation.human-output-naming.v1",
+                    "default_style": "speakable",
+                    "required_load": True,
+                    "apply_checklist": ["a", "b", "c"],
+                    "helper": {"module": "scripts/human_filename.py", "api": ["build_basename"]},
+                    "legend": {"required": True, "helper_dir": "docs/filename-legends"},
+                }),
+                encoding="utf-8",
+            )
+            (staging / "docs" / "filename-legends").mkdir()
+            (staging / "docs" / "filename-legends" / "sample.json").write_text(
+                json.dumps({"schema_version": "content-generation.filename-legend.v1", "feature": "sample", "glossary": {"a": "b"}, "files": ["x.mp3"]}),
+                encoding="utf-8",
+            )
+            (staging / "scripts" / "human_filename.py").write_text(
+                "def build_basename(*a, **k):\n    return 'x'\n"
+                "def build_basename_from_dimensions(*a, **k):\n    return 'x'\n"
+                "def build_relative_path(*a, **k):\n    return 'x'\n"
+                "def is_accepted_basename(*a, **k):\n    return True\n"
+                "def is_hashy_junk_basename(*a, **k):\n    return False\n"
+                "def is_robot_key_value_basename(*a, **k):\n    return False\n"
+                "def pitch_phrase(*a, **k):\n    return 'x'\n"
+                "def sanitize_label(*a, **k):\n    return 'x'\n"
+                "def speed_phrase(*a, **k):\n    return 'x'\n",
+                encoding="utf-8",
+            )
+            version = {
+                "system": "content-generation-modules",
+                "version": "0.5.7",
+                "modules": [
+                    "brand-foundation",
+                    "content-context",
+                    "writing-direction",
+                    "human-sounding-writing",
+                    "human-output-naming",
+                    "visual-direction",
+                    "image-generation",
+                    "html-demo",
+                ],
+            }
+            (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
+            bad = {
+                "schema_version": "content-generation.writing-routing.v1",
+                "enforcement": "soft",
+                "application": "must_load",
+                "required_writing_modules": ["writing-direction", "human-sounding-writing"],
+                "apply_checklist": ["a", "b", "c"],
+                "not_routed": [],
+                "human_facing_default": {
+                    "load": "human-sounding-writing",
+                    "required_load": True,
+                    "default_on": True,
+                    "covers": [
+                        "every human-facing task/output",
+                        "HTML reports",
+                        "compare HTML",
+                    ],
+                },
+                "routes": [
+                    {
+                        "id": "readme_product_entry",
+                        "surfaces": ["README.md"],
+                        "load": "writing-direction",
+                        "required_load": True,
+                    },
+                    {
+                        "id": "github_and_docs_prose",
+                        "surfaces": [
+                            "pull request titles",
+                            "issue titles",
+                            "issue log titles",
+                            "commit messages",
+                            "commit subjects",
+                            "non-README docs",
+                            "changelog prose",
+                            "HTML reports",
+                            "compare HTML",
+                            "compare UIs",
+                            "human-readable HTML",
+                        ],
+                        "load": "human-sounding-writing",
+                        "required_load": True,
+                        "default_on": True,
+                    },
+                    {
+                        "id": "generated_artifact_filenames",
+                        "surfaces": [
+                            "generated artifact filenames",
+                            "asset-manifest paths",
+                            "committed media basenames",
+                            "filename legends",
+                        ],
+                        "load": "human-output-naming",
+                        "required_load": True,
+                    },
+                ],
+                "acs_verify_entrypoint": {
+                    "writing": "python scripts/validate_content_system.py --root . --mode writing",
+                    "full_helper": "python scripts/validate_content_system.py --root .",
+                },
+                "acs_prompt_inject": {
+                    "fields": ["routes", "apply_checklist", "human_facing_default"],
+                    "when": "before HTML reports and compare deliverables",
+                    "instruction": (
+                        "MUST load hsw for every human-facing task including HTML reports "
+                        "and compare HTML; filenames and speakable legends; do not treat as "
+                        "optional or per-report."
+                    ),
+                },
+            }
+            (staging / "docs" / "writing-routing.json").write_text(json.dumps(bad), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("always_on" in e for e in errors), errors)
+            self.assertTrue(any("system_block" in e for e in errors), errors)
+
+
+    def test_issue_log_contract_present(self):
+        self.assertEqual(check_issue_log_contract(ROOT), [])
+        import json
+        contract = json.loads((ROOT / "docs" / "issue-log-contract.json").read_text(encoding="utf-8"))
+        self.assertEqual(contract["schema_version"], "content-generation.issue-log.v1")
+        self.assertIn("every", str(contract["audience"]).lower())
+        ids = {s["id"] for s in contract["intake_steps"]}
+        for needed in (
+            "reproduce_first",
+            "classify_product_defect_all_adopters",
+            "fix_pin_contract_validate",
+            "never_single_adopter_ticket",
+        ):
+            self.assertIn(needed, ids)
+        self.assertIn("validate_needles", contract["done_when_must_include"])
+        self.assertIn("adopter_facing_docs", contract["done_when_must_include"])
+        forbidden = " ".join(str(x).lower() for x in contract["forbidden_ticket_shapes"])
+        self.assertIn("acs-only", forbidden)
+        self.assertTrue((ROOT / ".github" / "ISSUE_TEMPLATE" / "operational.yml").is_file())
+
+    def test_issue_log_contract_rejects_acs_only_gap(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory)
+            (staging / "docs").mkdir()
+            (staging / "docs" / "ISSUE_LOG.md").write_text("# issue log\n", encoding="utf-8")
+            (staging / ".github" / "ISSUE_TEMPLATE").mkdir(parents=True)
+            (staging / ".github" / "ISSUE_TEMPLATE" / "operational.yml").write_text(
+                "name: Operational\nbody:\n  - reproduce every cgm adopter acs-only validate\n",
+                encoding="utf-8",
+            )
+            bad = {
+                "schema_version": "content-generation.issue-log.v1",
+                "audience": "acs_only",
+                "intake_steps": [
+                    {"id": "reproduce_first", "required": True},
+                    {"id": "classify_product_defect_all_adopters", "required": True},
+                    {"id": "fix_pin_contract_validate", "required": True},
+                    {"id": "never_single_adopter_ticket", "required": True},
+                ],
+                "forbidden_ticket_shapes": ["docs-only acknowledgment"],
+                "done_when": ["a", "b", "c"],
+                "done_when_must_include": ["validate_needles"],
+                "validate_needles": ["intake_steps"],
+            }
+            (staging / "docs" / "issue-log-contract.json").write_text(json.dumps(bad), encoding="utf-8")
+            errors = check_issue_log_contract(staging)
+            self.assertTrue(any("audience" in e for e in errors), errors)
+            self.assertTrue(any("ACS-only" in e or "acs-only" in e for e in errors), errors)
+            self.assertTrue(any("adopter_facing_docs" in e for e in errors), errors)
 
     def test_adopter_readme_rejects_cgm_promotion(self):
         errors = check_adopter_readme_product_only(

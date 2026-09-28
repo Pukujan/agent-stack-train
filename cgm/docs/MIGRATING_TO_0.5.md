@@ -93,3 +93,22 @@ do not rename the folder or replace the id with `hsw`.
   4. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
 - Soft still means no NLP prose CI — pin **0.5.6+**.
 
+## Always-on HSW automation (0.5.7+)
+
+- **Problem fixed:** pin ≠ enforcement. 0.5.6 documented MUST but adopters could
+  skip loading HSW unless told mid-run.
+- **Fix:** always-on `system_block` + `always_on` / `opt_in_forbidden` in
+  `docs/writing-routing.json`; `scripts/verify_hsw_applied.py` fail-closed gate;
+  validator needles; operational issue-log contract for this class of failure.
+- Adapter / every-adopter steps:
+  1. Pin helper **0.5.7+** (version and commit).
+  2. Paste `acs_prompt_inject.system_block` into the agent system prompt at boot.
+  3. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
+  4. Run `python scripts/verify_hsw_applied.py --root <cgm>` (and `--html` before
+     publishing human-facing HTML / compare Pages).
+- Soft still means no full NLP prose CI — automation = always-on inject +
+  contract validate + optional HTML tell scan.
+- Operational tickets for similar gaps: follow [`ISSUE_LOG.md`](ISSUE_LOG.md) /
+  [`issue-log-contract.json`](issue-log-contract.json) (reproduce first; every
+  adopter; never ACS-only).
+

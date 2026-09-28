@@ -36,6 +36,16 @@ FILENAME_CONTRACT_DOC = "docs/HUMAN_OUTPUT_NAMING.md"
 FILENAME_CONTRACT = "docs/human-output-naming.json"
 FILENAME_CONTRACT_SCHEMA = "content-generation.human-output-naming.v1"
 FILENAME_HELPER_PATH = "scripts/human_filename.py"
+HSW_VERIFY_HELPER_PATH = "scripts/verify_hsw_applied.py"
+ISSUE_LOG_DOC = "docs/ISSUE_LOG.md"
+ISSUE_LOG_CONTRACT = "docs/issue-log-contract.json"
+ISSUE_LOG_SCHEMA = "content-generation.issue-log.v1"
+ISSUE_LOG_REQUIRED_STEP_IDS = (
+    "reproduce_first",
+    "classify_product_defect_all_adopters",
+    "fix_pin_contract_validate",
+    "never_single_adopter_ticket",
+)
 FILENAME_HELPER_SYMBOLS = (
     "build_basename",
     "build_basename_from_dimensions",
@@ -95,6 +105,8 @@ REQUIRED_HELPER_DOCS = (
     "docs/WRITING_ROUTING.md",
     "docs/writing-routing.json",
     "docs/ACS_VERIFY.md",
+    "docs/ISSUE_LOG.md",
+    "docs/issue-log-contract.json",
     "docs/HUMAN_SOUNDING_WRITING.md",
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md",
@@ -675,9 +687,77 @@ def check_asset_manifest_human_paths(
     return errors
 
 
-def check_writing_contract(root: Path) -> list[str]:
-    """Presence check for writing modules + soft router (ACS hotload entrypoint)."""
+
+def check_issue_log_contract(root: Path) -> list[str]:
+    """Operational issue intake contract for every CGM adopter (not ACS-only)."""
     errors: list[str] = []
+    doc = root / ISSUE_LOG_DOC
+    if not doc.is_file():
+        errors.append(f"missing {ISSUE_LOG_DOC}")
+    path = root / ISSUE_LOG_CONTRACT
+    try:
+        contract = load_json(path)
+    except ValueError as exc:
+        return errors + [str(exc)]
+
+    if contract.get("schema_version") != ISSUE_LOG_SCHEMA:
+        errors.append(f"{ISSUE_LOG_CONTRACT} schema_version must be {ISSUE_LOG_SCHEMA}")
+    audience = str(contract.get("audience") or "").lower()
+    if "every" not in audience and "adopter" not in audience:
+        errors.append(f"{ISSUE_LOG_CONTRACT} audience must name every CGM adopter")
+
+    steps = contract.get("intake_steps")
+    if not isinstance(steps, list) or len(steps) < 4:
+        errors.append(f"{ISSUE_LOG_CONTRACT} intake_steps must list at least 4 steps")
+    else:
+        by_id = {str(s.get("id")): s for s in steps if isinstance(s, dict)}
+        for step_id in ISSUE_LOG_REQUIRED_STEP_IDS:
+            step = by_id.get(step_id)
+            if not isinstance(step, dict):
+                errors.append(f"{ISSUE_LOG_CONTRACT} missing intake step id {step_id}")
+            elif step.get("required") is not True:
+                errors.append(f"{ISSUE_LOG_CONTRACT} intake step {step_id} must be required")
+
+    forbidden = contract.get("forbidden_ticket_shapes")
+    if not isinstance(forbidden, list) or len(forbidden) < 2:
+        errors.append(f"{ISSUE_LOG_CONTRACT} forbidden_ticket_shapes must list ACS-only / single-adopter bans")
+    else:
+        joined = " ".join(str(x).lower() for x in forbidden)
+        if "acs-only" not in joined and "acs only" not in joined:
+            errors.append(f"{ISSUE_LOG_CONTRACT} forbidden_ticket_shapes must ban ACS-only tickets")
+        if "single-adopter" not in joined and "single adopter" not in joined:
+            errors.append(f"{ISSUE_LOG_CONTRACT} forbidden_ticket_shapes must ban single-adopter tickets")
+
+    done_when = contract.get("done_when")
+    if not isinstance(done_when, list) or len(done_when) < 3:
+        errors.append(f"{ISSUE_LOG_CONTRACT} done_when must be a list with at least 3 items")
+
+    must_include = {str(x) for x in contract.get("done_when_must_include", [])}
+    for needle in ("validate_needles", "adopter_facing_docs"):
+        if needle not in must_include:
+            errors.append(f"{ISSUE_LOG_CONTRACT} done_when_must_include must contain {needle}")
+
+    needles = contract.get("validate_needles")
+    if not isinstance(needles, list) or "intake_steps" not in needles:
+        errors.append(f"{ISSUE_LOG_CONTRACT} validate_needles must include intake_steps")
+
+    template = root / ".github" / "ISSUE_TEMPLATE" / "operational.yml"
+    if not template.is_file():
+        errors.append("missing .github/ISSUE_TEMPLATE/operational.yml")
+    else:
+        body = template.read_text(encoding="utf-8").lower()
+        for needle in ("reproduce", "every cgm adopter", "acs-only", "validate"):
+            if needle not in body:
+                errors.append(f"operational issue template must mention {needle}")
+
+    return errors
+
+
+def check_writing_contract(root: Path) -> list[str]:
+    """Presence check for writing modules + soft router + always-on HSW inject (every adopter)."""
+    errors: list[str] = []
+    if not (root / HSW_VERIFY_HELPER_PATH).is_file():
+        errors.append(f"missing {HSW_VERIFY_HELPER_PATH}")
     version_path = root / "system-version.json"
     try:
         version = load_json(version_path)
@@ -870,6 +950,69 @@ def check_writing_contract(root: Path) -> list[str]:
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.when must mention HTML or compare deliverables"
             )
+        if inject.get("always_on") is not True:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.always_on must be true"
+            )
+        if inject.get("opt_in_forbidden") is not True:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.opt_in_forbidden must be true"
+            )
+        audience = str(inject.get("audience") or "").lower()
+        if "every" not in audience and "adopter" not in audience and "all" not in audience:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.audience must name every CGM adopter"
+            )
+        inject_surfaces = {str(s).lower() for s in inject.get("surfaces", [])}
+        for needle in ("html report", "compare html", "compare ui"):
+            if not any(needle in surface for surface in inject_surfaces):
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.surfaces must mention {needle}"
+                )
+        system_block = inject.get("system_block")
+        if not isinstance(system_block, str) or len(system_block.strip()) < 80:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must be a non-trivial always-on paste block"
+            )
+        else:
+            lowered_block = system_block.lower()
+            for needle in ("always-on", "human-sounding-writing", "skill.md", "opt-in is forbidden"):
+                if needle not in lowered_block:
+                    errors.append(
+                        f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must mention {needle}"
+                    )
+            if "html" not in lowered_block:
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must mention HTML surfaces"
+                )
+        if "system_block" not in (fields or []):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include system_block"
+            )
+        if "always_on" not in (fields or []):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include always_on"
+            )
+        lowered_instruction = str(instruction).lower() if isinstance(instruction, str) else ""
+        if "always_on" not in lowered_instruction and "always-on" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention always_on / always-on"
+            )
+        if "adopter" not in lowered_instruction:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention every CGM adopter"
+            )
+
+    alias = contract.get("always_on_system_block")
+    if not isinstance(alias, dict) or alias.get("always_on") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} must declare always_on_system_block with always_on true"
+        )
+
+    if isinstance(entry, dict) and not entry.get("hsw_automation"):
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} acs_verify_entrypoint must declare hsw_automation"
+        )
 
     errors.extend(check_human_output_naming_contract(root))
     return errors
@@ -980,6 +1123,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"missing helper guide: {path}")
     errors.extend(check_readme(root))
     errors.extend(check_writing_contract(root))
+    errors.extend(check_issue_log_contract(root))
     # Filename contract is also required on full helper (fail closed if claimed/missing).
     # check_writing_contract already extends it; keep an explicit call only if writing skipped.
     return errors
@@ -1105,7 +1249,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Validate the content-generation helper contract. "
-            "ACS hotload: --mode writing checks writing-direction + human-sounding-writing + soft router."
+            "Adopter/hotload: --mode writing checks writing-direction + human-sounding-writing + soft router + always-on inject."
         )
     )
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -1115,7 +1259,7 @@ def main(argv: list[str] | None = None) -> int:
         "--mode",
         choices=("helper", "writing"),
         default="helper",
-        help="helper=full CGM contract (default); writing=ACS entrypoint for writing modules + soft router only",
+        help="helper=full CGM contract (default); writing=adopter entrypoint for writing modules + soft router + always-on inject",
     )
     args = parser.parse_args(argv)
     root = args.root.resolve()

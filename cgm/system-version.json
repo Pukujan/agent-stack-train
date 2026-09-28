@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -36,6 +36,8 @@
     "docs/WRITING_ROUTING.md",
     "docs/writing-routing.json",
     "docs/ACS_VERIFY.md",
+    "docs/issue-log-contract.json",
+    "docs/ISSUE_LOG.md",
     "docs/IMAGE_GUIDE.md",
     "docs/PRIOR_WORK.md",
     "docs/HOLDOUT_EVALUATION.md",
@@ -87,7 +89,7 @@
   "scanability_contract": {
     "version": "content-generation.scanability.v1",
     "heading_rule": "Use descriptive headings that tell the reader what they will learn or gain.",
-    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
+    "bolding_rule": "Use one short meaningful anchor when helpful, usually 2\u20138 words, for a problem, outcome, mechanism, proof, or boundary.",
     "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
     "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
   },

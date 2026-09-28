@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.7 — draft
+
+- **Force HSW for every CGM adopter:** always-on inject is no longer ACS-only documentation — any repo that pins CGM must paste the always-on system block at agent start;
+- `acs_prompt_inject` gains `always_on`, `opt_in_forbidden`, `audience: every_cgm_adopter`, `surfaces` (incl. HTML/compare), and a single copy-paste `system_block`; alias `always_on_system_block` points at it;
+- new `scripts/verify_hsw_applied.py` fail-closed gate: contract mode checks always-on inject + `human_facing_default`; `--html` / `--mode acs-html` optionally scans human-facing HTML for a short AI-jargon / tool-dump denylist (not full NLP quality CI);
+- validator + tests require the new contract keys and the verify script; EXPECTED_MODULES stays eight;
+- docs (ACS_VERIFY “Confirm HSW automation”, WRITING_ROUTING, README, AGENTS, MIGRATING, CHANGELOG) state the rule for **all adopters**; ACS remains one example consumer;
+- **operational issue-log contract:** `docs/issue-log-contract.json` + `docs/ISSUE_LOG.md` + `.github/ISSUE_TEMPLATE/operational.yml` — reproduce first, every-adopter framing, fix pin/contract/validate, never ACS-only tickets; validator asserts required keys.
+
 ## 0.5.6 — draft
 
 - **HSW default ON for every human-facing deliverable:** HTML reports, compare HTML/UIs, appendable HTML, and other agent-produced human-readable HTML join the soft router → `human-sounding-writing` (**hsw**) with `required_load` / `default_on`;

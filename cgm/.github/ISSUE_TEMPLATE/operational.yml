@@ -1,0 +1,60 @@
+name: Operational CGM failure
+description: Pin/install/hotload succeeded but a documented MUST/default did not auto-apply for adopters.
+title: "Operational: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for **operational** CGM failures (install ≠ enforcement).
+        Contract: `docs/issue-log-contract.json` / `docs/ISSUE_LOG.md`.
+        Frame for **every CGM adopter**. ACS may be the failure case — not the ticket scope.
+  - type: checkboxes
+    id: intake
+    attributes:
+      label: Intake checklist (required)
+      options:
+        - label: Reproduced first (or recorded why reproduce failed) — do not believe alone
+          required: true
+        - label: Classified as a product defect for EVERY CGM adopter
+          required: true
+        - label: Fix targets pin / contract / validate so all adopters get automation
+          required: true
+        - label: This is NOT an ACS-only or single-adopter ticket for this failure class
+          required: true
+        - label: Done-when will include validate needles + adopter-facing docs
+          required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What every CGM adopter should get automatically after the fix.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What you reproduced. Name the pin SHA/version. Cite ACS or another adopter only as the failure case.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Pin/contract/validate/docs changes. Universal framing.
+    validations:
+      required: true
+  - type: textarea
+    id: done_when
+    attributes:
+      label: Acceptance / done when
+      description: Must include validate needles + adopter-facing docs. PR Refs this issue; no direct main commit.
+      value: |
+        - [ ] Reproduce notes in issue or linked PR
+        - [ ] Fix framed for every CGM adopter
+        - [ ] Validator needles / verify script fail closed without the contract
+        - [ ] Adopter-facing docs updated
+        - [ ] PR Refs this issue; CI green; left unmerged unless asked
+    validations:
+      required: true

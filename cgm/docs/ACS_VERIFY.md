@@ -5,10 +5,13 @@ and adopters (for example Study-os) that must confirm full CGM + writing modules
 are present before treating hotload install as complete.
 
 **Enforcement:** soft for prose style (no NLP CI grade). The contract language
-for agents is still **MUST load / APPLY** via `required_load` — not "prefer."
-This entrypoint checks **presence** of the helper contract, writing modules,
-and soft router (including commit surfaces + inject metadata) — not whether a
-PR body or commit subject "sounds human."
+for agents is still **MUST load / APPLY** via `required_load` / `always_on` —
+not "prefer." This entrypoint checks **presence** of the helper contract,
+writing modules, soft router, and always-on inject — not whether a PR body or
+commit subject "sounds human."
+
+**Audience note:** Commands below say "ACS" because ACS asked for a verify
+hook. The machine contract applies to **every CGM adopter**.
 
 ## What `validate_content_system.py` already does
 
@@ -58,6 +61,49 @@ HTML / compare UIs**, appendable HTML, and other agent-produced human-readable
 HTML. Do not gate HSW behind a per-report flag. Exceptions remain
 README/product entry (`writing-direction`) and filename-only surfaces (**hon**).
 
+## Confirm HSW automation (0.5.7+ — every CGM adopter)
+
+0.5.6 documented MUST / `human_facing_default` but agents could pin CGM and
+still never load the skill. **0.5.7** forces automation with:
+
+1. Always-on paste block: `acs_prompt_inject.system_block` in
+   [`writing-routing.json`](writing-routing.json) (`always_on: true`,
+   `opt_in_forbidden: true`, `audience: every_cgm_adopter`).
+2. Fail-closed contract validate (needles for those keys).
+3. Optional HTML tell scan (conservative denylist — not full NLP quality CI).
+
+### Steps (any adopter; ACS example)
+
+```bash
+# 1) Pin CGM 0.5.7+ (version + commit SHA). Do not follow moving main.
+
+# 2) Writing contract + always-on inject keys
+python scripts/validate_content_system.py --root /path/to/content-generation-modules --mode writing
+
+# 3) Confirm HSW always-on contract (fail closed if inject incomplete)
+python scripts/verify_hsw_applied.py --root /path/to/content-generation-modules
+
+# 4) Before publishing human-facing HTML / compare Pages, scan the artifact
+python scripts/verify_hsw_applied.py --root /path/to/content-generation-modules \
+  --mode acs-html --html /path/to/compare.html
+```
+
+| Result | Meaning |
+| --- | --- |
+| `HSW_VERIFY ... status=OK` + `VALID` | Always-on inject + `human_facing_default` present; if `--html` given, no denylist jargon/tool-dump hits. |
+| Non-zero + `status=FAIL` | Hotload/inject contract incomplete, **or** given HTML still has known AI-jargon / tool-dump tells. |
+
+Honest limit: pass does **not** prove the prose "sounds human." It proves the
+automation gates ran. Soft still means no full NLP CI on every prose file.
+
+### What every adopter must still wire
+
+1. At **agent boot**, paste `acs_prompt_inject.system_block` into the system
+   prompt (not per-report).
+2. Run `verify_hsw_applied.py` (contract mode on install; `--html` before
+   publishing compare / human-facing HTML).
+3. Keep the eight-module pin on **0.5.7+**.
+
 ## Output filenames (0.5.5+)
 
 ACS prompt inject must mention **output filenames**, asset-manifest paths, and
@@ -104,8 +150,9 @@ CGM does not rewrite agent prompts inside ACS. After `hotload_check` /
 agent system or task prompt so adopters actually apply the modules.
 
 **Source file:** `docs/writing-routing.json`  
-**Fields to read:** `application`, `human_facing_default`, `routes` (each with
-`surfaces`, `load`, `required_load`, and for HSW `default_on`), `apply_checklist`  
+**Fields to read:** `always_on`, `opt_in_forbidden`, `system_block`, `surfaces`,
+`application`, `human_facing_default`, `routes`, `apply_checklist`
+(paste **`system_block`** — that is the always-on boot inject for every adopter)  
 **Canonical instruction text** (also in `acs_prompt_inject.instruction`):
 
 > Inject into the agent system or task prompt: HSW (human-sounding-writing) is
@@ -130,14 +177,13 @@ Suggested ACS wiring:
    instructions so every writing surface — including commit messages — carries
    a mandatory module load.
 
-## ACS follow-up (owning repo)
+## Adopter follow-up (ACS and every other pin)
 
-1. Re-pin hotload docs from CGM **0.5.5** to this release (**0.5.6+**)
-   after merge (eight modules; HSW default ON for HTML reports / compare UIs).
-2. Call the entrypoint above from `hotload_check.py` (subprocess; fail install
-   if non-zero).
-3. Inject `acs_prompt_inject` (including `human_facing_default`) into agent
-   prompts so compare HTML / human-facing reports always load **hsw** — no
-   per-report opt-in (see above).
-4. Keep adopter `.content-system/system-version.json` on the full eight-module
-   0.5.6+ set (including `human-output-naming` / **hon**).
+1. Re-pin from CGM **0.5.6** to **0.5.7+** (eight modules; always-on HSW inject).
+2. Call `--mode writing` and `scripts/verify_hsw_applied.py` from install /
+   hotload checks (fail install if non-zero).
+3. Paste `acs_prompt_inject.system_block` into the agent system prompt at
+   **boot** (every adopter — not ACS-only, not per-report).
+4. Before publishing compare / human-facing HTML, run
+   `verify_hsw_applied.py --mode acs-html --html <path>`.
+5. Keep adapter `system-version.json` on the full eight-module **0.5.7+** set.
