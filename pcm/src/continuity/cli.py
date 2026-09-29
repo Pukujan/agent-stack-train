@@ -1602,7 +1602,8 @@ def validate_repo(root: Path) -> list[str]:
 
     errors.extend(validate_workspace_layout(root, config))
     remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
-    if github_repository(remote) and not config.get("trackers", {}).get("github"):
+    origin_repository = github_repository(remote)
+    if origin_repository and not config.get("trackers", {}).get("github"):
         errors.append(f"{config_path}: GitHub repositories must set trackers.github=true to enable issue authority")
 
     canonical = config.get("canonical", {})
@@ -1672,23 +1673,21 @@ def validate_repo(root: Path) -> list[str]:
             errors.append(f"{path}: protocol_version does not match config")
         if meta.get("next_action", "").strip() == "":
             errors.append(f"{path}: next_action must be non-empty")
+        issue_url = meta.get("issue_url")
         if (
             config.get("trackers", {}).get("github")
             and current_meta
             and meta.get("id") == current_meta.get("active_task")
+            and not isinstance(issue_url, str)
         ):
-            issue_url = meta.get("issue_url")
-            if not isinstance(issue_url, str):
-                errors.append(f"{path}: active task in a GitHub-authoritative repository requires issue_url")
-            else:
-                try:
-                    issue_repo, _ = validate_github_issue_url(issue_url)
-                    remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
-                    repository = github_repository(remote)
-                    if repository and repository.casefold() != issue_repo.casefold():
-                        errors.append(f"{path}: issue_url repository {issue_repo} does not match origin {repository}")
-                except ContinuityError as exc:
-                    errors.append(f"{path}: {exc}")
+            errors.append(f"{path}: active task in a GitHub-authoritative repository requires issue_url")
+        if config.get("trackers", {}).get("github") and isinstance(issue_url, str):
+            try:
+                issue_repo, _ = validate_github_issue_url(issue_url)
+                if origin_repository and origin_repository.casefold() != issue_repo.casefold():
+                    errors.append(f"{path}: issue_url repository {issue_repo} does not match origin {origin_repository}")
+            except ContinuityError as exc:
+                errors.append(f"{path}: {exc}")
         errors.extend(validate_checkpoint_structure(root, path, text))
 
     for _task_id, (path, meta) in tasks_by_id.items():

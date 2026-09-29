@@ -21,6 +21,7 @@ from continuity.cli import (
     init_repo,
     load_json,
     main,
+    marker,
     pack_task,
     preflight_repo,
     publish_checkpoint,
@@ -108,6 +109,68 @@ class ContinuityTests(unittest.TestCase):
         meta = extract_marker(task.read_text(encoding="utf-8"), "task")
         self.assertEqual("https://github.com/example/repo/issues/12", meta["issue_url"])
         self.assertEqual([], validate_repo(root))
+
+    def test_issue_url_origin_cross_check_covers_every_task_file(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-origin-cross-check-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP", github_authority=True)
+        subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["git", "remote", "add", "origin", "https://github.com/example/real-repo.git"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        active_path = task_new(
+            root, "active", "Do work", "Why", "owner", "P1", "https://github.com/example/real-repo/issues/12"
+        )
+        completed_path = task_new(
+            root, "done", "Done work", "Why", "owner", "P1", "https://github.com/example/real-repo/issues/2"
+        )
+        current_path = root / "checkpoints" / "CURRENT.md"
+        current_text = current_path.read_text(encoding="utf-8")
+        current_meta = extract_marker(current_text, "current")
+        assert current_meta is not None
+        current_meta["active_task"] = "APP-0001"
+        current_meta["active_task_file"] = active_path.relative_to(root).as_posix()
+        current_path.write_text(
+            current_text.replace(
+                marker("current", extract_marker(current_text, "current") or {}),
+                marker("current", current_meta),
+                1,
+            ),
+            encoding="utf-8",
+        )
+        completed_text = completed_path.read_text(encoding="utf-8")
+        completed_meta = extract_marker(completed_text, "task")
+        assert completed_meta is not None
+        completed_meta["status"] = "completed"
+        completed_path.write_text(
+            completed_text.replace(
+                marker("task", extract_marker(completed_text, "task") or {}),
+                marker("task", completed_meta),
+                1,
+            ).replace("- Status: active", "- Status: completed"),
+            encoding="utf-8",
+        )
+
+        # Negative control: a completed task whose issue_url matches origin stays legal.
+        self.assertEqual(validate_repo(root), [])
+
+        completed_text = completed_path.read_text(encoding="utf-8")
+        completed_path.write_text(
+            completed_text.replace(
+                "https://github.com/example/real-repo/issues/2",
+                "https://github.com/evil-org/other-repo/issues/999999",
+            ),
+            encoding="utf-8",
+        )
+        errors = validate_repo(root)
+        self.assertIn(
+            f"{completed_path}: issue_url repository evil-org/other-repo does not match origin example/real-repo",
+            errors,
+        )
 
     def test_generated_handoff_names_github_and_private_workspace_authorities(self) -> None:
         from continuity.cli import handoff_template

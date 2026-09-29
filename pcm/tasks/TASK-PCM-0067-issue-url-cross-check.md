@@ -72,6 +72,29 @@ Blocked/uncertain:
 Next:
 - Create the two managed worktrees from merged main and hand PCM-0067/PCM-0068 to one worker each; workers keep their own task files status active and never edit CURRENT or .continuity.
 
+### 2026-09-29 19:30:53 UTC — Pcm0067Validator (omp delegated worker)
+
+<!-- continuity:checkpoint {"agent":"Pcm0067Validator (omp delegated worker)","blocked":[],"changed":["src/continuity/cli.py, tests/test_cli.py"],"completed":["Widened validate_repo's issue_url origin cross-check from only the CURRENT-active task to every task file carrying an issue_url string when trackers.github is on; the existence requirement (active task requires issue_url) stays scoped to the CURRENT-active task; error text unchanged."],"decisions":["Kept the validate_github_issue_url try/except per URL so active-task behavior is unchanged, and hoisted origin resolution to once per validate instead of re-running git inside the active-task branch; no schema version bump, no network probes, task_new origin check untouched."],"evidence":["Red-first: tests.test_cli.test_issue_url_origin_cross_check_covers_every_task_file failed before the fix (AssertionError: '...TASK-APP-0002-done.md: issue_url repository evil-org/other-repo does not match origin example/real-repo' not found in []) and passes after; fixture uses real git init + origin remote example/real-repo and includes the negative control (completed task with matching URL validates []). Local gates on Python 3.11/3.12/3.14: only the six recorded macOS-environmental baseline names fail (test_worktrees confined/refuses/distinct + another_drive error; test_cli preflight_rejects + unavailable_canonical_state), zero new; uvx ruff@0.6.9 reports only the two pre-existing ISC003 findings (cli.py:624,683); uvx mypy src clean; compileall clean; continuity validate --root . prints VALID; docs render --check prints SYNCHRONIZED; package build and tests/package_smoke.py all PASS in a .[dev] venv."],"next_action":"Open the PR to main with Refs #209 and no closing keyword, then post the pushed-not-delivered receipt on #209 keyed to this REQUEST_ID and the pushed branch-head SHA.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0067","timestamp":"2026-09-29T19:30:53Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"f9d302662b2d4cbd6112e7902e183e614d8f22df31086530c0925ffb7269f827","request_id":"6d1eaca1b6e748e089f5e7805575be56","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0067"} -->
+
+Completed:
+- Widened validate_repo's issue_url origin cross-check from only the CURRENT-active task to every task file carrying an issue_url string when trackers.github is on; the existence requirement (active task requires issue_url) stays scoped to the CURRENT-active task; error text unchanged.
+
+Evidence:
+- Red-first: tests.test_cli.test_issue_url_origin_cross_check_covers_every_task_file failed before the fix (AssertionError: '...TASK-APP-0002-done.md: issue_url repository evil-org/other-repo does not match origin example/real-repo' not found in []) and passes after; fixture uses real git init + origin remote example/real-repo and includes the negative control (completed task with matching URL validates []). Local gates on Python 3.11/3.12/3.14: only the six recorded macOS-environmental baseline names fail (test_worktrees confined/refuses/distinct + another_drive error; test_cli preflight_rejects + unavailable_canonical_state), zero new; uvx ruff@0.6.9 reports only the two pre-existing ISC003 findings (cli.py:624,683); uvx mypy src clean; compileall clean; continuity validate --root . prints VALID; docs render --check prints SYNCHRONIZED; package build and tests/package_smoke.py all PASS in a .[dev] venv.
+
+Decisions:
+- Kept the validate_github_issue_url try/except per URL so active-task behavior is unchanged, and hoisted origin resolution to once per validate instead of re-running git inside the active-task branch; no schema version bump, no network probes, task_new origin check untouched.
+
+Changed:
+- src/continuity/cli.py, tests/test_cli.py
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open the PR to main with Refs #209 and no closing keyword, then post the pushed-not-delivered receipt on #209 keyed to this REQUEST_ID and the pushed branch-head SHA.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
