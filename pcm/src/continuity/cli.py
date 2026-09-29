@@ -1563,6 +1563,41 @@ def _issue_log_format_guidance_files(root: Path) -> list[Path]:
     return files
 
 
+def document_inventory_findings(root: Path) -> tuple[list[str], list[str]]:
+    """Report a GitHub-authority root missing the optional document inventory.
+
+    Severity contract (PCM-0068, #210): a missing inventory is a warning printed
+    by the validate command, never an element of validate_repo's error list, so
+    preflight stays error-only and adopters without an index remain VALID. The
+    inventory is optional-but-recommended: fresh-session guidance expects a
+    session to consult it before choosing a next action, and while it is absent
+    `continuity docs find` and `continuity docs render` fail with a missing-file
+    error because render reads the catalog it cannot create.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    config_path = root / ".continuity" / "config.json"
+    if not config_path.is_file():
+        return errors, warnings
+    try:
+        config = load_config(root)
+    except ContinuityError:
+        return errors, warnings
+    trackers = config.get("trackers")
+    if not isinstance(trackers, dict) or not trackers.get("github"):
+        return errors, warnings
+    catalog_path = managed_output_path(root, DOCUMENT_CATALOG_PATH)
+    if catalog_path.is_file():
+        return errors, warnings
+    relative = catalog_path.relative_to(root.resolve()).as_posix()
+    warnings.append(
+        f"{relative}: missing document inventory (optional-but-recommended); run "
+        "`continuity docs init`, then `continuity docs add` once per searchable "
+        "document, then `continuity docs render` to build it"
+    )
+    return errors, warnings
+
+
 def validate_repo(root: Path) -> list[str]:
     errors: list[str] = []
     format_errors, _format_warnings = issue_log_format_findings(root)
@@ -3701,6 +3736,9 @@ def main(argv: list[str] | None = None) -> int:
             errors = validate_repo(root)
             _, format_warnings = issue_log_format_findings(root)
             for warning in format_warnings:
+                print(f"WARNING: {warning}")
+            _, inventory_warnings = document_inventory_findings(root)
+            for warning in inventory_warnings:
                 print(f"WARNING: {warning}")
             if errors:
                 for error in errors:

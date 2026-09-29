@@ -47,6 +47,7 @@ Use a non-destructive overlay:
 6. Ensure target task files use PCM task metadata/checkpoint structure when they participate in continuity.
 7. Run `continuity validate --root <target>`.
 8. Only after validation succeeds should an agent rely on PCM handoff/checkpoint state.
+9. Build the optional-but-recommended document inventory: run `continuity docs init`, then `continuity docs add` once per target document that should be searchable, then `continuity docs render`. PCM's fresh-session guidance expects a session to consult the inventory before choosing a next action, and while it is absent both `continuity docs find` and `continuity docs render` fail with a missing-file error — `render` reads the catalog and cannot create it.
 
 If the overlay cannot be completed without changing the target's established semantics, stop and make the incompatibility an explicit bounded PCM task instead of improvising.
 

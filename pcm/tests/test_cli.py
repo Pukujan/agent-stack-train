@@ -15,6 +15,7 @@ from continuity.cli import (
     ContinuityError,
     build_parser,
     checkpoint_task,
+    document_inventory_findings,
     extract_marker,
     github_issue_template,
     github_pr_template,
@@ -171,6 +172,45 @@ class ContinuityTests(unittest.TestCase):
             f"{completed_path}: issue_url repository evil-org/other-repo does not match origin example/real-repo",
             errors,
         )
+
+    def test_missing_document_inventory_is_validate_warning_not_error(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="continuity-docs-inventory-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP", github_authority=True)
+        self.assertFalse((root / ".continuity" / "documents.json").exists())
+
+        # The missing inventory must stay VALID: the finding is a warning, not an error.
+        self.assertEqual(validate_repo(root), [])
+        output = StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["validate", "--root", str(root)])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("VALID", output.getvalue())
+        warning_lines = [line for line in output.getvalue().splitlines() if line.startswith("WARNING:")]
+        self.assertTrue(any("continuity docs init" in line for line in warning_lines), output.getvalue())
+
+    def test_document_inventory_findings_require_github_tracker_and_missing_catalog(self) -> None:
+        # Without the GitHub tracker the inventory stays optional and silent.
+        private_root = Path(tempfile.mkdtemp(prefix="continuity-docs-inventory-off-"))
+        self.addCleanup(shutil.rmtree, private_root, True)
+        init_repo(private_root, "minimal", "Example", "APP", github_authority=False)
+        self.assertEqual(document_inventory_findings(private_root), ([], []))
+
+        # A GitHub root without a catalog reports exactly one remedy warning;
+        # once the catalog exists the warning disappears.
+        github_root = Path(tempfile.mkdtemp(prefix="continuity-docs-inventory-on-"))
+        self.addCleanup(shutil.rmtree, github_root, True)
+        init_repo(github_root, "minimal", "Example", "APP", github_authority=True)
+        errors, warnings = document_inventory_findings(github_root)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("continuity docs init", warnings[0])
+        self.assertEqual(main(["docs", "init", "--root", str(github_root)]), 0)
+        self.assertEqual(document_inventory_findings(github_root), ([], []))
+
+        # PCM's own repository keeps an inventory checked in, so it never warns.
+        pcm_root = Path(__file__).resolve().parent.parent
+        self.assertEqual(document_inventory_findings(pcm_root), ([], []))
 
     def test_generated_handoff_names_github_and_private_workspace_authorities(self) -> None:
         from continuity.cli import handoff_template

@@ -49,6 +49,29 @@ Observed (continuity 0.6.0, target checkout, 2026-09-26): validate VALID exit 0;
 
 No checkpoints yet.
 
+### 2026-09-29 20:01:44 UTC — omp-worker-pcm0068
+
+<!-- continuity:checkpoint {"agent":"omp-worker-pcm0068","blocked":[],"changed":["docs/TARGET_ADOPTION.md, src/continuity/cli.py, tests/test_cli.py"],"completed":["Overlay guide gains the optional document-inventory step (docs init -> docs add per document -> docs render); validate prints a WARNING naming continuity docs init when config.json exists, trackers.github is true and documents.json is missing; validate_repo and preflight stay error-only"],"decisions":["Warning is printed only by the validate CLI branch via document_inventory_findings mirroring issue_log_format_findings; docs render is documented as not the fix step because it loads the catalog it renders"],"evidence":["Red-first: AssertionError 'False is not true : VALID' before implementation, both new tests green after; suite 284 tests with only the six pre-existing environmental failures (zero delta); smoke target init --profile minimal --github-authority: WARNING + VALID exit 0, remedy sequence clears warning and docs find works; docs render --check SYNCHRONIZED; mypy clean; ruff at baseline"],"next_action":"Open the PR for task/PCM-0068-docs-index-adoption-step against main with Refs #210 and arm squash auto-merge once gates pass","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0068","timestamp":"2026-09-29T20:01:44Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a21f82512fece1d336864ca2ac97648244ef41ec5b579e4b4206095aea1c755c","request_id":"413752801525490c94e537888a66c022","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0068"} -->
+
+Completed:
+- Overlay guide gains the optional document-inventory step (docs init -> docs add per document -> docs render); validate prints a WARNING naming continuity docs init when config.json exists, trackers.github is true and documents.json is missing; validate_repo and preflight stay error-only
+
+Evidence:
+- Red-first: AssertionError 'False is not true : VALID' before implementation, both new tests green after; suite 284 tests with only the six pre-existing environmental failures (zero delta); smoke target init --profile minimal --github-authority: WARNING + VALID exit 0, remedy sequence clears warning and docs find works; docs render --check SYNCHRONIZED; mypy clean; ruff at baseline
+
+Decisions:
+- Warning is printed only by the validate CLI branch via document_inventory_findings mirroring issue_log_format_findings; docs render is documented as not the fix step because it loads the catalog it renders
+
+Changed:
+- docs/TARGET_ADOPTION.md, src/continuity/cli.py, tests/test_cli.py
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open the PR for task/PCM-0068-docs-index-adoption-step against main with Refs #210 and arm squash auto-merge once gates pass
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
