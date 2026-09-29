@@ -323,8 +323,8 @@
       ],
       "path": "tasks/TASK-PCM-0050-epistemic-records.md",
       "related": [],
-      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
-      "reviewed_sha256": "dbbd6d7b5fa5a65342093a421eed3fbed7b5d852eed588871c3e15c5dda07599",
+      "reviewed_commit": "dad5280aed7f238781d17c42523e76f9b17663ee",
+      "reviewed_sha256": "97273dc6db7e5ad68635c555f61c7f5358c43ad0b04cb6600368534ea9fb5179",
       "summary": "Decision-slice projection for PCM-0050.",
       "tasks": [
         "PCM-0050"

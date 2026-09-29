@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"0b93a4bd23cc23105df4d3711768620e93dee327c79dc2f79687d9bd8dc7ed7a","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"c0cef2f31632981b291398f4cb88e2a75c7493ebb856dc3a552e33ede5b11fe4","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -200,10 +200,10 @@
 ## PCM-0050 task projection (`pcm-0050-task`)
 
 - File: [`tasks/TASK-PCM-0050-epistemic-records.md`](../tasks/TASK-PCM-0050-epistemic-records.md)
-- Local content status: **NEEDS_REVIEW**
-- Last reviewed at commit: `1d3671d62ad8872b9798415da5b46d9ab7cffbe7`
-- Reviewed SHA-256: `dbbd6d7b5fa5a65342093a421eed3fbed7b5d852eed588871c3e15c5dda07599`
-- Current SHA-256: `44a0d5ed5587eeaf028fd0b33d5de72487dcc5b161dfbd8bd532808b70d28a79`
+- Local content status: **CURRENT**
+- Last reviewed at commit: `dad5280aed7f238781d17c42523e76f9b17663ee`
+- Reviewed SHA-256: `97273dc6db7e5ad68635c555f61c7f5358c43ad0b04cb6600368534ea9fb5179`
+- Current SHA-256: `97273dc6db7e5ad68635c555f61c7f5358c43ad0b04cb6600368534ea9fb5179`
 - Summary: Decision-slice projection for PCM-0050.
 - Search terms: `PCM-0050`, `decision`, `projection`
 - Neighboring records: none
