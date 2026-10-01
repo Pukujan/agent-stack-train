@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.12 — draft
+
+- **Issue, pull request, and receipt prose (issue #45):** new [`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md) states the human-output rules adopters apply to issue logs, pull request titles and bodies, receipts, and commit subjects, and routes them through `human-sounding-writing` (**hsw**) and `human-output-naming` (**hon**);
+- it encodes the two rules #45 names: a title is one complete, understandable human sentence with no leading prefix code (`feat:`, `fix:`, `chore:`) and no internal task number, and every commit SHA, pull request number, flag, or file path gets a plain-English meaning in the same sentence before it carries weight;
+- `docs/writing-routing.json` adds a `receipts` surface and a `title_contract` to the `github_and_docs_prose` route, and `docs/human-sounding-rules.json` adds the matching title patterns (`title_prefix_code`, `title_internal_task_number`, `title_reference_only`);
+- README and AGENTS now point at [Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops) as the single upstream for the three-plane issue template and triage, and at its release train [`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json); CGM links to that source and does not vendor its files;
+- the new doc joins `REQUIRED_HELPER_DOCS` and `system-version.json` `helper_contract_files` (presence only — no CI prose grade and no new lint step);
+- version bump to 0.5.12 across `system-version.json`, README, CHANGELOG, and the writing rules file.
+
 ## 0.5.11 — draft
 
 - **Adopter merge gates (issue #18):** new [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md) separates four gates in plain language — (1) CGM contract validation, (2) target-side factual/link/test checks on the current head, (3) branch-protection readiness including up-to-date status and stale source claims, and (4) merge authorization (human approval vs auto-merge);

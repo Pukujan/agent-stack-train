@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.11` (`v0.5.11`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
+**Current helper version: `0.5.12` (`v0.5.12`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -39,13 +39,16 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 | --- | --- | --- |
 | README / product entry | `writing-direction` (+ brand / context as needed) | **MUST load.** Keep scan-first selective bold |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ context as needed) | **MUST load.** Reader-facing explanation, not a manuscript; story order, evidence/status/boundaries, next action. A paper or raw data writeup stays on **hsw** |
-| PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose |
+| PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose; one plain sentence per title |
+| Receipts (push, checkpoint, release) | `human-sounding-writing` (**hsw**) | **MUST load.** A receipt headline is one human sentence |
 | Commit messages / commit subjects | `human-sounding-writing` (**hsw**) | **MUST load.** Plain human subject; in scope as of 0.5.3 |
 | Non-README docs, changelog prose | `human-sounding-writing` (**hsw**) | **MUST load.** Guides and narrative changelog text |
 | Posts / blogs / social / general prose | `human-sounding-writing` (**hsw**) | **MUST load.** Human voice; restrained bold |
 | Papers / data writeups | `human-sounding-writing` (**hsw**) | **MUST load.** Same voice; apply chart / takeaway guidance |
 | HTML reports / compare HTML / compare UIs / appendable HTML | `human-sounding-writing` (**hsw**) | **MUST load (default ON as of 0.5.7).** Visible prose in human-facing HTML; no per-report opt-in |
 | Generated artifact filenames / asset-manifest paths / committed media / filename legends | `human-output-naming` (**hon**) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend; never opaque `p0`/hex or robot key=value stems |
+
+Issue, pull request, receipt, and commit prose rules (plain one-sentence titles, no `feat:` / `fix:` prefix codes, a plain-English meaning for every SHA, PR number, flag, or path): [`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md). The three-plane issue template and its triage live upstream in [Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops); CGM links to that source and does not copy it, and its [release train](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json) (`stack-releases.json`) is the single source of certified stack versions.
 
 Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · machine-readable [`docs/writing-routing.json`](docs/writing-routing.json) (`required_load`, `human_facing_default`, `acs_prompt_inject`). Guide + rules: [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md), [`docs/human-sounding-rules.json`](docs/human-sounding-rules.json). Filename contract: [`docs/HUMAN_OUTPUT_NAMING.md`](docs/HUMAN_OUTPUT_NAMING.md), [`docs/human-output-naming.json`](docs/human-output-naming.json). ACS verify + inject: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
 
@@ -132,7 +135,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.11`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.12`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -197,6 +200,7 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/HOLDOUT_EVALUATION.md`](docs/HOLDOUT_EVALUATION.md) — repeatability on private, unseen target repositories.
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) · [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) · [`docs/MIGRATING_TO_0.4.md`](docs/MIGRATING_TO_0.4.md) · [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md) — adapter migration paths.
 - [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · [`docs/writing-routing.json`](docs/writing-routing.json) · [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md) · [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md) — writing router, ACS verify entrypoint, and hsw guide.
+- [`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md) — issue, pull request, receipt, and commit prose rules; links to Observational Issue Ops and the release train.
 - [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md) — CGM validation vs GitHub merge readiness: the four adopter gates and the optional CI + auto-merge path.
 - [`docs/PROPOSAL_FRAME_SEQUENCE_ASSETS.md`](docs/PROPOSAL_FRAME_SEQUENCE_ASSETS.md) · [`docs/PROPOSAL_MOVING_HERO.md`](docs/PROPOSAL_MOVING_HERO.md) · [`docs/PROPOSAL_DARK_MODE_VARIANTS.md`](docs/PROPOSAL_DARK_MODE_VARIANTS.md) — open proposals for animated frame-sequence assets, a moving hero, and derived dark variants (not shipped); [`docs/GITHUB_INLINE_MEDIA.md`](docs/GITHUB_INLINE_MEDIA.md) — measured GitHub Markdown media constraints (gif-only animation, video/audio sanitizer behavior).
 - [`templates/`](templates/) · [`schemas/`](schemas/) — starter files and contract shapes.
@@ -219,7 +223,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.11`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.12`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

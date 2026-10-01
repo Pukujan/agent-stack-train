@@ -129,6 +129,7 @@ REQUIRED_HELPER_DOCS = (
     "docs/MIGRATING_TO_0.5.md",
     "docs/ANTIGRAVITY_INTEGRATION.md",
     "docs/ADOPTER_MERGE_GATES.md",
+    "docs/NARRATIVE_AUTHORITY.md",
 )
 
 
@@ -905,6 +906,7 @@ def check_writing_contract(root: Path) -> list[str]:
         "pull request",
         "issue title",
         "issue log",
+        "receipt",
         "commit message",
         "commit subject",
         "non-readme",
@@ -922,6 +924,42 @@ def check_writing_contract(root: Path) -> list[str]:
         errors.append(
             f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose default_on must be true"
         )
+    title_contract = prose_route.get("title_contract")
+    if not isinstance(title_contract, dict):
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must declare a title_contract "
+            "for issue, pull request, receipt, and commit titles"
+        )
+    else:
+        title_rule = str(title_contract.get("rule") or "").lower()
+        if "one complete" not in title_rule or "human sentence" not in title_rule:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose title_contract.rule must "
+                "require one complete human sentence"
+            )
+        if "feat" not in title_rule or "prefix" not in title_rule:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose title_contract.rule must "
+                "forbid leading prefix codes"
+            )
+        reference_rule = str(title_contract.get("reference_rule") or "").lower()
+        for needle in ("sha", "pull request number", "flag", "file path", "plain-english"):
+            if needle not in reference_rule:
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose "
+                    f"title_contract.reference_rule must mention {needle}"
+                )
+        checklist = title_contract.get("checklist")
+        if not isinstance(checklist, list) or len(checklist) < 3:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose title_contract needs a "
+                "checklist with at least 3 items"
+            )
+        if title_contract.get("human_doc") != "docs/NARRATIVE_AUTHORITY.md":
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose title_contract.human_doc "
+                "must point at docs/NARRATIVE_AUTHORITY.md"
+            )
 
     human_default = contract.get("human_facing_default")
     if not isinstance(human_default, dict):

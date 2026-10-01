@@ -42,8 +42,12 @@ No single tell proves a text is AI-written; use tells as editing targets only
 
 ## 2. DO / DON'T rules
 
-**1. Plain title that says what happened.** Avoid colon-reveal titles and
-slogans [WP:AISIGNS] [Kriss].
+**1. Plain title that says what happened.** One complete human sentence; avoid
+colon-reveal titles and slogans. Do not open with a prefix code (`feat:`,
+`fix:`, `chore:`) or an internal task number [WP:AISIGNS] [Kriss]. Give every
+SHA, pull request number, flag, or file path a plain-English meaning in the
+same sentence. Issue, pull request, receipt, and commit surfaces:
+[`NARRATIVE_AUTHORITY.md`](NARRATIVE_AUTHORITY.md).
 
 **2. Open with one concrete case, then give the numbers.** Start with a single
 data point, question, or character, then zoom out [Pudding].
@@ -155,7 +159,8 @@ Z.”, moralizing section endings.
 
 ## 5. Self-check before submitting
 
-- [ ] Title has no colon slogan; it states a finding.
+- [ ] Title has no colon slogan, no leading prefix code, and no internal task
+      number; it states a finding in one human sentence.
 - [ ] First paragraph contains one concrete example or case.
 - [ ] A narrator (“we” / named actor) appears early with something done or noticed.
 - [ ] Zero banned words; each suspicious word at most once.

@@ -1,6 +1,6 @@
 {
   "name": "content-generation-modules.human-sounding-writing",
-  "version": "0.5.0",
+  "version": "0.5.12",
   "generated": "2026-09-24",
   "notes": "Severity: error = must fix; warn = fix or justify in a comment; info = density signal only. Regexes are ECMAScript/Python-compatible (no lookbehind). 'scope' tells the linter what unit to test. Contrast rules are warn, not error: pickles.news argues banning 'not X but Y' at generation time can remove real reasoning, so apply them in an edit pass after drafting. Vendored into content-generation-modules for the human-sounding-writing module. Owned by CGM; original research corpus retained.",
   "sources": {
@@ -2211,6 +2211,45 @@
         "uk_af",
         "muscatello"
       ]
+    },
+    {
+      "id": "title_prefix_code",
+      "description": "Title opens with a conventional-commit prefix code (feat:, fix:, chore:, docs:, refactor:, test:, ci:, build:, perf:, style:, revert:).",
+      "regex": "^(?:feat|fix|chore|docs|refactor|test|ci|build|perf|style|revert|wip)\\b\\s*(?:\\([^)]*\\))?\\s*!?\\s*:",
+      "flags": "i",
+      "scope": "title",
+      "severity": "error",
+      "fix": "Drop the prefix code and write one plain human sentence stating what is wrong or what the reader gets.",
+      "sources": [
+        "plainlang",
+        "wp_aisigns"
+      ]
+    },
+    {
+      "id": "title_internal_task_number",
+      "description": "Title opens with an internal task, issue, or priority number (#45, CGM-0045, TASK-0045, M5, P5).",
+      "regex": "^(?:#\\d+\\b|(?:[A-Z]{2,}|TASK|P|M)[-_]?\\d{1,4}\\b)",
+      "flags": "",
+      "scope": "title",
+      "severity": "error",
+      "fix": "Open with a plain human sentence; move the internal number to the issue body or the pull request link.",
+      "sources": [
+        "plainlang",
+        "orwell"
+      ]
+    },
+    {
+      "id": "title_reference_only",
+      "description": "Title is only an identifier (a commit SHA, pull request number, flag, or file path) with no sentence around it.",
+      "regex": "^(?:#\\d+|[0-9a-f]{7,40}|--[a-z][\\w-]*|[\\w./-]+\\.(?:py|json|md|ya?ml|ts|js|html|css))$",
+      "flags": "i",
+      "scope": "title",
+      "severity": "error",
+      "fix": "Write a plain sentence and give the identifier its plain-English meaning in that sentence.",
+      "sources": [
+        "plainlang",
+        "wp_aisigns"
+      ]
     }
   ],
   "readability": {
@@ -2499,6 +2538,6 @@
   "source": {
     "adapted_from": "shared writing-guide rules.json (Eval Lab writing lint corpus)",
     "module": "human-sounding-writing",
-    "helper_version": "0.5.0"
+    "helper_version": "0.5.12"
   }
 }

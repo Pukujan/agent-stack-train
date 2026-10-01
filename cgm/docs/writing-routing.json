@@ -51,6 +51,8 @@
         "issue titles",
         "issue bodies",
         "issue log titles",
+        "receipts",
+        "push receipts",
         "commit messages",
         "commit subjects",
         "non-README docs",
@@ -75,8 +77,26 @@
         "hsw",
         "HSW"
       ],
-      "notes": "Human voice, AI-tell scrub, restrained bold. Includes chart/takeaway guidance for papers and data writeups. Commit messages and commit subjects are in scope \u2014 MUST load hsw before writing them. HTML reports, compare HTML/UIs, appendable HTML, and other agent-produced human-readable HTML are in scope \u2014 MUST load hsw by default; no per-report opt-in. Filename basenames stay on human-output-naming (hon).",
-      "default_on": true
+      "notes": "Human voice, AI-tell scrub, restrained bold. Includes chart/takeaway guidance for papers and data writeups. Commit messages and commit subjects are in scope \u2014 MUST load hsw before writing them. HTML reports, compare HTML/UIs, appendable HTML, and other agent-produced human-readable HTML are in scope \u2014 MUST load hsw by default; no per-report opt-in. Filename basenames stay on human-output-naming (hon). Receipts (push, checkpoint, release) are human-facing prose and route here too; the title and reference rules are in docs/NARRATIVE_AUTHORITY.md.",
+      "default_on": true,
+      "title_contract": {
+        "applies_to": [
+          "issue titles",
+          "pull request titles",
+          "issue log titles",
+          "receipt headlines",
+          "commit subjects"
+        ],
+        "rule": "A title is one complete, understandable human sentence stating what is wrong or what the reader gets. No leading prefix codes (feat:, fix:, chore:, docs:, refactor:, test:, ci:, build:, perf:, style:, revert:) and no internal task numbers (#45, CGM-0045, TASK-0045, M5) as the first token.",
+        "reference_rule": "Give every commit SHA, pull request number, flag, or file path a plain-English meaning in the same sentence before it carries weight.",
+        "checklist": [
+          "Read the title alone: does it state what is wrong or what the reader gets?",
+          "Strip any leading prefix code or internal task number; the title must still read as one human sentence.",
+          "Name what each SHA, pull request number, flag, or file path is before it does any work.",
+          "No colon-reveal slogan; the title is a sentence, not a label with a subtitle."
+        ],
+        "human_doc": "docs/NARRATIVE_AUTHORITY.md"
+      }
     },
     {
       "id": "generated_artifact_filenames",
@@ -144,6 +164,7 @@
       "pull request titles and bodies",
       "issue titles and bodies",
       "issue log titles",
+      "receipts",
       "commit messages",
       "commit subjects",
       "non-README docs",

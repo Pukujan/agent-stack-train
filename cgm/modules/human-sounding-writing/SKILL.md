@@ -42,6 +42,7 @@ scanability contract.
 ## Durable references (in this repository)
 
 - Full guide: [`docs/HUMAN_SOUNDING_WRITING.md`](../../docs/HUMAN_SOUNDING_WRITING.md)
+- Issue / PR / receipt prose: [`docs/NARRATIVE_AUTHORITY.md`](../../docs/NARRATIVE_AUTHORITY.md)
 - Machine rules: [`docs/human-sounding-rules.json`](../../docs/human-sounding-rules.json)
 - Soft router: [`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md)
 
@@ -58,8 +59,11 @@ contract itself.
 2. **Open with something concrete.** Use a real record, question, case, or
    scene from the material, then zoom out to the broader point and numbers.
    Use a plain title that states what happened. Avoid colon-reveal titles and
-   slogan formulas. For **commit subjects**, keep one plain human line that
-   states what changed; scrub AI-tell phrasing.
+   slogan formulas, and do not open a title with a prefix code (`feat:`, `fix:`,
+   `chore:`) or an internal task number. Give every SHA, pull request number,
+   flag, or file path a plain-English meaning in the same sentence. For
+   **commit subjects**, keep one plain human line that states what changed;
+   scrub AI-tell phrasing.
 3. **Write as people.** Prefer “we” or a clear narrator, active verbs, and
    present tense for findings. Say what you did and what surprised you.
 4. **Keep the main text short.** Numbered plain findings work well: each opens

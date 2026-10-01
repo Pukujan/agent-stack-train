@@ -508,6 +508,70 @@ class ContentSystemValidationTests(unittest.TestCase):
         instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
         self.assertTrue("filename" in instruction or "human-output-naming" in instruction)
 
+    def test_writing_router_declares_title_contract(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        by_id = {route["id"]: route for route in contract["routes"]}
+        route = by_id["github_and_docs_prose"]
+        surfaces = {str(s).lower() for s in route["surfaces"]}
+        self.assertTrue(any("receipt" in s for s in surfaces), surfaces)
+        title_contract = route.get("title_contract")
+        self.assertIsInstance(title_contract, dict, "github_and_docs_prose needs a title_contract")
+        self.assertEqual(title_contract["human_doc"], "docs/NARRATIVE_AUTHORITY.md")
+        self.assertGreaterEqual(len(title_contract["checklist"]), 3)
+        rule = title_contract["rule"].lower()
+        self.assertIn("one complete", rule)
+        self.assertIn("human sentence", rule)
+        self.assertIn("feat", rule)
+        reference_rule = title_contract["reference_rule"].lower()
+        for needle in ("sha", "pull request number", "flag", "file path", "plain-english"):
+            self.assertIn(needle, reference_rule)
+        self.assertTrue((ROOT / "docs" / "NARRATIVE_AUTHORITY.md").is_file())
+
+    def test_writing_contract_rejects_missing_title_contract(self):
+        import json
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns(".git", "tests", "__pycache__"),
+            )
+            contract_path = staging / "docs" / "writing-routing.json"
+            contract = json.loads(contract_path.read_text(encoding="utf-8"))
+            for route in contract["routes"]:
+                if route.get("id") == "github_and_docs_prose":
+                    route.pop("title_contract", None)
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("title_contract" in e for e in errors), errors)
+
+    def test_writing_contract_rejects_missing_receipt_surface(self):
+        import json
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns(".git", "tests", "__pycache__"),
+            )
+            contract_path = staging / "docs" / "writing-routing.json"
+            contract = json.loads(contract_path.read_text(encoding="utf-8"))
+            for route in contract["routes"]:
+                if route.get("id") == "github_and_docs_prose":
+                    route["surfaces"] = [
+                        s for s in route["surfaces"] if "receipt" not in str(s).lower()
+                    ]
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("receipt" in e for e in errors), errors)
+
 
     def test_writing_router_routes_reader_facing_explanations_to_writing_direction(self):
         import json

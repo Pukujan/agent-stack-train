@@ -18,7 +18,8 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 | README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | **MUST load.** Keep scan-first selective bold and the README scanability contract. |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ `content-context` as needed) | **MUST load.** Reader-facing explanation, not a manuscript. Story order, selective bold, evidence/status/boundaries distinct, clear next action. A scholarly paper or raw data writeup stays on **hsw**. |
 | Pull request titles and bodies | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human-facing GitHub prose; plain titles, reader-first bodies. |
-| Issue titles, issue bodies, issue-log titles | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Same voice rules for tracker prose agents publish. |
+| Issue titles, issue bodies, issue-log titles | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Same voice rules for tracker prose agents publish. Titles are one plain human sentence. |
+| Receipts (push, checkpoint, release) | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** A receipt headline is one human sentence; references get a plain-English meaning. |
 | Commit messages and commit subjects | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Plain human subject; scrub AI-tell phrasing. In scope as of 0.5.3. |
 | Non-README docs and changelog prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Guides, ops notes, CHANGELOG narrative — not the root README. |
 | Posts / blogs / social / general agent prose | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human voice, AI-tell scrub, restrained bold. Agents asked for "hsw" should load this module. |
@@ -26,6 +27,29 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 | HTML reports / compare HTML / compare UIs / appendable HTML / agent human-readable HTML | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load (default ON).** Visible prose and labels in human-facing HTML — including ACS compare reports. No per-report opt-in. Basenames still use **hon**. |
 | Generated artifact filenames / asset-manifest paths / committed media basenames / filename legends | `human-output-naming` (short name **hon** / HON) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend required. Never opaque `p0`/hex or robot key=value stems. See [`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). |
 
+## Issue, pull request, and receipt prose (0.5.12+)
+
+Issue logs, pull request titles and bodies, receipts, and commit subjects
+route to **hsw**; generated filenames and asset paths inside them route to
+**hon**. Two rules apply to the title of every one of those surfaces:
+
+1. **The title is one complete, understandable human sentence** that states
+   what is wrong or what the reader gets. No leading prefix codes (`feat:`,
+   `fix:`, `chore:`, `docs:`) and no internal task number (`#45`, `CGM-0045`,
+   `TASK-0045`) as the first token.
+2. **Explain the reference before it carries weight.** Give every commit
+   SHA, pull request number, flag, or file path a plain-English meaning in
+   the same sentence before it does any work.
+
+Machine twin: the `title_contract` on the `github_and_docs_prose` route in
+[`writing-routing.json`](writing-routing.json). Full guide:
+[`docs/NARRATIVE_AUTHORITY.md`](NARRATIVE_AUTHORITY.md).
+
+The three-plane issue template and its triage live upstream in
+[Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops);
+CGM links to that source and does not vendor it. Certified stack versions are
+in its release train,
+[`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json).
 
 ## Reader-facing explanations (0.5.10+)
 
@@ -136,6 +160,7 @@ including **HTML reports / compare HTML**, forbid per-task opt-in, and mention
 - [`modules/writing-direction/SKILL.md`](../modules/writing-direction/SKILL.md)
 - [`modules/human-sounding-writing/SKILL.md`](../modules/human-sounding-writing/SKILL.md)
 - [`docs/HUMAN_SOUNDING_WRITING.md`](HUMAN_SOUNDING_WRITING.md)
+- [`docs/NARRATIVE_AUTHORITY.md`](NARRATIVE_AUTHORITY.md)
 - [`docs/human-sounding-rules.json`](human-sounding-rules.json)
 - [`docs/writing-routing.json`](writing-routing.json)
 - [`docs/ACS_VERIFY.md`](ACS_VERIFY.md)

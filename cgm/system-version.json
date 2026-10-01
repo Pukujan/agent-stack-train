@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -50,7 +50,8 @@
     "docs/HUMAN_OUTPUT_NAMING.md",
     "docs/human-output-naming.json",
     "docs/ANTIGRAVITY_INTEGRATION.md",
-    "docs/ADOPTER_MERGE_GATES.md"
+    "docs/ADOPTER_MERGE_GATES.md",
+    "docs/NARRATIVE_AUTHORITY.md"
   ],
   "human_output_contract": {
     "version": "content-generation.readme-contract.v2",

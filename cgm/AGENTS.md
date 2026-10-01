@@ -62,6 +62,26 @@ Do not apply `human-sounding-writing` bold restraints to READMEs. Do not weaken 
 **Every CGM adopter** (ACS is one consumer) must inject the always-on block at agent start: `acs_prompt_inject.system_block` in [`docs/writing-routing.json`](docs/writing-routing.json) (`always_on: true`, `opt_in_forbidden: true`). Verify entrypoint: `python scripts/validate_content_system.py --root <cgm> --mode writing`. Confirm automation: `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content check: `python scripts/verify_adopter_content.py --adapter <project>/.content-system --project-root <project>` or `python scripts/validate_content_system.py --root <cgm> --adapter <project>/.content-system --project-root <project> --check-adopter-docs`; add `--check-adopter-readme` for the adopter README structure + PNG hero gate. Google Antigravity sessions must follow [`docs/ANTIGRAVITY_INTEGRATION.md`](docs/ANTIGRAVITY_INTEGRATION.md) (`agent_bootstrap.antigravity` in the router). Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
 
 
+## Issue, pull request, and receipt prose
+
+Issue titles and bodies, issue-log titles, pull request titles and bodies,
+receipts, and commit subjects are human-facing prose. They **MUST load**
+`human-sounding-writing` (**hsw**), like any other GitHub or docs prose. The
+rules every adopter applies are in
+[`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md): a title is one
+complete, understandable human sentence with no leading `feat:` / `fix:` prefix
+code and no internal task number, and every commit SHA, pull request number,
+flag, or file path gets a plain-English meaning in the same sentence before it
+carries weight. Machine twin: the `title_contract` on the `github_and_docs_prose`
+route in [`docs/writing-routing.json`](docs/writing-routing.json).
+
+The three-plane observational issue template and its triage live upstream in
+[Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops)
+(OIO). CGM links to that source instead of copying it, and does not vendor its
+files. The certified versions of the whole stack are in OIO's release train,
+[`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json);
+CGM appears there as the narrative and styling authority.
+
 ## Operational issue intake
 
 When an **operational** issue is logged against CGM (Alex or an agent forwarding his ask — pin/install/hotload succeeded but a documented MUST/default did not auto-apply):
