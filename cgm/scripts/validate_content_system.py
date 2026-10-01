@@ -65,7 +65,12 @@ ROBOT_KV_BASENAME_RE = re.compile(r"(?i)_(?:pitch|speed|rate)-[a-z0-9.+-]+")
 FILENAME_LEGEND_DIR = "docs/filename-legends"
 FILENAME_LEGEND_SCHEMA = "content-generation.filename-legend.v1"
 ADAPTER_FILENAME_LEGEND_DIR = ".content-system/filename-legends"
-REQUIRED_ROUTER_ROUTE_IDS = ("readme_product_entry", "github_and_docs_prose", "generated_artifact_filenames")
+REQUIRED_ROUTER_ROUTE_IDS = (
+    "readme_product_entry",
+    "reader_facing_explanations",
+    "github_and_docs_prose",
+    "generated_artifact_filenames",
+)
 
 NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
 NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -817,6 +822,32 @@ def check_writing_contract(root: Path) -> list[str]:
         errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry must load writing-direction")
     if readme_route.get("required_load") is not True:
         errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry required_load must be true")
+    reader_route = by_id.get("reader_facing_explanations") or {}
+    if reader_route.get("load") != "writing-direction":
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations must load writing-direction"
+        )
+    if reader_route.get("required_load") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations required_load must be true"
+        )
+    reader_surfaces = {str(s).lower() for s in reader_route.get("surfaces", [])}
+    for needle in ("research plan", "architecture", "evidence brief"):
+        if not any(needle in surface for surface in reader_surfaces):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations surfaces must mention {needle}"
+            )
+    if "human-sounding-writing" not in str(reader_route.get("notes", "")).lower():
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations notes must distinguish "
+            "reader-facing briefs from human-sounding-writing (hsw) manuscript/data prose"
+        )
+    reader_checklist = reader_route.get("review_checklist")
+    if not isinstance(reader_checklist, list) or len(reader_checklist) < 3:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations needs a review_checklist "
+            "with at least 3 checks"
+        )
     prose_route = by_id.get("github_and_docs_prose") or {}
     if prose_route.get("load") != "human-sounding-writing":
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")

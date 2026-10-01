@@ -19,6 +19,31 @@
       "notes": "Keep scan-first selective bold and the README scanability contract."
     },
     {
+      "id": "reader_facing_explanations",
+      "surfaces": [
+        "human-facing research plans",
+        "reader-facing research briefs",
+        "architecture explanations",
+        "evidence briefs",
+        "human-facing project explanations"
+      ],
+      "load": "writing-direction",
+      "required_load": true,
+      "also_load_optional": [
+        "brand-foundation",
+        "content-context"
+      ],
+      "notes": "Reader-facing product/research explanations (plans, architecture writeups, evidence briefs) route to writing-direction: story order, scan-first selective bold, evidence/status/boundaries distinct, clear next action. This is NOT manuscript/data-writeup prose — a scholarly paper or raw data writeup routes to human-sounding-writing (hsw) instead. Do not copy the README outline mechanically onto a brief; adapt the checks to the document type.",
+      "review_checklist": [
+        "Story order: name the recognizable human situation, then the concrete problem and consequence, before mechanism or architecture.",
+        "Connect each important paragraph to why it matters and to an evidence, example, or boundary — not to style alone.",
+        "Keep evidence, status, and boundaries distinct: say what a cited source supports, what it leaves unproven, and the inspected revision.",
+        "Use descriptive headings and selective bold so a heading-and-bold scan tells a usable second story; do not turn the brief into a README clone.",
+        "End with a clear next action, example, or smallest useful path for the reader.",
+        "Adapt the checks to the document type; do not add promotional claims a research brief does not support."
+      ]
+    },
+    {
       "id": "github_and_docs_prose",
       "surfaces": [
         "pull request titles",
@@ -72,11 +97,12 @@
   ],
   "not_routed": [],
   "apply_checklist": [
-    "Identify the writing surface (README, PR title/body, issue title/body, issue-log title, commit message/subject, non-README doc, changelog prose, post/blog/social, paper/data writeup, HTML report, compare HTML/UI, or other human-facing HTML/artifact).",
-    "Look up the surface in routes[].surfaces in docs/writing-routing.json (or the table in docs/WRITING_ROUTING.md). If it is human-facing and not README/product entry and not a filename-only surface, default to human-sounding-writing (human_facing_default).",
+    "Identify the writing surface (README, product entry, human-facing research plan / architecture explanation / evidence brief, PR title/body, issue title/body, issue-log title, commit message/subject, non-README doc, changelog prose, post/blog/social, paper/data writeup, HTML report, compare HTML/UI, or other human-facing HTML/artifact).",
+    "Look up the surface in routes[].surfaces in docs/writing-routing.json (or the table in docs/WRITING_ROUTING.md). If it is a reader-facing research plan, architecture explanation, or evidence brief, route to writing-direction (see the reader_facing_explanations route and its review_checklist) — a scholarly paper or raw data writeup still routes to human-sounding-writing (hsw). If it is human-facing and not README/product entry, not a reader-facing explanation, and not a filename-only surface, default to human-sounding-writing (human_facing_default).",
     "MUST load modules/<load>/SKILL.md for that route before drafting \u2014 required_load is true; do not skip because the surface is short, 'just a commit', or 'just an HTML report'.",
     "Apply the module rules to the draft (voice, AI-tell scrub, bold policy as the module states).",
     "README / product entry stays on writing-direction; do not apply hsw bold restraints there.",
+    "Human-facing research plans, architecture explanations, and evidence briefs route to writing-direction (reader_facing_explanations); apply its review_checklist. A scholarly paper or raw data writeup still routes to hsw.",
     "If the surface is a generated artifact filename, asset-manifest path, committed media basename, or filename legend, MUST load modules/human-output-naming/SKILL.md (hon), call scripts/human_filename (speakable by default; optional safe_twin), and keep a per-feature legend.",
     "Never treat HSW as optional, soft-skip, or per-report opt-in for human-facing HTML, compare UIs, or agent-produced readable artifacts."
   ],
@@ -127,8 +153,8 @@
       "every other human-facing deliverable"
     ],
     "when": "At agent start / session boot for EVERY repo that pins CGM \u2014 not per-report and not ACS-only. Paste system_block into the agent system prompt before the agent writes ANY human-facing deliverable: GitHub or docs prose, HTML reports, compare HTML/UIs, appendable HTML, posts, papers, or other agent-produced human-readable artifacts \u2014 and before naming generated artifact / asset-manifest / media paths.",
-    "system_block": "CGM ALWAYS-ON WRITING RULE (every adopter that pins this helper)\n\nBefore you write ANY human-facing output \u2014 including HTML reports, compare HTML/UIs, appendable HTML, PR/issue/commit prose, docs, posts, papers, or other readable artifacts \u2014 you MUST load and apply modules/human-sounding-writing/SKILL.md (hsw).\n\nThis rule is always on. Opt-in is forbidden. Do not wait for a per-task, per-report, or per-HTML flag.\n\nExceptions (only these):\n- README.md / product entry pages \u2192 load modules/writing-direction/SKILL.md instead\n- Generated artifact filenames / asset-manifest paths / media basenames / filename legends \u2192 load modules/human-output-naming/SKILL.md (hon) for basenames; visible prose inside HTML still uses hsw\n\nHTML reports, compare HTML, and compare UIs have NO skip path. An exception reason is not allowed for those surfaces.\n\nIf you cannot load the skill file from the pinned CGM checkout, stop and report that \u2014 do not draft jargon-heavy or tool-dump HTML instead.\n\nFilenames: use scripts/human_filename (speakable basenames; optional safe_twin) and keep a per-feature legend. Hash may stay a separate manifest field.\n",
-    "instruction": "ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for EVERY human-facing task/output. Before writing ANY human-facing output (including HTML/compare), MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true. Skipping requires an explicit machine-readable exception reason that is NOT allowed for HTML reports, compare HTML, or compare UIs. README and product entry pages \u2192 writing-direction. Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups, HTML reports, compare HTML, compare UIs, appendable HTML reports, and other agent-produced human-readable HTML \u2192 human-sounding-writing (hsw). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on, not prefer. Follow apply_checklist and human_facing_default in this file. Generated artifact filenames, asset-manifest paths, committed media basenames, and filename legends \u2192 human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames (omit defaults; optional safe_twin); keep a per-feature legend (glossary + file list); never opaque p0/hex stems or robot key=value stems. Prose and visible text inside HTML still use hsw; basenames use hon."
+    "system_block": "CGM ALWAYS-ON WRITING RULE (every adopter that pins this helper)\n\nBefore you write ANY human-facing output \u2014 including HTML reports, compare HTML/UIs, appendable HTML, PR/issue/commit prose, docs, posts, papers, or other readable artifacts \u2014 you MUST load and apply modules/human-sounding-writing/SKILL.md (hsw).\n\nThis rule is always on. Opt-in is forbidden. Do not wait for a per-task, per-report, or per-HTML flag.\n\nExceptions (only these):\n- README.md / product entry pages \u2192 load modules/writing-direction/SKILL.md instead\n- Human-facing research plans, architecture explanations, and evidence briefs \u2192 load modules/writing-direction/SKILL.md (reader-facing explanation, not a manuscript or data writeup)\n- Generated artifact filenames / asset-manifest paths / media basenames / filename legends \u2192 load modules/human-output-naming/SKILL.md (hon) for basenames; visible prose inside HTML still uses hsw\n\nHTML reports, compare HTML, and compare UIs have NO skip path. An exception reason is not allowed for those surfaces.\n\nIf you cannot load the skill file from the pinned CGM checkout, stop and report that \u2014 do not draft jargon-heavy or tool-dump HTML instead.\n\nFilenames: use scripts/human_filename (speakable basenames; optional safe_twin) and keep a per-feature legend. Hash may stay a separate manifest field.\n",
+    "instruction": "ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for EVERY human-facing task/output. Before writing ANY human-facing output (including HTML/compare), MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true. Skipping requires an explicit machine-readable exception reason that is NOT allowed for HTML reports, compare HTML, or compare UIs. README and product entry pages \u2192 writing-direction. Human-facing research plans, architecture explanations, and evidence briefs \u2192 writing-direction (reader_facing_explanations; a scholarly paper or raw data writeup stays on hsw). Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups, HTML reports, compare HTML, compare UIs, appendable HTML reports, and other agent-produced human-readable HTML \u2192 human-sounding-writing (hsw). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on, not prefer. Follow apply_checklist and human_facing_default in this file. Generated artifact filenames, asset-manifest paths, committed media basenames, and filename legends \u2192 human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames (omit defaults; optional safe_twin); keep a per-feature legend (glossary + file list); never opaque p0/hex stems or robot key=value stems. Prose and visible text inside HTML still use hsw; basenames use hon."
   },
   "human_facing_default": {
     "load": "human-sounding-writing",
@@ -140,6 +166,7 @@
     ],
     "exceptions": [
       "readme_product_entry",
+      "reader_facing_explanations",
       "generated_artifact_filenames"
     ],
     "covers": [
@@ -153,7 +180,7 @@
       "posts blogs social",
       "papers and data writeups"
     ],
-    "notes": "Default ON for all human-facing deliverables. Do not treat HSW as optional, per-report, or only-when-writing-posts. README/product entry stays on writing-direction; basename/legend naming stays on human-output-naming (hon). Prose and visible text inside HTML reports and compare UIs still use HSW."
+    "notes": "Default ON for all human-facing deliverables. Do not treat HSW as optional, per-report, or only-when-writing-posts. README/product entry stays on writing-direction; reader-facing research plans, architecture explanations, and evidence briefs also stay on writing-direction (reader_facing_explanations route); basename/legend naming stays on human-output-naming (hon). Prose and visible text inside HTML reports and compare UIs still use HSW."
   },
   "always_on_system_block": {
     "path": "acs_prompt_inject.system_block",

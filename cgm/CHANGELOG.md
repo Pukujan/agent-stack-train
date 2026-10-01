@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.10 — draft
+
+- **Reader-facing explanations route to `writing-direction` (issue #15):** new `reader_facing_explanations` route in `docs/writing-routing.json` for human-facing research plans, architecture explanations, and evidence briefs — `load: writing-direction`, `required_load: true`, with a 6-item `review_checklist`;
+- the route is listed as an exception to `human_facing_default`, so those reader-facing briefs do **not** silently default to hsw; a scholarly paper or raw data writeup still routes to `human-sounding-writing` (hsw);
+- validator: `reader_facing_explanations` joins `REQUIRED_ROUTER_ROUTE_IDS`, and `check_writing_contract` asserts its load, `required_load`, surfaces (research plan / architecture / evidence brief), hsw distinction note, and review checklist;
+- `docs/WRITING_ROUTING.md` gains a "Reader-facing explanations" section with the checklist; README and the always-on inject name the new exception;
+- unit tests cover the route shape and reject a missing route;
+- version bump to 0.5.10 across `system-version.json`, README, CHANGELOG, and the router contract.
+
 ## 0.5.9 — draft
 
 - **PNG hero enforcement (issue #34):** `schemas/asset-manifest.schema.json` now rejects an SVG assigned to the `hero` role — a hero asset must be a raster `.png` with a non-`svg` orientation;

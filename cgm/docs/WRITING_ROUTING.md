@@ -16,6 +16,7 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 | Situation | Load | Notes |
 | --- | --- | --- |
 | README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | **MUST load.** Keep scan-first selective bold and the README scanability contract. |
+| Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ `content-context` as needed) | **MUST load.** Reader-facing explanation, not a manuscript. Story order, selective bold, evidence/status/boundaries distinct, clear next action. A scholarly paper or raw data writeup stays on **hsw**. |
 | Pull request titles and bodies | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human-facing GitHub prose; plain titles, reader-first bodies. |
 | Issue titles, issue bodies, issue-log titles | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Same voice rules for tracker prose agents publish. |
 | Commit messages and commit subjects | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Plain human subject; scrub AI-tell phrasing. In scope as of 0.5.3. |
@@ -26,12 +27,40 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 | Generated artifact filenames / asset-manifest paths / committed media basenames / filename legends | `human-output-naming` (short name **hon** / HON) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend required. Never opaque `p0`/hex or robot key=value stems. See [`docs/HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). |
 
 
+## Reader-facing explanations (0.5.10+)
+
+A human-facing research plan, architecture explanation, or evidence brief is a
+*reader-facing explanation*, not a manuscript. It routes to
+[`modules/writing-direction/SKILL.md`](../modules/writing-direction/SKILL.md),
+the same module as the README and product entry. A scholarly paper or a raw data
+writeup still routes to **hsw**.
+
+Apply these checks to the brief without copying the README outline mechanically:
+
+1. **Story order.** Name the recognizable human situation, then the concrete
+   problem and consequence, before mechanism or architecture.
+2. **Why it matters.** Connect each important paragraph to a consequence and to
+   an evidence, example, or boundary — not to style alone.
+3. **Evidence, status, boundaries stay distinct.** Say what a cited source
+   supports, what it leaves unproven, and the inspected revision.
+4. **Scannable structure.** Descriptive headings and selective bold, so a
+   heading-and-bold scan tells a usable second story.
+5. **Next action.** End with a clear next action, example, or smallest useful
+   path for the reader.
+6. **Fit the document type.** Adapt the checks to a brief; do not add
+   promotional claims the brief does not support.
+
+Machine-readable twin: the `reader_facing_explanations` route in
+[`writing-routing.json`](writing-routing.json) (its `review_checklist`).
+
 ## Human-facing default (0.5.6+)
 
 `human_facing_default` in [`writing-routing.json`](writing-routing.json) sets
 **hsw** as the default load for every human-facing deliverable. Exceptions:
 
 - README / product entry → `writing-direction`
+- Human-facing research plans / architecture explanations / evidence briefs →
+  `writing-direction` (reader-facing explanation, not a manuscript)
 - Generated artifact filenames / legends → `human-output-naming` (**hon**) for
   *basenames*; visible prose inside HTML still uses **hsw**
 
@@ -75,7 +104,8 @@ tells a second story. `human-sounding-writing` treats heavy bold and bold
 inline labels as AI tells. **Do not merge those policies.** Route by situation
 instead.
 
-If the task is a README or product entry, do not apply `human-sounding-writing`
+If the task is a README, product entry, or a reader-facing research plan /
+architecture explanation / evidence brief, do not apply `human-sounding-writing`
 bold restraints. If the task is a PR, issue, issue-log title, commit
 message/subject, non-README doc, changelog prose, post, blog, social update,
 general prose, paper, data writeup, HTML report, compare HTML/UI, or other

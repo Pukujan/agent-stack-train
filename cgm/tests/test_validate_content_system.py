@@ -508,6 +508,45 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertTrue("filename" in instruction or "human-output-naming" in instruction)
 
 
+    def test_writing_router_routes_reader_facing_explanations_to_writing_direction(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        by_id = {route["id"]: route for route in contract["routes"]}
+        route = by_id.get("reader_facing_explanations")
+        self.assertIsNotNone(route, "writing-routing.json must declare reader_facing_explanations")
+        self.assertEqual(route["load"], "writing-direction")
+        self.assertIs(route["required_load"], True)
+        surfaces = {str(s).lower() for s in route["surfaces"]}
+        self.assertTrue(any("research plan" in s for s in surfaces), surfaces)
+        self.assertTrue(any("architecture" in s for s in surfaces), surfaces)
+        self.assertTrue(any("evidence brief" in s for s in surfaces), surfaces)
+        notes = str(route.get("notes", "")).lower()
+        self.assertIn("human-sounding-writing", notes)
+        self.assertTrue(route.get("review_checklist"), "route needs a review checklist")
+        self.assertGreaterEqual(len(route["review_checklist"]), 3)
+        self.assertTrue((ROOT / "modules" / "writing-direction" / "SKILL.md").is_file())
+
+    def test_writing_contract_rejects_missing_reader_facing_route(self):
+        import json
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns(".git", "tests", "__pycache__"),
+            )
+            contract_path = staging / "docs" / "writing-routing.json"
+            contract = json.loads(contract_path.read_text(encoding="utf-8"))
+            contract["routes"] = [
+                route for route in contract["routes"] if route.get("id") != "reader_facing_explanations"
+            ]
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("reader_facing_explanations" in e for e in errors), errors)
+
     def test_writing_router_requires_always_on_inject(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))

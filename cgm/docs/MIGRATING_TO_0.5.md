@@ -133,4 +133,14 @@ do not rename the folder or replace the id with `hsw`.
   4. Run `python scripts/validate_content_system.py --root <cgm> --adapter <project>/.content-system --project-root <project> --check-adopter-readme` in CI.
   5. Antigravity (or any coding agent) sessions: paste `acs_prompt_inject.system_block` at boot and follow [`ANTIGRAVITY_INTEGRATION.md`](ANTIGRAVITY_INTEGRATION.md).
 
+## Reader-facing explanations route to writing-direction (0.5.10+)
+
+- **Problem fixed:** a human-facing research plan, architecture explanation, or evidence brief is a reader-facing explanation, but nothing in the router named it, so agents could miss `writing-direction` and apply the wrong module (CGM #15).
+- **Fix:** new `reader_facing_explanations` route in `docs/writing-routing.json` (`load: writing-direction`, `required_load: true`) with a 6-item `review_checklist`; it is an exception to `human_facing_default`, so these briefs do not default to hsw.
+- Adapter / every-adopter steps:
+  1. Pin helper **0.5.10+** (version and commit).
+  2. When writing a human-facing research plan, architecture explanation, or evidence brief, **MUST load** `modules/writing-direction/SKILL.md` and apply the route's `review_checklist`.
+  3. Keep a scholarly paper or raw data writeup on **hsw** (`human-sounding-writing`) — only reader-facing explanations route to `writing-direction`.
+  4. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
+
 
