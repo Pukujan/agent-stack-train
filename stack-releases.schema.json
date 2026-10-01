@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/agent-stack-train/stack-releases.schema.json",
+  "title": "Stack release train",
+  "description": "The certified version set of the agent stack. Published only from this repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release_train", "published_by", "recorded_at", "status", "certified", "adoption_rule"],
+  "properties": {
+    "schema_version": {"const": "agent-stack-train.stack-releases.v1"},
+    "release_train": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The train's identifier, e.g. a date."
+    },
+    "published_by": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The repository that publishes this train. Must be this repository."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": ["proposed", "certified"],
+      "description": "'proposed' until the owner accepts the train; 'certified' once accepted."
+    },
+    "certified": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "One entry per certified component, keyed by component name.",
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1,
+        "required": ["version", "role"],
+        "properties": {
+          "version": {"type": "string", "minLength": 1},
+          "commit": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+          "cli": {"type": "string", "minLength": 1},
+          "module": {"type": "string", "minLength": 1},
+          "modules": {"type": "integer", "minimum": 1},
+          "protocol_version": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "adoption_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "note": {"type": "string"}
+  }
+}

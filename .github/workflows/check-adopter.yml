@@ -1,0 +1,47 @@
+name: Check adopter manifest
+
+# Reusable: call this from an adopter's CI so no repository copies the check.
+#
+#   jobs:
+#     stack-train:
+#       uses: Pukujan/agent-stack-train/.github/workflows/check-adopter.yml@main
+#       with:
+#         manifest: stack-manifest.json
+
+on:
+  workflow_call:
+    inputs:
+      manifest:
+        description: Repository-relative path to the adopter's stack-manifest.json
+        required: false
+        type: string
+        default: stack-manifest.json
+      train-ref:
+        description: Train revision to check against
+        required: false
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Manifest agrees with the release train
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the adopter
+        uses: actions/checkout@v4
+
+      - name: Check out the train
+        uses: actions/checkout@v4
+        with:
+          repository: Pukujan/agent-stack-train
+          ref: ${{ inputs.train-ref }}
+          path: .stack-train
+
+      - name: Validate the manifest against the certified train
+        run: |
+          python .stack-train/scripts/check_manifest.py \
+            --manifest "${{ inputs.manifest }}" \
+            --train .stack-train/stack-releases.json
