@@ -147,7 +147,11 @@ def strip_markdown_code_and_comments(text: str) -> str:
     return cleaned
 
 
-def collect_project_markdown_files(project_root: Path, docs_dir: Path | None = None) -> list[Path]:
+def collect_project_markdown_files(
+    project_root: Path,
+    docs_dir: Path | None = None,
+    exclude_agent_contracts: bool = False,
+) -> list[Path]:
     """Return all human-facing markdown files to scan for references and prose tells."""
     md_files: list[Path] = []
     readme = project_root / "README.md"
@@ -158,12 +162,17 @@ def collect_project_markdown_files(project_root: Path, docs_dir: Path | None = N
     if docs.is_dir():
         for path in sorted(docs.rglob("*.md")):
             if not any(part in EXCLUDED_DIR_NAMES for part in path.parts):
+                if exclude_agent_contracts and (path.name == "AGENTS.md" or ".agent" in path.parts):
+                    continue
                 if path not in md_files:
                     md_files.append(path)
 
     for path in sorted(project_root.glob("*.md")):
-        if path.is_file() and path not in md_files:
-            md_files.append(path)
+        if path.is_file():
+            if exclude_agent_contracts and (path.name == "AGENTS.md" or ".agent" in path.parts):
+                continue
+            if path not in md_files:
+                md_files.append(path)
 
     return md_files
 
@@ -224,7 +233,10 @@ def check_manifest_assets_referenced(
     doc_texts = {}
     for md_path in md_files:
         try:
-            doc_texts[md_path] = md_path.read_text(encoding="utf-8", errors="replace")
+            raw = md_path.read_text(encoding="utf-8", errors="replace")
+            # Strip HTML comments so commented-out assets aren't considered rendered/referenced
+            uncommented = re.sub(r"(?s)<!--.*?-->", " ", raw)
+            doc_texts[md_path] = uncommented
         except OSError:
             continue
 
@@ -327,7 +339,7 @@ def check_human_output_naming(project_root: Path, docs_dir: Path | None = None) 
 def check_docs_hsw_tells(project_root: Path, docs_dir: Path | None = None) -> list[str]:
     """Reject tool-dump / agent-internals tells and high-signal AI tells in markdown prose."""
     errors: list[str] = []
-    md_files = collect_project_markdown_files(project_root, docs_dir)
+    md_files = collect_project_markdown_files(project_root, docs_dir, exclude_agent_contracts=True)
 
     for md_path in md_files:
         try:
@@ -358,17 +370,197 @@ def check_docs_hsw_tells(project_root: Path, docs_dir: Path | None = None) -> li
     return errors
 
 
+def check_manifest_hero_asset_format(adapter: Path) -> list[str]:
+    """Enforce that hero assets declared in asset-manifest.json are PNGs and not SVGs."""
+    errors: list[str] = []
+    manifest_path = adapter / "asset-manifest.json"
+    if not manifest_path.is_file():
+        return errors
+
+    try:
+        manifest = load_json(manifest_path)
+    except ValueError as exc:
+        return [str(exc)]
+
+    assets = manifest.get("assets", [])
+    if not isinstance(assets, list):
+        return errors
+
+    for asset in assets:
+        if not isinstance(asset, dict):
+            continue
+        role = str(asset.get("role") or "").strip().lower()
+        orientation = str(asset.get("orientation") or "").strip().lower()
+        raw_path = str(asset.get("path") or "").strip()
+        path_lower = raw_path.lower()
+
+        if "hero" in role:
+            if orientation == "svg" or path_lower.endswith(".svg"):
+                errors.append(
+                    f"hero asset '{raw_path}' in asset-manifest.json must be a PNG image, "
+                    "not an SVG (SVGs are for layout reference or diagrams, not public hero banners)"
+                )
+            elif not path_lower.endswith(".png"):
+                errors.append(
+                    f"hero asset '{raw_path}' in asset-manifest.json must have a .png extension (got '{raw_path}')"
+                )
+
+    return errors
+
+
+_README_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]+)?\)")
+_README_HTML_IMG_RE = re.compile(r"""<img\b[^>]*?\bsrc=["']([^"']+)["']""", re.IGNORECASE)
+_RASTER_SUFFIXES = (".png", ".webp", ".jpg", ".jpeg")
+_HERO_PNG_SUFFIX = ".png"
+
+
+def _strip_html_comments(text: str) -> str:
+    return re.sub(r"(?s)<!--.*?-->", " ", text)
+
+
+def _readme_image_urls(text: str) -> list[str]:
+    return _README_IMAGE_RE.findall(text) + _README_HTML_IMG_RE.findall(text)
+
+
+def _readme_hero_image_url(clean_readme: str) -> str | None:
+    """Return the first image in the intro section, falling back to the first in the doc."""
+    intro = re.split(r"(?m)^##\s+", clean_readme, maxsplit=1)[0]
+    images = _readme_image_urls(intro) or _readme_image_urls(clean_readme)
+    if not images:
+        return None
+    return images[0].split("?")[0].split("#")[0].strip("<>")
+
+
+def _registered_hero_paths(adapter: Path | None) -> list[str]:
+    if adapter is None:
+        return []
+    manifest_path = adapter / "asset-manifest.json"
+    if not manifest_path.is_file():
+        return []
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    paths: list[str] = []
+    for asset in manifest.get("assets", []):
+        if isinstance(asset, dict) and "hero" in str(asset.get("role", "")).lower():
+            raw_path = str(asset.get("path", "")).strip()
+            if raw_path:
+                paths.append(raw_path)
+    return paths
+
+
+def _hero_visual_errors(hero_url: str) -> list[str]:
+    lowered = hero_url.lower()
+    if lowered.endswith(".svg"):
+        return [
+            f"adopter README.md hero visual must be a PNG image, not an SVG (found '{hero_url}'); "
+            "SVGs are meant for UI layout wireframes or flow diagrams, never as the public README hero banner"
+        ]
+    if not lowered.endswith(_HERO_PNG_SUFFIX):
+        return [f"adopter README.md hero visual must be a PNG image (found '{hero_url}')"]
+    return []
+
+
+def _registered_hero_reference_errors(clean_readme: str, adapter: Path | None) -> list[str]:
+    errors: list[str] = []
+    for hero_path in _registered_hero_paths(adapter):
+        hero_base = hero_path.replace("\\", "/").rsplit("/", 1)[-1]
+        if hero_base not in clean_readme and hero_path not in clean_readme:
+            errors.append(f"adopter README.md must reference registered PNG hero asset '{hero_path}'")
+    return errors
+
+
+def check_readme_hero_format(project_root: Path, adapter: Path | None = None) -> list[str]:
+    """Reject non-PNG (especially SVG) hero visuals and require registered hero references."""
+    errors: list[str] = []
+    readme_path = project_root / "README.md"
+    if not readme_path.is_file():
+        return errors
+
+    try:
+        readme_text = readme_path.read_text(encoding="utf-8")
+    except OSError:
+        return errors
+
+    clean_readme = _strip_html_comments(readme_text)
+    hero_url = _readme_hero_image_url(clean_readme)
+    if hero_url:
+        errors.extend(_hero_visual_errors(hero_url))
+    errors.extend(_registered_hero_reference_errors(clean_readme, adapter))
+    return errors
+
+
+def check_adopter_readme_structure(project_root: Path, adapter: Path | None = None) -> list[str]:
+    """Lint adopter README.md structure: PNG hero image, problem narrative, table, and boundaries."""
+    errors: list[str] = []
+    readme_path = project_root / "README.md"
+    if not readme_path.is_file():
+        return [f"missing README.md under project root: {project_root}"]
+
+    try:
+        readme_text = readme_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return [f"cannot read {readme_path}: {exc}"]
+
+    clean_readme = _strip_html_comments(readme_text)
+
+    # 1. Hero banner visual must exist and be a PNG (SVGs are banned as the hero).
+    hero_url = _readme_hero_image_url(clean_readme)
+    if not hero_url:
+        errors.append(
+            "adopter README.md is missing a hero banner visual; every adopter README must include a narrative hero illustration (PNG)"
+        )
+    else:
+        errors.extend(_hero_visual_errors(hero_url))
+    errors.extend(_registered_hero_reference_errors(clean_readme, adapter))
+
+    # 2. Problem narrative section check
+    problem_match = re.search(
+        r"(?im)^##\s+.*(?:\bwhy\b.*(?:\bexists\b|\bbuilt\b|\bhere\b|\bnow\b|\bcreated\b)|\bproblem\b|\btension\b|\bsituation\b).*$",
+        clean_readme,
+    )
+    if not problem_match:
+        errors.append(
+            "adopter README.md is missing a problem narrative section (e.g. '## Why this exists' or '## Problem')"
+        )
+
+    # 3. Structured status / evidence / capabilities table check
+    table_match = re.search(r"(?m)^\|[^\n]+\|\s*\n\|[- :|]+\|\s*\n\|[^\n]+\|", clean_readme)
+    if not table_match:
+        errors.append(
+            "adopter README.md is missing a structured status/evidence table (markdown table mapping delivered capabilities/slices or claims and boundaries)"
+        )
+
+    # 4. Distinct boundaries section check
+    boundaries_match = re.search(
+        r"(?im)^##\s+.*(?:\bboundar|\bwhat\s+(?:is\s+implemented|this\s+project\s+|it\s+)?does\s+not\s+claim|\blimitations?\b|\bnon-goals?\b|\bscope\b).*$",
+        clean_readme,
+    )
+    if not boundaries_match:
+        errors.append(
+            "adopter README.md is missing a distinct boundaries section (e.g. '## Boundaries' or '## What it does not claim')"
+        )
+
+    return errors
+
+
 def check_adopter_content(
     adapter: Path,
     project_root: Path | None = None,
     docs_dir: Path | None = None,
+    check_readme_structure_enabled: bool = False,
 ) -> list[str]:
     """Run all adopter content freshness, asset reference, and HON/HSW checks."""
     errors: list[str] = []
-    root = project_root or (adapter.parent if (adapter.parent / "README.md").is_file() else Path.cwd())
+    root = project_root if project_root is not None else adapter.parent
 
     errors.extend(check_readme_freshness(root))
+    errors.extend(check_readme_hero_format(root, adapter))
+    if check_readme_structure_enabled:
+        errors.extend(check_adopter_readme_structure(root, adapter=adapter))
     errors.extend(check_manifest_assets_referenced(adapter, root, docs_dir))
+    errors.extend(check_manifest_hero_asset_format(adapter))
     errors.extend(check_human_output_naming(root, docs_dir))
     errors.extend(check_docs_hsw_tells(root, docs_dir))
 
@@ -397,14 +589,20 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Adopter documentation directory (defaults to <project-root>/docs)",
     )
+    parser.add_argument(
+        "--check-adopter-readme",
+        "--check-readme-structure",
+        action="store_true",
+        dest="check_readme_structure",
+        help="Lint adopter README structure (PNG hero, problem section, status table, boundaries)",
+    )
 
     args = parser.parse_args(argv)
 
     if args.project_root:
         project_root = args.project_root.resolve()
     elif args.adapter:
-        adapter_res = args.adapter.resolve()
-        project_root = adapter_res.parent if (adapter_res.parent / "README.md").is_file() else Path.cwd().resolve()
+        project_root = args.adapter.resolve().parent
     else:
         project_root = Path.cwd().resolve()
 
@@ -415,7 +613,12 @@ def main(argv: list[str] | None = None) -> int:
 
     docs_dir = args.docs_dir.resolve() if args.docs_dir else None
 
-    errors = check_adopter_content(adapter, project_root, docs_dir)
+    errors = check_adopter_content(
+        adapter,
+        project_root,
+        docs_dir,
+        check_readme_structure_enabled=args.check_readme_structure,
+    )
     status = "OK" if not errors else "FAIL"
 
     print(

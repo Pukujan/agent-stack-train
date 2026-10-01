@@ -111,6 +111,7 @@ REQUIRED_HELPER_DOCS = (
     "docs/HUMAN_SOUNDING_WRITING.md",
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md",
+    "docs/ANTIGRAVITY_INTEGRATION.md",
 )
 
 
@@ -1015,7 +1016,71 @@ def check_writing_contract(root: Path) -> list[str]:
             f"{WRITING_ROUTER_CONTRACT} acs_verify_entrypoint must declare hsw_automation"
         )
 
+    errors.extend(check_antigravity_bootstrap_contract(root, contract))
     errors.extend(check_human_output_naming_contract(root))
+    return errors
+
+
+ANTIGRAVITY_INTEGRATION_DOC = "docs/ANTIGRAVITY_INTEGRATION.md"
+
+
+def check_antigravity_bootstrap_contract(root: Path, contract: dict | None = None) -> list[str]:
+    """Require Antigravity (and coding-agent) bootstrap guidance that loads the full writing playbook."""
+    errors: list[str] = []
+    bootstrap = None
+    if isinstance(contract, dict):
+        bootstrap = contract.get("agent_bootstrap")
+    else:
+        try:
+            bootstrap = load_json(root / WRITING_ROUTER_CONTRACT).get("agent_bootstrap")
+        except ValueError as exc:
+            return [str(exc)]
+    if not isinstance(bootstrap, dict):
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} must declare agent_bootstrap with an antigravity entry"
+        )
+        return errors
+
+    antigravity = bootstrap.get("antigravity")
+    if not isinstance(antigravity, dict):
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap must declare an antigravity entry"
+        )
+        return errors
+
+    doc_ref = antigravity.get("integration_doc")
+    if doc_ref != ANTIGRAVITY_INTEGRATION_DOC:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.integration_doc must be "
+            f"{ANTIGRAVITY_INTEGRATION_DOC}"
+        )
+    if not (root / ANTIGRAVITY_INTEGRATION_DOC).is_file():
+        errors.append(f"missing Antigravity integration guide: {ANTIGRAVITY_INTEGRATION_DOC}")
+    if antigravity.get("always_on") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.always_on must be true"
+        )
+    if antigravity.get("opt_in_forbidden") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.opt_in_forbidden must be true"
+        )
+    if antigravity.get("system_block_ref") != "acs_prompt_inject.system_block":
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.system_block_ref must be "
+            "acs_prompt_inject.system_block"
+        )
+    must_load = [str(item) for item in antigravity.get("must_load", [])]
+    for module in ("writing-direction", "human-sounding-writing", "human-output-naming"):
+        if module not in must_load:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.must_load must include {module}"
+            )
+    steps = antigravity.get("bootstrap_steps")
+    if not isinstance(steps, list) or len(steps) < 3:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} agent_bootstrap.antigravity.bootstrap_steps must be a list "
+            "with at least 3 steps"
+        )
     return errors
 
 
@@ -1175,6 +1240,7 @@ def check_adapter(
     adapter: Path,
     project_root: Path | None = None,
     check_adopter_docs: bool = False,
+    check_adopter_readme: bool = False,
 ) -> list[str]:
     errors: list[str] = []
     required = {
@@ -1249,13 +1315,24 @@ def check_adapter(
         adopter_readme = (project_root / "README.md").read_text(encoding="utf-8")
         if helper_version >= (0, 5, 4):
             errors.extend(check_adopter_readme_product_only(adopter_readme))
-    if check_adopter_docs:
+    if check_adopter_docs or check_adopter_readme:
         try:
             from scripts.verify_adopter_content import check_adopter_content
         except ImportError:
             from verify_adopter_content import check_adopter_content
         effective_root = project_root or (adapter.parent if (adapter.parent / "README.md").is_file() else None)
-        errors.extend(check_adopter_content(adapter, effective_root))
+        if check_adopter_readme and effective_root is None:
+            errors.append(
+                "--check-adopter-readme could not locate the adopter project root; pass --project-root"
+            )
+        else:
+            errors.extend(
+                check_adopter_content(
+                    adapter,
+                    effective_root,
+                    check_readme_structure_enabled=check_adopter_readme,
+                )
+            )
     return errors
 
 
@@ -1273,6 +1350,14 @@ def main(argv: list[str] | None = None) -> int:
         "--check-adopter-docs",
         action="store_true",
         help="Enforce adopter README freshness, asset references, and doc checks when --adapter is supplied",
+    )
+    parser.add_argument(
+        "--check-adopter-readme",
+        action="store_true",
+        help=(
+            "Enforce adopter README structure when --adapter is supplied: PNG hero (SVG hero banned), "
+            "problem narrative, status/evidence table, and boundaries section. Includes --check-adopter-docs."
+        ),
     )
     parser.add_argument(
         "--mode",
@@ -1296,12 +1381,15 @@ def main(argv: list[str] | None = None) -> int:
     errors = check(root)
     if args.check_adopter_docs and not args.adapter:
         errors.append("--check-adopter-docs requires --adapter")
+    if args.check_adopter_readme and not args.adapter:
+        errors.append("--check-adopter-readme requires --adapter")
     if args.adapter:
         errors.extend(
             check_adapter(
                 args.adapter.resolve(),
                 args.project_root.resolve() if args.project_root else None,
                 check_adopter_docs=args.check_adopter_docs,
+                check_adopter_readme=args.check_adopter_readme,
             )
         )
     # Always emit CGM_VERIFY for ACS parsers on helper runs too.

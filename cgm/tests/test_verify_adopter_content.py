@@ -8,10 +8,13 @@ from pathlib import Path
 
 from scripts.verify_adopter_content import (
     check_adopter_content,
+    check_adopter_readme_structure,
     check_docs_hsw_tells,
     check_human_output_naming,
     check_manifest_assets_referenced,
+    check_manifest_hero_asset_format,
     check_readme_freshness,
+    check_readme_hero_format,
     main,
 )
 
@@ -216,20 +219,20 @@ class VerifyAdopterContentTests(unittest.TestCase):
             manifest = {
                 "schema_version": "content-generation.asset-manifest.v1",
                 "assets": [
-                    {"path": "assets/workspace-dashboard.svg", "role": "supporting"},
+                    {"path": "assets/workspace-dashboard.png", "role": "hero"},
                 ],
             }
             (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             assets = project / "assets"
             assets.mkdir()
-            (assets / "workspace-dashboard.svg").write_text("<svg></svg>", encoding="utf-8")
+            (assets / "workspace-dashboard.png").write_bytes(b"\x89PNG\r\n\x1a\n")
             readme = (
                 "# Octo Control Plane\n\n"
                 "> **One place to reach workspaces, files, and background jobs.**\n\n"
                 "Personal files, work projects, and AI agents often end up scattered across "
                 "local disks and unrelated cloud drives. Octo gives them one durable workspace "
                 "boundary while keeping underlying storage replaceable.\n\n"
-                "![Dashboard](assets/workspace-dashboard.svg)\n\n"
+                "![Dashboard](assets/workspace-dashboard.png)\n\n"
                 "## Why this exists\n\n"
                 "Developers and researchers lose track of raw files across workstations. "
                 "Octo provides unified metadata and scoped access links.\n\n"
@@ -295,6 +298,189 @@ class VerifyAdopterContentTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertIn("ADOPTER_VERIFY status=FAIL", out)
             self.assertIn("INVALID: adopter content check failed", out)
+
+    def test_manifest_hero_asset_accepts_png(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            adapter = Path(tmpdir) / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "assets/hero-story.png", "role": "hero"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            self.assertEqual(check_manifest_hero_asset_format(adapter), [])
+
+    def test_manifest_hero_asset_rejects_svg(self):
+        # CGM #34: workspace-dashboard.svg registered as the hero banner in octo-database
+        with tempfile.TemporaryDirectory() as tmpdir:
+            adapter = Path(tmpdir) / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "docs/assets/workspace-dashboard.svg", "role": "hero"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            errors = check_manifest_hero_asset_format(adapter)
+            self.assertTrue(any("must be a PNG" in e and "workspace-dashboard.svg" in e for e in errors), errors)
+
+    def test_manifest_hero_asset_rejects_svg_orientation(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            adapter = Path(tmpdir) / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "assets/hero-story.png", "role": "hero", "orientation": "svg"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            errors = check_manifest_hero_asset_format(adapter)
+            self.assertTrue(any("must be a PNG" in e for e in errors), errors)
+
+    def test_manifest_hero_asset_rejects_non_png_raster(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            adapter = Path(tmpdir) / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "assets/hero-story.jpg", "role": "hero"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            errors = check_manifest_hero_asset_format(adapter)
+            self.assertTrue(any(".png extension" in e for e in errors), errors)
+
+    def test_manifest_hero_asset_ignores_non_hero_roles(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            adapter = Path(tmpdir) / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "docs/assets/flow.svg", "role": "supporting"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            self.assertEqual(check_manifest_hero_asset_format(adapter), [])
+
+    def test_readme_hero_format_rejects_svg_hero(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            (project / "README.md").write_text(
+                "# Octo\n\n![Dashboard](docs/assets/workspace-dashboard.svg)\n\n"
+                "A substantive description of the product and its audience.\n",
+                encoding="utf-8",
+            )
+            errors = check_readme_hero_format(project)
+            self.assertTrue(any("must be a PNG image, not an SVG" in e for e in errors), errors)
+
+    def test_readme_hero_format_accepts_png_hero(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            (project / "README.md").write_text(
+                "# Octo\n\n![Dashboard](assets/hero-story.png)\n\n"
+                "A substantive description of the product and its audience.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(check_readme_hero_format(project), [])
+
+    def test_readme_hero_format_requires_registered_hero_reference(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            manifest = {
+                "schema_version": "content-generation.asset-manifest.v1",
+                "assets": [{"path": "assets/hero-story.png", "role": "hero"}],
+            }
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            (project / "README.md").write_text(
+                "# Octo\n\n![Other](assets/some-other.png)\n\n"
+                "A substantive description of the product and its audience.\n",
+                encoding="utf-8",
+            )
+            errors = check_readme_hero_format(project, adapter)
+            self.assertTrue(any("must reference registered PNG hero asset" in e for e in errors), errors)
+
+    def test_adopter_readme_structure_accepts_complete_readme(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            readme = (
+                "# Octo Control Plane\n\n"
+                "> **One place to reach workspaces, files, and background jobs.**\n\n"
+                "![Hero](assets/hero-story.png)\n\n"
+                "Personal files, work projects, and AI agents often end up scattered across "
+                "local disks and unrelated cloud drives.\n\n"
+                "## Why this exists\n\n"
+                "Developers and researchers lose track of raw files across workstations.\n\n"
+                "## What works today\n\n"
+                "| Capability | Status |\n| --- | --- |\n| Scoped links | shipped |\n\n"
+                "## Boundaries\n\n"
+                "Octo does not replace object storage or provide offline access.\n"
+            )
+            (project / "README.md").write_text(readme, encoding="utf-8")
+            self.assertEqual(check_adopter_readme_structure(project), [])
+
+    def test_adopter_readme_structure_rejects_svg_hero(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            readme = (
+                "# Octo\n\n![Hero](docs/assets/workspace-dashboard.svg)\n\n"
+                "## Why this exists\n\n"
+                "A problem narrative long enough to be substantive for the reader.\n\n"
+                "| Capability | Status |\n| --- | --- |\n| Links | shipped |\n\n"
+                "## Boundaries\n\n"
+                "It does not do offline sync.\n"
+            )
+            (project / "README.md").write_text(readme, encoding="utf-8")
+            errors = check_adopter_readme_structure(project)
+            self.assertTrue(any("must be a PNG image, not an SVG" in e for e in errors), errors)
+
+    def test_adopter_readme_structure_rejects_missing_sections(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            (project / "README.md").write_text(
+                "# Octo\n\nA short developer spec with no narrative structure at all.\n",
+                encoding="utf-8",
+            )
+            errors = check_adopter_readme_structure(project)
+            self.assertTrue(any("hero banner" in e for e in errors), errors)
+            self.assertTrue(any("problem narrative" in e for e in errors), errors)
+            self.assertTrue(any("status/evidence table" in e for e in errors), errors)
+            self.assertTrue(any("boundaries section" in e for e in errors), errors)
+
+    def test_adopter_content_structure_gate_off_by_default(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            manifest = {"schema_version": "content-generation.asset-manifest.v1", "assets": []}
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            (project / "README.md").write_text(
+                "# Octo\n\nA short developer spec with no narrative structure at all.\n",
+                encoding="utf-8",
+            )
+            errors = check_adopter_content(adapter, project)
+            self.assertFalse(any("problem narrative" in e for e in errors), errors)
+            errors_gated = check_adopter_content(adapter, project, check_readme_structure_enabled=True)
+            self.assertTrue(any("problem narrative" in e for e in errors_gated), errors_gated)
+
+    def test_main_cli_check_adopter_readme_flag(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            manifest = {"schema_version": "content-generation.asset-manifest.v1", "assets": []}
+            (adapter / "asset-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            (project / "README.md").write_text(
+                "# Octo\n\nA short developer spec with no narrative structure at all.\n",
+                encoding="utf-8",
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                exit_code = main([
+                    "--adapter", str(adapter),
+                    "--project-root", str(project),
+                    "--check-adopter-readme",
+                ])
+            out = buf.getvalue()
+            self.assertEqual(exit_code, 1)
+            self.assertIn("boundaries section", out)
 
 
 if __name__ == "__main__":

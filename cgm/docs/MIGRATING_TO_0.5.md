@@ -122,4 +122,15 @@ do not rename the folder or replace the id with `hsw`.
   3. Ensure `README.md` is updated beyond bootstrap placeholders and embeds declared visual assets.
   4. Ensure docs and filenames adhere to HON (no opaque hashes / robot stems) and HSW (no agent tool dumps or high-signal AI tells).
 
+## PNG hero + adopter README structure + Antigravity bootstrap (0.5.9+)
+
+- **Problem fixed:** an SVG layout sketch was registered and embedded as the public README hero (CGM #34), and Google Antigravity sessions generated shallow adopter READMEs that skipped the multi-image narrative and evidence structure (CGM #35).
+- **Fix:** hero assets must be raster `.png` in the schema and both validators; a new `--check-adopter-readme` gate asserts the full adopter README structure; `docs/ANTIGRAVITY_INTEGRATION.md` and `agent_bootstrap.antigravity` in the router give coding agents a bootstrap that loads the full writing playbook.
+- Adapter / every-adopter steps:
+  1. Pin helper **0.5.9+** (version and commit).
+  2. Register a PNG hero in `asset-manifest.json` and embed it as the README banner; an SVG wireframe is fine as a diagram, never as the hero.
+  3. Give the README a problem narrative, a grounded status/evidence table, and a distinct boundaries section.
+  4. Run `python scripts/validate_content_system.py --root <cgm> --adapter <project>/.content-system --project-root <project> --check-adopter-readme` in CI.
+  5. Antigravity (or any coding agent) sessions: paste `acs_prompt_inject.system_block` at boot and follow [`ANTIGRAVITY_INTEGRATION.md`](ANTIGRAVITY_INTEGRATION.md).
+
 

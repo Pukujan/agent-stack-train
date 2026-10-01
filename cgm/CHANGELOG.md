@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.9 — draft
+
+- **PNG hero enforcement (issue #34):** `schemas/asset-manifest.schema.json` now rejects an SVG assigned to the `hero` role — a hero asset must be a raster `.png` with a non-`svg` orientation;
+- `scripts/verify_adopter_content.py` adds `check_manifest_hero_asset_format` and `check_readme_hero_format`, rejecting an SVG or non-PNG hero in the manifest or the README banner;
+- **Adopter README linter (issue #35):** new `scripts/validate_content_system.py --check-adopter-readme` (and `verify_adopter_content.py --check-readme-structure`) asserts the required adopter README structure — narrative PNG hero, problem narrative section, grounded status/evidence table, and a distinct boundaries section;
+- **Antigravity bootstrap (issue #35):** new [`docs/ANTIGRAVITY_INTEGRATION.md`](docs/ANTIGRAVITY_INTEGRATION.md) plus `agent_bootstrap.antigravity` in `docs/writing-routing.json`, so Google Antigravity sessions load the full writing playbook (writing-direction, hsw, hon) and generate the multi-image narrative instead of a single SVG sketch;
+- validator `check_antigravity_bootstrap_contract` fails closed if the guide or the bootstrap contract keys are missing;
+- unit + integration tests cover acceptance and rejection for hero PNG enforcement, SVG hero ban, adopter README structure, and the Antigravity bootstrap contract;
+- version bump to 0.5.9 across `system-version.json`, README, AGENTS, ACS_VERIFY, MIGRATING_TO_0.5, and the router contract.
+
 ## 0.5.8 — draft
 
 - **Adopter content freshness and asset verification gate:** ship `scripts/verify_adopter_content.py` to deterministically prevent the failure mode reported in #33 (install ≠ enforcement);

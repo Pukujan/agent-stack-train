@@ -24,6 +24,22 @@
         "prompt_recipe": {"type": "string"},
         "review": {"enum": ["accepted", "draft", "rejected"]}
       },
+      "allOf": [
+        {
+          "if": {
+            "required": ["role"],
+            "properties": {
+              "role": {"pattern": "(^|[-_\\s])hero([-_\\s]|$)"}
+            }
+          },
+          "then": {
+            "properties": {
+              "orientation": {"enum": ["wide", "square", "portrait", "icon"]},
+              "path": {"pattern": "(\\.(png|PNG))$"}
+            }
+          }
+        }
+      ],
       "additionalProperties": true
     }
   },

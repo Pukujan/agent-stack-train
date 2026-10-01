@@ -663,6 +663,55 @@ class ContentSystemValidationTests(unittest.TestCase):
             self.assertTrue(any("always_on" in e for e in errors), errors)
             self.assertTrue(any("system_block" in e for e in errors), errors)
 
+    def test_antigravity_integration_doc_present(self):
+        doc = ROOT / "docs" / "ANTIGRAVITY_INTEGRATION.md"
+        self.assertTrue(doc.is_file(), "docs/ANTIGRAVITY_INTEGRATION.md must exist")
+        text = doc.read_text(encoding="utf-8").lower()
+        for needle in (
+            "antigravity",
+            "always-on",
+            "human-sounding-writing",
+            "skill.md",
+            "writing-direction",
+            "human-output-naming",
+            "system_block",
+        ):
+            self.assertIn(needle, text)
+
+    def test_writing_router_declares_antigravity_bootstrap(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        bootstrap = contract.get("agent_bootstrap")
+        self.assertIsInstance(bootstrap, dict, "writing-routing.json must declare agent_bootstrap")
+        antigravity = bootstrap.get("antigravity")
+        self.assertIsInstance(antigravity, dict, "agent_bootstrap.antigravity must be an object")
+        self.assertEqual(antigravity.get("integration_doc"), "docs/ANTIGRAVITY_INTEGRATION.md")
+        self.assertEqual(antigravity.get("always_on"), True)
+        self.assertEqual(antigravity.get("opt_in_forbidden"), True)
+        self.assertEqual(antigravity.get("system_block_ref"), "acs_prompt_inject.system_block")
+        self.assertIn("human-sounding-writing", antigravity.get("must_load", []))
+        self.assertIn("writing-direction", antigravity.get("must_load", []))
+        self.assertIn("human-output-naming", antigravity.get("must_load", []))
+        self.assertTrue((ROOT / antigravity["integration_doc"]).is_file())
+
+    def test_writing_contract_rejects_missing_antigravity_bootstrap(self):
+        import json
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns(".git", "tests", "__pycache__"),
+            )
+            contract_path = staging / "docs" / "writing-routing.json"
+            contract = json.loads(contract_path.read_text(encoding="utf-8"))
+            contract.pop("agent_bootstrap", None)
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("antigravity" in e.lower() for e in errors), errors)
 
     def test_issue_log_contract_present(self):
         self.assertEqual(check_issue_log_contract(ROOT), [])
@@ -838,6 +887,98 @@ class ContentSystemValidationTests(unittest.TestCase):
                 ])
             out = buf.getvalue()
             self.assertEqual(code, 0)
+            self.assertIn("VALID", out)
+
+    def test_main_check_adopter_readme_requires_adapter(self):
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = main(["--root", str(ROOT), "--check-adopter-readme"])
+        out = buf.getvalue()
+        self.assertEqual(code, 1)
+        self.assertIn("--check-adopter-readme requires --adapter", out)
+
+    def test_adapter_check_adopter_readme_enforces_structure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter)
+            (project / "diagram.png").write_bytes(b"png")
+            # A developer-spec README: hero image present, but no problem narrative,
+            # status table, or boundaries section (the CGM #35 Antigravity failure shape).
+            (project / "README.md").write_text(
+                "# Octo Control Plane\n\n"
+                "Personal files and work projects often end up scattered across disks. "
+                "Octo gives them one durable workspace boundary while keeping storage replaceable.\n\n"
+                "![Diagram](diagram.png)\n\n"
+                "## How it works\n\n"
+                "The platform API catalogs files into an operational database.\n",
+                encoding="utf-8",
+            )
+            errors_default = check_adapter(adapter, project, check_adopter_readme=False)
+            self.assertFalse(any("problem narrative" in e for e in errors_default))
+            errors_enforced = check_adapter(adapter, project, check_adopter_readme=True)
+            self.assertTrue(any("problem narrative" in e for e in errors_enforced), errors_enforced)
+            self.assertTrue(any("boundaries section" in e for e in errors_enforced), errors_enforced)
+
+    def test_main_check_adopter_readme_cli_integration(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter)
+            (project / "diagram.png").write_bytes(b"png")
+            # 1. Developer-spec README missing the narrative sections fails
+            (project / "README.md").write_text(
+                "# Octo Control Plane\n\n"
+                "Personal files and work projects often end up scattered across disks. "
+                "Octo gives them one durable workspace boundary while keeping storage replaceable.\n\n"
+                "![Diagram](diagram.png)\n\n"
+                "## How it works\n\n"
+                "The platform API catalogs files into an operational database.\n",
+                encoding="utf-8",
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = main([
+                    "--root", str(ROOT),
+                    "--adapter", str(adapter),
+                    "--project-root", str(project),
+                    "--check-adopter-readme",
+                ])
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("problem narrative", out)
+
+            # 2. A full CGM adopter README passes the structure gate
+            (project / "README.md").write_text(
+                "# Octo Control Plane\n\n"
+                "> **One place to reach workspaces, files, and background jobs.**\n\n"
+                "![Diagram](diagram.png)\n\n"
+                "Personal files and work projects often end up scattered across disks. "
+                "Octo gives them one durable workspace boundary while keeping storage replaceable.\n\n"
+                "## Why this exists\n\n"
+                "Developers lose track of raw files across systems. Octo provides unified metadata.\n\n"
+                "## What works today\n\n"
+                "| Capability | Status |\n| --- | --- |\n| Scoped links | shipped |\n\n"
+                "## Boundaries\n\n"
+                "Octo does not replace object storage or offer offline access.\n",
+                encoding="utf-8",
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = main([
+                    "--root", str(ROOT),
+                    "--adapter", str(adapter),
+                    "--project-root", str(project),
+                    "--check-adopter-readme",
+                ])
+            out = buf.getvalue()
+            self.assertEqual(code, 0, out)
             self.assertIn("VALID", out)
 
 

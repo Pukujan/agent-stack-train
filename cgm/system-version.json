@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -48,7 +48,8 @@
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md",
     "docs/HUMAN_OUTPUT_NAMING.md",
-    "docs/human-output-naming.json"
+    "docs/human-output-naming.json",
+    "docs/ANTIGRAVITY_INTEGRATION.md"
   ],
   "human_output_contract": {
     "version": "content-generation.readme-contract.v2",

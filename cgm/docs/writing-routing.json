@@ -89,6 +89,7 @@
     "full_helper": "python scripts/validate_content_system.py --root <cgm-checkout>",
     "helper_and_adapter": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project>",
     "helper_and_adapter_docs": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project> --check-adopter-docs",
+    "adopter_readme": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project> --check-adopter-readme",
     "adopter_content": "python scripts/verify_adopter_content.py --adapter <project>/.content-system --project-root <project>",
     "hsw_automation": "python scripts/verify_hsw_applied.py --root <cgm-checkout>",
     "hsw_automation_html": "python scripts/verify_hsw_applied.py --root <cgm-checkout> --html <path-to-compare.html>"
@@ -160,5 +161,26 @@
     "opt_in_forbidden": true,
     "audience": "every_cgm_adopter",
     "notes": "Canonical paste text lives at acs_prompt_inject.system_block (name kept for pin compatibility). Every CGM adopter must inject it at agent start."
+  },
+  "agent_bootstrap": {
+    "antigravity": {
+      "integration_doc": "docs/ANTIGRAVITY_INTEGRATION.md",
+      "always_on": true,
+      "opt_in_forbidden": true,
+      "system_block_ref": "acs_prompt_inject.system_block",
+      "must_load": [
+        "writing-direction",
+        "human-sounding-writing",
+        "human-output-naming"
+      ],
+      "bootstrap_steps": [
+        "At session start, read .content-system/ and the pinned CGM checkout; do not read the helper's moving main.",
+        "Paste acs_prompt_inject.system_block into the agent system prompt before writing any human-facing deliverable; opt-in is forbidden.",
+        "MUST load modules/writing-direction/SKILL.md for README/product entry, modules/human-sounding-writing/SKILL.md for PR/issue/commit prose, docs, and HTML reports, and modules/human-output-naming/SKILL.md for generated filenames and legends.",
+        "Generate the full narrative image set (hero PNG raster, problem, supporting) and register each in .content-system/asset-manifest.json with a prompt record; never use an SVG as the README hero.",
+        "Before handoff, run validate_content_system.py --check-adopter-readme (or verify_adopter_content.py) and fix failures."
+      ],
+      "notes": "Google Antigravity reads .content-system but did not proactively load the deep writing guidance (issue #35). This entry points the agent at the always-on system block and the full-depth README requirements. See docs/ANTIGRAVITY_INTEGRATION.md."
+    }
   }
 }

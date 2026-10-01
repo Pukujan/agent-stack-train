@@ -49,6 +49,13 @@ python scripts/validate_content_system.py \
   --project-root /path/to/adopter \
   --check-adopter-docs
 
+# Full CGM + adopter README structure + PNG hero gate (0.5.9+; includes --check-adopter-docs)
+python scripts/validate_content_system.py \
+  --root /path/to/content-generation-modules \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter \
+  --check-adopter-readme
+
 # Standalone adopter content freshness & asset reference check (0.5.8+)
 python scripts/verify_adopter_content.py \
   --adapter /path/to/adopter/.content-system \
@@ -114,9 +121,12 @@ automation gates ran. Soft still means no full NLP CI on every prose file.
    prompt (not per-report).
 2. Run `verify_hsw_applied.py` (contract mode on install; `--html` before
    publishing compare / human-facing HTML).
-3. Keep the eight-module pin on **0.5.8+**.
+3. Keep the eight-module pin on **0.5.9+**.
 4. Run `verify_adopter_content.py` (or `--check-adopter-docs`) in CI to enforce
    README freshness, asset references, and HON/HSW doc compliance.
+5. Run `validate_content_system.py --check-adopter-readme` (0.5.9+) to enforce
+   the adopter README structure: PNG hero (SVG hero banned), problem narrative,
+   grounded status/evidence table, and a boundaries section.
 
 ## Confirm adopter content freshness and asset references (0.5.8+ — every CGM adopter)
 
@@ -146,6 +156,33 @@ python scripts/validate_content_system.py \
   --project-root /path/to/adopter \
   --check-adopter-docs
 ```
+
+## Adopter README structure + PNG hero (0.5.9+ — every CGM adopter)
+
+0.5.8 checked freshness and asset references, but a registered SVG sketch could
+still be embedded as the public README hero (CGM #34), and coding agents such as
+Google Antigravity produced shallow adopter READMEs (CGM #35). **0.5.9** adds a
+structure gate and a hero-format gate:
+
+1. Rejects an SVG (or any non-PNG) asset registered with `role: hero` in
+   `asset-manifest.json`.
+2. Rejects a non-PNG image used as the adopter README hero banner.
+3. Asserts the README has a problem narrative section, a grounded
+   status/evidence table, and a distinct boundaries section.
+
+```bash
+# Adopter README structure gate (includes freshness + asset references)
+python scripts/validate_content_system.py \
+  --root /path/to/content-generation-modules \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter \
+  --check-adopter-readme
+```
+
+Google Antigravity and other coding agents must additionally follow
+[`ANTIGRAVITY_INTEGRATION.md`](ANTIGRAVITY_INTEGRATION.md) so they load the full
+writing playbook (`writing-direction`, **hsw**, **hon**) and generate the
+multi-image narrative, not a single SVG sketch.
 
 ## Output filenames (0.5.5+)
 
