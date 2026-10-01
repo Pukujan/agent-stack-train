@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/agent-stack-train/stack-manifest.schema.json",
+  "title": "Stack manifest",
+  "description": "One adopter's pin of the certified release train. The adopter keeps this file; the train keeps the certified versions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "adopter", "release_train", "source", "pins"],
+  "properties": {
+    "schema_version": {"const": "agent-stack-train.stack-manifest.v1"},
+    "adopter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The pinning repository's own name."
+    },
+    "release_train": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The train this manifest pins. Must equal the train's release_train."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A resolvable reference to the train's stack-releases.json (URL or repository-relative path)."
+    },
+    "pins": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "One entry per certified component the adopter consumes, keyed by component name.",
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "version": {"type": "string", "minLength": 1},
+          "commit": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+          "cli": {"type": "string", "minLength": 1},
+          "module": {"type": "string", "minLength": 1},
+          "modules": {"type": "integer", "minimum": 1}
+        }
+      }
+    }
+  }
+}

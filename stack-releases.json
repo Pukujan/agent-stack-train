@@ -1,0 +1,33 @@
+{
+  "schema_version": "agent-stack-train.stack-releases.v1",
+  "release_train": "2026-10-01",
+  "published_by": "https://github.com/Pukujan/agent-stack-train",
+  "recorded_at": "2026-10-01T00:00:00Z",
+  "status": "proposed",
+  "certified": {
+    "project-continuity-modules": {
+      "version": "0.6.0",
+      "commit": "4e2385474b4af9249ca009cbdcb38c4498932475",
+      "cli": "0.6.0",
+      "protocol_version": "0.1.0-draft",
+      "role": "Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates."
+    },
+    "content-generation-modules": {
+      "version": "0.5.7",
+      "commit": "c069613ca8b3e02bcf5aba1960160583537f8a3a",
+      "modules": 8,
+      "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation."
+    },
+    "agent-custom-setup": {
+      "module": "multi-agent-hotload",
+      "version": "0.1.0",
+      "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime."
+    },
+    "observational-issue-ops": {
+      "version": "0.1.0",
+      "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
+    }
+  },
+  "adoption_rule": "An adopter pins exactly one release train in its own stack-manifest.json and references each component by the version here. It does not hand-copy individual pins into several files.",
+  "note": "This is a proposal, not a mandate. The versions above are the ones the sibling issues certified; no adopter has been migrated to consume this train yet."
+}

@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Train gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The release train is well-formed
+        run: python scripts/check_manifest.py --self
+
+      - name: The manifest schema is valid JSON
+        run: python -c "import json; json.load(open('stack-manifest.schema.json'))"
