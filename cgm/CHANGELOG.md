@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.11 — draft
+
+- **Adopter merge gates (issue #18):** new [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md) separates four gates in plain language — (1) CGM contract validation, (2) target-side factual/link/test checks on the current head, (3) branch-protection readiness including up-to-date status and stale source claims, and (4) merge authorization (human approval vs auto-merge);
+- documents an optional CI + auto-merge path for adopters whose own policy permits merging without a separate reviewer, and states plainly that a validator pass does not trigger or guarantee a merge and that CGM cannot approve, push, or merge an adopter's pull request;
+- validator: new `check_adopter_merge_gates` fails closed if the guide is missing, drops one of the four gate concepts, or omits the boundary that CGM does not approve, push, or merge an adopter PR; the guide joins `REQUIRED_HELPER_DOCS` and `system-version.json` `helper_contract_files`;
+- README, AGENTS, and `docs/ACS_VERIFY.md` cross-reference the guide; unit tests cover presence, a missing guide, and a missing CGM-merge boundary;
+- version bump to 0.5.11 across `system-version.json`, README, and CHANGELOG.
+
 ## 0.5.10 — draft
 
 - **Reader-facing explanations route to `writing-direction` (issue #15):** new `reader_facing_explanations` route in `docs/writing-routing.json` for human-facing research plans, architecture explanations, and evidence briefs — `load: writing-direction`, `required_load: true`, with a 6-item `review_checklist`;

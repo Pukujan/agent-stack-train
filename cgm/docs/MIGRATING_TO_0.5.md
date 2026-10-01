@@ -143,4 +143,15 @@ do not rename the folder or replace the id with `hsw`.
   3. Keep a scholarly paper or raw data writeup on **hsw** (`human-sounding-writing`) — only reader-facing explanations route to `writing-direction`.
   4. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
 
+## Adopter merge gates — validation is not merge readiness (0.5.11+)
+
+- **Problem fixed:** an adopter README pull request could pass the pinned CGM validator and target checks yet stay open, because the target repository added a manual reviewer gate or never enabled auto-merge, and the adopter guidance did not separate CGM validation from GitHub merge readiness (CGM #18).
+- **Fix:** new [`ADOPTER_MERGE_GATES.md`](ADOPTER_MERGE_GATES.md) names four gates — (1) CGM contract validation, (2) target-side checks on the current head, (3) branch-protection readiness (required checks, up-to-date status, stale source claims), and (4) merge authorization (human approval vs auto-merge) — and documents an optional CI + auto-merge path.
+- Adapter / every-adopter steps:
+  1. Pin helper **0.5.11+** (version and commit).
+  2. Read [`ADOPTER_MERGE_GATES.md`](ADOPTER_MERGE_GATES.md) before treating a validator pass as merge-ready.
+  3. Confirm your target checks pass on the current head, and check whether your protection rules require a reviewer.
+  4. If your own policy permits merging without a separate reviewer, run the pinned CGM validator and target checks as required CI checks and enable auto-merge; otherwise keep your review rule.
+  5. Remember: CGM does not approve, push, or merge an adopter pull request, and a validator pass does not trigger or guarantee a merge.
+
 

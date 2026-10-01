@@ -184,6 +184,25 @@ Google Antigravity and other coding agents must additionally follow
 writing playbook (`writing-direction`, **hsw**, **hon**) and generate the
 multi-image narrative, not a single SVG sketch.
 
+## Adopter merge gates — validation is not merge readiness (0.5.11+ — every CGM adopter)
+
+A green CGM validator run and a merged pull request are separate outcomes
+(CGM #18). `validate_content_system.py` checks the helper contract and the
+adapter; it never approves, pushes, or merges an adopter's pull request, and a
+pass does not trigger or guarantee a merge. Four gates:
+
+1. **CGM contract validation** — this repository's helper + adapter checks.
+2. **Target-side checks on the current head** — the adopter's own factual,
+   link, test, and structure checks on the exact commit under review.
+3. **Branch-protection readiness** — required checks, up-to-date status, and
+   stale source claims; all target-repository settings.
+4. **Merge authorization** — a required human approval, or auto-merge armed.
+
+When the adopter's own policy permits merging without a separate reviewer, run
+the pinned CGM validator and the target checks as required CI checks and enable
+GitHub auto-merge; otherwise keep the repository's review rule. Full guide:
+[`ADOPTER_MERGE_GATES.md`](ADOPTER_MERGE_GATES.md).
+
 ## Output filenames (0.5.5+)
 
 ACS prompt inject must mention **output filenames**, asset-manifest paths, and

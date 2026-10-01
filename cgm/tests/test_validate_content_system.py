@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.validate_content_system import (
     check,
     check_adapter,
+    check_adopter_merge_gates,
     check_adopter_readme_product_only,
     check_issue_log_contract,
     check_project_brief_v2,
@@ -803,6 +804,43 @@ class ContentSystemValidationTests(unittest.TestCase):
             self.assertTrue(any("audience" in e for e in errors), errors)
             self.assertTrue(any("ACS-only" in e or "acs-only" in e for e in errors), errors)
             self.assertTrue(any("adopter_facing_docs" in e for e in errors), errors)
+
+    def test_adopter_merge_gates_guide_present(self):
+        self.assertEqual(check_adopter_merge_gates(ROOT), [])
+        text = (ROOT / "docs" / "ADOPTER_MERGE_GATES.md").read_text(encoding="utf-8").lower()
+        for concept in (
+            "contract validation",
+            "merge readiness",
+            "current head",
+            "branch protection",
+            "auto-merge",
+        ):
+            self.assertIn(concept, text)
+
+    def test_adopter_merge_gates_rejects_missing_guide(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            errors = check_adopter_merge_gates(Path(directory))
+            self.assertTrue(any("ADOPTER_MERGE_GATES" in e for e in errors), errors)
+
+    def test_adopter_merge_gates_rejects_missing_boundary(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory)
+            (staging / "docs").mkdir()
+            (staging / "docs" / "ADOPTER_MERGE_GATES.md").write_text(
+                "# Adopter merge gates\n\n"
+                "Gate 1 is contract validation; gate 2 checks the current head; "
+                "gate 3 is branch protection and freshness; gate 4 is auto-merge "
+                "versus human approval. Every required check must be green.\n\n"
+                "CGM can approve and merge an adopter pull request once the "
+                "validator passes.\n",
+                encoding="utf-8",
+            )
+            errors = check_adopter_merge_gates(staging)
+            self.assertTrue(
+                any("does not approve, push, or merge" in e for e in errors), errors
+            )
 
     def test_adopter_readme_rejects_cgm_promotion(self):
         errors = check_adopter_readme_product_only(

@@ -12,6 +12,13 @@ Before changing or using the system:
 6. inspect prior reviewed outputs in the target repository and the helper's prior-work references before inventing a new story or visual direction;
 7. run `python scripts/validate_content_system.py --root .` before handoff (adopters may call `--mode writing` first; confirm HSW automation with `python scripts/verify_hsw_applied.py --root .` and optional `--html <file>`; verify adopter content freshness & assets with `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; enforce adopter README structure — PNG hero, problem narrative, status/evidence table, boundaries — with `validate_content_system.py --check-adopter-readme`; see [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md));
 
+A validator pass is **not** merge readiness. CGM contract validation and GitHub
+merge readiness are separate outcomes, and CGM does not approve, push, or merge
+an adopter's pull request. The four adopter gates (contract validation;
+target-side checks on the current head; branch-protection readiness; merge
+authorization) and the optional CI + auto-merge path are in
+[`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md).
+
 The helper system defines methods and constraints. It does not define product facts. Product facts, claims, audience, and project-specific visual identity belong in the target repository.
 
 Do not treat model-generated scores as objective truth. Deterministic checks and human review remain authoritative for subjective quality.

@@ -47,6 +47,17 @@ ISSUE_LOG_REQUIRED_STEP_IDS = (
     "fix_pin_contract_validate",
     "never_single_adopter_ticket",
 )
+ADOPTER_MERGE_GATES_DOC = "docs/ADOPTER_MERGE_GATES.md"
+ADOPTER_MERGE_GATES_NEEDLES = (
+    "contract validation",
+    "merge readiness",
+    "current head",
+    "branch protection",
+    "auto-merge",
+    "required check",
+    "fresh",
+)
+ADOPTER_MERGE_GATES_BOUNDARY = "does not approve, push, or merge"
 FILENAME_HELPER_SYMBOLS = (
     "build_basename",
     "build_basename_from_dimensions",
@@ -117,6 +128,7 @@ REQUIRED_HELPER_DOCS = (
     "docs/human-sounding-rules.json",
     "docs/MIGRATING_TO_0.5.md",
     "docs/ANTIGRAVITY_INTEGRATION.md",
+    "docs/ADOPTER_MERGE_GATES.md",
 )
 
 
@@ -760,6 +772,25 @@ def check_issue_log_contract(root: Path) -> list[str]:
     return errors
 
 
+def check_adopter_merge_gates(root: Path) -> list[str]:
+    """Adopter guide that separates CGM validation from GitHub merge readiness (#18)."""
+    errors: list[str] = []
+    doc = root / ADOPTER_MERGE_GATES_DOC
+    if not doc.is_file():
+        return [f"missing {ADOPTER_MERGE_GATES_DOC}"]
+    # Strip markdown emphasis so needles survive **bold** / _italic_ / `code`.
+    plain = re.sub(r"[*_`]", "", doc.read_text(encoding="utf-8")).lower()
+    for needle in ADOPTER_MERGE_GATES_NEEDLES:
+        if needle not in plain:
+            errors.append(f"{ADOPTER_MERGE_GATES_DOC} must mention {needle}")
+    if ADOPTER_MERGE_GATES_BOUNDARY not in plain:
+        errors.append(
+            f"{ADOPTER_MERGE_GATES_DOC} must state that CGM does not approve, push, "
+            "or merge an adopter pull request (no merge promise)"
+        )
+    return errors
+
+
 def check_writing_contract(root: Path) -> list[str]:
     """Presence check for writing modules + soft router + always-on HSW inject (every adopter)."""
     errors: list[str] = []
@@ -1223,6 +1254,7 @@ def check(root: Path) -> list[str]:
     errors.extend(check_readme(root))
     errors.extend(check_writing_contract(root))
     errors.extend(check_issue_log_contract(root))
+    errors.extend(check_adopter_merge_gates(root))
     # Filename contract is also required on full helper (fail closed if claimed/missing).
     # check_writing_contract already extends it; keep an explicit call only if writing skipped.
     return errors

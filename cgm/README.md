@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.10` (`v0.5.10`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
+**Current helper version: `0.5.11` (`v0.5.11`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -132,7 +132,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.10`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.11`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -158,6 +158,8 @@ python -m unittest discover -s tests -v
 ```
 
 ACS / multi-agent-hotload should call `--mode writing` (and prefer full helper or helper+adapter for install completeness). Details: [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md).
+
+**CGM validation is not merge readiness.** The four gates — CGM contract validation, target-side checks on the current head, branch-protection readiness, and merge authorization — and an optional CI + auto-merge path are documented in [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). A validator pass does not trigger or guarantee a merge; branch protection, required checks, review rules, branch freshness, and the auto-merge setting belong to the adopter's repository.
 
 Migration notes for adding `human-sounding-writing` / hsw and `human-output-naming` / hon: [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md).
 
@@ -195,6 +197,7 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/HOLDOUT_EVALUATION.md`](docs/HOLDOUT_EVALUATION.md) — repeatability on private, unseen target repositories.
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) · [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) · [`docs/MIGRATING_TO_0.4.md`](docs/MIGRATING_TO_0.4.md) · [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md) — adapter migration paths.
 - [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · [`docs/writing-routing.json`](docs/writing-routing.json) · [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md) · [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md) — writing router, ACS verify entrypoint, and hsw guide.
+- [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md) — CGM validation vs GitHub merge readiness: the four adopter gates and the optional CI + auto-merge path.
 - [`templates/`](templates/) · [`schemas/`](schemas/) — starter files and contract shapes.
 
 ## Prior work and references
@@ -215,7 +218,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.10`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.11`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.
