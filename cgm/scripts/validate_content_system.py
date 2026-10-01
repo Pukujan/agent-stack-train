@@ -37,6 +37,7 @@ FILENAME_CONTRACT = "docs/human-output-naming.json"
 FILENAME_CONTRACT_SCHEMA = "content-generation.human-output-naming.v1"
 FILENAME_HELPER_PATH = "scripts/human_filename.py"
 HSW_VERIFY_HELPER_PATH = "scripts/verify_hsw_applied.py"
+ADOPTER_VERIFY_HELPER_PATH = "scripts/verify_adopter_content.py"
 ISSUE_LOG_DOC = "docs/ISSUE_LOG.md"
 ISSUE_LOG_CONTRACT = "docs/issue-log-contract.json"
 ISSUE_LOG_SCHEMA = "content-generation.issue-log.v1"
@@ -1118,6 +1119,8 @@ def check(root: Path) -> list[str]:
 
     if not (root / "CHATGPT_SETUP.md").is_file():
         errors.append("missing CHATGPT_SETUP.md")
+    if not (root / ADOPTER_VERIFY_HELPER_PATH).is_file():
+        errors.append(f"missing adopter verify helper {ADOPTER_VERIFY_HELPER_PATH}")
     for path in REQUIRED_HELPER_DOCS:
         if not (root / path).is_file():
             errors.append(f"missing helper guide: {path}")
@@ -1168,7 +1171,11 @@ def check_adopter_readme_product_only(readme_text: str) -> list[str]:
     return errors
 
 
-def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
+def check_adapter(
+    adapter: Path,
+    project_root: Path | None = None,
+    check_adopter_docs: bool = False,
+) -> list[str]:
     errors: list[str] = []
     required = {
         "system-version.json": "content-generation.adapter.v1",
@@ -1242,6 +1249,13 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
         adopter_readme = (project_root / "README.md").read_text(encoding="utf-8")
         if helper_version >= (0, 5, 4):
             errors.extend(check_adopter_readme_product_only(adopter_readme))
+    if check_adopter_docs:
+        try:
+            from scripts.verify_adopter_content import check_adopter_content
+        except ImportError:
+            from verify_adopter_content import check_adopter_content
+        effective_root = project_root or (adapter.parent if (adapter.parent / "README.md").is_file() else None)
+        errors.extend(check_adopter_content(adapter, effective_root))
     return errors
 
 
@@ -1255,6 +1269,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--adapter", type=Path)
     parser.add_argument("--project-root", type=Path)
+    parser.add_argument(
+        "--check-adopter-docs",
+        action="store_true",
+        help="Enforce adopter README freshness, asset references, and doc checks when --adapter is supplied",
+    )
     parser.add_argument(
         "--mode",
         choices=("helper", "writing"),
@@ -1275,11 +1294,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     errors = check(root)
+    if args.check_adopter_docs and not args.adapter:
+        errors.append("--check-adopter-docs requires --adapter")
     if args.adapter:
         errors.extend(
             check_adapter(
                 args.adapter.resolve(),
                 args.project_root.resolve() if args.project_root else None,
+                check_adopter_docs=args.check_adopter_docs,
             )
         )
     # Always emit CGM_VERIFY for ACS parsers on helper runs too.

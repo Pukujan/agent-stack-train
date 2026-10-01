@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.7` (`v0.5.7`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
+**Current helper version: `0.5.8` (`v0.5.8`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`. Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -131,7 +131,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.7`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.8`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -146,6 +146,12 @@ python scripts/validate_content_system.py --root . --mode writing
 
 # Helper + adopter adapter
 python scripts/validate_content_system.py --root . --adapter ../adopter/.content-system --project-root ../adopter
+
+# Helper + adopter adapter + content freshness / asset reference enforcement
+python scripts/validate_content_system.py --root . --adapter ../adopter/.content-system --project-root ../adopter --check-adopter-docs
+
+# Standalone adopter content freshness & asset reference check
+python scripts/verify_adopter_content.py --adapter ../adopter/.content-system --project-root ../adopter
 
 python -m unittest discover -s tests -v
 ```
@@ -208,7 +214,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.7`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.8`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

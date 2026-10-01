@@ -755,5 +755,91 @@ class ContentSystemValidationTests(unittest.TestCase):
             self.assertTrue(any("CGM" in e for e in errors))
             self.assertTrue(any("Image generation and use" in e for e in errors))
 
+    def test_adapter_check_adopter_docs_rejects_stale_bootstrap_and_unreferenced_asset(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter)
+            (project / "diagram.png").write_bytes(b"png")
+            (project / "README.md").write_text(
+                "# Octo\n\n"
+                "Repository governance and planning are being initialized under issue #2. "
+                "Product implementation starts with the login/workspace slice after that bootstrap is accepted.\n",
+                encoding="utf-8",
+            )
+            # Default check_adapter passes on disk asset existence
+            errors_default = check_adapter(adapter, project, check_adopter_docs=False)
+            self.assertEqual(errors_default, [])
+
+            # check_adopter_docs=True catches stale bootstrap and unreferenced asset
+            errors_enforced = check_adapter(adapter, project, check_adopter_docs=True)
+            self.assertTrue(any("bootstrap" in e for e in errors_enforced))
+            self.assertTrue(any("never referenced" in e and "diagram.png" in e for e in errors_enforced))
+
+    def test_main_check_adopter_docs_requires_adapter(self):
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = main(["--root", str(ROOT), "--check-adopter-docs"])
+        out = buf.getvalue()
+        self.assertEqual(code, 1)
+        self.assertIn("--check-adopter-docs requires --adapter", out)
+
+    def test_main_check_adopter_docs_cli_integration(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            adapter = project / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter)
+            (project / "diagram.png").write_bytes(b"png")
+            # 1. Stale bootstrap stub fails
+            (project / "README.md").write_text(
+                "# Octo\n\n"
+                "Product implementation starts with the login/workspace slice after that bootstrap is accepted.\n",
+                encoding="utf-8",
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = main([
+                    "--root", str(ROOT),
+                    "--adapter", str(adapter),
+                    "--project-root", str(project),
+                    "--check-adopter-docs",
+                ])
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("INVALID", out)
+            self.assertIn("bootstrap", out)
+
+            # 2. Fresh README referencing asset passes
+            (project / "README.md").write_text(
+                "# Octo Control Plane\n\n"
+                "> **One place to reach workspaces, files, and background jobs.**\n\n"
+                "Personal files and work projects often end up scattered across disks. "
+                "Octo gives them one durable workspace boundary while keeping storage replaceable.\n\n"
+                "![Diagram](diagram.png)\n\n"
+                "## Why this exists\n\n"
+                "Developers lose track of raw files across systems. Octo provides unified metadata.\n\n"
+                "## How it works\n\n"
+                "The platform API catalogs files into an operational database.\n",
+                encoding="utf-8",
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = main([
+                    "--root", str(ROOT),
+                    "--adapter", str(adapter),
+                    "--project-root", str(project),
+                    "--check-adopter-docs",
+                ])
+            out = buf.getvalue()
+            self.assertEqual(code, 0)
+            self.assertIn("VALID", out)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.8 — draft
+
+- **Adopter content freshness and asset verification gate:** ship `scripts/verify_adopter_content.py` to deterministically prevent the failure mode reported in #33 (install ≠ enforcement);
+- fails CI if adopter `README.md` still contains known bootstrap stubs (e.g. `Product implementation starts with... after that bootstrap is accepted`, planning placeholders, or unfilled template placeholders);
+- fails CI if visual assets declared in `asset-manifest.json` are never referenced in `README.md` or docs;
+- enforces basic HON checks (rejects opaque hex hashes, hashy junk, and robot key=value basenames on human-facing files and media);
+- enforces HSW checks across human-facing docs (rejects tool-dump/agent-internals and high-signal AI tells in markdown prose outside code blocks);
+- added `--check-adopter-docs` flag to `scripts/validate_content_system.py` to run these checks alongside adapter validation;
+- updated validator, ACS_VERIFY, MIGRATING_TO_0.5, AGENTS, system-version.json, and tests.
+
 ## 0.5.7 — draft
 
 - **Force HSW for every CGM adopter:** always-on inject is no longer ACS-only documentation — any repo that pins CGM must paste the always-on system block at agent start;

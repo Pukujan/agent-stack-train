@@ -112,3 +112,14 @@ do not rename the folder or replace the id with `hsw`.
   [`issue-log-contract.json`](issue-log-contract.json) (reproduce first; every
   adopter; never ACS-only).
 
+## Adopter content freshness and asset verification gate (0.5.8+)
+
+- **Problem fixed:** `validate_content_system.py` passed on stale bootstrap README (e.g. `Product implementation starts with... after that bootstrap is accepted`), assets declared in `asset-manifest.json` were never embedded in docs/README, and HON/HSW were not deterministically enforced on human-facing docs (CGM #33).
+- **Fix:** new `scripts/verify_adopter_content.py` and `--check-adopter-docs` flag in `scripts/validate_content_system.py`.
+- Adapter / every-adopter steps:
+  1. Pin helper **0.5.8+** (version and commit).
+  2. Run `python scripts/verify_adopter_content.py --adapter <project>/.content-system --project-root <project>` or `python scripts/validate_content_system.py --root <cgm> --adapter <project>/.content-system --project-root <project> --check-adopter-docs` in CI.
+  3. Ensure `README.md` is updated beyond bootstrap placeholders and embeds declared visual assets.
+  4. Ensure docs and filenames adhere to HON (no opaque hashes / robot stems) and HSW (no agent tool dumps or high-signal AI tells).
+
+

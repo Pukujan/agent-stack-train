@@ -88,6 +88,8 @@
     "writing": "python scripts/validate_content_system.py --root <cgm-checkout> --mode writing",
     "full_helper": "python scripts/validate_content_system.py --root <cgm-checkout>",
     "helper_and_adapter": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project>",
+    "helper_and_adapter_docs": "python scripts/validate_content_system.py --root <cgm-checkout> --adapter <project>/.content-system --project-root <project> --check-adopter-docs",
+    "adopter_content": "python scripts/verify_adopter_content.py --adapter <project>/.content-system --project-root <project>",
     "hsw_automation": "python scripts/verify_hsw_applied.py --root <cgm-checkout>",
     "hsw_automation_html": "python scripts/verify_hsw_applied.py --root <cgm-checkout> --html <path-to-compare.html>"
   },

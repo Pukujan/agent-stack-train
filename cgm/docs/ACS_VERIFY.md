@@ -41,6 +41,18 @@ python scripts/validate_content_system.py \
   --root /path/to/content-generation-modules \
   --adapter /path/to/adopter/.content-system \
   --project-root /path/to/adopter
+
+# Full CGM + adopter adapter + content freshness / asset reference enforcement (0.5.8+)
+python scripts/validate_content_system.py \
+  --root /path/to/content-generation-modules \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter \
+  --check-adopter-docs
+
+# Standalone adopter content freshness & asset reference check (0.5.8+)
+python scripts/verify_adopter_content.py \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter
 ```
 
 On success, `--mode writing` prints a line ACS can parse, for example:
@@ -102,7 +114,38 @@ automation gates ran. Soft still means no full NLP CI on every prose file.
    prompt (not per-report).
 2. Run `verify_hsw_applied.py` (contract mode on install; `--html` before
    publishing compare / human-facing HTML).
-3. Keep the eight-module pin on **0.5.7+**.
+3. Keep the eight-module pin on **0.5.8+**.
+4. Run `verify_adopter_content.py` (or `--check-adopter-docs`) in CI to enforce
+   README freshness, asset references, and HON/HSW doc compliance.
+
+## Confirm adopter content freshness and asset references (0.5.8+ — every CGM adopter)
+
+0.5.7 verified the presence and JSON validity of `.content-system` adapters and disk files,
+but did not deterministically enforce that `README.md` was updated beyond a bootstrap stub
+or that registered visual assets were embedded in docs (CGM #33).
+
+**0.5.8** adds `scripts/verify_adopter_content.py` and `--check-adopter-docs`:
+
+1. Fails CI if `README.md` matches known bootstrap stubs (e.g. `Product implementation starts with... after that bootstrap is accepted`, planning placeholders, or unfilled template placeholders).
+2. Fails CI if visual assets declared in `asset-manifest.json` are never referenced in `README.md` or adopter docs.
+3. Enforces basic HON checks (rejects opaque hex hashes and robot key=value basenames on human-facing files and media).
+4. Enforces HSW checks across human-facing docs (rejects tool-dump/agent-internals and high-signal AI tells in markdown prose outside code blocks).
+
+### Commands
+
+```bash
+# Standalone adopter check
+python scripts/verify_adopter_content.py \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter
+
+# Integrated with validate_content_system
+python scripts/validate_content_system.py \
+  --root /path/to/content-generation-modules \
+  --adapter /path/to/adopter/.content-system \
+  --project-root /path/to/adopter \
+  --check-adopter-docs
+```
 
 ## Output filenames (0.5.5+)
 
