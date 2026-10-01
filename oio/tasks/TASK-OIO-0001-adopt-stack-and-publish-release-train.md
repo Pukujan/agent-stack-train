@@ -1,8 +1,8 @@
 # TASK-OIO-0001 — Adopt Stack And Publish Release Train
 
-<!-- continuity:task {"acceptance":["continuity validate --root . returns VALID","validate_content_system.py --adapter .content-system --project-root . --check-adopter-readme prints VALID","stack-manifest.json and stack-releases.json exist and name the same four components","the scaffold is pushed through a merged PR on a task branch, not committed to main"],"depends_on":[],"goal":"Make OIO a clean adopter of the PCM + CGM + ACS stack and publish the release train","id":"OIO-0001","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/1","next_action":"open the PR for the adoption scaffold and confirm required gates before merge","owner":"owner/Pukujan","priority":"P5","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"OIO governs the shared issue protocol but was not itself wired into the stack it governs, risking the same drift the stack exists to remove"} -->
+<!-- continuity:task {"acceptance":["continuity validate --root . returns VALID","validate_content_system.py --adapter .content-system --project-root . --check-adopter-readme prints VALID","stack-manifest.json and stack-releases.json exist and name the same four components","the scaffold is pushed through a merged PR on a task branch, not committed to main"],"depends_on":[],"goal":"Make OIO a clean adopter of the PCM + CGM + ACS stack and publish the release train","id":"OIO-0001","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/1","next_action":"none; delivered in PR #3 (squash 043f2e2)","owner":"owner/Pukujan","priority":"P5","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"OIO governs the shared issue protocol but was not itself wired into the stack it governs, risking the same drift the stack exists to remove"} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Pukujan
 - Priority: P5
 - Depends on: none
@@ -35,10 +35,10 @@ A maintainer can open OIO, read one manifest, and know exactly which PCM, CGM, a
 
 ## Acceptance criteria
 
-- [ ] `continuity validate --root .` returns `VALID`.
-- [ ] `python scripts/validate_content_system.py --root "$CGM_ROOT" --adapter .content-system --project-root . --check-adopter-readme` prints `VALID`.
-- [ ] `stack-manifest.json` and `stack-releases.json` exist and name the same four components (OIO, PCM, CGM, ACS).
-- [ ] The scaffold is pushed through a merged PR on a task branch, not committed straight to `main`.
+- [x] `continuity validate --root .` returns `VALID`.
+- [x] The pinned CGM 0.5.7 validator prints `VALID` against `.content-system` (0.5.7 has no `--check-adopter-readme` flag; it runs the adopter-README check automatically).
+- [x] `stack-manifest.json` and `stack-releases.json` exist and name the same four components (OIO, PCM, CGM, ACS).
+- [x] The scaffold is pushed through a merged PR on a task branch, not committed straight to `main`.
 
 ## Evidence and sources
 
@@ -54,12 +54,12 @@ Run the two validators above from a checkout of the pinned CGM (the content vali
 ## Related records
 
 - Leaf owning issue: [#1](https://github.com/Pukujan/observational-issue-ops/issues/1). Parent ancestry: none. Dependencies: none.
-- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0001-adopt-stack` / issue #1 as filed / active.
-- Related PR/CI evidence and push receipt (request ID / SHA): pending.
+- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0001-adopt-stack` / issue #1 as filed / completed.
+- Related PR/CI evidence and push receipt: PR #3, squash merge `043f2e2`, required `gates` check passed; merge receipt on issue #1 (comment 5942339026).
 
 ## Checkpoint log
 
-No checkpoints yet.
+- 2026-10-01: scaffold, adapter, assets, and both stack files merged via PR #3 (`043f2e2`).
 
 ## Handoff
 

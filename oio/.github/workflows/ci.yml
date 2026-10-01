@@ -58,6 +58,9 @@ jobs:
           fi
           echo "OK: no committed secrets"
 
+      - name: Stack manifest agrees with the published release train
+        run: python scripts/check_stack_consistency.py
+
       - name: Issue templates and workflows parse
         run: |
           python - <<'PY'

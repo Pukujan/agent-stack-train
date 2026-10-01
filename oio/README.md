@@ -3,7 +3,7 @@
 > **One shared way to report what you saw.** A three-plane, non-binding observational issue protocol, so a report filed on any repository keeps its provenance and lands on one traceable trail.
 
 <p align="center">
-  <img src="docs/assets/oio-hero-banner.png" alt="A designer and a companion gather loose notes from several project folders onto a single shared ledger." width="100%">
+  <img src="docs/assets/oio-hero-banner.jpg" alt="A designer and a companion gather loose notes from several project folders onto a single shared ledger." width="100%">
 </p>
 
 A multi-repository project can hold strong evidence and still lose the report. When each repository keeps its own issue form and its own copy of the rules, the same observation gets written down differently in every place, and a reader cannot tell which copy is authoritative.
@@ -15,7 +15,7 @@ Observational Issue Ops (OIO) is the one source for that protocol. It gives a ma
 **Copied rules drift.** The same issue form, the same triage, and the same version pins get hand-copied into several repositories. Nothing forces the copies to agree, so they quietly diverge. A person following one repository's own guidance can end up describing the stack differently from a person following another's.
 
 <p align="center">
-  <img src="docs/assets/oio-problem-scattered.png" alt="A companion stands puzzled among several folders holding mismatched copies of one note, with no single shared ledger." width="100%">
+  <img src="docs/assets/oio-problem-scattered.jpg" alt="A companion stands puzzled among several folders holding mismatched copies of one note, with no single shared ledger." width="100%">
 </p>
 
 The cost is not only tidiness. When a version pin drifts, an adopter can install a stack that no longer matches what the repository claims, and no check catches it. When the issue form drifts, two reports of the same problem cannot be compared. OIO removes the copy: the rule lives in one place, and every repository points at it.
@@ -46,7 +46,7 @@ It is **not** a tracker, a workflow engine, or a place to store another project'
 Every report moves along the same short path, and the plane the reporter chooses sets the priority range the report can carry.
 
 <p align="center">
-  <img src="docs/assets/oio-loop-square.png" alt="A designer and companion trace one continuous loop of five cards on a shared workflow board." width="50%">
+  <img src="docs/assets/oio-loop-square.jpg" alt="A designer and companion trace one continuous loop of five cards on a shared workflow board." width="50%">
 </p>
 
 1. **Observe.** Someone notices something worth recording and opens the issue form.

@@ -3,7 +3,7 @@
   "system_version": "0.5.7",
   "assets": [
     {
-      "path": "docs/assets/oio-hero-banner.png",
+      "path": "docs/assets/oio-hero-banner.jpg",
       "role": "hero",
       "orientation": "wide",
       "dimensions": "1264x848",
@@ -21,7 +21,7 @@
       "hash": "fa6165cd88d9813ca01a9ed7c3eea14c182bd54c58ee281dbacc10e7cd91b16e"
     },
     {
-      "path": "docs/assets/oio-problem-scattered.png",
+      "path": "docs/assets/oio-problem-scattered.jpg",
       "role": "problem",
       "orientation": "wide",
       "dimensions": "1264x848",
@@ -39,7 +39,7 @@
       "hash": "85aceabe58157fff606245f896a82d40112554cb0e724bd7218282b8afac9d9b"
     },
     {
-      "path": "docs/assets/oio-loop-square.png",
+      "path": "docs/assets/oio-loop-square.jpg",
       "role": "supporting",
       "orientation": "square",
       "dimensions": "1024x1024",

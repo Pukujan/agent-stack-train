@@ -7,6 +7,7 @@ body:
     attributes:
       value: |
         ### Observational Issue & Non-Binding Proposal Protocol
+        > **Source**: This form is published by **Pukujan/observational-issue-ops**. Every other repository consumes it from here rather than keeping its own copy; file an observation here when the subject is the protocol itself.
         > **Notice**: All observational issues filed under this system are **proposals**, NOT literal implementation mandates.
         > Observational logs must be human-understandable, grounded in concrete evidence, and include provenance, reproducibility, and citations.
 

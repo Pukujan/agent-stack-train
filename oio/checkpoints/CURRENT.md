@@ -1,28 +1,27 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"OIO-0001","active_task_file":"tasks/TASK-OIO-0001-adopt-stack-and-publish-release-train.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"OIO-0002","active_task_file":"tasks/TASK-OIO-0002-template-routing-and-consistency.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
 ## Program state
 
-Phase: adopted as a clean stack adopter. The repository holds the three-plane observational-issue form, its triage, the release train (`stack-releases.json`), and its own pins (`stack-manifest.json`). The PCM continuity scaffold, the CGM adapter (`.content-system/`), and the ACS hotloader reference are in place. The README carries the narrative assets.
+Phase: adopted as a clean stack adopter, now closing its two remaining adoption gaps. The repository holds the three-plane observational-issue form, its triage, the release train (`stack-releases.json`), and its own pins (`stack-manifest.json`). The PCM continuity scaffold, the CGM adapter (`.content-system/`), and the ACS hotloader reference are in place. The README carries the narrative assets.
 
 ## Completed
 
-- continuity protocol initialized (PCM CLI 0.6.0).
-- CGM adapter pinned to the 0.5.7 baseline; `validate_content_system.py` returns VALID with the adopter-README check.
-- Three narrative assets generated and recorded in `.content-system/asset-manifest.json`.
-- `stack-releases.json` and `stack-manifest.json` written.
+- OIO-0001: continuity protocol initialized (PCM CLI 0.6.0).
+- OIO-0001: CGM adapter pinned to the 0.5.7 baseline; the pinned validator returns VALID.
+- OIO-0001: three narrative assets generated and recorded in `.content-system/asset-manifest.json`.
+- OIO-0001: `stack-releases.json` and `stack-manifest.json` written; merged 2026-10-01 in PR #3 (squash `043f2e2`).
 
 ## Active
 
-- none. The adoption scaffold is uncommitted in the canonical checkout, awaiting its first GitHub issue and PR.
+- OIO-0002 (issue #4): name OIO as the form's publisher and fail the `gates` check closed when `stack-manifest.json` disagrees with `stack-releases.json`.
 
 ## Queued
 
-- Open the first GitHub issue recording the adoption task, then commit and push the scaffold through a PR.
-- Give OIO its own observational-issue template that routes to OIO rather than a verbatim copy of the adopter's.
+- none.
 
 ## Blockers
 
@@ -30,4 +29,4 @@ None known.
 
 ## Next atomic action
 
-Open a GitHub issue on `Pukujan/observational-issue-ops` recording the stack-adoption task and its branch, then create the task projection with `continuity task new --issue <URL>` and push the scaffold through a PR.
+Open the PR for `task/OIO-0002-template-routing-and-consistency`, confirm the `gates` job passes, then merge.

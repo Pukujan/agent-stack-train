@@ -1,7 +1,7 @@
-# Prompt record — oio-problem-scattered.png
+# Prompt record — oio-problem-scattered.jpg
 
 - **Role:** problem
-- **Path:** `docs/assets/oio-problem-scattered.png`
+- **Path:** `docs/assets/oio-problem-scattered.jpg`
 - **Dimensions:** 1264x848 (wide 3:2)
 - **Provider / model:** `built-in image_gen` (CKFF image endpoint, `gemini-3.1-flash-image`)
 - **Exact title:** Five Copies, No Trail

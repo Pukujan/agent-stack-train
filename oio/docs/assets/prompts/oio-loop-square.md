@@ -1,7 +1,7 @@
-# Prompt record — oio-loop-square.png
+# Prompt record — oio-loop-square.jpg
 
 - **Role:** supporting
-- **Path:** `docs/assets/oio-loop-square.png`
+- **Path:** `docs/assets/oio-loop-square.jpg`
 - **Dimensions:** 1024x1024 (square)
 - **Provider / model:** `built-in image_gen` (CKFF image endpoint, `gemini-3.1-flash-image`)
 - **Exact title:** One Shared Path

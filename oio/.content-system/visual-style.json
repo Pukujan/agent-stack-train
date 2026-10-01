@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.visual-style.v1",
-  "reference_asset": "docs/assets/oio-hero-banner.png",
+  "reference_asset": "docs/assets/oio-hero-banner.jpg",
   "generation_workflow": "built-in image_gen",
   "narrative_roles": [
     "hero",

@@ -1,7 +1,7 @@
-# Prompt record — oio-hero-banner.png
+# Prompt record — oio-hero-banner.jpg
 
 - **Role:** hero
-- **Path:** `docs/assets/oio-hero-banner.png`
+- **Path:** `docs/assets/oio-hero-banner.jpg`
 - **Dimensions:** 1264x848 (wide 3:2)
 - **Provider / model:** `built-in image_gen` (CKFF image endpoint, `gemini-3.1-flash-image`)
 - **Exact title:** Observational Issue Ops
