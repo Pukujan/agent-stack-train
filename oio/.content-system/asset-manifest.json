@@ -1,0 +1,60 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.5.7",
+  "assets": [
+    {
+      "path": "docs/assets/oio-hero-banner.png",
+      "role": "hero",
+      "orientation": "wide",
+      "dimensions": "1264x848",
+      "text_policy": "Exact title and subtitle only; no extra labels or fabricated metrics.",
+      "exact_title": "Observational Issue Ops",
+      "exact_subtitle": "One issue protocol, every repository, one traceable trail",
+      "prompt_recipe": "Anime-inspired editorial illustration, warm blue-violet evening desk scene. A content designer and a small friendly story-guide companion gather loose note cards from several open project folders onto one shared ledger page. Palette: night ink #111B4D, violet #8F7CFF, cyan #63D9FF, coral #FF8A70, warm cream #F4F1FF, mint #94E3CB, gold #FFD28A. Exact title 'Observational Issue Ops' and exact subtitle 'One issue protocol, every repository, one traceable trail' in a quiet translucent panel. No fake metrics, dense UI, or decorative pseudo-text.",
+      "alt_text": "A designer and a companion gather loose notes from several project folders onto a single shared ledger.",
+      "usage": "README lead visual; placed directly below the title and lead sentence.",
+      "crop_behavior": "Full wide frame without cropping the title panel or the shared ledger.",
+      "rejection_conditions": "Reject if the title is misspelled, the layout is cluttered, or the image adds text beyond the declared title and subtitle.",
+      "review_decision": "accepted after visual review at repository image size",
+      "provider": "built-in image_gen",
+      "prompt_record": "docs/assets/prompts/oio-hero-banner.md",
+      "hash": "fa6165cd88d9813ca01a9ed7c3eea14c182bd54c58ee281dbacc10e7cd91b16e"
+    },
+    {
+      "path": "docs/assets/oio-problem-scattered.png",
+      "role": "problem",
+      "orientation": "wide",
+      "dimensions": "1264x848",
+      "text_policy": "Exact title and subtitle only; no extra labels or fabricated metrics.",
+      "exact_title": "Five Copies, No Trail",
+      "exact_subtitle": "The same rule hand-copied across repositories, each drifting on its own",
+      "prompt_recipe": "Anime-inspired editorial illustration, cooler dim blue-violet evening workspace. The friendly story-guide companion stands among four mismatched project folders, each holding a differently shaped copy of the same note card, with no shared ledger present. Palette: night ink #111B4D, violet #8F7CFF, cyan #63D9FF, coral #FF8A70, warm cream #F4F1FF, muted grey-green for the drifted copies. Exact title 'Five Copies, No Trail' and exact subtitle 'The same rule hand-copied across repositories, each drifting on its own' in a quiet translucent panel. No fake metrics, dense UI, or decorative pseudo-text.",
+      "alt_text": "A companion stands puzzled among several folders holding mismatched copies of one note, with no single shared ledger.",
+      "usage": "README problem visual; placed beside the problem section.",
+      "crop_behavior": "Full wide frame without cropping the companion or the mismatched folders.",
+      "rejection_conditions": "Reject if the title is misspelled, the folders look identical, or the image adds text beyond the declared title and subtitle.",
+      "review_decision": "accepted after visual review at repository image size",
+      "provider": "built-in image_gen",
+      "prompt_record": "docs/assets/prompts/oio-problem-scattered.md",
+      "hash": "85aceabe58157fff606245f896a82d40112554cb0e724bd7218282b8afac9d9b"
+    },
+    {
+      "path": "docs/assets/oio-loop-square.png",
+      "role": "supporting",
+      "orientation": "square",
+      "dimensions": "1024x1024",
+      "text_policy": "Exact title and subtitle plus the five single-word stage labels on the board; no other text.",
+      "exact_title": "One Shared Path",
+      "exact_subtitle": "Observe, file, triage, review, resolve across every repository",
+      "prompt_recipe": "Anime-inspired editorial illustration, warm blue-violet evening workspace. A content designer and the small friendly story-guide companion trace one continuous glowing loop across a wall-mounted workflow board carrying five rounded stage cards (observe, file, triage, review, resolve). Palette: night ink #111B4D, violet #8F7CFF, cyan #63D9FF loop lines, coral #FF8A70, warm cream #F4F1FF, mint #94E3CB, gold #FFD28A. Exact title 'One Shared Path' and exact subtitle 'Observe, file, triage, review, resolve across every repository' in a quiet translucent panel. No fake metrics, dense UI, or decorative pseudo-text.",
+      "alt_text": "A designer and companion trace one continuous loop of five cards on a shared workflow board.",
+      "usage": "README supporting visual; placed beside the how-it-works section.",
+      "crop_behavior": "Square frame; keep the loop, the five stage cards, and both characters inside the crop-safe area.",
+      "rejection_conditions": "Reject if the title or stage labels are misspelled, the loop is broken, or the image adds text beyond the declared title, subtitle, and stage labels.",
+      "review_decision": "accepted after visual review at repository image size",
+      "provider": "built-in image_gen",
+      "prompt_record": "docs/assets/prompts/oio-loop-square.md",
+      "hash": "9e05e19644ca6828f291b6ad7e9e0bf3f0753065a159087bd556d3ceaa5f7322"
+    }
+  ]
+}

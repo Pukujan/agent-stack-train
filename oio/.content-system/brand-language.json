@@ -1,0 +1,7 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "Observational Issue Ops",
+  "personality": ["calm", "evidence-first", "welcoming", "exact"],
+  "promise": "One shared observational-issue protocol, so a report filed in any repository keeps its provenance and lands on one traceable trail.",
+  "avoid": ["governance theater", "unexplained acronyms", "hype", "mandate language", "methodology-heavy product copy"]
+}

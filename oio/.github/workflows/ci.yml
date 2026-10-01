@@ -1,0 +1,71 @@
+name: ci
+
+# Required status check for PCM-governed merges into main.
+# Reproducible machine gates: pinned PCM continuity validate + preflight,
+# the pinned CGM adapter check, no committed secrets, and parse of the
+# issue templates and workflows OIO publishes.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    env:
+      PCM_PIN: 4e2385474b4af9249ca009cbdcb38c4498932475
+      CGM_PIN: c069613ca8b3e02bcf5aba1960160583537f8a3a
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned continuity CLI
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "git+https://github.com/Pukujan/project-continuity-modules.git@${PCM_PIN}"
+          python -m pip install pyyaml
+          continuity --version
+
+      - name: Continuity validate
+        run: continuity validate --root .
+
+      - name: Continuity preflight (TARGET_VALID)
+        run: continuity preflight --root .
+
+      - name: Validate the content adapter against the pinned helper
+        run: |
+          git clone --quiet https://github.com/Pukujan/content-generation-modules.git /tmp/cgm
+          git -C /tmp/cgm checkout --quiet "${CGM_PIN}"
+          python /tmp/cgm/scripts/validate_content_system.py \
+            --root /tmp/cgm \
+            --adapter .content-system \
+            --project-root .
+          # CGM 0.5.7 runs the product-only README check automatically when a
+          # README is present; its CLI has no --check-adopter-readme flag.
+
+      - name: No committed secrets (tracked tree)
+        run: |
+          if git grep -nIE 'sk-or-[A-Za-z0-9]|yolo_[A-Za-z0-9]{4,}|api[_-]?key["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9]{20}'; then
+            echo "FAIL: tracked secret-like string found"
+            exit 1
+          fi
+          echo "OK: no committed secrets"
+
+      - name: Issue templates and workflows parse
+        run: |
+          python - <<'PY'
+          import glob, yaml
+          files = sorted(glob.glob(".github/ISSUE_TEMPLATE/*.yml")) + sorted(glob.glob(".github/workflows/*.yml"))
+          for f in files:
+              with open(f, encoding="utf-8") as fh:
+                  yaml.safe_load(fh)
+              print("OK", f)
+          print(f"OK: {len(files)} file(s) parse")
+          PY
