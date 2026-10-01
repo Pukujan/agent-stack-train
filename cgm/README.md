@@ -198,6 +198,7 @@ Start with the [README template](templates/README.template.md) and its [machine-
 - [`docs/MIGRATING_TO_0.2.md`](docs/MIGRATING_TO_0.2.md) · [`docs/MIGRATING_TO_0.3.md`](docs/MIGRATING_TO_0.3.md) · [`docs/MIGRATING_TO_0.4.md`](docs/MIGRATING_TO_0.4.md) · [`docs/MIGRATING_TO_0.5.md`](docs/MIGRATING_TO_0.5.md) — adapter migration paths.
 - [`docs/WRITING_ROUTING.md`](docs/WRITING_ROUTING.md) · [`docs/writing-routing.json`](docs/writing-routing.json) · [`docs/ACS_VERIFY.md`](docs/ACS_VERIFY.md) · [`docs/HUMAN_SOUNDING_WRITING.md`](docs/HUMAN_SOUNDING_WRITING.md) — writing router, ACS verify entrypoint, and hsw guide.
 - [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md) — CGM validation vs GitHub merge readiness: the four adopter gates and the optional CI + auto-merge path.
+- [`docs/PROPOSAL_FRAME_SEQUENCE_ASSETS.md`](docs/PROPOSAL_FRAME_SEQUENCE_ASSETS.md) · [`docs/PROPOSAL_MOVING_HERO.md`](docs/PROPOSAL_MOVING_HERO.md) · [`docs/PROPOSAL_DARK_MODE_VARIANTS.md`](docs/PROPOSAL_DARK_MODE_VARIANTS.md) — open proposals for animated frame-sequence assets, a moving hero, and derived dark variants (not shipped); [`docs/GITHUB_INLINE_MEDIA.md`](docs/GITHUB_INLINE_MEDIA.md) — measured GitHub Markdown media constraints (gif-only animation, video/audio sanitizer behavior).
 - [`templates/`](templates/) · [`schemas/`](schemas/) — starter files and contract shapes.
 
 ## Prior work and references

@@ -89,6 +89,8 @@ For a supporting asset:
 
 The alt text should communicate the image's job, not repeat its filename or embed the entire caption. Keep detailed interpretation in nearby Markdown so the story remains available to screen-reader users and people who cannot load images.
 
+Measured GitHub constraints on what survives the Markdown renderer (gif-only animation, video and audio handling, `<picture>` support): [`GITHUB_INLINE_MEDIA.md`](GITHUB_INLINE_MEDIA.md). Animated and dark-variant asset proposals: [`PROPOSAL_FRAME_SEQUENCE_ASSETS.md`](PROPOSAL_FRAME_SEQUENCE_ASSETS.md), [`PROPOSAL_MOVING_HERO.md`](PROPOSAL_MOVING_HERO.md), [`PROPOSAL_DARK_MODE_VARIANTS.md`](PROPOSAL_DARK_MODE_VARIANTS.md).
+
 ## Responsive and accessibility review
 
 - Declare separate roles for wide, square, portrait, icon, and social-preview assets where the target needs them.
