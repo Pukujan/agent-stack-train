@@ -1,8 +1,8 @@
 # TASK-OIO-0003 — Redefine OIO as the issue-log ticketing system and move the train out
 
-<!-- continuity:task {"acceptance":["PROJECT.md defines OIO as a repeatable issue-log ticketing system covering observational issues, operational issues, and proposals, with a required filer stamp and an explicit boundary against ACS, CGM, PCM, and the train repository","the canonical form requires an issue-type field (observational | operational | proposal | incident) and a filer stamp (filer_origin + filer_identity) and still parses as YAML","the triage labels by issue type and filer origin and fails closed with needs-filer-stamp when the stamp is missing or identity-less","stack-releases.json no longer exists in OIO and stack-manifest.json points at Pukujan/agent-stack-train","continuity validate --root . returns VALID and the pinned CGM validator returns VALID","the increment is pushed through a merged PR on a task branch"],"depends_on":["OIO-0002"],"goal":"Rewrite OIO's definition to the issue-log ticketing system the owner specified, add the issue-type and filer-stamp fields, and move the release train to its own repository","id":"OIO-0003","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/9","next_action":"open the PR and merge after the required gates check passes","owner":"owner/Pukujan","priority":"P3","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"OIO's checked-in definition was narrower than its purpose (observational-only, no filer stamp) and it published the stack's release train, which made a product repository certify its own siblings"} -->
+<!-- continuity:task {"acceptance":["PROJECT.md defines OIO as a repeatable issue-log ticketing system covering observational issues, operational issues, and proposals, with a required filer stamp and an explicit boundary against ACS, CGM, PCM, and the train repository","the canonical form requires an issue-type field (observational | operational | proposal | incident) and a filer stamp (filer_origin + filer_identity) and still parses as YAML","the triage labels by issue type and filer origin and fails closed with needs-filer-stamp when the stamp is missing or identity-less","stack-releases.json no longer exists in OIO and stack-manifest.json points at Pukujan/agent-stack-train","continuity validate --root . returns VALID and the pinned CGM validator returns VALID","the increment is pushed through a merged PR on a task branch"],"depends_on":["OIO-0002"],"goal":"Rewrite OIO's definition to the issue-log ticketing system the owner specified, add the issue-type and filer-stamp fields, and move the release train to its own repository","id":"OIO-0003","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/9","next_action":"none; delivered in PR #11 (squash 2a836a5)","owner":"owner/Pukujan","priority":"P3","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"OIO's checked-in definition was narrower than its purpose (observational-only, no filer stamp) and it published the stack's release train, which made a product repository certify its own siblings"} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Pukujan
 - Priority: P3
 - Depends on: OIO-0002 (the template source note and the fail-closed consistency check, merged)
@@ -40,7 +40,7 @@ A human filing directly, a human filing through an agent, and an agent proposing
 - [x] The triage labels by issue type and filer origin and fails closed with `needs-filer-stamp` when the stamp is missing or identity-less.
 - [x] `stack-releases.json` no longer exists in OIO and `stack-manifest.json` points at `Pukujan/agent-stack-train`.
 - [x] `continuity validate --root .` returns `VALID` and the pinned CGM validator returns `VALID`.
-- [ ] The increment is pushed through a merged PR on a task branch.
+- [x] The increment is pushed through a merged PR on a task branch (PR #11).
 
 ## Evidence and sources
 
@@ -51,8 +51,9 @@ A human filing directly, a human filing through an agent, and an agent proposing
 ## Related records
 
 - Leaf owning issue: [#9](https://github.com/Pukujan/observational-issue-ops/issues/9). Parent ancestry: none (top-level deliverable). Dependencies: OIO-0002 (merged).
-- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0003-issue-log-definition` / issue #9 as filed / active.
+- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0003-issue-log-definition` / issue #9 as filed / completed.
 
 ## Checkpoint log
 
 - 2026-10-01: definition rewritten; form and triage extended with the issue type and filer stamp; `stack-releases.json` and the local consistency checker removed and the manifest repointed at `Pukujan/agent-stack-train`; both validators pass.
+- 2026-10-01: merged via PR #11 (squash `2a836a5`); the required `gates` check passed; the receipt is on issue #9.
