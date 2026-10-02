@@ -47,9 +47,9 @@ Machine twin: the `title_contract` on the `github_and_docs_prose` route in
 
 The three-plane issue template and its triage live upstream in
 [Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops);
-CGM links to that source and does not vendor it. Certified stack versions are
-in its release train,
-[`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json).
+CGM links to that source and does not vendor it. Certified stack versions live
+in their own repository, [agent-stack-train](https://github.com/Pukujan/agent-stack-train), in
+[`stack-releases.json`](https://github.com/Pukujan/agent-stack-train/blob/main/stack-releases.json).
 
 ## Reader-facing explanations (0.5.10+)
 

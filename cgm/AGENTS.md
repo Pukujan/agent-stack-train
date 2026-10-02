@@ -78,8 +78,9 @@ route in [`docs/writing-routing.json`](docs/writing-routing.json).
 The three-plane observational issue template and its triage live upstream in
 [Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops)
 (OIO). CGM links to that source instead of copying it, and does not vendor its
-files. The certified versions of the whole stack are in OIO's release train,
-[`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json);
+files. The certified versions of the whole stack live in their own repository,
+[`agent-stack-train`](https://github.com/Pukujan/agent-stack-train), in its
+[`stack-releases.json`](https://github.com/Pukujan/agent-stack-train/blob/main/stack-releases.json);
 CGM appears there as the narrative and styling authority.
 
 ## Operational issue intake

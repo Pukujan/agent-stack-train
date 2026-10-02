@@ -70,9 +70,12 @@ its triage workflow. CGM does not copy that template. Point at it:
   and its
   [`observational-issue.yml`](https://github.com/Pukujan/observational-issue-ops/blob/main/.github/ISSUE_TEMPLATE/observational-issue.yml)
 - Release train:
-  [`stack-releases.json`](https://github.com/Pukujan/observational-issue-ops/blob/main/stack-releases.json)
+  [`agent-stack-train`](https://github.com/Pukujan/agent-stack-train) and its
+  [`stack-releases.json`](https://github.com/Pukujan/agent-stack-train/blob/main/stack-releases.json)
 
-The release train is the single source of certified versions. CGM appears in the
+The release train is the single source of certified versions. It lives in its
+own repository rather than in OIO, so that no product repository certifies its
+own siblings. CGM appears in the
 2026-10-01 train as version 0.5.7 at commit `c069613`, certified for the
 narrative and styling authority role: writing routing, human-sounding writing,
 output naming, visual direction, and image generation. An adopter pins the train
