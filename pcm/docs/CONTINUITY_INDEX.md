@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"c0cef2f31632981b291398f4cb88e2a75c7493ebb856dc3a552e33ede5b11fe4","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"43182fed6e724b31ff6be32caaed6ce36707c101a51471ed5f282863050420b7","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -71,7 +71,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `85e4a9ae275753cfeb28bbde8dcedb87fa6d6b1d9f114ee55b7b1a004451362d`
+- Current SHA-256: `8a89004583cd361702c739e2d2de40e98be73514ba7c289d75a6ab42c517f633`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
@@ -83,10 +83,22 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
-- Current SHA-256: `a9cd7d61a96772125e99b6718729678b1d9c01dbc29710de1e20fae25d8a1c56`
+- Current SHA-256: `857461f96f21330e96c1f7acb1082cd1e615bfa15e34d89e260eed5862fbdfc6`
 - Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`
+- Task associations: none
+
+## Observational issue delegation and release-train pin (`observational-issue-delegation`)
+
+- File: [`docs/OBSERVATIONAL_ISSUE_DELEGATION.md`](../docs/OBSERVATIONAL_ISSUE_DELEGATION.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9`
+- Current SHA-256: `eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9`
+- Summary: PCM delegates the human observational-issue protocol and its triage to observational-issue-ops (OIO) and records its pinned role in the stack release train.
+- Search terms: `boundary`, `delegation`, `observational issue`, `oio`, `release train`, `stack-releases`
+- Neighboring records: `architecture-guide`, `github-progression-spec`, `issue-log-format`
 - Task associations: none
 
 ## PCM-0015 implementation plan (`pcm-0015-plan`)

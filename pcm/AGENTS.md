@@ -105,6 +105,10 @@ For continuity issues, progress updates, pull requests, and PCM-owned project-st
 
 New continuity-managed source paths (tasks, claims, adopter folders, new prose filenames) use pronounceable words a newcomer can say aloud. See `docs/CONTINUITY_PATH_NAMING.md`. Keep existing public paths stable; do not rewrite merged history for naming alone. Generated artifact/media filenames belong to CGM ([content-generation-modules#26](https://github.com/Pukujan/content-generation-modules/issues/26)) — pin and apply that helper when generating content; do not reimplement it in PCM.
 
+## Issue taxonomy boundary
+
+PCM owns **execution continuity**: task creation, checkpoint progression, immutable push receipts, and required PR gates. It does **not** own human observational issues. The 3-plane observational-issue protocol (Owner P1–P20, Collaborator P20–P40, Community P40–P100), its non-binding proposals, its GitHub Issue Form, and its triage automation live in the canonical upstream [`Pukujan/observational-issue-ops`](https://github.com/Pukujan/observational-issue-ops) (OIO). Do not add an observational-issue form or a triage workflow here; do not copy OIO's template or triage YAML into PCM. When an OIO observational issue is ratified into accepted work, PCM projects it as a task and links the leaf issue. PCM participates in the stack release train ([`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train)) as a pinned, tested component. See [`docs/OBSERVATIONAL_ISSUE_DELEGATION.md`](docs/OBSERVATIONAL_ISSUE_DELEGATION.md).
+
 ## Verification rule
 
 Name the human-visible outcome and choose checks in proportion to the promise being changed. Deterministic regression tests are the default; fresh-session holdouts are reserved for agent-facing workflow promises and must use the visible-contract fairness rules. Do not add process documents or test-type sub-issues by default. See `docs/TESTING_POLICY.md`.

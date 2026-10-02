@@ -2,6 +2,8 @@
 
 One plain-language shape for issue logs, progress updates and pull requests that any PCM adopter can apply mechanically. The continuity-records policy states the record contract; this module states the readable structure a writer applies to fill it. Pick the tier by the kind of issue, not by preference.
 
+This module governs how PCM records are written. It does not define issue forms or triage: the 3-plane human observational-issue protocol, its GitHub Issue Form, and its triage automation belong to the canonical upstream [`Pukujan/observational-issue-ops`](https://github.com/Pukujan/observational-issue-ops). See [`OBSERVATIONAL_ISSUE_DELEGATION.md`](OBSERVATIONAL_ISSUE_DELEGATION.md) for the boundary.
+
 <!-- pcm:policy {"id":"issue-log-format","policy_version":"1.2.0","protocol_version":"0.1.0-draft"} -->
 
 <!-- pcm:issue-log-format:start -->

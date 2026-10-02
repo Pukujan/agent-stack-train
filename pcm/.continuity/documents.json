@@ -136,6 +136,28 @@
       "title": "Issue log format"
     },
     {
+      "id": "observational-issue-delegation",
+      "keywords": [
+        "boundary",
+        "delegation",
+        "observational issue",
+        "oio",
+        "release train",
+        "stack-releases"
+      ],
+      "path": "docs/OBSERVATIONAL_ISSUE_DELEGATION.md",
+      "related": [
+        "architecture-guide",
+        "github-progression-spec",
+        "issue-log-format"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9",
+      "summary": "PCM delegates the human observational-issue protocol and its triage to observational-issue-ops (OIO) and records its pinned role in the stack release train.",
+      "tasks": [],
+      "title": "Observational issue delegation and release-train pin"
+    },
+    {
       "id": "pcm-0015-plan",
       "keywords": [
         "epistemic context",

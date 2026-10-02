@@ -34,7 +34,8 @@ PCM is **not**:
 - an autonomous project manager or polling agent;
 - a substitute for tests or experimental rigor;
 - a promise that anything an agent writes is true;
-- a reason to keep every chat transcript.
+- a reason to keep every chat transcript;
+- the owner of human **observational issues**: the 3-plane observational-issue protocol (Owner P1–P20, Collaborator P20–P40, Community P40–P100), its non-binding proposals, and its triage live in [`Pukujan/observational-issue-ops`](https://github.com/Pukujan/observational-issue-ops) (OIO), not here. See [`docs/OBSERVATIONAL_ISSUE_DELEGATION.md`](docs/OBSERVATIONAL_ISSUE_DELEGATION.md).
 
 ## What you can make or use
 
@@ -110,6 +111,7 @@ Exact title and subtitle copy, prompts, alt text, crop rules, rejection conditio
 - [`docs/CONTINUITY_PATH_NAMING.md`](docs/CONTINUITY_PATH_NAMING.md): pronounceable continuity/source-path names; CGM owns generated artifact filenames ([#26](https://github.com/Pukujan/content-generation-modules/issues/26)).
 - [`AGENTS.md`](AGENTS.md): the full agent operating contract, including worktrees, workspace registry, receipts, and the document catalog.
 - [`docs/VERSIONING.md`](docs/VERSIONING.md): protocol and package version rules and migration.
+- [`docs/OBSERVATIONAL_ISSUE_DELEGATION.md`](docs/OBSERVATIONAL_ISSUE_DELEGATION.md): the boundary with observational-issue-ops — PCM owns execution continuity; OIO owns the 3-plane observational-issue taxonomy, its templates and triage. Records PCM's pinned role in the stack release train.
 - [`docs/CONTINUITY_RECORDS_POLICY.md`](docs/CONTINUITY_RECORDS_POLICY.md): how to write issues and records a human can follow.
 - [`docs/AGENT_LIFECYCLE.md`](docs/AGENT_LIFECYCLE.md): closing delegated agents after they return.
 - [`templates/v1/`](templates/v1): the files each profile installs. [`schemas/v1/`](schemas/v1): the machine-readable contracts.
