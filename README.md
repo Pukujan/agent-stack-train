@@ -29,7 +29,7 @@ The current train is `2026-10-01`, status `proposed` — no adopter has been mig
 | Component | Version | Role |
 | --- | --- | --- |
 | `project-continuity-modules` | 0.6.0 | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates. |
-| `content-generation-modules` | 0.5.7 | Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation. |
+| `content-generation-modules` | 0.5.12 | Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation. |
 | `agent-custom-setup` | 0.1.0 (`multi-agent-hotload`) | Install surface: hot-load the full stack plus the coordination runtime. |
 | `observational-issue-ops` | 0.1.0 | Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage. |
 
