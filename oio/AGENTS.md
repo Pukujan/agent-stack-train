@@ -8,7 +8,7 @@ For GitHub repositories, verify the live linked issue with `continuity issue ver
 
 ## Stack this repository consumes
 
-Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its pins live in one place — [`stack-manifest.json`](stack-manifest.json) — and the certified versions it points at are published in [`stack-releases.json`](stack-releases.json).
+Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its pins live in one place — [`stack-manifest.json`](stack-manifest.json) — and the certified versions it points at are published in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train).
 
 | Component | Role here |
 | --- | --- |
@@ -20,7 +20,7 @@ When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://gith
 
 ```bash
 python scripts/validate_content_system.py --root "$CGM_ROOT" \
-  --adapter .content-system --project-root . --check-adopter-readme
+  --adapter .content-system --project-root .
 ```
 
 ## Scope
@@ -29,11 +29,25 @@ Work only inside the active bounded task. Split or revise the task before materi
 
 ## Issue governance (this repository's product)
 
-OIO owns the three-plane observational-issue protocol and its triage. The canonical artifacts are `.github/ISSUE_TEMPLATE/observational-issue.yml` and `.github/workflows/issue-triage.yml`; every other repository consumes these rather than keeping its own copy.
+OIO owns the repeatable issue-log ticketing system and its triage. The canonical artifacts are `.github/ISSUE_TEMPLATE/observational-issue.yml` and `.github/workflows/issue-triage.yml`; every other repository consumes these rather than keeping its own copy.
 
-- Every observation filed under this protocol is a **non-binding proposal**, never an implementation mandate.
+- One canonical form with an **issue-type** field: `observational`, `operational`, `proposal`, or `incident`.
+- Every issue carries a **required filer stamp**: `filer_origin` (`human-direct`, `human-via-agent`, or `agent-initiated`) plus the filer identity and session. Triage labels the origin and fails closed with `needs-filer-stamp` when it is missing or identity-less.
+- Every issue filed under this protocol is a **non-binding proposal**, never an implementation mandate.
 - The reporter picks a plane — lead owner (P1–20), approved collaborator (P20–40), or community (P40–100) — and the triage clamps the priority to that plane's range.
 - OIO owns the protocol and its triage. It does **not** own any adopter's product code, issues, or releases; each repository keeps its own issue history.
+
+## How OIO separates from the rest of the stack
+
+OIO exists separately because the issue log used to live inside the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer graded itself. OIO takes the governance out. The same reasoning applies to versions: a product repository must not certify its own siblings, so the certified version set lives in the dedicated train repository.
+
+| Repository | Owns | Does not own |
+| --- | --- | --- |
+| **OIO** (this repository) | The issue-log ticketing system: the form, the filer stamp, the triage, the intake contract, the bootstrap into any repository. | Product code, releases, version pins, narrative, execution continuity, the install surface. |
+| **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates, the `continuity` CLI. | Issue governance, narrative, versions. |
+| **CGM** — `content-generation-modules` | Narrative and style authority: writing routing, human-sounding writing, output naming, visual direction, image generation. | Issue governance, execution continuity, versions. |
+| **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, execution continuity, versions. |
+| **`agent-stack-train`** | The certified version set of the stack — one place adopters read compatible versions from. | Everything else. |
 
 ## Canonical checkout
 

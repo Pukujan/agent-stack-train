@@ -1,15 +1,49 @@
-name: Observational Issue Log
-description: File a 3-plane observational issue or non-binding proposal with full provenance, reproducibility, and priority rating.
-title: "[OBSERVATION]: "
+name: Issue Log Entry
+description: File a 3-plane issue-log entry — observational, operational, proposal, or incident — with a filer stamp, provenance, reproducibility, and priority rating.
+title: "[ISSUE]: "
 labels: ["observational-issue", "proposal"]
 body:
   - type: markdown
     attributes:
       value: |
-        ### Observational Issue & Non-Binding Proposal Protocol
-        > **Source**: This form is published by **Pukujan/observational-issue-ops**. Every other repository consumes it from here rather than keeping its own copy; file an observation here when the subject is the protocol itself.
-        > **Notice**: All observational issues filed under this system are **proposals**, NOT literal implementation mandates.
-        > Observational logs must be human-understandable, grounded in concrete evidence, and include provenance, reproducibility, and citations.
+        ### Issue Log Entry Protocol
+        > **Source**: This form is published by **Pukujan/observational-issue-ops**. Every other repository consumes it from here rather than keeping its own copy; file an issue here when the subject is the protocol itself.
+        > **Notice**: All issues filed under this system are **proposals**, NOT literal implementation mandates.
+        > Issue logs must be human-understandable, grounded in concrete evidence, and include a filer stamp, provenance, reproducibility, and citations.
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue Type
+      description: What kind of record is this? Observational = something seen; Operational = something broken or degraded now; Proposal = a proposed change; Incident = an operational issue with a timeline and impact, filed for the record while it is handled.
+      options:
+        - "observational"
+        - "operational"
+        - "proposal"
+        - "incident"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: filer_origin
+    attributes:
+      label: Filer Origin (who initiated this filing)
+      description: "Exactly one. human-direct = a human filed it themselves. human-via-agent = a human directed an agent to file it; the human owns the intent. agent-initiated = an agent filed it on its own initiative, without a human asking for this specific issue."
+      options:
+        - "human-direct"
+        - "human-via-agent"
+        - "agent-initiated"
+    validations:
+      required: true
+
+  - type: textarea
+    id: filer_identity
+    attributes:
+      label: Filer Identity & Session
+      description: "The identity on the filing. Include the human handle when a human is involved, the agent identity and session identifier when an agent filed it, and the timestamp. Triage reads this field and rejects a filing that does not state its origin."
+      placeholder: "- Human: @handle (if involved)\n- Agent: <agent identity> / session <id>\n- Timestamp: 2026-10-01T00:00:00Z"
+    validations:
+      required: true
 
   - type: dropdown
     id: plane
@@ -59,7 +93,7 @@ body:
     id: provenance
     attributes:
       label: Provenance & Context
-      description: Origin of this observation (observer identity, agent/tool session, commit SHA, environment/host, date/timestamp).
+      description: Origin of this issue (observer identity, agent/tool session, commit SHA, environment/host, date/timestamp).
       placeholder: "- Observer: Lead Developer / Contributor Name\n- Environment: gravebuster host / Ubuntu 22.04 / local dev\n- Commit / Session: commit <sha> / session <id>"
     validations:
       required: true
@@ -68,7 +102,7 @@ body:
     id: reproducibility
     attributes:
       label: Reproducibility Steps / Evidence
-      description: Exact steps, commands, raw test output, error traces, or logs demonstrating the observation.
+      description: Exact steps, commands, raw test output, error traces, or logs demonstrating the observation. For operational issues and incidents, include the impact and, where known, the timeline.
       placeholder: "1. Execute command: npm test ...\n2. Observe output / error trace: ...\n3. Evidence logs: ..."
     validations:
       required: true

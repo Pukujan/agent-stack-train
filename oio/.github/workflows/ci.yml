@@ -58,8 +58,12 @@ jobs:
           fi
           echo "OK: no committed secrets"
 
-      - name: Stack manifest agrees with the published release train
-        run: python scripts/check_stack_consistency.py
+      - name: Stack manifest agrees with the certified release train
+        run: |
+          git clone --quiet https://github.com/Pukujan/agent-stack-train.git /tmp/train
+          python /tmp/train/scripts/check_manifest.py \
+            --manifest stack-manifest.json \
+            --train /tmp/train/stack-releases.json
 
       - name: Issue templates and workflows parse
         run: |
