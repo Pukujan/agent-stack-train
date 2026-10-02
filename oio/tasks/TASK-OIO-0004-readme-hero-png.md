@@ -1,8 +1,8 @@
 # TASK-OIO-0004 — Upgrade the README hero to the CGM PNG contract
 
-<!-- continuity:task {"acceptance":["the README hero is a PNG generated with the best available image model and the JPG is removed","every hero reference is updated: README.md, .content-system/asset-manifest.json, .content-system/visual-style.json, and the prompt record","the manifest records the exact title and subtitle, the SHA-256 of the new PNG, and the provider","continuity validate --root . returns VALID and the pinned CGM validator returns VALID","the increment is pushed through a merged PR on a task branch"],"depends_on":["OIO-0003"],"goal":"Replace OIO's JPG README hero with a regenerated PNG that satisfies the CGM adopter-README hero contract, and update every reference to it","id":"OIO-0004","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/13","next_action":"open the pull request on the task branch and request auto-merge after the required gates pass","owner":"owner/Pukujan","priority":"P3","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"CGM's adopter-README contract requires the hero banner to be a PNG; OIO's hero is a JPG, so the checked-in README does not satisfy the current CGM README spec even though its pinned 0.5.7 CI still passes"} -->
+<!-- continuity:task {"acceptance":["the README hero is a PNG generated with the best available image model and the JPG is removed","every hero reference is updated: README.md, .content-system/asset-manifest.json, .content-system/visual-style.json, and the prompt record","the manifest records the exact title and subtitle, the SHA-256 of the new PNG, and the provider","continuity validate --root . returns VALID and the pinned CGM validator returns VALID","the increment is pushed through a merged PR on a task branch"],"depends_on":["OIO-0003"],"goal":"Replace OIO's JPG README hero with a regenerated PNG that satisfies the CGM adopter-README hero contract, and update every reference to it","id":"OIO-0004","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/13","next_action":"none; delivered in PR #14 (squash c65c69b)","owner":"owner/Pukujan","priority":"P3","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"CGM's adopter-README contract requires the hero banner to be a PNG; OIO's hero is a JPG, so the checked-in README does not satisfy the current CGM README spec even though its pinned 0.5.7 CI still passes"} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Pukujan
 - Priority: P3
 - Depends on: OIO-0003 (the issue-log definition, merged)
@@ -39,7 +39,7 @@ The README's lead visual is a PNG generated with the best available image model,
 - [x] Every hero reference is updated: `README.md`, `.content-system/asset-manifest.json`, `.content-system/visual-style.json`, and the prompt record.
 - [x] The manifest records the exact title and subtitle, the SHA-256 of the new PNG, and the provider.
 - [x] `continuity validate --root .` returns VALID and the pinned CGM validator returns VALID.
-- [ ] The increment is pushed through a merged PR on a task branch.
+- [x] The increment is pushed through a merged PR on a task branch (PR #14).
 
 ## Evidence and sources
 
@@ -50,8 +50,9 @@ The README's lead visual is a PNG generated with the best available image model,
 ## Related records
 
 - Leaf owning issue: [#13](https://github.com/Pukujan/observational-issue-ops/issues/13). Parent ancestry: none (top-level deliverable). Dependencies: OIO-0003 (merged).
-- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0004-readme-hero-png` / issue #13 as filed / in-progress.
+- Primary writer / branch / source issue revision / as-of status: agent session / `task/OIO-0004-readme-hero-png` / issue #13 as filed / completed.
 
 ## Checkpoint log
 
 - 2026-10-02: hero regenerated as a PNG with `google/gemini-3-pro-image` (via OpenRouter), replacing the JPG; references updated in the README, adapter, and prompt record; both validators pass.
+- 2026-10-02: merged via PR #14 (squash `c65c69b`); the required `gates` check passed; the receipt is on issue #13.
