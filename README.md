@@ -1,6 +1,6 @@
 # Agent Stack Train
 
-> **One certified version set for the agent stack.** Adopters pin the train once and read compatible component versions from here, instead of hand-copying a pin into many files.
+> **One certified version set for the agent stack.** Every adopter pins the train once and reads compatible component versions from here, instead of hand-copying a pin into many files.
 
 The stack is a set of repositories that ship together: a continuity system, a narrative system, an install surface, and an issue-log ticketing system. This repository holds the **certified version set** — the single answer to "which component versions are compatible with each other".
 
