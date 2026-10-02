@@ -3,7 +3,7 @@
 > **One repeatable issue log for the whole stack.** A single way to file, stamp, rate, and route a record of something observed or something broken — so a human working through an agent, and an agent acting on its own, write the same shape of record and any repository handles it the same way.
 
 <p align="center">
-  <img src="docs/assets/oio-hero-banner.jpg" alt="A designer and a companion gather loose notes from several project folders onto a single shared ledger." width="100%">
+  <img src="docs/assets/oio-hero-banner.png" alt="A designer and a companion gather loose notes from several project folders onto a single shared ledger." width="100%">
 </p>
 
 A multi-repository project can hold strong evidence and still lose the report. When each repository keeps its own issue form and its own copy of the rules, the same observation gets written down differently in every place, and a reader cannot tell which copy is authoritative.

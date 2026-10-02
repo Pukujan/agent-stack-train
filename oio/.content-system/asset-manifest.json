@@ -3,14 +3,14 @@
   "system_version": "0.5.7",
   "assets": [
     {
-      "path": "docs/assets/oio-hero-banner.jpg",
+      "path": "docs/assets/oio-hero-banner.png",
       "role": "hero",
       "orientation": "wide",
       "dimensions": "1264x848",
       "text_policy": "Exact title and subtitle only; no extra labels or fabricated metrics.",
       "exact_title": "Observational Issue Ops",
       "exact_subtitle": "One issue protocol, every repository, one traceable trail",
-      "prompt_recipe": "Anime-inspired editorial illustration, warm blue-violet evening desk scene. A content designer and a small friendly story-guide companion gather loose note cards from several open project folders onto one shared ledger page. Palette: night ink #111B4D, violet #8F7CFF, cyan #63D9FF, coral #FF8A70, warm cream #F4F1FF, mint #94E3CB, gold #FFD28A. Exact title 'Observational Issue Ops' and exact subtitle 'One issue protocol, every repository, one traceable trail' in a quiet translucent panel. No fake metrics, dense UI, or decorative pseudo-text.",
+      "prompt_recipe": "Anime-inspired editorial illustration, warm blue-violet evening desk scene. A content designer (a woman with shoulder-length auburn-purple hair in a soft lavender shirt) and a small friendly story-guide companion (a rounded pale-green sprout creature with a leaf on its head and a small blue neckerchief) gather loose note cards from several open project folders onto one glowing shared ledger page. Palette: night ink #111B4D, violet #8F7CFF, cyan #63D9FF, coral #FF8A70, warm cream #F4F1FF, mint #94E3CB, gold #FFD28A. Exact title 'Observational Issue Ops' and exact subtitle 'One issue protocol, every repository, one traceable trail' in a quiet translucent panel. No box names or captions on the folders; no fake metrics, dense UI, or decorative pseudo-text.",
       "alt_text": "A designer and a companion gather loose notes from several project folders onto a single shared ledger.",
       "usage": "README lead visual; placed directly below the title and lead sentence.",
       "crop_behavior": "Full wide frame without cropping the title panel or the shared ledger.",
@@ -18,7 +18,7 @@
       "review_decision": "accepted after visual review at repository image size",
       "provider": "built-in image_gen",
       "prompt_record": "docs/assets/prompts/oio-hero-banner.md",
-      "hash": "fa6165cd88d9813ca01a9ed7c3eea14c182bd54c58ee281dbacc10e7cd91b16e"
+      "hash": "4aac70dde995d77c576bda4afadc74b6e4f080d2536379d2cb47d1dd531b53cd"
     },
     {
       "path": "docs/assets/oio-problem-scattered.jpg",
