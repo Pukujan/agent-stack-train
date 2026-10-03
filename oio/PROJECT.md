@@ -20,43 +20,37 @@ Required CI and GitHub auto-merge are mandatory. Arm auto-merge only after the i
 
 ## Main goal
 
-Hold **one repeatable issue-log ticketing system** — a single, portable way to file, stamp, rate, and route a record of something observed or something broken — so that a human working through an agent, or an agent acting on its own initiative, records an **observational issue**, an **operational issue**, or a **proposal** with full provenance, and any repository handles it the same way.
+Hold **one repeatable observational and operational issue-log protocol** — a single, portable way to file, stamp, assess, and route an observation or current operational failure. General proposals and incident-management records remain outside this ontology. Every record carries source, account, destination, ontology, impact, risk, and release context.
 
 The system must be **repeatable**: the same protocol drops into any repository, anywhere, and behaves identically there.
 
 ## Why
 
-The same issue-governance rule was hand-copied into several repositories. Copies drift, so a report filed in one repository no longer matches the trail in another, and nobody can tell which copy is authoritative. Worse, the copies were narrower than the need: they captured only "I observed something", not "something is broken right now" and not "an agent proposes this change" — and they never recorded *who or what filed the issue*, so a human's direct report and an agent's own proposal looked identical on the record.
+The issue log was duplicated across repositories, leaving no single set of definitions. OIO packages one default observational/operational ontology and a project-scoped extension; provenance records distinguish direct human, human-via-agent, agent-proposed, and agent-initiated origins while keeping authorization evidence separate.
 
 Measured 2026-10-01: one CGM version pin lived in thirteen files across three revisions. OIO removes the copy: the protocol lives in one place and every repository points at it.
 
 ## What an issue is here
 
-One canonical form, with a **type** field choosing between four kinds:
+One canonical form, with a **type** field choosing between two kinds:
 
 | Type | What it records |
 | --- | --- |
 | **observational** | Something someone saw — a fact, a symptom, a discrepancy — with provenance and citations. |
-| **operational** | Something broken or degraded right now: an incident, an outage, a failed run, a blocked pipeline. |
-| **proposal** | A proposed change. Every issue is a non-binding proposal; this type is for one whose main content *is* the change. |
-| **incident** | An operational issue with a timeline and an impact, filed for the record while it is handled. |
+| **operational** | Something broken or degraded right now: an outage, failed run, or blocked pipeline. It is not an incident-management record. |
 
 ## The filer stamp
 
 Every issue carries a **required, machine-checkable filer stamp**. It answers two questions: *who initiated this filing*, and *whose identity is on it*.
 
-**Origin** — exactly one:
+**Origin** — exactly one of four classes: `human-direct` (class 1), `human-via-agent` (class 2), `agent-proposed` (class 3, for human consideration), or `agent-initiated` (class 4, lowest). Human class claims require a separate authenticated GitHub account attestation; body text cannot verify itself.
 
-- `human-direct` — a human filed the issue themselves.
-- `human-via-agent` — a human directed an agent to file it; the human owns the intent.
-- `agent-initiated` — an agent filed it on its own initiative, without a human asking for this specific issue.
-
-**Identity** — the stamp also carries the filing identity: the human's handle when a human is involved, the agent's identity and session identifier when an agent filed it, and the timestamp. Triage reads the stamp, labels it, and can reject a filing that does not state its origin.
+**Identity** — record content author, authenticated GitHub actor/account, directing account when applicable, timestamp, session reference when available, authorization evidence, and exact destination. Shared credentials still cannot prove who typed a prompt.
 
 ## Scope
 
-- The **issue form** — one canonical template with the type field, the filer stamp, provenance, citations, operational data, and the priority rating (`.github/ISSUE_TEMPLATE/`).
-- The **triage** — automation that reads a filed issue, validates the filer stamp, and applies the type, plane, and priority labels (`.github/workflows/issue-triage.yml`).
+- The **issue form** — one canonical template with the type field, the filer stamp, provenance, citations, operational data, and the project-scoped priority path and impact/release assessment (`.github/ISSUE_TEMPLATE/`).
+- The **triage** — automation that reads a filed issue, validates the filer stamp, and applies the type, filer-class, account-tier, project-priority, risk-lane, and release labels (`.github/workflows/issue-triage.yml`).
 - The **intake contract** — the written rule for how a filed issue is received, handled, and closed, and the bootstrap steps that install this protocol into any repository.
 - **One place to point** — every other repository consumes this source rather than keeping its own copy.
 
@@ -64,11 +58,11 @@ Every issue carries a **required, machine-checkable filer stamp**. It answers tw
 
 - **Not a tracker, a workflow engine, or a place to store another project's issues.** Each repository keeps its own issue history.
 - **Does not own any adopter's product code, issues, or releases.**
-- **Does not own version pins or the release train.** The certified version set of the stack lives in its own dedicated train repository; OIO neither publishes nor certifies it. OIO is an adopter of the train, not its owner.
+- **Does not own version pins or the release train.** A proposed version manifest lives in its own train repository; OIO neither publishes nor certifies it. OIO is an adopter of the train, not its owner.
 - **Does not own narrative or style.** README, issue, PR, and commit prose route through CGM.
 - **Does not own execution continuity.** Tasks, checkpoints, push receipts, and PR gates belong to PCM.
 - **Does not own the install surface.** How the stack is hot-loaded and wired belongs to ACS.
-- **Does not make any issue binding.** Every issue filed under this protocol is a proposal.
+- **Does not make any issue binding.** Every issue log is non-binding evidence for review, not implementation or release authorization.
 
 ## How OIO separates from the rest of the stack
 
@@ -76,17 +70,17 @@ OIO exists separately because the issue log used to live *inside* the installer.
 
 | Repository | Owns | Does not own |
 | --- | --- | --- |
-| **OIO** (this repository) | The issue-log ticketing system: the form, the filer stamp, the triage, the intake contract, the bootstrap into any repository. | Product code, releases, version pins, narrative, execution continuity, the install surface. |
+| **OIO** (this repository) | The observational/operational issue-log ontology, form, provenance, triage, installer, and adopter bootstrap. | Product code, adopter issue histories, releases, stack version certification, narrative, execution continuity, the install surface. |
 | **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates, the `continuity` CLI. | Issue governance, narrative, versions. |
 | **CGM** — `content-generation-modules` | Narrative and style authority: writing routing, human-sounding writing, output naming, visual direction, image generation. | Issue governance, execution continuity, versions. |
 | **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, execution continuity, versions. |
-| **The train repository** | The certified version set of the stack — one place adopters read compatible versions from. | Everything else. |
+| **The train repository** | The proposed version manifest for stack compatibility; its current record is not a final certification. | Everything else. |
 
 An adopter pins the train once, consumes OIO's form once, and keeps its own issue history.
 
 ## Definition of success
 
-- A human filing directly, a human filing through an agent, and an agent proposing an issue on its own initiative all produce the **same shape of record**, distinguishable by the filer stamp, and all three are traceable from first sighting to a decision.
-- An observational issue and an operational issue both route through the same triage, labelled by type, plane, and priority.
-- The protocol, the filer stamp, and the triage live in **exactly one repository**, and any other repository can adopt them by pointing at this source — no hand-copied rule.
-- The certified version set lives in the train repository, and OIO's own pins point at it.
+- Direct human, human-via-agent, agent-proposed, and agent-initiated records share one schema; authorization claims are distinct from authenticated account evidence.
+- Observational and operational records share triage for source authority, project priority, impact evidence, and the risk-versus-product review lane.
+- The ontology, form, triage, and installer live in **exactly one repository**; each adopter retains its own extension and issue history.
+- The train repository contains the current proposed version set; OIO's own pins point at it and preserve its proposed status.

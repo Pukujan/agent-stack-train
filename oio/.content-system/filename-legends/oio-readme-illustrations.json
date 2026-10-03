@@ -1,0 +1,54 @@
+{
+  "schema_version": "content-generation.filename-legend.v1",
+  "feature": "oio-readme-illustrations",
+  "module": "human-output-naming",
+  "title": "OIO README illustrations",
+  "glossary": [
+    {
+      "token": "OIO",
+      "meaning": "Observational Issue Ops, the issue-log protocol illustrated by these README assets."
+    },
+    {
+      "token": "Hero Banner",
+      "meaning": "The lead illustration showing several repositories sharing one issue ledger."
+    },
+    {
+      "token": "Problem Scattered",
+      "meaning": "The illustration showing uncoordinated copies of an issue note."
+    },
+    {
+      "token": "Loop Square",
+      "meaning": "The illustration showing observe, file, triage, review, and resolve."
+    }
+  ],
+  "rules_summary": [
+    "Use the existing safe-twin basenames in the asset manifest.",
+    "The manifest path is the authority; image digests remain separate metadata."
+  ],
+  "files": [
+    {
+      "path": "docs/assets/oio-hero-banner.png",
+      "identity": "oio-hero-banner",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "README lead illustration."
+    },
+    {
+      "path": "docs/assets/oio-problem-scattered.jpg",
+      "identity": "oio-problem-scattered",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "README problem illustration."
+    },
+    {
+      "path": "docs/assets/oio-loop-square.jpg",
+      "identity": "oio-loop-square",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "README workflow illustration."
+    }
+  ]
+}

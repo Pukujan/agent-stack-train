@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.5.7",
+  "system_version": "0.5.12",
   "assets": [
     {
       "path": "docs/assets/oio-hero-banner.png",
@@ -18,7 +18,8 @@
       "review_decision": "accepted after visual review at repository image size",
       "provider": "built-in image_gen",
       "prompt_record": "docs/assets/prompts/oio-hero-banner.md",
-      "hash": "4aac70dde995d77c576bda4afadc74b6e4f080d2536379d2cb47d1dd531b53cd"
+      "hash": "4aac70dde995d77c576bda4afadc74b6e4f080d2536379d2cb47d1dd531b53cd",
+      "feature": "oio-readme-illustrations"
     },
     {
       "path": "docs/assets/oio-problem-scattered.jpg",
@@ -36,7 +37,8 @@
       "review_decision": "accepted after visual review at repository image size",
       "provider": "built-in image_gen",
       "prompt_record": "docs/assets/prompts/oio-problem-scattered.md",
-      "hash": "85aceabe58157fff606245f896a82d40112554cb0e724bd7218282b8afac9d9b"
+      "hash": "85aceabe58157fff606245f896a82d40112554cb0e724bd7218282b8afac9d9b",
+      "feature": "oio-readme-illustrations"
     },
     {
       "path": "docs/assets/oio-loop-square.jpg",
@@ -54,7 +56,8 @@
       "review_decision": "accepted after visual review at repository image size",
       "provider": "built-in image_gen",
       "prompt_record": "docs/assets/prompts/oio-loop-square.md",
-      "hash": "9e05e19644ca6828f291b6ad7e9e0bf3f0753065a159087bd556d3ceaa5f7322"
+      "hash": "9e05e19644ca6828f291b6ad7e9e0bf3f0753065a159087bd556d3ceaa5f7322",
+      "feature": "oio-readme-illustrations"
     }
   ]
 }

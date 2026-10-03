@@ -8,15 +8,15 @@ For GitHub repositories, verify the live linked issue with `continuity issue ver
 
 ## Stack this repository consumes
 
-Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its pins live in one place — [`stack-manifest.json`](stack-manifest.json) — and the certified versions it points at are published in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train).
+Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its pins live in one place — [`stack-manifest.json`](stack-manifest.json) — and the pinned candidate versions are recorded in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train).
 
 | Component | Role here |
 | --- | --- |
 | **PCM** — `project-continuity-modules` (CLI 0.6.0 @ `4e23854…`) | Continuity files + `continuity` CLI, GitHub-owned progression, PR-only to `main`, required CI gates, leaf receipts. |
-| **CGM** — `content-generation-modules` (0.5.7 @ `c069613…`, eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
-| **ACS** — `agent-custom-setup`, module `multi-agent-hotload` @ `0.1.0` | The install surface that wires the three together. |
+| **CGM** — `content-generation-modules` (0.5.12 @ `6831f91…`, eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
+| **ACS** — `agent-custom-setup`, `multi-agent-hotload` 0.1.0 from canonical source commit `3a381eba11c6262c702f5d696878c371342e859a` | The install surface that wires the three together. |
 
-When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/main/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order. A two-module CGM pin or a continuity-only PCM is an incomplete install. Validate the adapter with:
+When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order. A two-module CGM pin or a continuity-only PCM is an incomplete install. OIO records the ACS source contract but does not claim runtime readiness until `hotload_check.py` passes with runtime assignment and coordination artifacts installed. Validate the adapter with:
 
 ```bash
 python scripts/validate_content_system.py --root "$CGM_ROOT" \
@@ -29,17 +29,20 @@ Work only inside the active bounded task. Split or revise the task before materi
 
 ## Issue governance (this repository's product)
 
-OIO owns the repeatable issue-log ticketing system and its triage. The canonical artifacts are `.github/ISSUE_TEMPLATE/observational-issue.yml` and `.github/workflows/issue-triage.yml`; every other repository consumes these rather than keeping its own copy.
+OIO owns one prepacked ontology and one triage contract for **observational** and **operational** issue logs only. The canonical artifacts are `.github/ISSUE_TEMPLATE/observational-issue.yml`, `.github/workflows/issue-triage.yml`, `ontology/default.json`, and `ontology/ISSUE_LOG_ONTOLOGY.md`; adopters receive version-pinned copies through the installer and own their issue history and namespaced project extension.
 
-- One canonical form with an **issue-type** field: `observational`, `operational`, `proposal`, or `incident`.
-- Every issue carries a **required filer stamp**: `filer_origin` (`human-direct`, `human-via-agent`, or `agent-initiated`) plus the filer identity and session. Triage labels the origin and fails closed with `needs-filer-stamp` when it is missing or identity-less.
-- Every issue filed under this protocol is a **non-binding proposal**, never an implementation mandate.
-- The reporter picks a plane — lead owner (P1–20), approved collaborator (P20–40), or community (P40–100) — and the triage clamps the priority to that plane's range.
-- OIO owns the protocol and its triage. It does **not** own any adopter's product code, issues, or releases; each repository keeps its own issue history.
+- Filer origin has four distinct classes: human-direct (1), human-via-agent (2), agent-proposed for human consideration (3), and agent-initiated (4). Unattested human claims remain class 3 until a mapped owner/approved account separately applies the corresponding `oio-auth:` label. Triage stores the GitHub event ID and exact issue-body SHA-256 in a bot comment; editing the body invalidates the attestation, and the authorized account must reapply it. Issue body text cannot self-verify a claim. This verifies GitHub account action only, not who typed a prompt on shared credentials.
+- Within source class, account authority comes from the project-owned GitHub account map; then the project priority path is compared as numeric string components. Paths support roots 1–100 and nested paths such as 1.10; there are no cross-project comparisons without an explicit crosswalk.
+- A missing or mismatched project priority is unranked in the structured record (`status: unresolved`, null path and concept ID); never substitute a default rank.
+- Risk-versus-product urgency is a separate advisory review lane based on evidenced impact, likelihood, exposure, recoverability, and release relevance. It can expedite human review without changing filer authority or automatically blocking/approving shipment.
+- These definitions are only for observational/operational logs. General proposals and incidents use other records and are not parsed as OIO issue logs.
+- On OIO, ACS, CGM, and PCM, an agent may prepare a local draft but must not submit the issue or write repository files without explicit human direction naming the destination and action. Adoption is not write permission. An OIO form or installer never grants permission to write another repository.
+
+Every issue log is a non-binding record for review, never an implementation or release mandate. The form stamp and authenticated GitHub identity are distinct facts; account/session credentials cannot prove who typed a prompt when those credentials are shared.
 
 ## How OIO separates from the rest of the stack
 
-OIO exists separately because the issue log used to live inside the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer graded itself. OIO takes the governance out. The same reasoning applies to versions: a product repository must not certify its own siblings, so the certified version set lives in the dedicated train repository.
+OIO exists separately because the issue log used to live inside the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer graded itself. OIO takes the governance out. The same reasoning applies to versions: a product repository must not certify its own siblings, so the proposed version manifest lives in the dedicated train repository.
 
 | Repository | Owns | Does not own |
 | --- | --- | --- |
@@ -47,11 +50,11 @@ OIO exists separately because the issue log used to live inside the installer. W
 | **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates, the `continuity` CLI. | Issue governance, narrative, versions. |
 | **CGM** — `content-generation-modules` | Narrative and style authority: writing routing, human-sounding writing, output naming, visual direction, image generation. | Issue governance, execution continuity, versions. |
 | **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, execution continuity, versions. |
-| **`agent-stack-train`** | The certified version set of the stack — one place adopters read compatible versions from. | Everything else. |
+| **`agent-stack-train`** | The proposed version manifest for stack compatibility; its current record is not a final certification. | Everything else. |
 
 ## Canonical checkout
 
-The Git repository, remote, task ID, branch/ref, and commit history identify the work; the physical path does not. Keep one permanent main checkout as the project home base and use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task at `<canonical-root>/.worktrees/<task-id>`. Do not create one per session/agent, sibling clones, or arbitrary worktree paths; resume the same worktree across sessions. Register other existing checkouts with `continuity workspace register --root <checkout>`; PCM checks the private per-device registry and Git's worktree list, reuses one clean unlocked task match, and stops on dirty, locked, conflicting, or ambiguous matches. It never scans drives. Keep absolute paths out of shared handoffs.
+The Git repository, remote, task ID, branch/ref, and commit history identify the work; the physical path does not. Keep one permanent main checkout as the project home base and use it for sequential work. When isolation or parallel work is genuinely useful, create one managed linked worktree per independent active task at `<canonical-root>/pcm/worktree/<task-id>`. Do not create one per session/agent, sibling clones, or arbitrary worktree paths; resume the same worktree across sessions. Register other existing checkouts with `continuity workspace register --root <checkout>`; PCM checks the private per-device registry and Git's worktree list, reuses one clean unlocked task match, and stops on dirty, locked, conflicting, or ambiguous matches. It never scans drives. Keep absolute paths out of shared handoffs.
 
 After required checks pass, the PR is merged, the task record is complete, and the worktree is clean, run `continuity worktree remove <TASK-ID>`. It verifies the GitHub PR, required checks, and merged commit and refuses locked/pinned or otherwise unsafe cleanup; never force-remove unfinished or user-modified work.
 
