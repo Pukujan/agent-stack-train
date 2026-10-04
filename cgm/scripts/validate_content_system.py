@@ -608,12 +608,11 @@ def check_filename_legends(root: Path, *, adapter: bool = False) -> list[str]:
             identity = entry.get("identity")
             style = str(entry.get("style") or "speakable")
             if identity is not None:
-                # Import lazily so validate stays usable when scripts/ is on sys.path.
+                # Resolve the helper under either invocation: repo root or scripts/ on sys.path.
                 try:
                     from scripts.human_filename import build_basename as _build
-                except Exception:
-                    # Structural-only fallback already covered hashy/robot above.
-                    continue
+                except ImportError:
+                    from human_filename import build_basename as _build
                 expected = _build(
                     str(identity),
                     file_path.rsplit(".", 1)[-1] if "." in file_path else "mp3",

@@ -2,6 +2,7 @@
 
 ## 0.5.12 — draft
 
+- **Filename-legend path check (issue #52):** `check_filename_legends` resolved `scripts.human_filename` inside a bare `except Exception: continue`, so under the default CLI form (`python scripts/validate_content_system.py`) the path-vs-helper comparison was silently skipped and any filename validated; the helper now resolves under either invocation and a missing helper surfaces instead of being swallowed, with a regression test pinning the default-invocation path;
 - **Issue, pull request, and receipt prose (issue #45):** new [`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md) states the human-output rules adopters apply to issue logs, pull request titles and bodies, receipts, and commit subjects, and routes them through `human-sounding-writing` (**hsw**) and `human-output-naming` (**hon**);
 - it encodes the two rules #45 names: a title is one complete, understandable human sentence with no leading prefix code (`feat:`, `fix:`, `chore:`) and no internal task number, and every commit SHA, pull request number, flag, or file path gets a plain-English meaning in the same sentence before it carries weight;
 - `docs/writing-routing.json` adds a `receipts` surface and a `title_contract` to the `github_and_docs_prose` route, and `docs/human-sounding-rules.json` adds the matching title patterns (`title_prefix_code`, `title_internal_task_number`, `title_reference_only`);

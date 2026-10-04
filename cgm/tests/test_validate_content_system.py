@@ -494,6 +494,45 @@ class ContentSystemValidationTests(unittest.TestCase):
             self.assertTrue(any("html report" in e for e in errors), errors)
 
 
+    def test_filename_legend_path_check_runs_on_default_cli_invocation(self):
+        """Regression: the default CLI form must still verify legend paths.
+
+        The path-vs-helper comparison imported ``scripts.human_filename`` inside a
+        bare ``except Exception: continue``. Under
+        ``python scripts/validate_content_system.py`` sys.path[0] is ``scripts/``,
+        so the import raised and the whole comparison was silently skipped -- a
+        legend could name any file and still validate.
+        """
+        import shutil
+        import subprocess
+        import sys
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns("assets", ".git", "__pycache__"),
+            )
+            legend = staging / "docs" / "filename-legends" / "voice-audio-song-food.json"
+            data = json.loads(legend.read_text(encoding="utf-8"))
+            data["files"][0]["path"] = "totally-wrong-name.mp3"
+            data["files"][0]["identity"] = "Song Food"
+            legend.write_text(json.dumps(data), encoding="utf-8")
+
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(staging / "scripts" / "validate_content_system.py"),
+                    "--root",
+                    str(staging),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertIn("does not match helper output", proc.stdout)
+            self.assertIn("totally-wrong-name.mp3", proc.stdout)
+
     def test_writing_router_lists_artifact_filename_surfaces(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
