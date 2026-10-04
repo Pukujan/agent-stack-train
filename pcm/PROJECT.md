@@ -69,6 +69,21 @@ GitHub owns durable project task/progression state. Repository documents are man
 - encoding every domain's workflow in one universal schema;
 - treating previous-agent prose as evidence without supporting results.
 
+## Layer ownership (the stack, one line each)
+
+The stack is several repositories, each owning exactly one layer. PCM owns **continuity** and nothing else:
+
+| Layer | Repo | Owns |
+| --- | --- | --- |
+| Ticket logging | OIO — `observational-issue-ops` | Writing issue tickets **only** — the form, the filer stamp, the triage, and how to handle/prioritize them. **Not coordination.** |
+| Execution coordination | ACS — `agent-custom-setup` | **Running** the tickets: making them workable, breaking them down, coordinating the agents. The multi-agent hotload pack. Future DAG++ layer. |
+| **Continuity** | **PCM (this repository)** | **Tasks, checkpoints, push receipts, PR gates, and the `continuity` CLI.** |
+| Narrative | CGM — `content-generation-modules` | Writing routing, prose, naming, visual direction, image generation, HTML demos. |
+| Versions | train — `agent-stack-train` | The certified version set. |
+| Decision-making | JEV — `jev-dump` | Aspirational arbiter / tie-breaker between agents — **parked**; not strong enough yet. |
+
+PCM pins no layer above it and replaces none of them: it supplies the continuity protocol a repository runs, and the other layers point at it rather than vendoring it.
+
 ## Definition of success for v1
 
 Following the bounded authority and finite publication rules in SPEC section 8, a fresh repository can be initialized with the protocol, validated deterministically, assigned a bounded task, checkpointed by multiple independent sessions, and resumed by another session using PROJECT + CURRENT + TASK + one relevant spec/context pack without reading historical chats.
