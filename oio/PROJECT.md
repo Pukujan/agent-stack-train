@@ -66,15 +66,18 @@ Every issue carries a **required, machine-checkable filer stamp**. It answers tw
 
 ## How OIO separates from the rest of the stack
 
-OIO exists separately because the issue log used to live *inside* the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer was grading itself. OIO takes the governance out and gives it its own repository. The same reasoning applies to versions: a product repository must not certify its own siblings.
+OIO exists separately because the issue log used to live *inside* the installer. When ACS owned both the installer and the coordination rules, installing ACS installed governance — the installer was grading itself. OIO takes the governance out and gives it its own repository. The same reasoning applies to versions: a product repository must not certify its own siblings.
 
-| Repository | Owns | Does not own |
+The stack is several repositories, each owning exactly one layer. OIO owns **ticket logging** and nothing else:
+
+| Layer | Repo | Owns |
 | --- | --- | --- |
-| **OIO** (this repository) | The observational/operational issue-log ontology, form, provenance, triage, installer, and adopter bootstrap. | Product code, adopter issue histories, releases, stack version certification, narrative, execution continuity, the install surface. |
-| **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates, the `continuity` CLI. | Issue governance, narrative, versions. |
-| **CGM** — `content-generation-modules` | Narrative and style authority: writing routing, human-sounding writing, output naming, visual direction, image generation. | Issue governance, execution continuity, versions. |
-| **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, execution continuity, versions. |
-| **The train repository** | The proposed version manifest for stack compatibility; its current record is not a final certification. | Everything else. |
+| **Ticket logging** | **OIO (this repository)** | **Writing issue tickets only** — the form, the filer stamp, the triage, and how to handle/prioritize them. **Not coordination.** |
+| Execution coordination | ACS — `agent-custom-setup` | **Running** the tickets: making them workable, breaking them down, coordinating the agents. The multi-agent hotload pack. Future DAG++ layer. |
+| Continuity | PCM — `project-continuity-modules` | Tasks, checkpoints, push receipts, PR gates, and the `continuity` CLI. |
+| Narrative | CGM — `content-generation-modules` | Writing routing, prose, naming, visual direction, image generation, HTML demos. |
+| Versions | train — `agent-stack-train` | The certified version set. |
+| Decision-making | JEV — `jev-dump` | Aspirational arbiter / tie-breaker between agents — **parked**; not strong enough yet. |
 
 An adopter pins the train once, consumes OIO's form once, and keeps its own issue history.
 
