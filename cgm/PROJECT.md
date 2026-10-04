@@ -38,15 +38,18 @@ When the evidence is missing, the output must say so. A citation proves traceabi
 
 ## How CGM separates from the rest of the stack
 
-| Repository | Owns | Does not own |
-| --- | --- | --- |
-| **CGM** (this repository) | Narrative and style: writing routing, human-sounding writing, output naming, visual direction, image generation, HTML demos. | Product facts, issue governance, execution continuity, versions, the install surface. |
-| **OIO** — `observational-issue-ops` | The issue-log ticketing system: the form, the filer stamp, the triage, the intake contract. | Narrative, continuity, versions, the install surface. |
-| **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required pull request gates, the `continuity` CLI. | Issue governance, narrative, versions. |
-| **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, continuity, versions. |
-| **The train repository** | The certified version set — one place adopters read compatible versions from. | Everything else. |
+The stack is several repositories, each owning exactly one layer. CGM owns **narrative** and nothing else:
 
-An adopter pins the train once, consumes OIO's form once, and loads CGM's modules for the surface it is writing.
+| Layer | Repo | Owns |
+| --- | --- | --- |
+| Ticket logging | OIO — `observational-issue-ops` | Writing issue tickets **only** — the form, the filer stamp, the triage, and how to handle/prioritize them. **Not coordination.** |
+| Execution coordination | ACS — `agent-custom-setup` | **Running** the tickets: making them workable, breaking them down, coordinating the agents. The multi-agent hotload pack. Future DAG++ layer. |
+| Continuity | PCM — `project-continuity-modules` | Tasks, checkpoints, push receipts, PR gates, and the `continuity` CLI. |
+| **Narrative** | **CGM (this repository)** | **Writing routing, prose, naming, visual direction, image generation, HTML demos.** |
+| Versions | train — `agent-stack-train` | The certified version set. |
+| Decision-making | JEV — `jev-dump` | Aspirational arbiter / tie-breaker between agents — **parked**; not strong enough yet. |
+
+CGM pins no layer above it and replaces none of them: an adopter pins the train once, consumes OIO's form once, and loads CGM's modules for the surface it is writing.
 
 ## Definition of success
 
