@@ -1,9 +1,9 @@
 name: ci
 
 # Required status check for PCM-governed merges into main.
-# Reproducible machine gates: pinned PCM continuity validate + preflight,
-# the pinned CGM adapter check, no committed secrets, and parse of the
-# issue templates and workflows OIO publishes.
+# Reproducible machine gates: continuity validate + preflight and the CGM
+# adapter check at the commits in stack-mesh.json, no committed secrets,
+# and parse of the issue templates and workflows OIO publishes.
 
 on:
   pull_request:
@@ -16,9 +16,6 @@ permissions:
 jobs:
   gates:
     runs-on: ubuntu-latest
-    env:
-      PCM_PIN: 4e2385474b4af9249ca009cbdcb38c4498932475
-      CGM_PIN: 6831f91e165b62d719c05eb492f7375fa932b560
     steps:
       - uses: actions/checkout@v4
 
@@ -26,11 +23,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pinned continuity CLI
+      - name: Install the mesh continuity CLI
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "git+https://github.com/Pukujan/project-continuity-modules.git@${PCM_PIN}"
           python -m pip install pyyaml
+          PCM=$(python -c "import json; print(json.load(open('stack-mesh.json',encoding='utf-8'))['requires']['project-continuity-modules']['commit'])")
+          python -m pip install "git+https://github.com/Pukujan/project-continuity-modules.git@${PCM}"
           continuity --version
 
       - name: Continuity validate
@@ -44,10 +42,11 @@ jobs:
           python -m pip install -r requirements.txt
           python -m unittest discover -s tests -v
 
-      - name: Validate the content adapter against the pinned helper
+      - name: Validate the content adapter against the mesh helper
         run: |
+          CGM=$(python -c "import json; print(json.load(open('stack-mesh.json',encoding='utf-8'))['requires']['content-generation-modules']['commit'])")
           git clone --quiet https://github.com/Pukujan/content-generation-modules.git /tmp/cgm
-          git -C /tmp/cgm checkout --quiet "${CGM_PIN}"
+          git -C /tmp/cgm checkout --quiet "${CGM}"
           python /tmp/cgm/scripts/validate_content_system.py \
             --root /tmp/cgm \
             --adapter .content-system \
