@@ -16,7 +16,7 @@ For GitHub repositories, Issues are authoritative for task scope, priority, owne
 
 ## Workspace lifecycle
 
-Keep one permanent main checkout as the project's home base and use it for sequential work. When genuine parallelism or isolation is useful, create one managed linked worktree per independent active task under `<canonical-root>/pcm/worktree/<TASK-ID>`, not one per session or agent; resume it across sessions. Do not create sibling clones or arbitrary worktree paths.
+Keep one permanent main checkout as the project's home base and use it for sequential work. When genuine parallelism or isolation is useful, create one managed linked worktree per independent active task at `<project>/worktrees/<TASK-ID>`, beside the canonical checkout at `<project>/main`, not one per session or agent; resume it across sessions. Do not create sibling clones or arbitrary worktree paths.
 
 Before creating a tree, PCM checks Git's registered worktrees and its private per-device workspace registry. Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths stay local and must never be copied into shared records.
 

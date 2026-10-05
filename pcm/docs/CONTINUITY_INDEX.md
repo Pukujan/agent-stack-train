@@ -23,7 +23,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
-- Current SHA-256: `bb7d615e9942d1ea89012f8d6f64c8e1f48686703bf179f92ed005062be1adbe`
+- Current SHA-256: `8dccaa4b3fbd0d3d40c1ec1350dd5a4b1de41ee991c9662a11b5ba73e0166cd3`
 - Summary: How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.
 - Search terms: `architecture`, `checkpoint`, `doc-system`, `ownership`, `resume`
 - Neighboring records: `continuity-records-policy`, `issue-log-format`
@@ -71,7 +71,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `8a89004583cd361702c739e2d2de40e98be73514ba7c289d75a6ab42c517f633`
+- Current SHA-256: `8e4dd030e6d891c596b61d033c6fd962c6a7c05da4081261945109cd80f38e17`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
