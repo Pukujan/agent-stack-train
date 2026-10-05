@@ -24,19 +24,12 @@ The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.sche
 
 ## Certified components
 
-The current train is `2026-10-01`, status `proposed` — no adopter has been migrated onto it yet.
-
-| Component | Version | Role |
-| --- | --- | --- |
-| `project-continuity-modules` | 0.6.0 | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates. |
-| `content-generation-modules` | 0.5.12 | Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation. |
-| `agent-custom-setup` | 0.1.0 (`multi-agent-hotload`) | Install surface: hot-load the full stack plus the coordination runtime. |
-| `observational-issue-ops` | 0.1.0 | Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage. |
+The live train is `current`. Versions are not copied into this README, because a copied table is how the 2026-10-01 snapshot stayed on PCM 0.6.0 after 0.7.0 had shipped. The versions are [`stack-releases.json`](stack-releases.json). `scripts/refresh_train.py` rewrites that file from the default branch of each component listed in [`components.json`](components.json). [Refresh the release train](.github/workflows/refresh-train.yml) runs that script every hour and on demand.
 
 ## How to adopt
 
-1. Add a `stack-manifest.json` to your repository, set `adopter` to your repository name, and point `source` at this repository's `stack-releases.json`.
-2. Pin every component the train certifies, using the exact version, commit, and module count from the train.
+1. Add a `stack-manifest.json` to your repository, set `adopter` to your repository name, set `release_train` to `current`, and point `source` at this repository's `stack-releases.json`.
+2. Name every component the train certifies. Leave each pin empty to follow the train. Copy a version or commit only when that repository is deliberately frozen.
 3. Run the check in CI:
 
    ```bash
@@ -56,8 +49,8 @@ python scripts/check_manifest.py --manifest <path>      # an adopter's pins agre
 ## Boundaries
 
 - This repository owns **versions only** — no product code, no issue governance, no narrative, no execution continuity.
-- A certified entry is a compatibility statement, not a release mandate. `status` moves from `proposed` to `certified` when the owner accepts a train.
-- Changing a certified version is an owner-gated change.
+- A certified entry is the default-branch head of that component, refreshed by `scripts/refresh_train.py`. The owner accepted this channel on 2026-10-05 after the frozen `2026-10-01` snapshot held PCM at 0.6.0.
+- A hand edit of a version in `stack-releases.json` is overwritten on the next refresh. Change `components.json` to change where a version is read from.
 
 ## Ownership
 

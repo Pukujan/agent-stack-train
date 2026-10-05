@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Pukujan/agent-stack-train/stack-releases.schema.json",
   "title": "Stack release train",
-  "description": "The certified version set of the agent stack. Published only from this repository.",
+  "description": "The certified version set of the agent stack. Published only from this repository. scripts/refresh_train.py rewrites it from each component's default branch.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "release_train", "published_by", "recorded_at", "status", "certified", "adoption_rule"],
