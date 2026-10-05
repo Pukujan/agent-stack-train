@@ -35,17 +35,17 @@ TRAIN_SCHEMA = "agent-stack-train.stack-releases.v1"
 PUBLISHED_BY = "https://github.com/Pukujan/agent-stack-train"
 RELEASE_TRAIN = "current"
 ADOPTION_RULE = (
-    "An adopter names this train in its own stack-manifest.json and names each "
-    "component it consumes. The version and commit recorded here are that "
-    "component's default-branch head. Leave a pin empty to follow this file. "
-    "Copy a version into the manifest only when that repository is deliberately "
-    "frozen, and expect the check to fail once this file moves."
+    "This file is the mesh for project-continuity-modules, "
+    "content-generation-modules, agent-custom-setup, and observational-issue-ops. "
+    "Each of those repositories must require every component here, including "
+    "itself. An older version or commit fails scripts/mesh.py. The hotloader "
+    "installs these versions and refuses an older checkout."
 )
 NOTE = (
-    "This train follows each component's default branch. The 2026-10-01 snapshot "
-    "certified project-continuity-modules 0.6.0 (4e238547) after 0.7.0 had shipped; "
-    "the owner rejected that lag on 2026-10-05. recorded_at changes only when a "
-    "certified entry changes. Refresh with scripts/refresh_train.py."
+    "When one component moves, the other three must move to it. "
+    "scripts/refresh_train.py records the current head of each component. "
+    "scripts/mesh.py fails a repository that still requires an older one. "
+    "recorded_at changes only when a certified entry or this rule changes."
 )
 
 
