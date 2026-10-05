@@ -32,17 +32,24 @@ PCM keeps **no copy** of the certified set. The block below is PCM's own checked
   "train_publisher": "https://github.com/Pukujan/agent-stack-train",
   "train_source": "stack-releases.json",
   "component": "project-continuity-modules",
-  "version": "0.6.0",
-  "cli": "0.6.0",
-  "protocol_version": "0.1.0-draft",
-  "verified_commit": "4e2385474b4af9249ca009cbdcb38c4498932475",
-  "verified_commit_subject": "Mandatory adopter enforcement: gates required check + docs (Refs #211) (#212)",
-  "as_of": "2026-10-02"
+  "certified": {
+    "version": "0.6.0",
+    "cli": "0.6.0",
+    "protocol_version": "0.1.0-draft",
+    "commit": "4e2385474b4af9249ca009cbdcb38c4498932475",
+    "commit_subject": "Mandatory adopter enforcement: gates required check + docs (Refs #211) (#212)",
+    "as_of": "2026-10-02"
+  },
+  "source": {
+    "version": "0.7.0",
+    "protocol_version": "0.1.0-draft",
+    "as_of": "2026-10-04"
+  }
 }
 ```
 <!-- pcm:stack-release-train:end -->
 
-`verified_commit` is the commit this repository resolves for the pin, and `verified_commit_subject` is that commit's message, so the check can confirm the pin names the revision it claims to.
+The block keeps two versions apart on purpose. The `certified` half is what train `2026-10-01` published for PCM — version `0.6.0`, at commit `4e2385474b4af9249ca009cbdcb38c4498932475`, whose message is `commit_subject`, so the check can confirm the pin names the revision it claims to. The `source` half is what this checkout declares today. A source version may **lead** the last certified train: PCM #234 raised the CLI to `0.7.0` after the train was published, and the train is re-certified separately once the new build is on `main`. Forcing the two equal would make the pin assert a certification the train has not published, so they are recorded separately and each is checked against its own authority — `source` against `src/continuity/__init__.py` and `.continuity/config.json`, `certified` against the commit it names.
 
 ### Where the train is published (as of 2026-10-02)
 

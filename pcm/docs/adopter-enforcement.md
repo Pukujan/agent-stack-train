@@ -120,6 +120,18 @@ UI verify: **Settings → Rules → Rulesets** (active ruleset on `main` with PR
 
 PCM reference (as applied for #211): ruleset name `main protection`, required check `gates`, `allow_auto_merge: true`.
 
+## Workspace layout (project folder)
+
+PCM adopters use one project folder per repository under the dev root: the
+canonical checkout at `<repo>/main`, and managed task worktrees only under
+`<repo>/worktrees/<TASK-ID>`. A repo that never uses worktrees can just have
+`<repo>/main`. PCM refuses to create a worktree inside the main checkout or
+directly in the dev root, and `continuity validate` flags a stray checkout of the
+same repository under the dev root. An existing flat `<dev-root>/<repo>` checkout
+is adopted with `continuity worktree migrate --root <dev-root>/<repo>` (dry run)
+and `--yes` to perform the move; it refuses when anything is dirty or unpushed.
+See [`TARGET_ADOPTION.md`](TARGET_ADOPTION.md#workspace-layout-project-folder).
+
 ## Relation to existing PCM docs
 
 - [`TARGET_ADOPTION.md`](TARGET_ADOPTION.md) — how to overlay PCM files on a mature repo; **this file** is the mandatory GitHub enforcement contract those adopters must also apply.

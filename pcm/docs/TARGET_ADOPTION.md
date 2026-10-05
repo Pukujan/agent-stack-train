@@ -14,6 +14,45 @@ When PCM is used as a helper for another repository:
 
 `MODE: TARGET_VALID` is the only successful target preflight state.
 
+## Workspace layout (project folder)
+
+Every PCM-managed repository lives in one **project folder** under the dev root:
+
+```
+<dev-root>/
+├── <repo>/
+│   ├── main/                  <- canonical checkout (.git is a directory)
+│   └── worktrees/
+│       └── <TASK-ID>/         <- linked worktree of main/
+└── <other-repo>/
+    └── main/                  <- no worktrees yet; main/ on its own is fine
+```
+
+- The canonical checkout is `<repo>/main`. `continuity init` defaults to
+  `managed-worktrees` mode, and this is the layout that mode expects.
+- Task worktrees are created, tracked and pruned **only** under
+  `<repo>/worktrees/<TASK-ID>`. PCM refuses to create a worktree inside the
+  main checkout or directly in the dev root.
+- Dependency clones, scratch work and caches stay out of the dev root entirely
+  (e.g. `%LOCALAPPDATA%\acs\{deps,scratch}` or `~/.cache/acs/...`).
+- `continuity validate` fails on a stray checkout of the same repository sitting
+  directly under the dev root, and on a worktree outside `<repo>/worktrees/`.
+  A repo that never uses worktrees can just have `<repo>/main`.
+
+### Migrating a flat checkout
+
+An existing `<dev-root>/<repo>` checkout is adopted with:
+
+```bash
+continuity worktree migrate --root <dev-root>/<repo>        # dry run: prints the plan
+continuity worktree migrate --root <dev-root>/<repo> --yes  # performs the move
+```
+
+Migration moves the checkout to `<repo>/main`, moves any registered worktrees
+into `<repo>/worktrees/` with `git worktree move`, and runs `git worktree repair`
+afterwards. It refuses when the checkout or any worktree has dirty, stashed, or
+unpushed work, and it never touches a repository already on the new layout.
+
 ## Fresh target
 
 For a GitHub repository that does not already own conflicting PCM-managed paths, GitHub Issues are the required task authority. Create or identify an issue before creating each active task; pass its canonical URL with `continuity task new --issue https://github.com/OWNER/REPO/issues/NUMBER`. Existing task/status files are a cached working view linked to that issue. Before resuming, run `continuity issue verify <TASK-ID>` and resolve any conflict from the live issue.

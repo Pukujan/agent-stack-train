@@ -34,7 +34,9 @@ class ManagedWorktreeTests(unittest.TestCase):
         self.registry_environment.start()
         self.addCleanup(self.registry_environment.stop)
         self.remote = self.base / "origin.git"
-        self.root = self.base / "project"
+        self.project = self.base / "project"
+        self.root = self.project / "main"
+        self.worktrees = self.project / "worktrees"
         subprocess.run(
             ["git", "init", "--bare", "--initial-branch=main", str(self.remote)],
             cwd=self.base,
@@ -42,6 +44,7 @@ class ManagedWorktreeTests(unittest.TestCase):
             capture_output=True,
             text=True,
         )
+        self.project.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             ["git", "clone", str(self.remote), str(self.root)],
             cwd=self.base,
@@ -102,7 +105,7 @@ class ManagedWorktreeTests(unittest.TestCase):
     def test_create_is_confined_to_task_and_resume_is_idempotent(self) -> None:
         path, resumed = create_managed_worktree(self.root, self.task_id)
         self.assertFalse(resumed)
-        self.assertEqual(path, self.root / "pcm" / "worktree" / self.task_id)
+        self.assertEqual(path, self.worktrees / self.task_id)
         self.assertTrue(path.is_dir())
         self.assertEqual((path, True), create_managed_worktree(self.root, self.task_id))
         worktree_count = sum(
@@ -157,7 +160,7 @@ class ManagedWorktreeTests(unittest.TestCase):
         subprocess.run(["git", "-C", str(other), "checkout", "-b", branch], check=True, capture_output=True, text=True)
         register_local_workspace(other)
         self.assertEqual((other, True), create_managed_worktree(self.root, self.task_id))
-        self.assertFalse((self.root / "pcm" / "worktree" / self.task_id).exists())
+        self.assertFalse((self.worktrees / self.task_id).exists())
 
     def test_create_stops_on_dirty_registered_checkout(self) -> None:
         from continuity.cli import register_local_workspace
@@ -180,7 +183,7 @@ class ManagedWorktreeTests(unittest.TestCase):
         register_local_workspace(other)
         with self.assertRaisesRegex(ContinuityError, "existing task checkout is dirty"):
             create_managed_worktree(self.root, self.task_id)
-        self.assertFalse((self.root / "pcm" / "worktree" / self.task_id).exists())
+        self.assertFalse((self.worktrees / self.task_id).exists())
 
     def test_distinct_task_ids_get_independent_worktrees(self) -> None:
         task_new(self.root, "parallel-task", "Proceed independently", "Parallel work test", "other", "P2")
@@ -188,8 +191,8 @@ class ManagedWorktreeTests(unittest.TestCase):
         self.git(["git", "push", "origin", "main"])
         first_path, _ = create_managed_worktree(self.root, self.task_id)
         second_path, _ = create_managed_worktree(self.root, "DPT-0002")
-        self.assertEqual(self.root / "pcm" / "worktree" / self.task_id, first_path)
-        self.assertEqual(self.root / "pcm" / "worktree" / "DPT-0002", second_path)
+        self.assertEqual(self.worktrees / self.task_id, first_path)
+        self.assertEqual(self.worktrees / "DPT-0002", second_path)
         self.assertNotEqual(first_path, second_path)
         first_branch = self.git(["git", "-C", str(first_path), "branch", "--show-current"]).stdout.strip()
         second_branch = self.git(["git", "-C", str(second_path), "branch", "--show-current"]).stdout.strip()
@@ -406,6 +409,143 @@ class ManagedWorktreeTests(unittest.TestCase):
         self.assertEqual("org/repo", github_repository("https://github.com/org/repo.git"))
         self.assertEqual("org/repo", github_repository("git@github.com:org/repo.git"))
         self.assertIsNone(github_repository(str(self.remote)))
+
+
+class WorkspaceMigrationTests(unittest.TestCase):
+    """Issue #234: the project-folder layout and the flat-layout migration."""
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="continuity-migration-")
+        self.addCleanup(self.temp.cleanup)
+        self.base = Path(self.temp.name)
+        self.registry_environment = patch.dict(os.environ, {"LOCALAPPDATA": str(self.base / "appdata")})
+        self.registry_environment.start()
+        self.addCleanup(self.registry_environment.stop)
+        self.remote = self.base / "origin.git"
+        self.root = self.base / "repo"
+        subprocess.run(
+            ["git", "init", "--bare", "--initial-branch=main", str(self.remote)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(self.root)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.git(["git", "config", "user.name", "PCM Test"])
+        self.git(["git", "config", "user.email", "pcm-test@example.invalid"])
+        init_repo(self.root, "software", "Migration Test", "MIG")
+        self.commit_all("initialize continuity")
+        self.git(["git", "push", "--set-upstream", "origin", "main"])
+
+    def git(self, args: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(args, cwd=cwd or self.root, capture_output=True, check=True, text=True)
+
+    def commit_all(self, message: str, cwd: Path | None = None) -> None:
+        self.git(["git", "add", "-A"], cwd)
+        self.git(["git", "commit", "-m", message], cwd)
+
+    def add_legacy_worktree(self, task_id: str = "MIG-0001") -> Path:
+        path = self.root / "pcm" / "worktree" / task_id
+        branch = f"task/{task_id}-legacy"
+        self.git(["git", "worktree", "add", "-b", branch, str(path)])
+        self.git(["git", "-C", str(path), "push", "--set-upstream", "origin", branch])
+        return path
+
+    def test_flat_checkout_refuses_managed_worktree_creation(self) -> None:
+        task_new(self.root, "legacy-task", "Test legacy layout", "Test refusal", "test", "P1")
+        self.commit_all("add task")
+        self.git(["git", "push", "origin", "main"])
+        with self.assertRaisesRegex(ContinuityError, "project-folder layout"):
+            create_managed_worktree(self.root, "MIG-0001")
+
+    def test_validate_flags_flat_checkout_that_has_a_worktree(self) -> None:
+        from continuity.cli import load_config, validate_managed_worktrees
+
+        self.add_legacy_worktree()
+        errors = validate_managed_worktrees(self.root, load_config(self.root))
+        self.assertTrue(any("flat checkout" in error for error in errors), errors)
+
+    def test_dev_root_stray_is_flagged(self) -> None:
+        from continuity.cli import validate_dev_root_strays
+
+        project = self.base / "proj"
+        project.mkdir()
+        main = project / "main"
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(main)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        stray = self.base / "repo-stray"
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(stray)],
+            cwd=self.base,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        errors = validate_dev_root_strays(main)
+        self.assertTrue(any("stray checkout" in error for error in errors), errors)
+
+    def test_migrate_dry_run_reports_plan_without_moving(self) -> None:
+        from continuity.cli import migrate_workspace_layout
+
+        self.add_legacy_worktree()
+        plan = migrate_workspace_layout(self.root, apply=False)
+        self.assertTrue(any("move checkout" in step for step in plan), plan)
+        self.assertTrue(self.root.is_dir())
+        self.assertFalse((self.root / "main").exists())
+        self.assertFalse((self.base / "repo" / "worktrees").exists())
+
+    def test_migrate_refuses_when_worktree_is_dirty(self) -> None:
+        from continuity.cli import migrate_workspace_layout
+
+        path = self.add_legacy_worktree()
+        (path / "uncommitted.txt").write_text("keep this local work\n", encoding="utf-8")
+        with self.assertRaisesRegex(ContinuityError, "dirty"):
+            migrate_workspace_layout(self.root, apply=True)
+        self.assertTrue(self.root.is_dir())
+        self.assertFalse((self.root / "main").exists())
+
+    def test_migrate_refuses_when_worktree_branch_is_unpushed(self) -> None:
+        from continuity.cli import migrate_workspace_layout
+
+        path = self.root / "pcm" / "worktree" / "MIG-0001"
+        self.git(["git", "worktree", "add", "-b", "task/MIG-0001-legacy", str(path)])
+        self.git(["git", "-C", str(path), "commit", "--allow-empty", "-m", "unpushed work"])
+        with self.assertRaisesRegex(ContinuityError, "unpushed"):
+            migrate_workspace_layout(self.root, apply=True)
+
+    def test_migrate_moves_checkout_and_repairs_worktrees(self) -> None:
+        from continuity.cli import migrate_workspace_layout
+
+        self.add_legacy_worktree()
+        migrate_workspace_layout(self.root, apply=True)
+        project = self.base / "repo"
+        new_main = project / "main"
+        new_worktree = project / "worktrees" / "MIG-0001"
+        self.assertTrue(new_main.is_dir())
+        self.assertTrue((new_main / ".git").exists())
+        # The flat checkout is gone; the project folder now only holds main/ and worktrees/.
+        self.assertFalse((self.root / ".git").exists())
+        self.assertTrue(new_worktree.is_dir())
+        listing = self.git(["git", "worktree", "list", "--porcelain"], cwd=new_main).stdout
+        paths = {
+            Path(line.removeprefix("worktree ")).resolve()
+            for line in listing.splitlines()
+            if line.startswith("worktree ")
+        }
+        self.assertIn(new_main.resolve(), paths)
+        self.assertIn(new_worktree.resolve(), paths)
+        self.assertNotIn((self.root / "pcm" / "worktree" / "MIG-0001").resolve(), paths)
 
 
 class WorktreeStorageExperimentTests(unittest.TestCase):

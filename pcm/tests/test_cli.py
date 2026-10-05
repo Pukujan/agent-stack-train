@@ -262,7 +262,7 @@ class ContinuityTests(unittest.TestCase):
 
         agents = (root / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("one per independent active task, not one per session or agent", agents)
-        self.assertIn("pcm/worktree/<TASK-ID>", agents)
+        self.assertIn("<project>/worktrees/<TASK-ID>", agents)
         self.assertIn("continuity worktree remove", agents)
         self.assertIn("git worktree lock", agents)
         self.assertIn("git worktree unlock", agents)

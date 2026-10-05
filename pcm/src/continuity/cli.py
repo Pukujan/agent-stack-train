@@ -7,6 +7,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -89,6 +90,10 @@ SCHEMA_FILES = {
 }
 
 WORKSPACE_MODES = {"managed-worktrees", "single-checkout"}
+# Project-folder layout (issue #234): the canonical checkout lives at
+# <project>/main and task worktrees sit beside it at <project>/worktrees/<task>.
+MAIN_CHECKOUT_DIRNAME = "main"
+WORKTREES_DIRNAME = "worktrees"
 WORKSPACE_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
     "properties": {"mode": {"enum": sorted(WORKSPACE_MODES), "type": "string"}},
@@ -543,9 +548,11 @@ def workspace_policy_text(workspace_mode: str) -> str:
     return (
         "## Workspace mode: managed task worktrees\n\n"
         "The Git repository, remote, and task history stay canonical; the main checkout remains the permanent home base. "
-        "Use it for sequential work. Create a linked worktree only when parallel work or isolation is actually useful, "
-        "at `<canonical-root>/pcm/worktree/<TASK-ID>`. Use one per independent active task, not one per session or agent; "
-        "a new session continuing that task resumes the same tree. Do not create sibling clones or arbitrary worktree paths.\n\n"
+        "The project folder holds the canonical checkout at `<project>/main`; use it for sequential work. "
+        "Create a linked worktree only when parallel work or isolation is actually useful, "
+        "at `<project>/worktrees/<TASK-ID>`, beside the checkout. Use one per independent active task, not one per session or agent; "
+        "a new session continuing that task resumes the same tree. Do not create sibling clones, worktrees inside the checkout, "
+        "or arbitrary worktree paths; a stray worktree in the dev root or inside `<project>/main` fails `continuity validate`.\n\n"
         "Before creating a tree, PCM checks Git's registered worktrees and the private per-device workspace registry. "
         "Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match for the same remote/task/ref is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths are local-only and must never be copied into issues, commits, PRs, or handoffs.\n\n"
         "After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. "
@@ -1423,6 +1430,42 @@ def branch_for_task(task_path: Path) -> str:
     return f"task/{task_path.stem.removeprefix('TASK-')}"
 
 
+def dev_root_strays(canonical_root: Path) -> list[str]:
+    """Checkouts of this same repository sitting directly under the dev root.
+
+    After migration only project folders sit under the dev root; a sibling
+    checkout or linked worktree of this repository in the dev root is a stray
+    and belongs under `<project>/worktrees/`. Checkouts of other repositories
+    are ignored, so unrelated repos in the dev root never trigger this.
+    """
+    project = canonical_root.parent
+    dev_root = project.parent
+    if not dev_root.is_dir():
+        return []
+    remote_value = git_value(canonical_root, ["remote", "get-url", "origin"], fallback="")
+    identity = (github_repository(remote_value) or remote_value.rstrip("/").removesuffix(".git")).casefold()
+    if not identity:
+        return []
+    strays: list[str] = []
+    try:
+        children = sorted(dev_root.iterdir())
+    except OSError:
+        return []
+    for child in children:
+        if child == project or not child.is_dir():
+            continue
+        if not (child / ".git").exists():
+            continue
+        candidate = run_external(["git", "-C", str(child), "remote", "get-url", "origin"], canonical_root)
+        candidate_value = candidate.stdout.strip()
+        candidate_identity = (
+            github_repository(candidate_value) or candidate_value.rstrip("/").removesuffix(".git")
+        ).casefold()
+        if candidate.returncode == 0 and candidate_identity == identity:
+            strays.append(str(child))
+    return strays
+
+
 def validate_managed_worktrees(root: Path, config: dict[str, Any]) -> list[str]:
     root = root.resolve()
     if not (root / ".git").exists():
@@ -1443,19 +1486,30 @@ def validate_managed_worktrees(root: Path, config: dict[str, Any]) -> list[str]:
         return ["Git reported no registered worktrees for the managed repository"]
     canonical_root = Path(entries[0].path).resolve()
     errors: list[str] = []
+    project = canonical_root.parent
+    worktrees_root = project / WORKTREES_DIRNAME if canonical_root.name == MAIN_CHECKOUT_DIRNAME else None
     for entry in entries[1:]:
         path = Path(entry.path).resolve()
-        try:
-            relative = path.relative_to(canonical_root)
-        except ValueError:
-            errors.append(f"managed worktree is outside the canonical checkout: {path}")
+        if worktrees_root is None:
+            errors.append(
+                "managed worktree found on a flat checkout; the canonical checkout must be "
+                f"<project>/{MAIN_CHECKOUT_DIRNAME} and task worktrees under <project>/{WORKTREES_DIRNAME}/: "
+                f"{path}; run `continuity worktree migrate` to adopt the layout"
+            )
             continue
-        if len(relative.parts) != 3 or relative.parts[:2] != ("pcm", "worktree"):
-            errors.append(f"additional worktree must be under pcm/worktree/<TASK-ID> in the canonical checkout: {path}")
+        if not path.is_relative_to(worktrees_root):
+            errors.append(
+                f"additional worktree must be under <project>/{WORKTREES_DIRNAME}/<TASK-ID>, "
+                f"beside the canonical checkout: {path}"
+            )
             continue
-        task_id = relative.parts[2]
+        relative = path.relative_to(worktrees_root)
+        if len(relative.parts) != 1:
+            errors.append(f"managed worktree must be <project>/{WORKTREES_DIRNAME}/<TASK-ID>: {path}")
+            continue
+        task_id = relative.parts[0]
         if TASK_ID_RE.fullmatch(task_id) is None:
-            errors.append(f"managed worktree directory must be a task ID, got: {relative.parts[2]}")
+            errors.append(f"managed worktree directory must be a task ID, got: {relative.parts[0]}")
             continue
         try:
             task_path = find_task(canonical_root, config, task_id)
@@ -1474,13 +1528,33 @@ def validate_managed_worktrees(root: Path, config: dict[str, Any]) -> list[str]:
     return errors
 
 
+def validate_dev_root_strays(canonical_root: Path) -> list[str]:
+    """Errors for stray checkouts of this repository directly under the dev root."""
+    return [
+        (
+            f"stray checkout of this repository directly under the dev root: {stray}; "
+            f"move it under <project>/{WORKTREES_DIRNAME}/ (see `continuity worktree migrate`)"
+        )
+        for stray in dev_root_strays(canonical_root)
+    ]
+
+
 def validate_workspace_layout(root: Path, config: dict[str, Any]) -> list[str]:
     workspace = config.get("workspace")
     mode = workspace.get("mode", "single-checkout") if isinstance(workspace, dict) else "single-checkout"
     if mode == "single-checkout":
         return validate_single_checkout(root)
     if mode == "managed-worktrees":
-        return validate_managed_worktrees(root, config)
+        errors = validate_managed_worktrees(root, config)
+        try:
+            canonical_root = canonical_worktree_root(root)
+        except ContinuityError:
+            return errors
+        if canonical_root.name != MAIN_CHECKOUT_DIRNAME:
+            # A flat checkout is not yet a project folder, so its dev root is
+            # unknown; only `<project>/main` can locate strays to scan for.
+            return errors
+        return errors + validate_dev_root_strays(canonical_root)
     return [f"unsupported workspace mode: {mode}"]
 
 def issue_log_format_findings(root: Path) -> tuple[list[str], list[str]]:
@@ -2266,35 +2340,148 @@ def register_local_workspace(root: Path) -> Path:
     return permanent
 
 
-def managed_worktree_path(root: Path, task_id: str) -> Path:
+def managed_worktrees_root(root: Path) -> Path:
+    """The `<project>/worktrees` directory beside the canonical `<project>/main` checkout.
+
+    Managed worktrees live here, never inside the checkout and never directly in
+    the dev root. A checkout that is not the `<project>/main` layout is refused
+    with the migration command that adopts it.
+    """
     root = root.resolve()
-    for parent in (root / "pcm", root / "pcm" / "worktree"):
+    if root.name != MAIN_CHECKOUT_DIRNAME:
+        raise ContinuityError(
+            "managed worktrees require the project-folder layout: the canonical checkout must be "
+            f"<project>/{MAIN_CHECKOUT_DIRNAME}, but this checkout is {root}; "
+            "run `continuity worktree migrate` to adopt the layout"
+        )
+    return root.parent / WORKTREES_DIRNAME
+
+
+def managed_worktree_path(root: Path, task_id: str) -> Path:
+    worktrees_root = managed_worktrees_root(root)
+    project = worktrees_root.parent
+    for parent in (project, worktrees_root):
         if parent.is_symlink():
             raise ContinuityError(f"refusing to use a symlink in the managed worktree path: {parent}")
         if parent.exists() and not parent.is_dir():
             raise ContinuityError(f"managed worktree path component is not a directory: {parent}")
-    path = root / "pcm" / "worktree" / task_id
-    if not path.resolve(strict=False).is_relative_to(root):
-        raise ContinuityError(f"managed worktree path escapes the canonical checkout: {path}")
+    path = worktrees_root / task_id
+    if not path.resolve(strict=False).is_relative_to(project):
+        raise ContinuityError(f"managed worktree path escapes the project folder: {path}")
     return path
 
 
-def ensure_managed_worktree_ignored(root: Path) -> None:
-    raw_path = git_value(root, ["rev-parse", "--git-path", "info/exclude"])
-    exclude = Path(raw_path)
-    if not exclude.is_absolute():
-        exclude = root / exclude
-    try:
-        content = exclude.read_text(encoding="utf-8") if exclude.exists() else ""
-        if "/pcm/worktree/" not in content.splitlines():
-            updated = content.rstrip("\r\n")
-            if updated:
-                updated += "\n"
-            updated += "# PCM managed task worktrees\n/pcm/worktree/\n"
-            exclude.parent.mkdir(parents=True, exist_ok=True)
-            exclude.write_text(updated, encoding="utf-8")
-    except OSError as exc:
-        raise ContinuityError(f"could not configure the local managed-worktree ignore: {exc}") from exc
+def _migration_blockers(root: Path, ignore_prefixes: tuple[str, ...] = ()) -> list[str]:
+    """Reasons a checkout must not be migrated: dirty, stashed, or unpushed work.
+
+    ``ignore_prefixes`` are repo-relative posix paths whose untracked contents do
+    not count as dirty — the legacy in-checkout worktree directory, which the old
+    layout kept out of commits only through a local ignore rule.
+    """
+    problems: list[str] = []
+    status = run_external(["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all"], root)
+    if status.returncode != 0:
+        problems.append(f"cannot inspect working tree: {root}")
+    else:
+        dirty_lines = []
+        for line in status.stdout.splitlines():
+            if not line.strip():
+                continue
+            path = line[3:].strip().strip('"')
+            if any(path == prefix or path.startswith(prefix + "/") for prefix in ignore_prefixes):
+                continue
+            dirty_lines.append(line)
+        if dirty_lines:
+            problems.append(f"working tree is dirty: {root}")
+    stash = run_external(["git", "-C", str(root), "stash", "list"], root)
+    if stash.returncode == 0 and stash.stdout.strip():
+        problems.append(f"stash is not empty: {root}")
+    upstream = run_external(
+        ["git", "-C", str(root), "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], root
+    )
+    if upstream.returncode != 0 or not upstream.stdout.strip():
+        problems.append(f"unpushed work: no upstream tracking branch proves the work is pushed: {root}")
+    else:
+        ahead = run_external(["git", "-C", str(root), "rev-list", "--count", "@{u}..HEAD"], root)
+        if ahead.returncode != 0:
+            problems.append(f"cannot compare against the upstream branch: {root}")
+        elif ahead.stdout.strip() not in ("", "0"):
+            problems.append(f"unpushed commits: {root}")
+    return problems
+
+
+def migrate_workspace_layout(root: Path, *, apply: bool) -> list[str]:
+    """Move a flat checkout to `<project>/main` and its worktrees to `<project>/worktrees/`.
+
+    Dry run unless ``apply``. Refuses when the checkout or any linked worktree
+    has dirty, stashed, or unpushed work, and never touches a repository that is
+    already on the project-folder layout.
+    """
+    root = canonical_worktree_root(root)
+    if root.name == MAIN_CHECKOUT_DIRNAME:
+        raise ContinuityError(f"already on the project-folder layout: {root} is <project>/{MAIN_CHECKOUT_DIRNAME}")
+    # Flat layout: the checkout itself is the project folder (<dev>/<repo>).
+    project = root
+    target_main = project / MAIN_CHECKOUT_DIRNAME
+    if target_main.exists():
+        raise ContinuityError(f"refusing to migrate: target already exists: {target_main}")
+
+    entries = worktree_inventory(root)
+    if not entries:
+        raise ContinuityError("Git reported no checkout to migrate")
+    linked = entries[1:]
+    worktrees_root = project / WORKTREES_DIRNAME
+
+    # Legacy in-checkout worktrees are untracked but were kept out of commits by a
+    # local ignore rule, so their paths must not count as dirty in the main checkout.
+    ignored = tuple(
+        Path(entry.path).resolve().relative_to(root).as_posix()
+        for entry in linked
+        if Path(entry.path).resolve().is_relative_to(root)
+    )
+    blockers: list[str] = _migration_blockers(root, ignored)
+    for entry in linked:
+        blockers.extend(_migration_blockers(Path(entry.path).resolve()))
+    if blockers:
+        raise ContinuityError("refusing to migrate; resolve first: " + "; ".join(blockers))
+
+    plan = [f"move checkout {root} -> {target_main}"]
+    relocated: list[tuple[Path, Path]] = []
+    for entry in linked:
+        old = Path(entry.path).resolve()
+        # Inside the checkout it moves with it to target_main/<rel>; a sibling in
+        # the dev root stays put and only its gitdir link is repaired.
+        old_after_move = target_main / old.relative_to(root) if old.is_relative_to(root) else old
+        new = worktrees_root / old.name
+        relocated.append((old_after_move, new))
+        plan.append(f"move worktree {old_after_move} -> {new}")
+    if not apply:
+        return plan
+
+    # Staging must sit outside the project folder so the folder can be moved wholesale.
+    staging = project.parent / (root.name + ".pcm-migrating")
+    if staging.exists():
+        raise ContinuityError(f"refusing to migrate: staging path already exists: {staging}")
+    shutil.move(str(root), str(staging))
+    target_main.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(staging), str(target_main))
+    # Re-point the (possibly relocated) worktrees at the new main checkout, then move
+    # each under <project>/worktrees/.
+    run_external(
+        ["git", "-C", str(target_main), "worktree", "repair", *[str(old) for old, _ in relocated]],
+        target_main,
+    )
+    if relocated:
+        worktrees_root.mkdir(parents=True, exist_ok=True)
+    for old, new in relocated:
+        result = run_external(["git", "-C", str(target_main), "worktree", "move", str(old), str(new)], target_main)
+        if result.returncode != 0:
+            raise ContinuityError(
+                f"checkout moved, but `git worktree move` failed for {old}: "
+                f"{(result.stderr or result.stdout or '').strip()}"
+            )
+    run_external(["git", "-C", str(target_main), "worktree", "repair"], target_main)
+    return plan
 
 
 def github_repository(remote: str) -> str | None:
@@ -2494,7 +2681,6 @@ def _create_managed_worktree(root: Path, task_id: str) -> tuple[Path, bool]:
     task_exists_on_remote(root, task_path, base_ref, task_id)
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    ensure_managed_worktree_ignored(root)
     local_branch = run_external(
         ["git", "-C", str(root), "show-ref", "--verify", "--quiet", f"refs/heads/{branch}"], root
     )
@@ -3699,6 +3885,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_worktree_remove = worktree_sub.add_parser("remove")
     p_worktree_remove.add_argument("task_id")
     p_worktree_remove.add_argument("--root", default=".")
+    p_worktree_migrate = worktree_sub.add_parser("migrate")
+    p_worktree_migrate.add_argument("--root", default=".")
+    p_worktree_migrate.add_argument(
+        "--yes",
+        action="store_true",
+        help="perform the migration; without it the command only prints the plan",
+    )
 
     p_workspace = sub.add_parser("workspace")
     workspace_sub = p_workspace.add_subparsers(dest="workspace_command", required=True)
@@ -4107,6 +4300,16 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "worktree" and args.worktree_command == "remove":
             path = remove_managed_worktree(Path(args.root).resolve(), args.task_id)
             print(f"REMOVED: {path}")
+            return 0
+
+        if args.command == "worktree" and args.worktree_command == "migrate":
+            plan = migrate_workspace_layout(Path(args.root).resolve(), apply=args.yes)
+            if args.yes:
+                print("MIGRATED:")
+            else:
+                print("PLAN (dry run; pass --yes to apply):")
+            for step in plan:
+                print(f"  {step}")
             return 0
 
         parser.error("unhandled command")

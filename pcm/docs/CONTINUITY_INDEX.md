@@ -23,7 +23,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
-- Current SHA-256: `4e3d490452169a87e5c7200834e09d88cf450e4c1f45c6bb96aa2a3f6377063c`
+- Current SHA-256: `bb7d615e9942d1ea89012f8d6f64c8e1f48686703bf179f92ed005062be1adbe`
 - Summary: How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.
 - Search terms: `architecture`, `checkpoint`, `doc-system`, `ownership`, `resume`
 - Neighboring records: `continuity-records-policy`, `issue-log-format`
@@ -92,10 +92,10 @@
 ## Observational issue delegation and release-train pin (`observational-issue-delegation`)
 
 - File: [`docs/OBSERVATIONAL_ISSUE_DELEGATION.md`](../docs/OBSERVATIONAL_ISSUE_DELEGATION.md)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9`
-- Current SHA-256: `eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9`
+- Current SHA-256: `253689c693055a165a5a318ca7175e5d1dfcba18d27812865aaf12190287deb6`
 - Summary: PCM delegates the human observational-issue protocol and its triage to observational-issue-ops (OIO) and records its pinned role in the stack release train.
 - Search terms: `boundary`, `delegation`, `observational issue`, `oio`, `release train`, `stack-releases`
 - Neighboring records: `architecture-guide`, `github-progression-spec`, `issue-log-format`
