@@ -2,9 +2,9 @@
 """Check one adopter's stack-manifest.json against the certified release train.
 
 Any repository in the stack can run this in CI. It reads the adopter's manifest
-and the train's stack-releases.json and fails closed on any disagreement, so a
-single edit to either file cannot silently desynchronise them — the drift this
-train exists to remove.
+and the train's stack-releases.json and fails closed on any disagreement.
+An empty pin follows the train. A pin that copies a version or commit must
+equal the train, so a frozen copy cannot pretend to be current.
 
 Usage:
     python scripts/check_manifest.py --manifest ../stack-manifest.json

@@ -26,10 +26,10 @@
     "pins": {
       "type": "object",
       "minProperties": 1,
-      "description": "One entry per certified component the adopter consumes, keyed by component name.",
+      "description": "One entry per certified component the adopter consumes, keyed by component name. An empty entry follows the train. A copied version or commit must equal the train.",
       "additionalProperties": {
         "type": "object",
-        "minProperties": 1,
+        "minProperties": 0,
         "properties": {
           "version": {"type": "string", "minLength": 1},
           "commit": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},

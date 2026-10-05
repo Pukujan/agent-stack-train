@@ -1,0 +1,39 @@
+{
+  "schema_version": "agent-stack-train.components.v1",
+  "owner": "Pukujan",
+  "ref": "main",
+  "components": [
+    {
+      "name": "project-continuity-modules",
+      "repo": "project-continuity-modules",
+      "role": "Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates.",
+      "version_file": "src/continuity/__init__.py",
+      "version_pattern": "__version__\\s*=\\s*[\"']([^\"']+)[\"']",
+      "protocol_file": "PROJECT.md",
+      "protocol_pattern": "\"protocol_version\"\\s*:\\s*\"([^\"]+)\"",
+      "copy_version_to": ["cli"]
+    },
+    {
+      "name": "content-generation-modules",
+      "repo": "content-generation-modules",
+      "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation.",
+      "version_json": "system-version.json",
+      "version_key": "version",
+      "modules_key": "modules"
+    },
+    {
+      "name": "agent-custom-setup",
+      "repo": "agent-custom-setup",
+      "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime.",
+      "version_json": "registry.json",
+      "version_key": "version",
+      "module": "multi-agent-hotload"
+    },
+    {
+      "name": "observational-issue-ops",
+      "repo": "observational-issue-ops",
+      "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage.",
+      "version_from_release": true
+    }
+  ]
+}
