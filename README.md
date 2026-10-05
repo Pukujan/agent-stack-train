@@ -29,7 +29,7 @@ The live train is `current`. Versions are not copied into this README, because a
 ## How to adopt
 
 1. Add a `stack-manifest.json` to your repository, set `adopter` to your repository name, set `release_train` to `current`, and point `source` at this repository's `stack-releases.json`.
-2. Name every component the train certifies. Leave each pin empty to follow the train. Copy a version or commit only when that repository is deliberately frozen.
+2. Name every component. Leave each pin empty so you follow the mesh. The four stack repositories themselves carry `stack-mesh.json` and fail CI when it is behind.
 3. Run the check in CI:
 
    ```bash

@@ -1,0 +1,64 @@
+name: Require the mesh
+
+# The four stack repositories call this. It fails when that repository
+# requires an older version than stack-releases.json. With write=true it
+# opens a pull request that moves the repository onto the mesh.
+
+on:
+  workflow_call:
+    inputs:
+      component:
+        description: Which of the four repositories is calling
+        required: true
+        type: string
+      write:
+        description: Open a pull request that rewrites stack-mesh.json to the mesh
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  mesh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the calling repository
+        uses: actions/checkout@v4
+
+      - name: Check out the mesh
+        uses: actions/checkout@v4
+        with:
+          repository: Pukujan/agent-stack-train
+          ref: main
+          path: .stack-train
+
+      - name: Require every component at the mesh version
+        if: ${{ !inputs.write }}
+        run: python .stack-train/scripts/mesh.py --check --root . --component "${{ inputs.component }}"
+
+      - name: Rewrite the local requirement to the mesh
+        if: ${{ inputs.write }}
+        run: python .stack-train/scripts/mesh.py --write --root .
+
+      - name: Open a pull request when this repository was behind
+        if: ${{ inputs.write }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B mesh/sync
+          git add -- stack-mesh.json
+          if [ -f .github/workflows/ci.yml ]; then
+            git add -- .github/workflows/ci.yml
+          fi
+          if git diff --cached --quiet; then
+            echo "Already on the mesh."
+            exit 0
+          fi
+          git commit -m "Require the current mesh versions of all four stack repositories."
+          git push --force-with-lease origin mesh/sync
+          gh pr create --base main --head mesh/sync --title "Require the current mesh versions" --body "A stack component moved. This repository has to require that version. An older checkout stays failed." || echo "pull request already open"
