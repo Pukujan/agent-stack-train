@@ -99,6 +99,42 @@ class MeshTests(unittest.TestCase):
             self.assertIn(NEW_PCM, pinned)
             self.assertNotIn(OLD_PCM, pinned)
 
+    def test_a_repo_is_not_required_to_pin_its_own_commit(self) -> None:
+        """A repo cannot pin a head it has not written yet, so its own entry is free."""
+        declaration = mesh.declaration_from(stack())
+        declaration["requires"][PCM]["commit"] = "b" * 40
+        self.assertEqual(mesh.declaration_problems(stack(), declaration, PCM), [])
+
+    def test_a_repo_must_still_pin_a_sibling_commit(self) -> None:
+        declaration = mesh.declaration_from(stack())
+        declaration["requires"][OIO]["commit"] = "b" * 40
+        errors = mesh.declaration_problems(stack(), declaration, PCM)
+        self.assertTrue(any(OIO in error for error in errors))
+
+    def test_write_keeps_the_own_entry_and_is_a_fixed_point(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            (repo / "src" / "continuity").mkdir(parents=True)
+            (repo / "src" / "continuity" / "__init__.py").write_text(
+                '__version__ = "0.7.0"\n', encoding="utf-8"
+            )
+            own = {"version": "0.7.0", "commit": "c" * 40}
+            (repo / mesh.MESH_NAME).write_text(
+                json.dumps({"source": mesh.SOURCE, "requires": {PCM: own}}), encoding="utf-8"
+            )
+            mesh.write_repo(stack(), repo, PCM)
+            written = json.loads((repo / mesh.MESH_NAME).read_text(encoding="utf-8"))
+            self.assertEqual(written["requires"][PCM], own)
+            self.assertEqual(written["requires"][OIO]["commit"], OIO_SHA)
+            # Write-then-check is clean, and a second write changes nothing:
+            # the repair converges instead of chasing its own head.
+            self.assertEqual(mesh.check_repo(stack(), repo, PCM), [])
+            before = (repo / mesh.MESH_NAME).read_text(encoding="utf-8")
+            mesh.write_repo(stack(), repo, PCM)
+            self.assertEqual((repo / mesh.MESH_NAME).read_text(encoding="utf-8"), before)
+
     def test_missing_mesh_file_fails(self) -> None:
         import tempfile
 

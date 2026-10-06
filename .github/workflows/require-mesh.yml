@@ -35,13 +35,13 @@ jobs:
           ref: main
           path: .stack-train
 
-      - name: Require every component at the mesh version
+      - name: Require every sibling at the mesh version
         if: ${{ !inputs.write }}
         run: python .stack-train/scripts/mesh.py --check --root . --component "${{ inputs.component }}"
 
       - name: Rewrite the local requirement to the mesh
         if: ${{ inputs.write }}
-        run: python .stack-train/scripts/mesh.py --write --root .
+        run: python .stack-train/scripts/mesh.py --write --root . --component "${{ inputs.component }}"
 
       - name: Open a pull request when this repository was behind
         if: ${{ inputs.write }}
@@ -59,6 +59,10 @@ jobs:
             echo "Already on the mesh."
             exit 0
           fi
-          git commit -m "Require the current mesh versions of all four stack repositories."
+          git commit -m "Require the current mesh versions of the sibling stack repositories."
           git push --force-with-lease origin mesh/sync
-          gh pr create --base main --head mesh/sync --title "Require the current mesh versions" --body "A stack component moved. This repository has to require that version. An older checkout stays failed." || echo "pull request already open"
+          gh pr create --base main --head mesh/sync --title "Require the current mesh versions" --body "A sibling stack component moved. This repository has to require that version. An older checkout stays failed." || echo "pull request already open"
+          # Arm auto-merge so the repair lands on its own once the required
+          # checks pass. Opening the PR without this left every mesh repair
+          # sitting unmerged, which is how a stale pin survived for weeks.
+          gh pr merge mesh/sync --auto --squash --delete-branch || echo "auto-merge not armed; checks may still be pending"

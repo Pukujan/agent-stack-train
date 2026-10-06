@@ -3,13 +3,16 @@
 
 stack-releases.json is the mesh. Each of project-continuity-modules,
 content-generation-modules, agent-custom-setup, and observational-issue-ops
-must require every component in that file, including itself. An older
-version or commit fails the check. ``--write`` rewrites the local
-stack-mesh.json (and a checkout pin left in CI) to those versions.
+must require every *sibling* component in that file at the mesh version. An
+older version or commit fails the check. A repository does not require itself
+by commit: it cannot pin a commit it has not written yet, and requiring its own
+head would make the mesh unmergeable. ``--write`` rewrites the local
+stack-mesh.json (and a checkout pin left in CI) to those versions, keeping the
+repository's own entry as it already is.
 
 Usage:
     python scripts/mesh.py --check --root . --component content-generation-modules
-    python scripts/mesh.py --write --root .
+    python scripts/mesh.py --write --root . --component content-generation-modules
 """
 from __future__ import annotations
 
@@ -96,14 +99,23 @@ def declaration_from(mesh: dict) -> dict:
     return {"source": SOURCE, "requires": requires}
 
 
-def declaration_problems(mesh: dict, declaration: dict) -> list[str]:
-    """Fail when a repo requires anything other than the mesh versions."""
+def declaration_problems(mesh: dict, declaration: dict, component: str = "") -> list[str]:
+    """Fail when a repo requires a sibling at anything other than the mesh version.
+
+    The repository's own entry is never compared. A repo cannot pin itself at a
+    commit it has not written yet: every merge moves its head, so a mesh that
+    required its own head would fail the instant it merged and could never
+    converge. A repo's self-consistency is its declared version, checked by
+    ``own_version_problems``, not its own commit.
+    """
     required = declaration_from(mesh)["requires"]
     got = declaration.get("requires") if isinstance(declaration, dict) else None
     if not isinstance(got, dict):
-        return [f"{MESH_NAME} must require every component at the mesh version"]
+        return [f"{MESH_NAME} must require every sibling at the mesh version"]
     errors = []
     for name, spec in required.items():
+        if name == component:
+            continue
         actual = got.get(name)
         if not isinstance(actual, dict):
             errors.append(f"{name}: missing; the mesh requires {spec['version']} {spec['commit']}")
@@ -177,17 +189,32 @@ def check_repo(mesh: dict, root: Path, component: str) -> list[str]:
         except MeshError as exc:
             errors = [str(exc)]
         else:
-            errors = declaration_problems(mesh, declaration)
+            errors = declaration_problems(mesh, declaration, component)
     errors.extend(own_version_problems(mesh, root, component))
     errors.extend(pin_problems(mesh, root))
     return errors
 
 
-def write_repo(mesh: dict, root: Path) -> list[Path]:
-    """Rewrite the local requirement file and a CI checkout pin to the mesh."""
+def write_repo(mesh: dict, root: Path, component: str = "") -> list[Path]:
+    """Rewrite the local requirement file and a CI checkout pin to the mesh.
+
+    The repository's own entry is preserved exactly as it already is: a repo
+    does not pin itself. It is kept in the file so the shape stays uniform and
+    older readers still see four components.
+    """
     written = []
     path = root / MESH_NAME
-    path.write_text(json.dumps(declaration_from(mesh), indent=2) + "\n", encoding="utf-8", newline="\n")
+    declaration = declaration_from(mesh)
+    if component:
+        try:
+            existing = load_json(path)
+        except MeshError:
+            existing = None
+        if isinstance(existing, dict):
+            own = (existing.get("requires") or {}).get(component)
+            if isinstance(own, dict):
+                declaration["requires"][component] = own
+    path.write_text(json.dumps(declaration, indent=2) + "\n", encoding="utf-8", newline="\n")
     written.append(path)
     workflow = root / ".github" / "workflows" / "ci.yml"
     if workflow.is_file():
@@ -214,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
         document = load_json(args.mesh) if args.mesh else fetch_mesh()
         root = args.root.resolve()
         if args.write:
-            written = write_repo(document, root)
+            written = write_repo(document, root, args.component)
             for path in written:
                 print(f"wrote {path}")
             return 0
