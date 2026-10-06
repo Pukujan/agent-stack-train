@@ -70,7 +70,26 @@ class InstallerTests(unittest.TestCase):
         (self.target / "AGENTS.md").write_text("# Existing adopter rules\n\nKeep this paragraph.\n")
 
     def tree(self):
-        return {str(path.relative_to(self.target)): path.read_bytes() for path in self.target.rglob("*") if path.is_file() and ".git" not in path.parts}
+        return {str(path.relative_to(self.target)).replace("\\", "/"): path.read_bytes() for path in self.target.rglob("*") if path.is_file() and ".git" not in path.parts}
+
+    def make_dir_link(self, link, target):
+        """Create a directory link: a symlink, or a Windows junction where symlinks need privilege."""
+        try:
+            os.symlink(target, link, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            if sys.platform != "win32":
+                raise
+            import _winapi
+
+            _winapi.CreateJunction(str(target), str(link))
+        self.addCleanup(self._remove_dir_link, link)
+
+    @staticmethod
+    def _remove_dir_link(link):
+        if link.is_symlink():
+            link.unlink()
+        elif link.exists():
+            os.rmdir(link)
 
     def test_fresh_and_repeat_install_are_confined_and_preserve_extension(self):
         before = set(self.tree())
@@ -135,7 +154,7 @@ class InstallerTests(unittest.TestCase):
     def test_symlink_target_path_is_refused(self):
         outside = Path(self.temp.name) / "outside"
         outside.mkdir()
-        (self.target / ".oio").symlink_to(outside, target_is_directory=True)
+        self.make_dir_link(self.target / ".oio", outside)
         with self.assertRaisesRegex(InstallError, "symlink"):
             install(str(self.target))
         self.assertEqual(list(outside.iterdir()), [])
@@ -149,12 +168,12 @@ class InstallerTests(unittest.TestCase):
                 outside.mkdir()
                 path = self.target / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.symlink_to(outside, target_is_directory=True)
+                self.make_dir_link(path, outside)
                 outside_before = {str(p): p.read_bytes() for p in outside.rglob("*") if p.is_file()}
                 with self.assertRaisesRegex(InstallError, "symlink"):
                     install(str(self.target))
                 self.assertEqual({str(p): p.read_bytes() for p in outside.rglob("*") if p.is_file()}, outside_before)
-                path.unlink()
+                self._remove_dir_link(path)
 
     def test_directory_swap_to_symlink_during_install_cannot_redirect_write(self):
         target = self.target
@@ -169,7 +188,7 @@ class InstallerTests(unittest.TestCase):
         def swap_after_open(root, relative):
             if relative == ".oio/ontology/default.json":
                 managed_parent.rename(moved)
-                managed_parent.symlink_to(outside, target_is_directory=True)
+                self.make_dir_link(managed_parent, outside)
 
         with mock.patch("oio_installer._after_parent_open", side_effect=swap_after_open):
             with _TargetFS(target) as target_fs, self.assertRaises((InstallError, OSError)):
@@ -203,7 +222,7 @@ class InstallerTests(unittest.TestCase):
         def swap_after_open(root, relative):
             if relative == ".oio/ontology/default.json":
                 managed_parent.rename(moved)
-                managed_parent.symlink_to(outside, target_is_directory=True)
+                self.make_dir_link(managed_parent, outside)
 
         with mock.patch("oio_installer._after_parent_open", side_effect=swap_after_open):
             with _TargetFS(target) as target_fs, self.assertRaises((InstallError, OSError)):

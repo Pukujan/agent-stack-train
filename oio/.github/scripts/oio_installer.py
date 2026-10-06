@@ -71,7 +71,37 @@ def _after_parent_open(target: Path, relative: str) -> None:
     """Test hook for exercising path swaps after secure directory traversal."""
 
 
+def _is_reparse(info: os.stat_result) -> bool:
+    """Whether a stat result is a symlink or a Windows reparse point (junction)."""
+    if stat.S_ISLNK(info.st_mode):
+        return True
+    return bool(getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+
+
+def _is_link_or_reparse(path: Path) -> bool:
+    """``Path.is_symlink`` misses Windows junctions; this also catches those."""
+    if path.is_symlink():
+        return True
+    try:
+        return _is_reparse(os.lstat(path))
+    except OSError:
+        return False
+
+
 class _TargetFS:
+    """Managed-path access, dispatched per platform.
+
+    POSIX holds descriptor-relative no-follow directory handles; Windows refuses
+    reparse points and re-verifies parent identity, since it has no ``dir_fd``.
+    """
+
+    def __new__(cls, root: Path):
+        if cls is _TargetFS:
+            return super().__new__(_WindowsTargetFS if sys.platform == "win32" else _PosixTargetFS)
+        return super().__new__(cls)
+
+
+class _PosixTargetFS(_TargetFS):
     """Descriptor-relative access that refuses symlinks at managed path components."""
 
     def __init__(self, root: Path):
@@ -192,6 +222,131 @@ class _TargetFS:
             os.fsync(parent_fd)
         finally:
             os.close(parent_fd)
+
+
+class _WindowsTargetFS(_TargetFS):
+    """Refuse reparse points and re-verify parent identity around each write.
+
+    Windows exposes no ``dir_fd`` operations, so this cannot hold a directory
+    open the way the POSIX layer does. It refuses a symlink, junction, or any
+    other reparse point at every managed path component, and re-verifies the
+    parent directory's identity immediately before and after each replacement.
+    A same-user process that swaps the parent path inside the remaining window
+    is the documented residual race (see docs/ADOPTER_INSTALL.md); a swap
+    detected at any checkpoint fails closed.
+    """
+
+    def __init__(self, root: Path):
+        info = os.lstat(root)
+        if not stat.S_ISDIR(info.st_mode) or _is_reparse(info):
+            raise InstallError(f"target root is a symlink or reparse point: {root}")
+        self.root = root
+        self._root_id = (info.st_dev, info.st_ino)
+
+    def close(self) -> None:
+        pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc):
+        self.close()
+
+    def _parts(self, relative: str) -> tuple[str, ...]:
+        pure = PurePosixPath(relative)
+        if pure.is_absolute() or ".." in pure.parts or not pure.parts or any("\\" in part for part in pure.parts):
+            raise InstallError(f"unsafe package path: {relative!r}")
+        return pure.parts
+
+    def _check(self, path: Path) -> os.stat_result:
+        info = os.lstat(path)
+        if _is_reparse(info):
+            raise InstallError(f"refusing symlink or reparse point in managed target path: {path}")
+        return info
+
+    def _verify_root(self) -> None:
+        info = os.lstat(self.root)
+        if _is_reparse(info) or (info.st_dev, info.st_ino) != self._root_id:
+            raise InstallError("target root changed during installation")
+
+    def _parent(self, relative: str, *, create: bool = False) -> tuple[Path, str, tuple[int, int]]:
+        parts = self._parts(relative)
+        parent = self.root
+        for part in parts[:-1]:
+            parent = parent / part
+            try:
+                info = self._check(parent)
+            except FileNotFoundError:
+                if not create:
+                    raise
+                os.mkdir(parent)
+                info = self._check(parent)
+            if not stat.S_ISDIR(info.st_mode):
+                raise InstallError(f"managed target path is not a directory: {relative}")
+        info = self._check(parent)
+        return parent, parts[-1], (info.st_dev, info.st_ino)
+
+    def _verify_parent(self, parent: Path, expected: tuple[int, int]) -> None:
+        info = os.lstat(parent)
+        if _is_reparse(info) or (info.st_dev, info.st_ino) != expected:
+            raise InstallError(f"managed target path changed during installation: {parent}")
+
+    def read_bytes(self, relative: str) -> bytes | None:
+        path = self.root
+        try:
+            for part in self._parts(relative):
+                path = path / part
+                self._check(path)
+        except FileNotFoundError:
+            return None
+        if not stat.S_ISREG(os.lstat(path).st_mode):
+            raise InstallError(f"managed target path is not a regular file: {relative}")
+        return path.read_bytes()
+
+    def atomic_write(self, relative: str, data: bytes) -> None:
+        parent, leaf, parent_id = self._parent(relative, create=True)
+        temp_name = f".oio-tmp-{os.getpid()}-{os.urandom(8).hex()}"
+        temp_path = parent / temp_name
+        try:
+            _after_parent_open(self.root, relative)
+            self._verify_root()
+            self._verify_parent(parent, parent_id)
+            fd = os.open(temp_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            try:
+                with os.fdopen(fd, "wb") as handle:
+                    fd = -1
+                    handle.write(data)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+            finally:
+                if fd >= 0:
+                    os.close(fd)
+            leaf_path = parent / leaf
+            try:
+                info = os.lstat(leaf_path)
+            except FileNotFoundError:
+                pass
+            else:
+                if _is_reparse(info):
+                    raise InstallError(f"refusing symlink or reparse point in managed target path: {relative}")
+                if not stat.S_ISREG(info.st_mode):
+                    raise InstallError(f"managed target path is not a regular file: {relative}")
+            self._verify_parent(parent, parent_id)
+            os.replace(temp_path, leaf_path)
+            self._verify_parent(parent, parent_id)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+
+    def unlink(self, relative: str) -> None:
+        parent, leaf, parent_id = self._parent(relative)
+        self._verify_parent(parent, parent_id)
+        leaf_path = parent / leaf
+        if _is_reparse(os.lstat(leaf_path)):
+            raise InstallError(f"refusing symlink or reparse point in managed target path: {relative}")
+        os.unlink(leaf_path)
 
 
 def _recover_transaction(target: Path, target_fs: _TargetFS) -> None:
@@ -341,7 +496,7 @@ def _safe_target(root_arg: str) -> Path:
     raw = Path(root_arg).expanduser()
     if not raw.is_absolute():
         raise InstallError("--target must be an explicit absolute path")
-    if raw.is_symlink():
+    if _is_link_or_reparse(raw):
         raise InstallError("--target cannot itself be a symlink")
     target = raw.resolve(strict=True)
     if not target.is_dir() or not ((target / ".git").is_dir() or (target / ".git").is_file()):
@@ -356,7 +511,7 @@ def _target_file(target: Path, relative: str, *, must_exist: bool = False) -> Pa
     current = target
     for part in pure.parts:
         current = current / part
-        if current.is_symlink():
+        if _is_link_or_reparse(current):
             raise InstallError(f"refusing symlink in managed target path: {relative}")
     if must_exist and not current.exists():
         raise InstallError(f"required target file is missing: {relative}")

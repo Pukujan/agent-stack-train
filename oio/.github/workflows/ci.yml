@@ -14,7 +14,29 @@ permissions:
   contents: read
 
 jobs:
+  # OIO's installer must run on Windows too: ACS SPEC.md section 6 requires every
+  # installer to run on Windows, macOS, and Linux, and the Windows path is only
+  # reachable on a real Windows host. `gates` aggregates this job so the required
+  # context stays `gates` while the platform boundary is enforced, not assumed.
+  windows:
+    name: windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the installer and triage suite on Windows
+        run: |
+          python -m pip install -r requirements.txt
+          python -m unittest discover -s tests -v
+
   gates:
+    name: gates
+    needs: [windows]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,3 +102,9 @@ jobs:
               print("OK", f)
           print(f"OK: {len(files)} file(s) parse")
           PY
+
+      - name: Require the Windows installer suite green
+        run: |
+          set -euo pipefail
+          echo "windows=${{ needs.windows.result }}"
+          test "${{ needs.windows.result }}" = "success"
