@@ -14,7 +14,7 @@ The same version pin was hand-copied across many files and drifted: measured 202
 - `components.json` — where each version is read from (repository, version file, and role).
 - `stack-manifest.schema.json` — the shape of an adopter's own pin file. An empty pin follows the train.
 - `scripts/check_manifest.py` — the reusable check an adopter runs in CI to prove its manifest agrees with the train.
-- `scripts/refresh_train.py` — rewrites the certified set from those default branches. The refresh workflow runs it on a schedule.
+- `scripts/refresh_train.py` — rewrites the certified set from those default branches, skipping a head that changed only the mesh. The refresh workflow runs it on a schedule.
 - The rule for reading the train: pin once, read the version from the train, never hand-copy.
 
 ## Non-goals

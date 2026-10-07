@@ -8,6 +8,11 @@ for the default-branch head of each component, and records the version that
 head declares. A scheduled workflow runs it so the record cannot lag behind
 the branches adopters are actually on.
 
+A head that changed nothing but ``stack-mesh.json`` is skipped in favor of the
+last commit that changed the component itself. A mesh rewrite exists to take a
+sibling's version; certifying it would move this component's certified commit,
+which forces every sibling to rewrite its mesh, forever. See ``certifiable_sha``.
+
 Usage:
     python scripts/refresh_train.py           # write stack-releases.json when a head moved
     python scripts/refresh_train.py --check   # exit 1 when the file is stale; do not write
@@ -31,19 +36,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 COMPONENTS_PATH = ROOT / "components.json"
 RELEASES_PATH = ROOT / "stack-releases.json"
+MESH_FILE = "stack-mesh.json"
 TRAIN_SCHEMA = "agent-stack-train.stack-releases.v1"
 PUBLISHED_BY = "https://github.com/Pukujan/agent-stack-train"
 RELEASE_TRAIN = "current"
 ADOPTION_RULE = (
     "This file is the mesh for project-continuity-modules, "
     "content-generation-modules, agent-custom-setup, and observational-issue-ops. "
-    "Each of those repositories must require every component here, including "
-    "itself. An older version or commit fails scripts/mesh.py. The hotloader "
-    "installs these versions and refuses an older checkout."
+    "Each of those repositories must require every sibling component here. A "
+    "repository does not require itself: it cannot pin a commit it has not "
+    "written yet, and a mesh that did would fail the moment it merged. An older "
+    "version or commit fails scripts/mesh.py. The hotloader installs these "
+    "versions and refuses an older checkout."
 )
 NOTE = (
     "When one component moves, the other three must move to it. "
-    "scripts/refresh_train.py records the current head of each component. "
+    "scripts/refresh_train.py records each component's last commit that changed "
+    "the component itself, skipping a commit that changed only stack-mesh.json, "
+    "so taking a sibling's version does not itself move the certified set. "
     "scripts/mesh.py fails a repository that still requires an older one. "
     "recorded_at changes only when a certified entry or this rule changes."
 )
@@ -129,6 +139,62 @@ def head_sha(owner: str, repo: str, ref: str, fetch) -> str:
     return sha.lower()
 
 
+def api_list(url: str, fetch) -> list:
+    try:
+        data = json.loads(fetch(url))
+    except json.JSONDecodeError as exc:
+        raise RefreshError(f"{url} did not return JSON: {exc}") from exc
+    if not isinstance(data, list):
+        raise RefreshError(f"{url} must return a JSON array")
+    return data
+
+
+def changed_files(owner: str, repo: str, sha: str, fetch) -> list[str]:
+    payload = api_json(f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}", fetch)
+    files = payload.get("files")
+    if not isinstance(files, list):
+        raise RefreshError(f"{owner}/{repo}@{sha} did not return a file list")
+    return [
+        entry["filename"]
+        for entry in files
+        if isinstance(entry, dict) and isinstance(entry.get("filename"), str)
+    ]
+
+
+def certifiable_sha(owner: str, repo: str, ref: str, fetch, *, limit: int = 30) -> str:
+    """The head, or the newest commit that changed something besides the mesh.
+
+    A mesh rewrite changes nothing but ``stack-mesh.json``. Certifying it would
+    move the certified commit every time a repository took its siblings'
+    versions -- which moves that repository's head, which makes every sibling
+    rewrite its mesh again. The mesh could never settle. Skipping those commits
+    certifies the last commit that changed the component itself, so a mesh
+    repair does not invalidate the mesh it just wrote.
+
+    When the history cannot be read, the head is certified. That is the older,
+    churnier behavior, and it is safer than guessing at a shorter history.
+    """
+    head = head_sha(owner, repo, ref, fetch)
+    try:
+        listing = api_list(
+            f"https://api.github.com/repos/{owner}/{repo}/commits?sha={ref}&per_page={limit}",
+            fetch,
+        )
+        shas = [
+            entry["sha"]
+            for entry in listing
+            if isinstance(entry, dict) and isinstance(entry.get("sha"), str)
+        ]
+        if not shas or shas[0].lower() != head:
+            return head
+        for sha in shas:
+            if set(changed_files(owner, repo, sha, fetch)) != {MESH_FILE}:
+                return sha.lower()
+    except RefreshError:
+        return head
+    return head
+
+
 def file_text(owner: str, repo: str, sha: str, path: str, fetch) -> str:
     # The contents API, not raw.githubusercontent.com. The raw host failed TLS
     # from the network this script runs on; api.github.com did not.
@@ -149,7 +215,7 @@ def file_text(owner: str, repo: str, sha: str, path: str, fetch) -> str:
 def component_entry(spec: dict, owner: str, ref: str, fetch) -> dict:
     name = spec["name"]
     repo = spec["repo"]
-    sha = head_sha(owner, repo, ref, fetch)
+    sha = certifiable_sha(owner, repo, ref, fetch)
     entry: dict = {"version": "", "commit": sha}
 
     if spec.get("version_file"):
