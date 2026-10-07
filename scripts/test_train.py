@@ -29,6 +29,12 @@ def pages() -> dict[str, str]:
         "modules": ["brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "human-output-naming", "visual-direction", "image-generation", "html-demo"],
     }
     acs = {"version": "0.2.0"}
+    heads = {
+        "project-continuity-modules": (PCM_SHA, "src/continuity/__init__.py"),
+        "content-generation-modules": (CGM_SHA, "system-version.json"),
+        "agent-custom-setup": (ACS_SHA, "registry.json"),
+        "observational-issue-ops": (OIO_SHA, "ontology/oio-project.json"),
+    }
     blobs = {
         f"https://api.github.com/repos/{OWNER}/project-continuity-modules/commits/main": {"sha": PCM_SHA},
         f"https://api.github.com/repos/{OWNER}/content-generation-modules/commits/main": {"sha": CGM_SHA},
@@ -40,6 +46,12 @@ def pages() -> dict[str, str]:
         f"https://api.github.com/repos/{OWNER}/agent-custom-setup/contents/registry.json?ref={ACS_SHA}": json.dumps(acs),
         f"https://api.github.com/repos/{OWNER}/observational-issue-ops/releases/latest": {"tag_name": "v0.1.0"},
     }
+    # Each head here changed something besides the mesh, so the walk-back in
+    # certifiable_sha certifies the head itself. The mesh-only case is covered
+    # by CertifiableShaTests.
+    for repo, (sha, path) in heads.items():
+        blobs[f"https://api.github.com/repos/{OWNER}/{repo}/commits?sha=main&per_page=30"] = [{"sha": sha}]
+        blobs[f"https://api.github.com/repos/{OWNER}/{repo}/commits/{sha}"] = {"files": [{"filename": path}]}
     return {url: body if isinstance(body, str) else json.dumps(body) for url, body in blobs.items()}
 
 
@@ -129,6 +141,90 @@ class CheckTests(unittest.TestCase):
         del manifest["pins"]["observational-issue-ops"]
         errors = check_manifest.check(manifest, self.train(), "train")
         self.assertTrue(any("observational-issue-ops" in error for error in errors))
+
+
+class CertifiableShaTests(unittest.TestCase):
+    """A mesh rewrite must not move the certified commit.
+
+    Certifying it would move this component's head, which makes every sibling
+    rewrite its mesh, which moves their heads -- a loop the mesh can never
+    settle. These pin the walk-back and its fail-safe.
+    """
+
+    def history(self, shas: list[str], files: dict[str, list[str]]) -> dict[str, str]:
+        served = {f"https://api.github.com/repos/{OWNER}/example/commits/main": json.dumps({"sha": shas[0]})}
+        served[f"https://api.github.com/repos/{OWNER}/example/commits?sha=main&per_page=30"] = json.dumps(
+            [{"sha": sha} for sha in shas]
+        )
+        for sha in shas:
+            served[f"https://api.github.com/repos/{OWNER}/example/commits/{sha}"] = json.dumps(
+                {"files": [{"filename": name} for name in files[sha]]}
+            )
+        return served
+
+    def certifiable(self, served: dict[str, str]) -> str:
+        def fetch(url: str) -> str:
+            if url not in served:
+                raise AssertionError(url)
+            return served[url]
+
+        return refresh_train.certifiable_sha(OWNER, "example", "main", fetch)
+
+    def test_a_mesh_only_head_certifies_the_last_substantive_commit(self) -> None:
+        substantive, mesh = "a" * 40, "b" * 40
+        served = self.history(
+            [mesh, substantive],
+            {mesh: ["stack-mesh.json"], substantive: ["src/continuity/__init__.py"]},
+        )
+        self.assertEqual(self.certifiable(served), substantive)
+
+    def test_a_substantive_head_is_certified_itself(self) -> None:
+        substantive, older = "a" * 40, "b" * 40
+        served = self.history(
+            [substantive, older],
+            {substantive: ["src/continuity/__init__.py"], older: ["README.md"]},
+        )
+        self.assertEqual(self.certifiable(served), substantive)
+
+    def test_consecutive_mesh_rewrites_are_all_skipped(self) -> None:
+        substantive = "a" * 40
+        meshes = ["b" * 40, "c" * 40, "d" * 40]
+        served = self.history(
+            meshes + [substantive],
+            {sha: ["stack-mesh.json"] for sha in meshes}
+            | {substantive: ["registry.json"]},
+        )
+        self.assertEqual(self.certifiable(served), substantive)
+
+    def test_a_commit_that_also_changes_another_file_is_substantive(self) -> None:
+        """Only a change confined to the mesh is skipped."""
+        head = "a" * 40
+        served = self.history(
+            [head],
+            {head: ["stack-mesh.json", ".github/workflows/ci.yml"]},
+        )
+        self.assertEqual(self.certifiable(served), head)
+
+    def test_unreadable_history_falls_back_to_the_head(self) -> None:
+        """A failure to read the log certifies the head -- churnier, never wrong.
+
+        A rate-limited or unauthorised listing answers with a JSON object, not
+        the array of commits, which is what the API returns in production.
+        """
+        head = "a" * 40
+        served = {f"https://api.github.com/repos/{OWNER}/example/commits/main": json.dumps({"sha": head})}
+        served[f"https://api.github.com/repos/{OWNER}/example/commits?sha=main&per_page=30"] = json.dumps(
+            {"message": "API rate limit exceeded"}
+        )
+        self.assertEqual(self.certifiable(served), head)
+
+    def test_a_listing_that_does_not_start_at_the_head_is_not_walked(self) -> None:
+        head, other = "a" * 40, "b" * 40
+        served = {f"https://api.github.com/repos/{OWNER}/example/commits/main": json.dumps({"sha": head})}
+        served[f"https://api.github.com/repos/{OWNER}/example/commits?sha=main&per_page=30"] = json.dumps(
+            [{"sha": other}]
+        )
+        self.assertEqual(self.certifiable(served), head)
 
 
 if __name__ == "__main__":
