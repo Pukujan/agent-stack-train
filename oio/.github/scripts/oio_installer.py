@@ -105,8 +105,7 @@ class _PosixTargetFS(_TargetFS):
     """Descriptor-relative access that refuses symlinks at managed path components."""
 
     def __init__(self, root: Path):
-        required = {os.open, os.mkdir, os.stat, os.unlink, os.rename}
-        if not required.issubset(os.supports_dir_fd) or not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
+        if _posix_precondition():
             raise InstallError("this platform lacks descriptor-relative no-follow filesystem operations")
         self.root = root
         self.root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
@@ -676,12 +675,58 @@ def _install_in_target(target: Path, target_fs: _TargetFS, project_id: str | Non
     return [f"Installed OIO {OIO_VERSION} for {project_id} in {target}", "Default project priority paths 1–100 are available; replace their generic definitions with project meanings and maintain the owner account map before relying on authority-ranked triage."]
 
 
+def _posix_precondition() -> str:
+    """Why the POSIX backend cannot run here, or ``""`` when it can.
+
+    The single source of truth for the POSIX precondition: ``_PosixTargetFS``
+    refuses with it, and ``platform_support`` reports it. A caller that asks
+    ``--check-platform`` therefore cannot be told something the install would
+    then refuse.
+    """
+    required = {os.open, os.mkdir, os.stat, os.unlink, os.rename}
+    missing = sorted(f.__name__ for f in required - set(os.supports_dir_fd))
+    if missing:
+        return "os.supports_dir_fd lacks " + ", ".join(missing)
+    for flag in ("O_NOFOLLOW", "O_DIRECTORY"):
+        if not hasattr(os, flag):
+            return f"os.{flag} is unavailable"
+    return ""
+
+
+def platform_support() -> tuple[bool, str]:
+    """Whether this platform can host the installer, and the backend it uses.
+
+    Derived from the same dispatch ``_TargetFS`` performs, so a caller's probe
+    cannot claim support the install would not deliver — which is how a
+    hard-coded copy of this check went stale when Windows support landed.
+    """
+    if sys.platform == "win32":
+        return True, "Windows reparse-point backend"
+    why = _posix_precondition()
+    if why:
+        return False, why
+    return True, "descriptor-relative no-follow backend"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", required=True, help="absolute path to one existing Git target repository")
+    parser.add_argument("--target", help="absolute path to one existing Git target repository")
     parser.add_argument("--project-id", help="owner/repository; otherwise inferred from target origin")
     parser.add_argument("--check", action="store_true", help="validate the installed files without writing")
+    parser.add_argument(
+        "--check-platform",
+        action="store_true",
+        help="report whether this platform can host the installer, then exit (no target needed)",
+    )
     args = parser.parse_args(argv)
+
+    if args.check_platform:
+        supported, backend = platform_support()
+        print(f"{'supported' if supported else 'unsupported'}: {backend}")
+        return 0 if supported else 1
+
+    if not args.target:
+        parser.error("--target is required unless --check-platform is given")
     try:
         for line in install(args.target, args.project_id, args.check):
             print(line)

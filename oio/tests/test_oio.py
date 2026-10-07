@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -526,6 +528,40 @@ Correct the filing and check classification.
             issue["body"] = issue["body"].replace("observational", issue_type, 1)
             with self.subTest(issue_type=issue_type):
                 self.assertTrue(classify_issue(issue, ROOT)["skip"])
+
+
+class PlatformProbeTests(unittest.TestCase):
+    """The probe a caller uses must agree with the dispatch the installer uses.
+
+    ACS calls ``--check-platform`` instead of keeping its own copy of OIO's
+    precondition. A copy is what went stale: it kept reporting Windows
+    unsupported after the Windows backend landed, so an install that would have
+    succeeded reported PARTIAL.
+    """
+
+    def test_probe_reports_the_backend_the_installer_dispatches_to(self):
+        supported, backend = oio_installer.platform_support()
+        self.assertTrue(supported, backend)
+        expected = "Windows" if sys.platform == "win32" else "descriptor-relative"
+        self.assertIn(expected, backend)
+
+    def test_check_platform_flag_runs_without_a_target(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(oio_installer.main(["--check-platform"]), 0)
+
+    def test_posix_precondition_is_the_probe_and_the_refusal(self):
+        """One source of truth for the POSIX precondition.
+
+        The reason the probe reports is the reason the backend refuses with, so
+        a caller cannot be told something the install would then reject.
+        """
+        if sys.platform == "win32":
+            self.skipTest("the POSIX precondition is not consulted on Windows")
+        with mock.patch.object(oio_installer.os, "supports_dir_fd", set()):
+            self.assertTrue(oio_installer._posix_precondition())
+            self.assertFalse(oio_installer.platform_support()[0])
+            with self.assertRaises(InstallError):
+                oio_installer._PosixTargetFS(Path("."))
 
 
 if __name__ == "__main__":
