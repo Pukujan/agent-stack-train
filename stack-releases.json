@@ -2,7 +2,7 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-07T01:09:05Z",
+  "recorded_at": "2026-10-07T07:18:36Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
@@ -20,7 +20,7 @@
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "efd8e191eb2a8299fa3be9ebaf2f49404742bcfe",
+      "commit": "264117398e7754d7e91076481cd664b5e197c1d4",
       "module": "multi-agent-hotload",
       "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime."
     },
