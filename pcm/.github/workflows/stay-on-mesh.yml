@@ -30,3 +30,7 @@ jobs:
     with:
       component: project-continuity-modules
       write: true
+    secrets:
+      # Optional. Without it the pull request is opened with github.token and
+      # its checks wait for a human approval; with it the sync runs unattended.
+      MESH_SYNC_TOKEN: ${{ secrets.MESH_SYNC_TOKEN }}
