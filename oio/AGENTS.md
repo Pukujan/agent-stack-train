@@ -8,7 +8,7 @@ For GitHub repositories, verify the live linked issue with `continuity issue ver
 
 ## Stack this repository consumes
 
-Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its pins live in one place — [`stack-manifest.json`](stack-manifest.json) — and the pinned candidate versions are recorded in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train).
+Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its machine-checked pins live in one place — [`stack-mesh.json`](stack-mesh.json), validated against the certified train — and the certified versions are recorded in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train). [`stack-manifest.json`](stack-manifest.json) names the components and the train source.
 
 | Component | Role here |
 | --- | --- |
@@ -42,7 +42,7 @@ Every issue log is a non-binding record for review, never an implementation or r
 
 ## How OIO separates from the rest of the stack
 
-OIO exists separately because the issue log used to live inside the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer graded itself. OIO takes the governance out. The same reasoning applies to versions: a product repository must not certify its own siblings, so the proposed version manifest lives in the dedicated train repository.
+OIO exists separately because the issue log used to live inside the installer. When ACS owned both the install surface and the coordination rules, installing ACS installed governance — the installer graded itself. OIO takes the governance out. The same reasoning applies to versions: a product repository must not certify its own siblings, so the certified version manifest lives in the dedicated train repository.
 
 | Repository | Owns | Does not own |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ OIO exists separately because the issue log used to live inside the installer. W
 | **PCM** — `project-continuity-modules` | Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates, the `continuity` CLI. | Issue governance, narrative, versions. |
 | **CGM** — `content-generation-modules` | Narrative and style authority: writing routing, human-sounding writing, output naming, visual direction, image generation. | Issue governance, execution continuity, versions. |
 | **ACS** — `agent-custom-setup` | The install surface: the hot-loader and the runtime safety that wires PCM + CGM + OIO together. | Issue governance, narrative, execution continuity, versions. |
-| **`agent-stack-train`** | The proposed version manifest for stack compatibility; its current record is not a final certification. | Everything else. |
+| **`agent-stack-train`** | The certified version manifest for stack compatibility. | Everything else. |
 
 ## Canonical checkout
 
