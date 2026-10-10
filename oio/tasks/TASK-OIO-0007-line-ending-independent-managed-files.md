@@ -1,8 +1,8 @@
 # TASK-OIO-0007 — Line-ending independent managed files
 
-<!-- continuity:task {"acceptance":["Installing OIO writes every managed file with LF line endings and records the digest of those LF bytes, so a Windows (CRLF) install and a Linux (LF) install produce byte-identical files","`--check` passes on a checkout that renders the same content with CRLF, and reports the line-ending difference as a note rather than the 'managed file changed' tamper refusal; a real content edit is still refused","An existing install whose manifest recorded CRLF digests (from an installer that hashed a Windows worktree) migrates to LF through a normal re-install, without deleting the install or hand-editing the manifest","`python -m unittest discover -s tests` passes on Windows and on ubuntu CI, with new regression tests that fail against the pre-fix installer","A `.gitattributes` in the OIO source pins LF checkout so the shipped package bytes are canonical on every platform"],"depends_on":[],"goal":"Make OIO's managed-file integrity contract line-ending independent so a correct install passes its own required `--check` gate on a Linux checkout, whether the installer ran on Windows or Linux.","id":"OIO-0007","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/41","next_action":"Push the branch, open a PR that Refs #41, arm auto-merge after the final push, and confirm the required gates before marking complete.","owner":"owner/Pukujan","priority":"P5","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The installer read package files as raw working-tree bytes and hashed them, so a Windows (CRLF) checkout installed CRLF files with CRLF digests; a later LF checkout (Linux CI) then failed both `--check` and re-install with 'managed file changed since OIO installed it' even though the content was identical. Reported as recurring across adopter repositories (issue #41)."} -->
+<!-- continuity:task {"acceptance":["Installing OIO writes every managed file with LF line endings and records the digest of those LF bytes, so a Windows (CRLF) install and a Linux (LF) install produce byte-identical files","`--check` passes on a checkout that renders the same content with CRLF, and reports the line-ending difference as a note rather than the 'managed file changed' tamper refusal; a real content edit is still refused","An existing install whose manifest recorded CRLF digests (from an installer that hashed a Windows worktree) migrates to LF through a normal re-install, without deleting the install or hand-editing the manifest","`python -m unittest discover -s tests` passes on Windows and on ubuntu CI, with new regression tests that fail against the pre-fix installer","A `.gitattributes` in the OIO source pins LF checkout so the shipped package bytes are canonical on every platform"],"depends_on":[],"goal":"Make OIO's managed-file integrity contract line-ending independent so a correct install passes its own required `--check` gate on a Linux checkout, whether the installer ran on Windows or Linux.","id":"OIO-0007","issue_url":"https://github.com/Pukujan/observational-issue-ops/issues/41","next_action":"None for this task; the fix is merged at 27b954f. Human verification of a Windows-install to Linux-check round trip remains open on issue #41.","owner":"owner/Pukujan","priority":"P5","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"The installer read package files as raw working-tree bytes and hashed them, so a Windows (CRLF) checkout installed CRLF files with CRLF digests; a later LF checkout (Linux CI) then failed both `--check` and re-install with 'managed file changed since OIO installed it' even though the content was identical. Reported as recurring across adopter repositories (issue #41)."} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Pukujan
 - Priority: P5
 - Depends on: none
@@ -35,11 +35,11 @@ A Windows operator who installs OIO and then validates it on Linux (or vice vers
 
 ## Acceptance criteria
 
-- [ ] Installing OIO writes every managed file with LF and records the digest of those LF bytes; a Windows and a Linux install are byte-identical.
-- [ ] `--check` passes on a CRLF checkout of identical content and reports the line-ending difference as a note; a real content edit is still refused.
-- [ ] A legacy manifest that recorded CRLF digests migrates to LF through a normal re-install, without deleting the install or hand-editing the manifest.
-- [ ] `python -m unittest discover -s tests` passes on Windows and ubuntu CI, with new tests that fail against the pre-fix installer.
-- [ ] `.gitattributes` pins LF checkout for the OIO source.
+- [x] Installing OIO writes every managed file with LF and records the digest of those LF bytes; a Windows and a Linux install are byte-identical.
+- [x] `--check` passes on a CRLF checkout of identical content and reports the line-ending difference as a note; a real content edit is still refused.
+- [x] A legacy manifest that recorded CRLF digests migrates to LF through a normal re-install, without deleting the install or hand-editing the manifest.
+- [x] `python -m unittest discover -s tests` passes on Windows and ubuntu CI, with new tests that fail against the pre-fix installer.
+- [x] `.gitattributes` pins LF checkout for the OIO source.
 
 ## Evidence and sources
 
@@ -51,11 +51,37 @@ A Windows operator who installs OIO and then validates it on Linux (or vice vers
 
 - Leaf owning issue: `Pukujan/observational-issue-ops#41` (open; parent: none).
 - Related: `#32` (native Windows install) and `#37` (stale pin) are distinct but share the Windows-install symptom.
-- Primary writer / branch / as-of status: owner session on `task/OIO-0007-lf-canonical-install`, based on `origin/main` at `504d413`.
+- Primary writer / branch / as-of status: owner session on `task/OIO-0007-lf-canonical-install`, based on `origin/main` at `504d413`; merged to `main` as squash `27b954f` (PR #42). Task complete; issue #41 open pending human verification.
 
 ## Checkpoint log
 
-No checkpoints yet.
+### 2026-10-10 03:05:00 UTC — owner session (LF-canonical install)
+
+Completed:
+- Made the managed-file integrity contract line-ending independent: the installer normalizes every managed file to LF before writing and records the digest of those LF bytes, so a Windows (CRLF) install and a Linux (LF) install are byte-identical.
+- `--check` compares content after line-ending normalization and reports an EOL-only difference as a note instead of the tamper refusal, while a real content edit is still refused.
+- A manifest that recorded CRLF digests migrates to LF through a normal re-install, without deleting the install or hand-editing the manifest.
+- Added `.gitattributes` pinning `* text=auto eol=lf` (binary assets excluded) so the shipped package bytes are canonical on every platform.
+
+Evidence:
+- Branch `task/OIO-0007-lf-canonical-install` pushed at `74d983c` (base `origin/main` `504d413`); PR #42 merged to `main` as squash `27b954f` at 2026-10-10T02:55:17Z.
+- Required check `gates` passed: ubuntu leg (continuity validate/preflight, 45-test suite, adapter validation, secret scan, template parse) and windows leg (all six new regression tests green).
+- The six new tests fail against the pre-fix installer (2 failures, 3 errors). Receipt on issue #41 (comment 6093062254).
+- `require / mesh` is red but was already red on `main` before this branch and is not a required check; unrelated mesh drift (`agent-custom-setup` pin `efd8e191` behind the train `26411739`).
+
+Decisions:
+- Normalize at write time and record LF digests, rather than only comparing EOL-insensitively: this makes a Windows and a Linux install byte-identical and fixes the source, so no adopter-side workaround is needed.
+- Report an EOL-only difference as a note rather than a failure; keep the tamper refusal for real content edits. A content edit equalling another file's LF-normalized digest would require a SHA-256 collision, so tamper detection is not weakened.
+- No `--rehash`/`--force` flag: a normal re-install already migrates a legacy manifest.
+
+Changed:
+- .github/scripts/oio_installer.py, tests/test_oio.py, .gitattributes, docs/ADOPTER_INSTALL.md, tasks/TASK-OIO-0007-line-ending-independent-managed-files.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- Human verification of a Windows-install → Linux-`--check` round trip remains open on issue #41 (`needs-human-verification`); the fix is verified by tests and CI, not on a machine outside this session.
+
+Next:
+- None for this task; await the human round-trip confirmation on issue #41 before closing it.
 
 ## Handoff
 

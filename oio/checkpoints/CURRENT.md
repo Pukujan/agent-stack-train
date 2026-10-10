@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"OIO-0007","active_task_file":"tasks/TASK-OIO-0007-line-ending-independent-managed-files.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
@@ -16,10 +16,11 @@ Phase: OIO has shipped a prepacked observational/operational issue ontology and 
 - OIO-0004 (issue #13): the README hero was regenerated as a PNG (with `google/gemini-3-pro-image`) to meet the current CGM adopter-README hero contract, replacing the JPG; the references in the README, the adapter, and the prompt record were updated. Merged 2026-10-02 in PR #14 (squash `c65c69b`).
 - OIO-0005 (issue #18): shipped the prepacked observational/operational ontology, validated adopter extension scaffold, target-confined installer, local form/triage and 36-test disposable-adopter coverage. Merged 2026-10-03 in PR #19 (squash `e965d36`). The `gates` CI check passed on the PR head; the installer is ready for an explicitly targeted adopter installation. ACS runtime integration remains uncertified.
 - OIO-0006 (issue #32): ported the installer to Windows with the anti-redirection control preserved — the platform-dispatched `_TargetFS` refuses a symlink, junction, or reparse point at every managed path component and re-verifies parent identity around each replacement — plus a `windows-latest` CI leg aggregated into `gates`. Merged 2026-10-06 in PR #33 (squash `e2e30ec`).
+- OIO-0007 (issue #41): made the managed-file integrity contract line-ending independent — the installer writes LF-canonical bytes and hashes them, `--check` compares content after EOL normalization with a distinct note for an EOL-only difference (a real content edit is still refused), a legacy CRLF-digest manifest migrates through a normal re-install, and `.gitattributes` pins LF checkout for the source. Merged 2026-10-10 in PR #42 (squash `27b954f`); required check `gates` passed on both platform legs.
 
 ## Active
 
-- OIO-0007 (issue #41): make the managed-file integrity contract line-ending independent — write LF-canonical bytes and hash them, compare content after EOL normalization with a distinct note for an EOL-only difference, migrate legacy CRLF-digest manifests through a normal re-install, and pin LF checkout for the OIO source with `.gitattributes`. Branch `task/OIO-0007-lf-canonical-install`, based on `origin/main` at `504d413`. Parent: none.
+- none.
 
 ## Queued
 
@@ -28,7 +29,8 @@ Phase: OIO has shipped a prepacked observational/operational issue ontology and 
 ## Blockers
 
 - OIO pins the current ACS HOTLOAD module source but does not contain the runtime assignment, lease, watchdog, claim-queue, and claim-to-PR integration required for `hotload_check.py`; do not claim ACS runtime readiness.
+- `require / mesh` is red on `main`: the `agent-custom-setup` pin (`efd8e191`) is behind the train (`26411739`). Pre-existing since 2026-10-09; not a required check.
 
 ## Next atomic action
 
-Push `task/OIO-0007-lf-canonical-install`, open a PR that Refs #41, arm auto-merge only after the final push, and confirm the `gates` check (Windows + ubuntu legs) before marking OIO-0007 complete and posting the leaf receipt. The train at `Pukujan/agent-stack-train` remains `status: proposed`; ACS runtime integration remains uncertified.
+Await human verification of the Windows-install → Linux-`--check` round trip on issue #41 before closing it. The train at `Pukujan/agent-stack-train` remains `status: proposed`; ACS runtime integration remains uncertified.
