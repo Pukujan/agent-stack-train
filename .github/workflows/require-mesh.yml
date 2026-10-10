@@ -60,6 +60,12 @@ jobs:
             exit 0
           fi
           git commit -m "Require the current mesh versions of the sibling stack repositories."
+          # actions/checkout fetches only the default branch, so when mesh/sync
+          # already exists on the remote there is no remote-tracking ref for it
+          # here. --force-with-lease fails closed on that unknown ref ("stale
+          # info"), which rejected every push once the branch existed. Fetch it
+          # first so the lease has a value; tolerate it being absent.
+          git fetch origin mesh/sync || true
           git push --force-with-lease origin mesh/sync
           gh pr create --base main --head mesh/sync --title "Require the current mesh versions" --body "A sibling stack component moved. This repository has to require that version. An older checkout stays failed." || echo "pull request already open"
           # Arm auto-merge so the repair lands on its own once the required
