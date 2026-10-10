@@ -2,7 +2,7 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-07T07:18:36Z",
+  "recorded_at": "2026-10-10T08:37:20Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
@@ -26,7 +26,7 @@
     },
     "observational-issue-ops": {
       "version": "0.1.0",
-      "commit": "61b6aaa256fff043adc67433b7413503b0552983",
+      "commit": "5c3373da5f0953c4928c784425b620d0c713dc70",
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
     }
   },
