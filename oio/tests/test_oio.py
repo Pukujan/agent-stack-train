@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -152,6 +153,60 @@ class InstallerTests(unittest.TestCase):
         with self.assertRaisesRegex(InstallError, "managed file changed"):
             install(str(self.target))
         self.assertEqual(self.tree(), before)
+
+    def test_install_writes_lf_canonical_bytes_and_hashes_them(self):
+        install(str(self.target))
+        source = (ROOT / "ontology/default.json").read_bytes()
+        expected = source.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        installed = (self.target / ".oio/ontology/default.json").read_bytes()
+        self.assertNotIn(b"\r\n", installed)
+        self.assertEqual(installed, expected)
+        manifest = json.loads((self.target / ".oio/install-manifest.json").read_text())
+        self.assertEqual(manifest["managed_files"][".oio/ontology/default.json"], hashlib.sha256(installed).hexdigest())
+
+    def test_check_passes_after_an_lf_checkout_normalizes_the_worktree(self):
+        install(str(self.target))
+        for relative in list(oio_installer.PACKAGE_FILES) + ["AGENTS.md"]:
+            path = self.target / relative
+            if path.exists():
+                path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
+        result = " ".join(install(str(self.target), check_only=True))
+        self.assertIn("VALID", result)
+
+    def test_eol_only_difference_is_reported_not_refused(self):
+        install(str(self.target))
+        managed = self.target / ".oio/ontology/default.json"
+        managed.write_bytes(managed.read_bytes().replace(b"\n", b"\r\n"))
+        result = " ".join(install(str(self.target), check_only=True))
+        self.assertIn("VALID", result)
+        self.assertIn("line endings differ", result)
+
+    def test_legacy_crlf_digest_manifest_migrates_without_deleting_the_install(self):
+        install(str(self.target))
+        manifest_path = self.target / ".oio/install-manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        for relative in list(manifest["managed_files"]):
+            managed = self.target / relative
+            crlf = managed.read_bytes().replace(b"\n", b"\r\n")
+            managed.write_bytes(crlf)
+            manifest["managed_files"][relative] = hashlib.sha256(crlf).hexdigest()
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+        install(str(self.target))
+        self.assertNotIn(b"\r\n", (self.target / ".oio/ontology/default.json").read_bytes())
+        self.assertIn("VALID", " ".join(install(str(self.target), check_only=True)))
+
+    def test_content_edit_under_crlf_is_still_refused(self):
+        install(str(self.target))
+        managed = self.target / ".oio/ontology/default.json"
+        managed.write_bytes(managed.read_bytes().replace(b"\n", b"\r\n") + b"\r\n")
+        with self.assertRaisesRegex(InstallError, "managed file changed"):
+            install(str(self.target))
+
+    def test_agents_block_in_a_crlf_worktree_is_not_treated_as_an_edit(self):
+        install(str(self.target))
+        agents = self.target / "AGENTS.md"
+        agents.write_bytes(agents.read_bytes().replace(b"\n", b"\r\n"))
+        install(str(self.target))
 
     def test_symlink_target_path_is_refused(self):
         outside = Path(self.temp.name) / "outside"

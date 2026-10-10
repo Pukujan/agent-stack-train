@@ -25,6 +25,10 @@ python3 /absolute/path/to/target-repository/.github/scripts/oio_installer.py \
 
 For an upgrade, rerun the installer from a newer pinned OIO checkout against the same explicit target. The installer refuses to overwrite edited managed files or project-owned extension data; review conflicts and migrate deliberately. Installation does not grant permission to file issues. In particular, an agent may prepare a local draft but must not submit an issue or write files in OIO, ACS, CGM, or PCM without explicit human direction naming the destination and action.
 
+## Line endings
+
+OIO writes its managed files with LF line endings regardless of the platform that ran the installer, and records the digests of those LF bytes. The integrity check compares content after line-ending normalization, so a checkout that renders the same content with CRLF — for example a Windows worktree of a repository whose `.gitattributes` commits LF — passes `--check` and is reported with a note that the content matches and the line endings differ, while a real content edit is still refused. An existing install whose manifest recorded CRLF digests from an older installer migrates through a normal re-install; the managed files are rewritten as LF and the manifest is regenerated, without deleting the install.
+
 ## Validation
 
 The installer validates the default ontology and adopter extension. CI tests fresh and repeated installation in a disposable local repository, path confinement, preservation of adopter data, explicit conflict refusal, and interrupted-install recovery. OIO's issue triage validates observational/operational records and labels source class, authenticated account tier, project priority, evidence dimensions, release relevance, and an advisory review lane. Risk labels do not grant authority or make an automatic release decision.
