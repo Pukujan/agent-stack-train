@@ -11,11 +11,11 @@
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "efd8e191eb2a8299fa3be9ebaf2f49404742bcfe"
+      "commit": "264117398e7754d7e91076481cd664b5e197c1d4"
     },
     "observational-issue-ops": {
       "version": "0.1.0",
-      "commit": "61b6aaa256fff043adc67433b7413503b0552983"
+      "commit": "5c3373da5f0953c4928c784425b620d0c713dc70"
     }
   }
 }
