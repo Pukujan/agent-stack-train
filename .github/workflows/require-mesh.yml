@@ -16,6 +16,14 @@ on:
         required: false
         type: boolean
         default: false
+    secrets:
+      MESH_SYNC_TOKEN:
+        description: >-
+          Token that pushes mesh/sync and opens its pull request. A
+          GITHUB_TOKEN-created pull request has its workflows held for human
+          approval, so unattended sync needs a token that acts as a user. When
+          unset this falls back to github.token.
+        required: false
 
 permissions:
   contents: write
@@ -27,6 +35,11 @@ jobs:
     steps:
       - name: Check out the calling repository
         uses: actions/checkout@v4
+        with:
+          # With MESH_SYNC_TOKEN the branch push and the pull request are
+          # authored by that user, so the pull request's workflows run
+          # unattended instead of waiting for approval.
+          token: ${{ secrets.MESH_SYNC_TOKEN || github.token }}
 
       - name: Check out the mesh
         uses: actions/checkout@v4
@@ -46,7 +59,7 @@ jobs:
       - name: Open a pull request when this repository was behind
         if: ${{ inputs.write }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.MESH_SYNC_TOKEN || github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
