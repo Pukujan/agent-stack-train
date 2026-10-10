@@ -12,11 +12,11 @@ Observational Issue Ops is a clean adopter of the shared stack; it vendors none 
 
 | Component | Role here |
 | --- | --- |
-| **PCM** — `project-continuity-modules` (CLI 0.6.0 @ `4e23854…`) | Continuity files + `continuity` CLI, GitHub-owned progression, PR-only to `main`, required CI gates, leaf receipts. |
-| **CGM** — `content-generation-modules` (0.5.12 @ `6831f91…`, eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
-| **ACS** — `agent-custom-setup`, `multi-agent-hotload` 0.1.0 from canonical source commit `3a381eba11c6262c702f5d696878c371342e859a` | The install surface that wires the three together. |
+| **PCM** — `project-continuity-modules` (CLI 0.7.0 @ `776b468…`) | Continuity files + `continuity` CLI, GitHub-owned progression, PR-only to `main`, required CI gates, leaf receipts. |
+| **CGM** — `content-generation-modules` (0.5.12 @ `78385ff…`, eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
+| **ACS** — `agent-custom-setup` (0.2.0 @ `264117398…`, module `multi-agent-hotload`) | The install surface that wires the three together. |
 
-When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order. A two-module CGM pin or a continuity-only PCM is an incomplete install. OIO records the ACS source contract but does not claim runtime readiness until `hotload_check.py` passes with runtime assignment and coordination artifacts installed. Validate the adapter with:
+When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/264117398e7754d7e91076481cd664b5e197c1d4/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order. A two-module CGM pin or a continuity-only PCM is an incomplete install. OIO records the ACS source contract but does not claim runtime readiness until `hotload_check.py` passes with runtime assignment and coordination artifacts installed. Validate the adapter with:
 
 ```bash
 python scripts/validate_content_system.py --root "$CGM_ROOT" \

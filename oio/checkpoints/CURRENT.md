@@ -29,8 +29,8 @@ Phase: OIO has shipped a prepacked observational/operational issue ontology and 
 ## Blockers
 
 - OIO pins the current ACS HOTLOAD module source but does not contain the runtime assignment, lease, watchdog, claim-queue, and claim-to-PR integration required for `hotload_check.py`; do not claim ACS runtime readiness.
-- `require / mesh` is red on `main`: the `agent-custom-setup` pin (`efd8e191`) is behind the train (`26411739`). Pre-existing since 2026-10-09; not a required check.
+- The scheduled `Stay on the mesh` sync cannot update its own branch: every scheduled run commits the corrected `stack-mesh.json` but the push is rejected (`stale info`) because a `mesh/sync` branch already exists at an older commit, so the mesh still drifts until a human refreshes the pin. Tracked on issue #37; the fix is in the train's reusable workflow.
 
 ## Next atomic action
 
-Await human verification of the Windows-install → Linux-`--check` round trip on issue #41 before closing it. The train at `Pukujan/agent-stack-train` remains `status: proposed`; ACS runtime integration remains uncertified.
+Await human verification of the Windows-install → Linux-`--check` round trip on issue #41 before closing it. The train at `Pukujan/agent-stack-train` is now `status: certified` (recorded 2026-10-07); ACS runtime integration remains uncertified.
