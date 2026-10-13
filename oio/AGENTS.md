@@ -8,15 +8,15 @@ For GitHub repositories, verify the live linked issue with `continuity issue ver
 
 ## Stack this repository consumes
 
-Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its machine-checked pins live in one place — [`stack-mesh.json`](stack-mesh.json), validated against the certified train — and the certified versions are recorded in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train). [`stack-manifest.json`](stack-manifest.json) names the components and the train source.
+Observational Issue Ops is a clean adopter of the shared stack; it vendors none of it. Its machine-checked pins live in one place — [`stack-mesh.json`](stack-mesh.json), validated against the certified train — and the certified versions are recorded in the dedicated train repository [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train). [`stack-manifest.json`](stack-manifest.json) names the components and the train source. Component versions and commits are deliberately not restated here: a hand-copied pin was correct for eleven hours on 2026-10-10 and stale ever since, so this table names roles only and `stack-mesh.json` is the one current answer.
 
 | Component | Role here |
 | --- | --- |
-| **PCM** — `project-continuity-modules` (CLI 0.7.0 @ `776b468…`) | Continuity files + `continuity` CLI, GitHub-owned progression, PR-only to `main`, required CI gates, leaf receipts. |
-| **CGM** — `content-generation-modules` (0.5.12 @ `78385ff…`, eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
-| **ACS** — `agent-custom-setup` (0.2.0 @ `264117398…`, module `multi-agent-hotload`) | The install surface that wires the three together. |
+| **PCM** — `project-continuity-modules` | Continuity files + `continuity` CLI, GitHub-owned progression, PR-only to `main`, required CI gates, leaf receipts. |
+| **CGM** — `content-generation-modules` (eight modules) | Narrative and style. README and product entry route through `writing-direction`; issue/PR/commit prose through `human-sounding-writing`; basenames through `human-output-naming`. The adapter is `.content-system/`. |
+| **ACS** — `agent-custom-setup` (module `multi-agent-hotload`) | The install surface that wires the three together. |
 
-When told to load the agent hot-loader, follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/264117398e7754d7e91076481cd664b5e197c1d4/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order. A two-module CGM pin or a continuity-only PCM is an incomplete install. OIO records the ACS source contract but does not claim runtime readiness until `hotload_check.py` passes with runtime assignment and coordination artifacts installed. Validate the adapter with:
+When told to load the agent hot-loader, install the sibling components at the commits [`stack-mesh.json`](stack-mesh.json) requires, then follow the ACS [HOTLOAD.md](https://github.com/Pukujan/agent-custom-setup/blob/main/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) install order — the link tracks the ACS default branch so it cannot go stale; for a frozen revision, substitute the ACS commit `stack-mesh.json` names. A two-module CGM pin or a continuity-only PCM is an incomplete install. OIO records the ACS source contract but does not claim runtime readiness until `hotload_check.py` passes with runtime assignment and coordination artifacts installed. Validate the adapter with:
 
 ```bash
 python scripts/validate_content_system.py --root "$CGM_ROOT" \
