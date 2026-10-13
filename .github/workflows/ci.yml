@@ -21,3 +21,21 @@ jobs:
 
       - name: The manifest schema is valid JSON
         run: python -c "import json; json.load(open('stack-manifest.schema.json'))"
+
+      - name: The prose-pin check's tests pass
+        run: python scripts/test_prose_pins.py
+
+      # A stack document that restates a component version/commit the certified
+      # set does not name is drift no other validator can see (issue #16):
+      # check_manifest.py reads stack-manifest.json, mesh.py reads
+      # stack-mesh.json, and ACS's check_pins.py reads only declared
+      # projections -- none of them reads README.md/AGENTS.md/PROJECT.md.
+      # Scoped to the default branch: a pull request that legitimately
+      # advances the mesh disagrees with a train it has not yet been certified
+      # into, and a mesh/sync head exists precisely to take a sibling's new
+      # version before the train records it, so those heads are exempt.
+      - name: The train's own prose states no stale component pin
+        if: >-
+          github.event_name == 'push' && github.ref == 'refs/heads/main'
+          || (github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'mesh/sync')
+        run: python scripts/check_prose_pins.py --root .

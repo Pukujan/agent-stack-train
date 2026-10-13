@@ -52,6 +52,7 @@ python scripts/check_manifest.py --manifest <path>      # an adopter's pins agre
 - A certified entry is the default-branch head of that component, refreshed by `scripts/refresh_train.py`. The owner accepted this channel on 2026-10-05 after the frozen `2026-10-01` snapshot held PCM at 0.6.0.
 - One exception: a head that changed nothing but `stack-mesh.json` is skipped for the last commit that changed the component itself. Taking a sibling's version would otherwise move this component's certified commit, which forces every sibling to rewrite its mesh again — a loop the mesh could never settle.
 - A hand edit of a version in `stack-releases.json` is overwritten on the next refresh. Change `components.json` to change where a version is read from.
+- **A stack document may not restate a current component version or commit.** It points at `stack-mesh.json` or `stack-releases.json` instead. `scripts/check_prose_pins.py` fails a document that states a component pin the certified set does not name; run it from any checkout with `--train <path to stack-releases.json>`. A hand-refreshed pin was correct for eleven hours on 2026-10-10 (OIO PR #44), so refreshing is the same debt with a new timestamp, not a fix.
 
 ## Ownership
 
