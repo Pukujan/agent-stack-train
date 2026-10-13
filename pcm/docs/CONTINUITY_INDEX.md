@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"43182fed6e724b31ff6be32caaed6ce36707c101a51471ed5f282863050420b7","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"2202d694b10e6c846af86ddaf031f4c0bbda186c72a9aeea8eb7f4185cab0658","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -64,6 +64,18 @@
 - Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`
 - Task associations: `PCM-0018`, `PCM-0025`, `PCM-0026`
+
+## Contributor mode (`contributor-mode`)
+
+- File: [`docs/CONTRIBUTOR_MODE.md`](../docs/CONTRIBUTOR_MODE.md)
+- Local content status: **CURRENT**
+- Last reviewed at commit: `uncommitted`
+- Reviewed SHA-256: `afd45aed85393af9859e6d1d16660bcecf8a48a94569489146cf5f99fd63cbc3`
+- Current SHA-256: `afd45aed85393af9859e6d1d16660bcecf8a48a94569489146cf5f99fd63cbc3`
+- Summary: Work on a repository you do not administer with zero writes into it: the leak guard and the task descriptor.
+- Search terms: `contributor`, `foreign checkout`, `leak guard`, `sidecar`
+- Neighboring records: `observational-issue-delegation`
+- Task associations: none
 
 ## GitHub authority and finite progression (`github-progression-spec`)
 

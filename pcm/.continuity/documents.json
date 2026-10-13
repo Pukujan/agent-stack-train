@@ -96,6 +96,24 @@
       "title": "Continuity records policy"
     },
     {
+      "id": "contributor-mode",
+      "keywords": [
+        "contributor",
+        "foreign checkout",
+        "leak guard",
+        "sidecar"
+      ],
+      "path": "docs/CONTRIBUTOR_MODE.md",
+      "related": [
+        "observational-issue-delegation"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "afd45aed85393af9859e6d1d16660bcecf8a48a94569489146cf5f99fd63cbc3",
+      "summary": "Work on a repository you do not administer with zero writes into it: the leak guard and the task descriptor.",
+      "tasks": [],
+      "title": "Contributor mode"
+    },
+    {
       "id": "github-progression-spec",
       "keywords": [
         "GitHub authority",

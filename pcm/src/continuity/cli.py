@@ -21,8 +21,16 @@ from typing import Any
 from urllib.parse import quote
 
 from . import __version__
+from .contributor import (
+    ANCHOR_KINDS,
+    ignored_leak_paths,
+    leak_findings,
+    parse_contributor_descriptor,
+    render_contributor_descriptor,
+)
 
 PROTOCOL_VERSION = "0.1.0-draft"
+CONTRIBUTOR_DESCRIPTOR_FILENAME = "contributor.json"
 CONTINUITY_RECORDS_POLICY_MARKER = (
     '<!-- pcm:policy {"id":"continuity-records","policy_version":"1.3.0","protocol_version":"0.1.0-draft"} -->'
 )
@@ -1897,6 +1905,132 @@ def preflight_repo(root: Path) -> tuple[str, list[str]]:
             return "DEGRADED_TARGET", errors
         return "INVALID_TARGET", errors
     return "TARGET_VALID", []
+
+
+# --- Contributor mode (issue #247, first slice) ------------------------------
+#
+# A contributor works on a repository they do not administer. Nothing from the
+# stack may be written into that checkout, and the task's identity is recorded
+# on the owner's side of the boundary. See docs/CONTRIBUTOR_MODE.md.
+
+def foreign_leak_findings(root: Path) -> list[str]:
+    """Report stack-owned paths present in a foreign checkout's working tree.
+
+    Runs ``git status`` inside ``root`` and returns one finding per staged,
+    unstaged, or untracked entry under a stack-owned path (see
+    ``continuity.contributor.STACK_PATHS``). A clean foreign tree returns an
+    empty list.
+
+    Two closed doors, not one:
+
+    - Untracked files are expanded with ``--untracked-files=all`` so an
+      untracked stack directory names its files instead of hiding behind an
+      abbreviated entry.
+    - Ignored entries are *also* reported, via a second ``--ignored`` pass,
+      because a contributor who accidentally added ``.coord/`` to a foreign
+      ``.gitignore`` has still written stack state into that repository's
+      working tree — and a guard that only reads plain ``git status`` would
+      call that tree clean. Git's ignore list is the foreign repository's
+      policy, not ours to trust for the zero-writes contract.
+
+    This guard fails closed: when ``root`` is not a Git working tree, or Git
+    cannot report status at all, a :class:`ContinuityError` is raised rather
+    than returning an empty list — an unrunnable guard must never be mistaken
+    for a clean checkout.
+    """
+    root = root.resolve()
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        ignored = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "--ignored", "--untracked-files=all"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except FileNotFoundError as exc:
+        raise ContinuityError("git is required for the contributor leak guard") from exc
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or exc.stdout or "git status failed").strip()
+        raise ContinuityError(f"foreign checkout status unavailable (the guard fails closed): {detail}") from exc
+    findings = leak_findings(proc.stdout)
+    findings.extend(f"{path}: stack-owned path {prefix!r} is ignored in the foreign checkout"
+                    for path, prefix in ignored_leak_paths(ignored.stdout))
+    return findings
+
+
+def foreign_anchor_present(root: Path, anchor_sha: str) -> bool:
+    """True when the anchor SHA resolves as a commit in the foreign checkout.
+
+    An unresolvable anchor is reported as a degraded note by the caller, never
+    as a refusal: the SHA is upstream's, and a contributor may legitimately
+    record it before fetching the upstream ref. A missing Git binary is also
+    reported as absent rather than raising, for the same reason.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "-e", f"{anchor_sha}^{{commit}}"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return False
+    return proc.returncode == 0
+
+
+def write_contributor_descriptor(
+    store_root: Path,
+    foreign_root: Path,
+    repository: str,
+    anchor_sha: str,
+    anchor_kind: str,
+    sidecar: str,
+) -> Path:
+    """Record a contributor task's identity on the owner's side of the boundary.
+
+    ``store_root`` is where the descriptor is written (in real use, the task's
+    private sidecar checkout); ``foreign_root`` is the checkout being guarded.
+    The write is refused when the two overlap, because a descriptor inside the
+    foreign repository is exactly the leak the guard exists to prevent.
+    """
+    store_root = store_root.resolve()
+    foreign_root = foreign_root.resolve()
+    if store_root == foreign_root or store_root.is_relative_to(foreign_root):
+        raise ContinuityError(
+            f"descriptor store root {store_root} is inside the foreign checkout {foreign_root}; "
+            "contributor state must live on the owner's side of the boundary"
+        )
+    try:
+        content = render_contributor_descriptor(repository, anchor_sha, anchor_kind, sidecar)
+    except ValueError as exc:
+        raise ContinuityError(str(exc)) from exc
+    path = store_root / CONTRIBUTOR_DESCRIPTOR_FILENAME
+    write_file_no_overwrite(path, content)
+    return path
+
+
+def load_contributor_descriptor(store_root: Path) -> dict[str, str]:
+    """Read back a contributor descriptor, failing closed on anything malformed."""
+    path = store_root.resolve() / CONTRIBUTOR_DESCRIPTOR_FILENAME
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise ContinuityError(f"missing contributor descriptor: {path}") from exc
+    except OSError as exc:
+        raise ContinuityError(f"contributor descriptor unavailable: {path}: {exc}") from exc
+    try:
+        return parse_contributor_descriptor(text)
+    except ValueError as exc:
+        raise ContinuityError(f"{path}: {exc}") from exc
 
 
 def checkpoint_metadata(
@@ -3901,6 +4035,41 @@ def build_parser() -> argparse.ArgumentParser:
     p_workspace_unregister = workspace_sub.add_parser("unregister")
     p_workspace_unregister.add_argument("--root", required=True)
 
+    p_contributor = sub.add_parser(
+        "contributor",
+        help="contributor mode: work on a repository you do not administer, with zero writes into it",
+    )
+    contributor_sub = p_contributor.add_subparsers(dest="contributor_command", required=True)
+    p_contributor_guard = contributor_sub.add_parser(
+        "guard",
+        help="fail if any stack-owned path appears in a foreign checkout's git status",
+    )
+    p_contributor_guard.add_argument("--root", required=True, help="the foreign checkout to guard")
+    p_contributor_describe = contributor_sub.add_parser(
+        "describe",
+        help="record a contributor task's identity on the owner's side of the boundary",
+    )
+    p_contributor_describe.add_argument("--root", required=True, help="sidecar/store root; never the foreign checkout")
+    p_contributor_describe.add_argument("--foreign-root", required=True, help="the foreign checkout being guarded")
+    p_contributor_describe.add_argument("--repo", required=True, help="owner/name of the repository contributed to")
+    p_contributor_describe.add_argument(
+        "--anchor-sha",
+        required=True,
+        help="full upstream commit/pull-request-head SHA that anchors the task (the one-way link)",
+    )
+    p_contributor_describe.add_argument(
+        "--anchor",
+        dest="anchor_kind",
+        choices=list(ANCHOR_KINDS),
+        default="pr",
+        help="whether the SHA is an upstream pull request head (pr, default) or a plain commit (commit)",
+    )
+    p_contributor_describe.add_argument(
+        "--sidecar",
+        required=True,
+        help="private sidecar location holding this task's continuity state",
+    )
+
     return parser
 
 
@@ -4310,6 +4479,28 @@ def main(argv: list[str] | None = None) -> int:
                 print("PLAN (dry run; pass --yes to apply):")
             for step in plan:
                 print(f"  {step}")
+            return 0
+
+        if args.command == "contributor" and args.contributor_command == "guard":
+            findings = foreign_leak_findings(Path(args.root).resolve())
+            for finding in findings:
+                print(f"LEAK: {finding}")
+            if findings:
+                print(f"LEAKED: {len(findings)} stack path(s) present in the foreign checkout; remove them before any push or pull request")
+                return 1
+            print("CLEAN: no stack-owned path appears in the foreign checkout's git status")
+            return 0
+
+        if args.command == "contributor" and args.contributor_command == "describe":
+            path = write_contributor_descriptor(
+                Path(args.root).resolve(),
+                Path(args.foreign_root).resolve(),
+                args.repo,
+                args.anchor_sha,
+                args.anchor_kind,
+                args.sidecar,
+            )
+            print(path)
             return 0
 
         parser.error("unhandled command")
