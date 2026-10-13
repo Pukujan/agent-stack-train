@@ -2,31 +2,31 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-13T17:39:12Z",
+  "recorded_at": "2026-10-13T22:53:44Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
       "version": "0.7.0",
-      "commit": "b61c4b17886d24e69d3ff8d6438d0cedb2417c54",
+      "commit": "8cbfc3c8e9f13eadf2663fd6dd060588ee29399d",
       "cli": "0.7.0",
       "protocol_version": "0.1.0-draft",
       "role": "Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates."
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "909b317a1a7e79d183f10289c4eda46a7adcdab4",
+      "commit": "fe2054ba323257510eff4e31de1dcd4a1460d1c7",
       "modules": 8,
       "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation."
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "a5e61cd100793db3b02dd3e155395f986efd2b73",
+      "commit": "83fdf459c65016343ad5be1637f93ce0413525c7",
       "module": "multi-agent-hotload",
       "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime."
     },
     "observational-issue-ops": {
       "version": "0.1.0",
-      "commit": "993eca2a03a85e77c832b06a85209c72378885d4",
+      "commit": "2d1215502bc683e5bcbc6dc637b8b2b4cf28f3b7",
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
     }
   },
