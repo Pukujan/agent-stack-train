@@ -3,15 +3,15 @@
   "requires": {
     "project-continuity-modules": {
       "version": "0.7.0",
-      "commit": "85e6aa7a889b57aeef270213c37258194717e358"
+      "commit": "b61c4b17886d24e69d3ff8d6438d0cedb2417c54"
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "5c8c5f167098d04cf96fb1fe449880001a1edd14"
+      "commit": "909b317a1a7e79d183f10289c4eda46a7adcdab4"
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "3df982adc008b9caa4b3a9991f77486393c9a30b"
+      "commit": "a5e61cd100793db3b02dd3e155395f986efd2b73"
     },
     "observational-issue-ops": {
       "version": "0.1.0",
