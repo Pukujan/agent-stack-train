@@ -20,6 +20,15 @@ body:
       required: true
 
   - type: dropdown
+    id: lifecycle_status
+    attributes:
+      label: Lifecycle Status
+      description: The current state of this log in the OIO issue-log lifecycle. open = recorded and awaiting review; resolved = fixed, answered, or no longer reproducible, with the resolution evidence recorded; superseded = another log replaces this one, recorded as a relation; obsolete = the affected surface changed or was removed without a fix; wontfix = reviewed and deliberately not acted on, with the reason recorded. A log with no recorded status is open. Status is a review-state claim, not authorization, a queue rank, or a release decision. A settled log reopens when its condition is observed again, when new evidence contradicts its resolution or decision, when the affected surface changes, or on a scheduled re-check.
+      options: ["open", "resolved", "superseded", "obsolete", "wontfix"]
+    validations:
+      required: true
+
+  - type: dropdown
     id: filer_origin
     attributes:
       label: Filer Origin (who initiated this filing)
@@ -78,7 +87,7 @@ body:
     attributes:
       label: Ontology Versions Used
       description: Copy the exact OIO and project ontology versions from this repository's installed files; historical records keep their original versions.
-      placeholder: "oio=1.0.0; project=1.0.0"
+      placeholder: "oio=1.1.0; project=1.0.0"
     validations:
       required: true
 
@@ -240,7 +249,7 @@ body:
     attributes:
       label: Provenance and Context
       description: Record repository, source revision, environment, observer, date, and the default/project ontology versions used.
-      placeholder: "- Destination repository: owner/repo\n- Source revision/environment: ...\n- Ontology versions: OIO 1.0.0 / project 1.0.0"
+      placeholder: "- Destination repository: owner/repo\n- Source revision/environment: ...\n- Ontology versions: OIO 1.1.0 / project 1.0.0"
     validations:
       required: true
 
@@ -250,6 +259,15 @@ body:
       label: Reproducibility Steps and Evidence
       description: Give commands, steps, observed results, and the incident timeline when relevant.
       placeholder: "1. ...\n2. ...\nObserved result: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: relations
+    attributes:
+      label: Issue Relations
+      description: "Typed links to other logs or records, one per line as `<relation>: <reference>`, where `<relation>` is one of supersedes, superseded-by, related, duplicate-of and `<reference>` is a repository issue reference such as owner/repo#123, #123, or a URL. supersedes and superseded-by are inverses: record exactly one direction per pair, and the replaced log's status becomes superseded. duplicate-of points at the canonical record; this log is retained as evidence. A relation never changes filer origin, authorization, or queue class. Write none when there is no link."
+      placeholder: "related: #21\nsuperseded-by: Pukujan/observational-issue-ops#52\nor none"
     validations:
       required: true
 

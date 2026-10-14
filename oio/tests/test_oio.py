@@ -340,6 +340,9 @@ class TriageTests(unittest.TestCase):
         body = f"""### Issue Type
 observational
 
+### Lifecycle Status
+open
+
 ### Filer Origin (who initiated this filing)
 {origin}
 
@@ -359,7 +362,7 @@ agent:codex/session-123
 Pukujan/observational-issue-ops
 
 ### Ontology Versions Used
-oio=1.0.0; project=1.0.0
+oio=1.1.0; project=1.0.0
 
 ### Project Priority Path
 {path}
@@ -411,6 +414,9 @@ May delay triage.
 
 ### Smallest Useful Product Slice
 Correct the filing and check classification.
+
+### Issue Relations
+related: #21
 """
         return {"body": body, "labels": [{"name": "observational-issue"}], "user": {"id": 137629468, "login": "Pukujan"}, "created_at": "2026-10-03T12:00:00Z"}
 
@@ -424,7 +430,11 @@ Correct the filing and check classification.
         self.assertIn("queue:class-3:account-01", decision["labels"])
         self.assertIn("authorization:claimed", decision["labels"])
         self.assertIn("review:product-outcome-review", decision["labels"])
-        self.assertEqual(decision["record"]["ontology"], {"default_version": "1.0.0", "project_version": "1.0.0"})
+        self.assertIn("status:open", decision["labels"])
+        self.assertIn("relation:related", decision["labels"])
+        self.assertEqual(decision["record"]["lifecycle"], {"status": "open"})
+        self.assertEqual(decision["record"]["relations"], [{"relation": "related", "reference": "#21"}])
+        self.assertEqual(decision["record"]["ontology"], {"default_version": "1.1.0", "project_version": "1.0.0"})
         self.assertNotIn("needs-record-schema", decision["labels"])
 
     def test_authenticated_human_account_controls_human_queue_rank(self):
@@ -455,6 +465,40 @@ Correct the filing and check classification.
         invalid["priority"]["status"] = "resolved"
         with self.assertRaises(Exception):
             Draft202012Validator(schema).validate(invalid)
+
+    def test_lifecycle_status_and_relations_come_from_the_shipped_ontology(self):
+        from jsonschema import Draft202012Validator
+
+        core = json.loads((ROOT / "ontology/default.json").read_text())
+        record_schema = json.loads((ROOT / "schemas/v1/issue-log-record.schema.json").read_text())
+        self.assertEqual(set(core["lifecycle"]["status_values"]), {"open", "resolved", "superseded", "obsolete", "wontfix"})
+        self.assertEqual(set(core["relations"]["relation_types"]), {"supersedes", "superseded-by", "related", "duplicate-of"})
+        issue = self.make_issue()
+        issue["body"] = issue["body"].replace("### Lifecycle Status\nopen", "### Lifecycle Status\nresolved")
+        issue["body"] = issue["body"].replace("related: #21", "related: #21\nsupersedes: #17\nsuperseded-by: owner/repo#20\nduplicate-of: #15\ngarbage-line")
+        decision = classify_issue(issue, ROOT)
+        self.assertIn("status:resolved", decision["labels"])
+        self.assertNotIn("needs-lifecycle-status", decision["labels"])
+        for relation in ["relation:supersedes", "relation:superseded-by", "relation:related", "relation:duplicate-of"]:
+            self.assertIn(relation, decision["labels"])
+        self.assertIn("needs-relation-review", decision["labels"])
+        Draft202012Validator(record_schema).validate(decision["record"])
+
+    def test_legacy_body_without_lifecycle_defaults_to_open_with_a_flag(self):
+        issue = self.make_issue()
+        issue["body"] = issue["body"].replace("### Lifecycle Status\nopen\n\n", "")
+        issue["body"] = issue["body"].replace("\n### Issue Relations\nrelated: #21\n", "\n")
+        decision = classify_issue(issue, ROOT)
+        self.assertIn("status:open", decision["labels"])
+        self.assertIn("needs-lifecycle-status", decision["labels"])
+        self.assertNotIn("needs-relation-review", decision["labels"])
+
+    def test_unknown_lifecycle_status_fails_closed(self):
+        issue = self.make_issue()
+        issue["body"] = issue["body"].replace("### Lifecycle Status\nopen", "### Lifecycle Status\ndone")
+        decision = classify_issue(issue, ROOT)
+        self.assertIn("needs-lifecycle-status", decision["labels"])
+        self.assertNotIn("status:done", decision["labels"])
 
     def test_human_via_agent_needs_authenticated_directing_account(self):
         verified = classify_issue(self.make_issue(origin="human-via-agent", auth_state="verified", director_id="137629468"), ROOT)

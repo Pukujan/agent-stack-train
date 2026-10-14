@@ -23,6 +23,9 @@ ORIGIN_CLASS = {
     "agent-initiated": 4,
 }
 ISSUE_TYPES = {"observational", "operational"}
+LIFECYCLE_DEFAULT_STATUS = "open"
+LIFECYCLE_FALLBACK_STATUSES = {"open", "resolved", "superseded", "obsolete", "wontfix"}
+RELATION_FALLBACK_TYPES = ("supersedes", "superseded-by", "related", "duplicate-of")
 AUTH_LABELS = {"human-direct": "oio-auth:human-direct", "human-via-agent": "oio-auth:human-via-agent"}
 ATTESTATION_MARKER = "<!-- oio-account-attestation:v1 "
 
@@ -35,6 +38,45 @@ def priority_label(path: str) -> str:
     import hashlib
 
     return f"priority:ref-{hashlib.sha256(path.encode()).hexdigest()[:16]}"
+
+
+def _lifecycle_statuses(default: dict) -> dict[str, str]:
+    """Read the ontology's status values, falling back to the shipped set."""
+    lifecycle = default.get("lifecycle") if isinstance(default, dict) else None
+    values = lifecycle.get("status_values") if isinstance(lifecycle, dict) else None
+    if isinstance(values, dict) and values:
+        return {str(key).lower(): str(key).lower() for key in values}
+    return {status: status for status in LIFECYCLE_FALLBACK_STATUSES}
+
+
+def _relation_types(default: dict) -> set[str]:
+    """Read the ontology's relation types, falling back to the shipped set."""
+    relations = default.get("relations") if isinstance(default, dict) else None
+    values = relations.get("relation_types") if isinstance(relations, dict) else None
+    if isinstance(values, dict) and values:
+        return {str(key).lower() for key in values}
+    return set(RELATION_FALLBACK_TYPES)
+
+
+def _parse_relations(text: str, known: set[str]) -> tuple[list[dict[str, str]], list[str]]:
+    """Parse ``<relation>: <reference>`` lines; return typed links and unrecognized lines."""
+    links: list[dict[str, str]] = []
+    unrecognized: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip().lstrip("-*").strip()
+        if not line or line.lower() in {"none", "n/a", "not-applicable"}:
+            continue
+        if ":" not in line:
+            unrecognized.append(line)
+            continue
+        name, reference = line.split(":", 1)
+        name = name.strip().lower()
+        reference = reference.strip()
+        if name not in known or not reference:
+            unrecognized.append(line)
+            continue
+        links.append({"relation": name, "reference": reference})
+    return links, unrecognized
 
 
 def review_lane(impact: str, likelihood: str, exposure: str, confidence: str, relation: str) -> str:
@@ -91,6 +133,31 @@ def classify_issue(issue: dict, root: Path, repository_id: str | None = None, ev
     else:
         labels.add("needs-issue-type")
         warnings.append("missing-or-invalid-issue-type")
+
+    status_values = _lifecycle_statuses(default)
+    lifecycle_text = norm.get("lifecyclestatus", "").strip().lower()
+    if lifecycle_text in status_values:
+        lifecycle_status = lifecycle_text
+        labels.add(f"status:{lifecycle_status}")
+    elif not lifecycle_text:
+        # A log with no recorded status is open; flag it for a filer to confirm.
+        lifecycle_status = LIFECYCLE_DEFAULT_STATUS
+        labels.add(f"status:{lifecycle_status}")
+        labels.add("needs-lifecycle-status")
+        warnings.append("missing-lifecycle-status")
+    else:
+        lifecycle_status = LIFECYCLE_DEFAULT_STATUS
+        labels.add(f"status:{lifecycle_status}")
+        labels.add("needs-lifecycle-status")
+        warnings.append("invalid-lifecycle-status")
+
+    relation_types = _relation_types(default)
+    relation_links, unrecognized_relations = _parse_relations(norm.get("issuerelations", ""), relation_types)
+    if unrecognized_relations:
+        labels.add("needs-relation-review")
+        warnings.append("unrecognized-issue-relation")
+    for name in sorted({link["relation"] for link in relation_links}):
+        labels.add(f"relation:{name}")
 
     origin = norm.get("filerorigin(whoinitiatedthisfiling)", "").strip().lower()
     if origin not in ORIGIN_CLASS:
@@ -272,6 +339,10 @@ def classify_issue(issue: dict, root: Path, repository_id: str | None = None, ev
             "delay_cost": norm.get("costofdelay", "unknown"),
             "smallest_useful_slice": norm.get("smallestusefulproductslice", "unknown"),
         },
+        "lifecycle": {
+            "status": lifecycle_status,
+        },
+        "relations": relation_links,
     }
     try:
         _schema_validate(record, root / (".oio/schemas/v1/issue-log-record.schema.json" if (root / ".oio/schemas/v1/issue-log-record.schema.json").exists() else "schemas/v1/issue-log-record.schema.json"))
@@ -414,8 +485,8 @@ def apply_github_labels(decision: dict, event: dict, token: str, repository: str
     if status != 200:
         raise RuntimeError(f"could not read existing labels: HTTP {status}: {current}")
     current_names = {item["name"] for item in current}
-    managed_prefixes = ("type:", "filer:", "queue:", "account:", "authorization:", "priority:", "impact:", "likelihood:", "exposure:", "recoverability:", "evidence:", "release:", "ontology:", "review:")
-    managed_exact = {"needs-issue-type", "needs-filer-stamp", "needs-account-review", "needs-human-verification", "needs-priority-definition", "needs-impact-evidence", "needs-release-relevance", "needs-record-schema", "needs-record-context"}
+    managed_prefixes = ("type:", "filer:", "queue:", "account:", "authorization:", "priority:", "impact:", "likelihood:", "exposure:", "recoverability:", "evidence:", "release:", "ontology:", "review:", "status:", "relation:")
+    managed_exact = {"needs-issue-type", "needs-filer-stamp", "needs-account-review", "needs-human-verification", "needs-priority-definition", "needs-impact-evidence", "needs-release-relevance", "needs-record-schema", "needs-record-context", "needs-lifecycle-status", "needs-relation-review"}
     stale = [name for name in current_names if name.startswith(managed_prefixes) or name in managed_exact]
     stale.extend(name for name in current_names if name.startswith("oio-auth:") and name not in decision["labels"])
     if stale:

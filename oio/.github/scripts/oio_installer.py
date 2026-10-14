@@ -30,7 +30,7 @@ except (OSError, KeyError, json.JSONDecodeError):
     try:
         OIO_VERSION = json.loads((SOURCE_ROOT / ".oio/install-manifest.json").read_text(encoding="utf-8"))["oio_version"]
     except (OSError, KeyError, json.JSONDecodeError):
-        OIO_VERSION = "0.1.0"
+        OIO_VERSION = "0.2.0"
 MANIFEST_REL = ".oio/install-manifest.json"
 JOURNAL_REL = ".oio/.installer-transaction.json"
 AGENTS_START = "<!-- oio:issue-log-guidance:start -->"
