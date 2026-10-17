@@ -52,6 +52,8 @@ The stamp records content author, authenticated GitHub actor, session reference 
 | Understand the protocol before filing | The template's own field descriptions | the issue form itself |
 | Point another repository at one source | A single repository to reference | this repository |
 | Install the prepacked ontology and triage into one selected repository | A safe, pinned installer and project extension scaffold | [docs/ADOPTER_INSTALL.md](docs/ADOPTER_INSTALL.md) |
+| Close logs automatically when a pull request merges | The reusable close contract and same-repo callers | `.github/workflows/close-on-merge.yml` |
+| Find lifecycle labels that contradict the issue state | The reusable drift audit | `.github/workflows/oio-status-drift.yml` |
 
 ## How it works
 
@@ -66,6 +68,24 @@ Every record moves along the same short path. The project ontology supplies prio
 3. **Triage.** Automation validates the installed ontology and record schema, then labels the source class, authenticated account tier, project path, impact, release relevance, and advisory review lane. Human-origin claims require a separate account attestation.
 4. **Review.** The owner reads the proposal. Every issue is a proposal, not a mandate.
 5. **Resolve.** The issue is answered, accepted, or closed, and the trail stays on the issue itself.
+
+## Closing the loop
+
+A merged pull request is the one transition OIO automates. The close contract reads the pull-request body and acts only on native closing verbs:
+
+- `Closes #12`, `Fixes #12`, and `Resolves #12` close the named log; the optional `owner/repo#12` form reaches another repository. The verbs are case-insensitive.
+- `Refs #12` is a progress link and closes nothing.
+- Duplicate references collapse to one action.
+
+`.github/workflows/close-on-merge.yml` is reusable: a caller passes `oio_ref`, and its job runs only when `github.event.pull_request.merged == true`. For each referenced log it closes with reason `completed`, adds `status:resolved`, removes the other `status:*` labels, rewrites the body's Lifecycle Status section to `resolved`, and posts one comment carrying the `<!-- oio:close-on-merge -->` marker so a retry does not comment twice. An issue that is already closed is not closed a second time; its lifecycle fields are still synced. Cross-repository references are attempted with `CROSS_REPO_TOKEN`; when that token cannot see the issue, the run prints a warning and continues instead of failing the whole merge.
+
+`.github/workflows/oio-status-drift.yml` is the report-only audit. It reads every issue's `status:*` label and the GitHub open/closed state, prints each contradiction, and exits non-zero when any exist. A closed log must be `resolved`, `superseded`, `obsolete`, or `wontfix`; an open log must be `open`. Logs with no status label are ignored.
+
+Same-repo callers ship with OIO: `close-on-merge-caller.yml` runs on `pull_request: closed`, and `status-drift-caller.yml` runs daily and on manual dispatch. Adopters call the same reusable workflows from their own repository; see [docs/ADOPTER_INSTALL.md](docs/ADOPTER_INSTALL.md).
+
+## Version and release rule
+
+The installer reports the package version in this order: the `observational-issue-ops` pin in `stack-manifest.json`, then the installed `.oio/install-manifest.json`, then the checked-in `VERSION` file. There is no hard-coded fallback: if none of those exists, the installer refuses with an actionable error. Bump `VERSION` in the same change as any packaged file, so an install can be compared to the package that produced it.
 
 ## How OIO separates from the rest of the stack
 
