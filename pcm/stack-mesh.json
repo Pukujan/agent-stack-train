@@ -7,15 +7,15 @@
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "4cea25e028e0ad9a5a66f4c30855fe9db069ba58"
+      "commit": "0557b8d184301ad22da8d92a3980ac0e1dc66d62"
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "83fdf459c65016343ad5be1637f93ce0413525c7"
+      "commit": "9001faf05925e33815013e9963dc11ac39ed6441"
     },
     "observational-issue-ops": {
       "version": "0.2.0",
-      "commit": "ff4e30cf5c89442290544d61e376462a83d88f76"
+      "commit": "305adc5d09920d28e603a1b317108637cc30a624"
     }
   }
 }
