@@ -3,7 +3,7 @@
   "requires": {
     "project-continuity-modules": {
       "version": "0.7.0",
-      "commit": "ea4744157f134ca2e68f85bd44091e88c3c7b2a9"
+      "commit": "70dc17dcf96b99b9bf9308a774fdcfa0b70d3f6b"
     },
     "content-generation-modules": {
       "version": "0.5.12",
@@ -11,7 +11,7 @@
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "9001faf05925e33815013e9963dc11ac39ed6441"
+      "commit": "470013ed3380262cc85568bff83e563ecdbab491"
     },
     "observational-issue-ops": {
       "version": "0.2.0",
