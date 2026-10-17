@@ -17,6 +17,11 @@ from typing import Iterable
 
 CLOSE_COMMENT_MARKER = "<!-- oio:close-on-merge -->"
 SETTLED_STATUSES = {"resolved", "superseded", "obsolete", "wontfix"}
+# Pull-request bodies quote examples such as `Closes owner/repo#12` while
+# documenting the contract. Those placeholders name no real repository, so a
+# close attempt on them only produces a resolution error.
+PLACEHOLDER_OWNERS = {"owner", "org", "your-org", "your_org"}
+PLACEHOLDER_REPOS = {"repo", "repository", "name", "your-repo", "your_repo"}
 CLOSING_PATTERN = re.compile(
     r"\b(?:closes|fixes|resolves)\b\s*:?\s*"
     r"(?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?\s*#([0-9]+)\b",
@@ -26,16 +31,25 @@ LIFECYCLE_HEADING = re.compile(r"^###[ \t]+Lifecycle Status[ \t]*(?=\r?$)", re.I
 NEXT_HEADING = re.compile(r"^###[ \t]+", re.MULTILINE)
 
 
+def _is_placeholder(repo: str) -> bool:
+    owner, name = repo.split("/", 1)
+    return owner.lower() in PLACEHOLDER_OWNERS or name.lower() in PLACEHOLDER_REPOS
+
+
 def closing_refs(body: str) -> list[tuple[str | None, int]]:
     """Return the issues a body closes with a native closing verb.
 
     ``Refs #12`` is a progress link, not a close directive, and is ignored.
-    Duplicates are collapsed while keeping first-seen order.
+    A reference whose repository part is a documented placeholder
+    (``owner/repo#12``) is an example, not a directive. Duplicates are
+    collapsed while keeping first-seen order.
     """
     refs: list[tuple[str | None, int]] = []
     seen: set[tuple[str | None, int]] = set()
     for match in CLOSING_PATTERN.finditer(body or ""):
         repo = match.group(1)
+        if repo is not None and _is_placeholder(repo):
+            continue
         key = (repo.lower() if repo else None, int(match.group(2)))
         if key in seen:
             continue

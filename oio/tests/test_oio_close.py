@@ -134,22 +134,28 @@ class ClosingRefsTests(unittest.TestCase):
         self.assertEqual(closing_refs("Closes #12"), [(None, 12)])
         self.assertEqual(closing_refs("Fixes: #3"), [(None, 3)])
         self.assertEqual(closing_refs("resolves Pukujan/observational-issue-ops#4"), [("Pukujan/observational-issue-ops", 4)])
-        self.assertEqual(closing_refs("CLOSES owner/repo#5"), [("owner/repo", 5)])
+        self.assertEqual(closing_refs("CLOSES Pukujan/agent-stack-train#5"), [("Pukujan/agent-stack-train", 5)])
 
     def test_refs_keyword_is_not_a_close_directive(self):
         self.assertEqual(closing_refs("Refs #12\nrelated: #13"), [])
         self.assertEqual(closing_refs("This closes nothing."), [])
 
+    def test_documented_placeholders_are_examples_not_directives(self):
+        self.assertEqual(closing_refs("CLOSES owner/repo#5"), [])
+        self.assertEqual(closing_refs('PASS "Closes owner/repo#12" -> no match'), [])
+        self.assertEqual(closing_refs("Fixes org/repository#7"), [])
+        self.assertEqual(closing_refs("Closes Pukujan/observational-issue-ops#5"), [("Pukujan/observational-issue-ops", 5)])
+
     def test_duplicates_collapse_case_insensitively(self):
         self.assertEqual(
-            closing_refs("Closes #1\ncloses #1\nFixes OWNER/Repo#2\nfixes owner/repo#2"),
-            [(None, 1), ("OWNER/Repo", 2)],
+            closing_refs("Closes #1\ncloses #1\nFixes Pukujan/RepoTracker#2\nfixes Pukujan/repotracker#2"),
+            [(None, 1), ("Pukujan/RepoTracker", 2)],
         )
 
     def test_metamorphic_reordering_and_progress_refs_do_not_change_the_set(self):
-        base = closing_refs("Closes #1\nFixes #2\nResolves owner/repo#3")
-        reordered = closing_refs("Resolves owner/repo#3\nCloses #1\nFixes #2")
-        with_refs = closing_refs("Refs #99\nCloses #1\nRefs #2\nFixes #2\nResolves owner/repo#3\nRefs #3")
+        base = closing_refs("Closes #1\nFixes #2\nResolves Pukujan/agent-stack-train#3")
+        reordered = closing_refs("Resolves Pukujan/agent-stack-train#3\nCloses #1\nFixes #2")
+        with_refs = closing_refs("Refs #99\nCloses #1\nRefs #2\nFixes #2\nResolves Pukujan/agent-stack-train#3\nRefs #3")
         self.assertEqual(set(base), set(reordered))
         self.assertEqual(set(base), set(with_refs))
 
