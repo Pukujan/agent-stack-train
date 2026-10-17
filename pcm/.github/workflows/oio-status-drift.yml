@@ -1,0 +1,21 @@
+name: OIO status drift
+
+# OIO owns the drift check; this caller only supplies the schedule. The called
+# workflow is pinned to a commit SHA, not a branch, so the contract PCM relies
+# on cannot move underneath it.
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  drift:
+    uses: Pukujan/observational-issue-ops/.github/workflows/oio-status-drift.yml@ff4e30cf5c89442290544d61e376462a83d88f76
+    with:
+      oio_ref: ff4e30cf5c89442290544d61e376462a83d88f76
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
