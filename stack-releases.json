@@ -2,19 +2,19 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-14T18:42:09Z",
+  "recorded_at": "2026-10-17T09:34:14Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
       "version": "0.7.0",
-      "commit": "8cbfc3c8e9f13eadf2663fd6dd060588ee29399d",
+      "commit": "a40181123d1af764b8bc78bfe6ea54c6bd46ea6e",
       "cli": "0.7.0",
       "protocol_version": "0.1.0-draft",
       "role": "Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates."
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "fe2054ba323257510eff4e31de1dcd4a1460d1c7",
+      "commit": "4cea25e028e0ad9a5a66f4c30855fe9db069ba58",
       "modules": 8,
       "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation."
     },
@@ -25,8 +25,8 @@
       "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime."
     },
     "observational-issue-ops": {
-      "version": "0.1.0",
-      "commit": "e5e5fb1250aa8d154e9a83554638aec4cc8b2c8a",
+      "version": "0.2.0",
+      "commit": "ff4e30cf5c89442290544d61e376462a83d88f76",
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
     }
   },
