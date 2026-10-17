@@ -149,7 +149,7 @@
       ],
       "reviewed_commit": "uncommitted",
       "reviewed_sha256": "7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b",
-      "summary": "One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.",
+      "summary": "PCM's prose rules for issue logs, updates and PRs; the canonical issue-log shape defers to OIO's ontology and form.",
       "tasks": [],
       "title": "Issue log format"
     },

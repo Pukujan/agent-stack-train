@@ -31,7 +31,7 @@ The human explanation can be detailed when the decision is consequential or unfa
 ### New issue
 
 Describe the real-world or project consequence first. State the intended result in terms someone can observe, then scope/non-goals and proportionate acceptance checks. Link the canonical task when one is activated. Add sources and reproduction details only when they support a claim or are needed to repeat the reported behavior.
- Follow the structure defined by the [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) for the issue log itself.
+ Fill OIO's canonical issue-log shape (its ontology and issue form) and follow the writing rules in the [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) for the issue log itself.
 
 ### Issue progress update
 
@@ -41,7 +41,7 @@ Every issue progress update MUST link the leaf child issue owning the work, its 
 ### Pull request
 
 Keep the visible summary easy to scan: human outcome, change and scope, verification result, and related task/issue. Put detailed reproduction, logs, and provenance behind a short expandable section or direct artifact links. Include the CI result and merge/closeout status when known. Do not claim a PR is merged until the remote confirms it.
- The [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) defines the reader-first PR opening and the `Refs #<number>` reference convention.
+ The [issue-log-format module](ISSUE_LOG_FORMAT.md) (`issue-log-format` policy marker) defines the reader-first PR opening and the `Refs #<number>` / native closing-keyword convention.
 
 When a PR description or commit message refers to a GitHub issue, use an issue-closing keyword only when merging should complete that issue. GitHub recognizes `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference; a negated sentence can still be interpreted as a closing directive. For progress-only work, use a non-closing reference such as `Refs #123` or link the issue manually from GitHub's sidebar. After every merge, verify the live issue status before reconciling task lifecycle. See [GitHub's linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 

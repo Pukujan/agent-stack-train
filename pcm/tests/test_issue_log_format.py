@@ -1,4 +1,9 @@
-"""Deterministic tests for the issue-log-format 1.2.0 module (PCM-0027, #99).
+"""Deterministic tests for the issue-log-format 1.3.0 module (PCM-0027, #99).
+
+1.3.0 (2026-10-14, #252) deduplicates the explain-the-reference rule: PCM's
+copy of the prose rule is removed and both the module doc and the pinned
+guidance block point at CGM `docs/NARRATIVE_AUTHORITY.md` Rule 2, the single
+source for issue-log prose voice per the OIO #52 consolidation ruling.
 
 Severity decisions (owner direction on #99, comment 5828143593, 2026-09-25):
 missing marker -> warning (adopters stay VALID); contradictory -> error;
@@ -40,8 +45,8 @@ class IssueLogFormatModuleTests(unittest.TestCase):
         self.assertIn(ISSUE_LOG_FORMAT_POLICY_MARKER, ISSUE_LOG_FORMAT_GUIDANCE)
         self.assertEqual(ISSUE_LOG_FORMAT_GUIDANCE.count(ISSUE_LOG_FORMAT_START_MARKER), 1)
         self.assertEqual(ISSUE_LOG_FORMAT_GUIDANCE.count(ISSUE_LOG_FORMAT_END_MARKER), 1)
-        self.assertIn("1.2.0", ISSUE_LOG_FORMAT_POLICY_MARKER)
-        self.assertEqual(ISSUE_LOG_FORMAT_POLICY_VERSION, "1.2.0")
+        self.assertIn("1.3.0", ISSUE_LOG_FORMAT_POLICY_MARKER)
+        self.assertEqual(ISSUE_LOG_FORMAT_POLICY_VERSION, "1.3.0")
 
     def test_diagram_rules_ship_in_the_block(self) -> None:
         g = ISSUE_LOG_FORMAT_GUIDANCE
@@ -65,7 +70,7 @@ class IssueLogFormatModuleTests(unittest.TestCase):
         g = ISSUE_LOG_FORMAT_GUIDANCE
         for phrase in (
             "Readability rules",
-            "plain-word meaning in the same sentence",
+            "NARRATIVE_AUTHORITY.md",
             "claim first, numbers as support",
             "no unexplained acronym or bare identifier on first use",
         ):
@@ -73,6 +78,20 @@ class IssueLogFormatModuleTests(unittest.TestCase):
                 self.assertIn(phrase, g)
         doc = (ROOT / "docs" / "ISSUE_LOG_FORMAT.md").read_text(encoding="utf-8")
         self.assertIn("## Readability rules", doc)
+
+    def test_shape_defers_to_oio_and_points_at_its_ontology_and_form(self) -> None:
+        g = ISSUE_LOG_FORMAT_GUIDANCE
+        doc = (ROOT / "docs" / "ISSUE_LOG_FORMAT.md").read_text(encoding="utf-8")
+        for name, text in (("guidance", g), ("doc", doc)):
+            with self.subTest(source=name):
+                self.assertIn("observational-issue-ops", text)
+                self.assertIn("ontology/ISSUE_LOG_ONTOLOGY.md", text)
+                self.assertIn(".github/ISSUE_TEMPLATE/observational-issue.yml", text)
+                self.assertIn("does not define a competing form", text)
+                self.assertIn("not a second form schema", text)
+        for phrase in ("What an investigation record must say", "Would confirm", "Would refute", "Experiment"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, doc)
 
     def test_marker_json_is_wellformed(self) -> None:
         payload = ISSUE_LOG_FORMAT_POLICY_MARKER.split("<!-- pcm:policy ", 1)[1]
@@ -183,7 +202,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
 
     def test_stale_marker_warns_and_prints_update_step(self) -> None:
         stale = ISSUE_LOG_FORMAT_GUIDANCE.replace(
-            '"policy_version":"1.2.0"', '"policy_version":"0.9.0"'
+            f'"policy_version":"{ISSUE_LOG_FORMAT_POLICY_VERSION}"', '"policy_version":"0.9.0"'
         )
         (self.root / "AGENTS.md").write_text(
             "# Agent Operating Contract\n\n" + stale + "\n", encoding="utf-8"
@@ -206,7 +225,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
 
     def test_contradictory_versions_are_errors(self) -> None:
         other = ISSUE_LOG_FORMAT_GUIDANCE.replace(
-            '"policy_version":"1.2.0"', '"policy_version":"2.0.0"'
+            f'"policy_version":"{ISSUE_LOG_FORMAT_POLICY_VERSION}"', '"policy_version":"2.0.0"'
         )
         (self.root / "HANDOFF.md").write_text(
             "# Current Handoff\n\n" + other + "\n", encoding="utf-8"
@@ -215,7 +234,7 @@ class IssueLogFormatValidatorTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         self.assertEqual(len(errors), 1)
         self.assertIn("contradictory", errors[0])
-        self.assertIn("1.2.0", errors[0])
+        self.assertIn(ISSUE_LOG_FORMAT_POLICY_VERSION, errors[0])
         self.assertIn("2.0.0", errors[0])
         self.assertEqual(len(self.guidance_errors()), 1)
 
@@ -312,14 +331,14 @@ class IssueLogFormatInitTests(unittest.TestCase):
             handoff = root / "HANDOFF.md"
             text = handoff.read_text(encoding="utf-8")
             stale = text.replace(ISSUE_LOG_FORMAT_GUIDANCE, ISSUE_LOG_FORMAT_GUIDANCE.replace(
-                '"policy_version":"1.2.0"', '"policy_version":"0.9.0"'
+                f'"policy_version":"{ISSUE_LOG_FORMAT_POLICY_VERSION}"', '"policy_version":"0.9.0"'
             ))
             handoff.write_text(stale, encoding="utf-8")
             _, warnings = issue_log_format_findings(root)
             self.assertEqual(len(warnings), 1)
             updated = handoff.read_text(encoding="utf-8").replace(
                 ISSUE_LOG_FORMAT_GUIDANCE.replace(
-                    '"policy_version":"1.2.0"', '"policy_version":"0.9.0"'
+                    f'"policy_version":"{ISSUE_LOG_FORMAT_POLICY_VERSION}"', '"policy_version":"0.9.0"'
                 ),
                 ISSUE_LOG_FORMAT_GUIDANCE,
             )

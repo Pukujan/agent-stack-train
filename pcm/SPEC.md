@@ -184,4 +184,4 @@ Keep machine-readable IDs and versions aligned across task/checkpoint, tracker, 
 
 PCM owns the continuation-record contract and its propagation to adopting projects. It does not standardize unrelated domain/product writing. GitHub issue and PR templates are optional writing aids, not synchronization adapters; installing them MUST preserve conflicting project files. PCM MUST NOT claim automatic conversation capture or issue synchronization. The full policy is in docs/CONTINUITY_RECORDS_POLICY.md.
 
-The readable structure for issue logs, progress updates and pull requests is the separately versioned `issue-log-format` module (policy 1.2.0): docs/ISSUE_LOG_FORMAT.md.
+The readable structure for issue logs, progress updates and pull requests is the separately versioned `issue-log-format` module (policy 1.3.0): docs/ISSUE_LOG_FORMAT.md. The canonical issue-log shape belongs to OIO; the module defers to OIO's ontology and issue form and states only the prose rules PCM owns.

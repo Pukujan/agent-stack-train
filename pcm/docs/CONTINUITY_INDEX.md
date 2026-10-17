@@ -1,6 +1,6 @@
 # Continuity Document Index
 
-<!-- continuity:documents-index {"catalog_sha256":"2202d694b10e6c846af86ddaf031f4c0bbda186c72a9aeea8eb7f4185cab0658","schema":"project-continuity.documents-index.v1"} -->
+<!-- continuity:documents-index {"catalog_sha256":"bffef7d2cbd2161602d2104b1a81eb04cc11018802a49c33f0510456ddf85570","schema":"project-continuity.documents-index.v1"} -->
 
 > Generated from `.continuity/documents.json`. Edit the JSON inventory, then run `continuity docs render`; do not edit this view directly.
 > Freshness below compares local file bytes; after `git fetch origin`, use `continuity docs find` for cached remote freshness.
@@ -23,7 +23,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3`
-- Current SHA-256: `8dccaa4b3fbd0d3d40c1ec1350dd5a4b1de41ee991c9662a11b5ba73e0166cd3`
+- Current SHA-256: `291079ff3b969af59215b425e3035d3f95938eb903c85cdcf34af08a3a57f38c`
 - Summary: How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.
 - Search terms: `architecture`, `checkpoint`, `doc-system`, `ownership`, `resume`
 - Neighboring records: `continuity-records-policy`, `issue-log-format`
@@ -59,7 +59,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
-- Current SHA-256: `f6dd332d5155ab219adf289b766fa80e9ec8b196fb85926311e454252c9e14a9`
+- Current SHA-256: `c1eeff6be08de111a69044402379c789e61ed04e3e4988229673f791b018817d`
 - Summary: Human-readable and machine-verifiable issue, task, checkpoint and handoff records.
 - Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`
@@ -83,7 +83,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `8e4dd030e6d891c596b61d033c6fd962c6a7c05da4081261945109cd80f38e17`
+- Current SHA-256: `93fbedde03b9bcc375bbb1c652186b500f0d767a6ee6ea34528d7d2f6ec1d725`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
@@ -95,8 +95,8 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
-- Current SHA-256: `857461f96f21330e96c1f7acb1082cd1e615bfa15e34d89e260eed5862fbdfc6`
-- Summary: One plain-language shape for issue logs, updates and PRs that adopters can apply mechanically.
+- Current SHA-256: `5ab76a8e7b0dba0b06f8e2aa3e1f754179f9e7017425a22e78f092a89ab63210`
+- Summary: PCM's prose rules for issue logs, updates and PRs; the canonical issue-log shape defers to OIO's ontology and form.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`
 - Task associations: none
