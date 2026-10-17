@@ -2,25 +2,25 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-17T09:55:15Z",
+  "recorded_at": "2026-10-17T10:54:05Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
       "version": "0.7.0",
-      "commit": "ea4744157f134ca2e68f85bd44091e88c3c7b2a9",
+      "commit": "70dc17dcf96b99b9bf9308a774fdcfa0b70d3f6b",
       "cli": "0.7.0",
       "protocol_version": "0.1.0-draft",
       "role": "Execution continuity: tasks, checkpoints, immutable push receipts, required PR gates."
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "0557b8d184301ad22da8d92a3980ac0e1dc66d62",
+      "commit": "100f3c3ff1f612f76ef11f713a7466778cd8aa00",
       "modules": 8,
       "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation."
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "9001faf05925e33815013e9963dc11ac39ed6441",
+      "commit": "470013ed3380262cc85568bff83e563ecdbab491",
       "module": "multi-agent-hotload",
       "role": "Install surface: hot-load FULL PCM + FULL CGM + OIO plus the coordination runtime."
     },
