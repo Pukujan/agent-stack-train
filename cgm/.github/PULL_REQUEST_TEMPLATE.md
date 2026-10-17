@@ -1,6 +1,8 @@
 ## Tracking issue
 
-Refs #<open issue with written acceptance criteria>
+Closes #<open issue with written acceptance criteria>
+
+Use `Closes #N` when the merge resolves the issue; use `Refs #N` for progress-only work.
 
 ## Reader problem and outcome
 

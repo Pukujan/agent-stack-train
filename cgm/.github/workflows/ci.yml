@@ -42,9 +42,14 @@ jobs:
               return;
             }
 
-            const match = body.match(/^\s*(?:Refs|Tracks|Tracking issue)\s*:?\s*#(\d+)\b/im);
+            const match = body.match(/^\s*(?:Closes|Fixes|Resolves|Refs|Tracks|Tracking issue)\s*:?\s*#(\d+)\b/im);
             if (!match) {
-              core.setFailed("PR body must identify its tracking issue, for example: Refs #123.");
+              core.setFailed(
+                "PR body must identify its tracking issue on its own line, for example: " +
+                "Closes #123 (closes the issue when the PR merges) or Refs #123 " +
+                "(links the issue without closing it). Accepted forms: Closes #N, Fixes #N, " +
+                "Resolves #N, Refs #N, Tracks #N, Tracking issue #N."
+              );
               return;
             }
 
