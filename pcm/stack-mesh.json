@@ -7,11 +7,11 @@
     },
     "content-generation-modules": {
       "version": "0.5.12",
-      "commit": "0557b8d184301ad22da8d92a3980ac0e1dc66d62"
+      "commit": "100f3c3ff1f612f76ef11f713a7466778cd8aa00"
     },
     "agent-custom-setup": {
       "version": "0.2.0",
-      "commit": "9001faf05925e33815013e9963dc11ac39ed6441"
+      "commit": "470013ed3380262cc85568bff83e563ecdbab491"
     },
     "observational-issue-ops": {
       "version": "0.2.0",
