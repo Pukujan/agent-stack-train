@@ -1,0 +1,118 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "Agent Custom Setup",
+  "audience": [
+    "operators running several coding agents on one repository who need a shared answer to who decides, who is working, and how work gets approved",
+    "maintainers hot-loading multi-agent coordination into a working repo with one command that fails closed on a partial install",
+    "teams that want coordination rules pinned as documents and a validator, not an agent that decides on their behalf"
+  ],
+  "problem": "Put more than one agent on a single repository and the hard problem stops being the code. Two agents claim the same task, a seat goes quiet and nobody notices for an hour, an agent drafts a change nobody approved, or a returning agent acts on a lease it no longer holds. The work itself is fine; the coordination is not. There is no shared, written answer to who is boss, how a seat fails over, or how a proposed change earns a PR.",
+  "solution": "ACS ships the multi-agent hotloader: a versioned coordination pack that, dropped into any working repo, wires join-order roles, a decision boss on a minute-scale lease with FIFO failover, a claim queue, an agent-less watchdog, and a propose -> boss ACCEPT/REJECT -> claim -> PR path, on top of the full Project Continuity Modules (PCM) and full Content Generation Modules (CGM 0.5.12) contracts, without vendoring either helper's source.",
+  "mechanism": [
+    "join/continue order fills roles (first continuer = decision boss, next = coder1, ...); the assignment seed is a hint only and tool identity is irrelevant",
+    "the decision boss holds a lease measured in minutes (default 30, range 15-120); after the TTL the seat is vacant, claimants form a FIFO claim queue, and the front takes boss; a returning old boss rejoins at the end with no automatic reclaim",
+    "an agent-less watchdog runs every ~10 minutes and only flags a stale seat - it never appoints a boss or makes a product decision (watchdog != failover)",
+    "work moves proposal -> boss ACCEPT/REJECT -> claim branch -> PR; nothing commits straight to the protected default branch and required CI gates must pass on the exact candidate",
+    "hotload_check resolves the pinned PCM and CGM checkouts, runs the adapter validator, and only on success writes PROMPT_INJECT.md; missing or stale pins fail closed",
+    "pins.json is the single source of truth and check_pins.py fails closed when any declared projection disagrees on a PCM/CGM commit, version family, or the eight-module count"
+  ],
+  "evidence": [
+    {
+      "claim": "The multi-agent hotloader is the install surface and fails closed on a partial install: FULL PCM + FULL CGM 0.5.12 + this runtime, with a thin subset rejected on purpose.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
+      "status": "shipped",
+      "supports": "The pack's entry document states the three full-stack install requirements, the load order, and that hotload_check.py fails the install unless the assignment pins, the helper checkout revision, and the adapter validation all pass.",
+      "limits": "A specification and a validator do not guarantee adopter agents honor every rule; enforcement depends on the adopter enabling branch protection and required checks.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "HOTLOAD.md on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
+        "locator": "sections 'Done when' and 'Load order'",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
+      }
+    },
+    {
+      "claim": "Pin drift is caught, not assumed: pins.json is the single source of truth and check_pins.py fails closed on any declared projection that disagrees.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py",
+      "status": "shipped",
+      "supports": "The checker reads pins.json, scans every declared projection, and exits non-zero on a foreign commit token, a wrong version family, a missing module-count word, or a superseded value - even when the canonical value is also present. CI runs it on every candidate.",
+      "limits": "It verifies that declared projections agree with the manifest; it cannot see a surface that was never declared as a projection.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "check_pins.py on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py",
+        "locator": "module docstring; run() over manifest['projections']",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py"
+      }
+    },
+    {
+      "claim": "Roles fill by live join order, the boss holds a minute-scale lease with FIFO failover, and the watchdog is liveness-only - all written down as binding.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
+      "status": "shipped",
+      "supports": "ROLES.md specifies join-order role fill, the lease TTL (default 30 minutes, range 15-120), the claim-file FIFO claim queue (the local claim file is the authoritative seat store), the returning-boss-rejoins-at-end rule, the zombie-boss rule, and that the ~10-minute watchdog flags a stale seat without appointing a boss.",
+      "limits": "A written process is a commitment, not an enforcement mechanism; it relies on agents and operators reading the same document.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "ROLES.md on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
+        "locator": "role-fill, boss-lease, and watchdog sections",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md"
+      }
+    },
+    {
+      "claim": "Proposals gate the path to a PR: propose -> boss ACCEPT/REJECT -> claim branch -> PR, with no direct commits to the protected default branch.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md",
+      "status": "shipped",
+      "supports": "PROPOSALS.md defines the proposal lifecycle and the boss ACCEPT/REJECT gate that turns an accepted proposal into a claim on a branch and then a PR, keeping the proposal/ACCEPT layer out of PCM's scope.",
+      "limits": "Relies on the adopter enabling branch protection and required checks; the ACCEPT/REJECT gate is a governance rule, not an automated judge.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "PROPOSALS.md on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md",
+        "locator": "flow: propose -> ACCEPT/REJECT -> claim -> PR",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md"
+      }
+    },
+    {
+      "claim": "The adapter pins the full content-generation contract at 0.5.12 (eight modules including human-output-naming) and the pack pins PCM CLI 0.6.0, both fail-closed.",
+      "source": ".content-system/system-version.json",
+      "status": "shipped",
+      "supports": "system-version.json pins helper 0.5.12 @ 6831f91e165b62d719c05eb492f7375fa932b560 with the eight-module list; the pack's pins.json independently pins PCM CLI 0.6.0 @ 4e2385474b4af9249ca009cbdcb38c4498932475, and check_pins.py holds both.",
+      "limits": "The pins are exact and fail-closed; they do not claim the adopter's prose meets the writing contract, only that the correct modules are loaded.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "adapter pin on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": ".content-system/system-version.json",
+        "locator": "fields helper_version, helper_commit, modules",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/.content-system/system-version.json"
+      }
+    }
+  ],
+  "boundaries": [
+    "ACS owns execution coordination only; it ships no decision-making, adjudication, or benchmarking layer, and makes no decisions on an agent's behalf",
+    "ACS does not replace PCM or CGM and does not vendor helper source trees",
+    "The boss ACCEPT/REJECT gate is a governance rule, not an automated judge; final authority belongs to the human operator",
+    "No API keys, tokens, cookies, or .env contents enter the repository; external keys are referenced by environment-variable name only",
+    "Live status as of 2026-10-04: the registry ships exactly one module (multi-agent-hotload @ 0.1.0); decision-making and benchmarking work is parked outside this repository"
+  ]
+}

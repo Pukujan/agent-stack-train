@@ -1,0 +1,48 @@
+{
+  "system": "agent-custom-setup",
+  "version": "0.2.0",
+  "created": "2026-09-25",
+  "updated": "2026-10-04",
+  "recorded_at": "2026-10-04T00:00:00Z",
+  "valid_time": {
+    "start": "2026-09-25T00:00:00-04:00",
+    "end": null
+  },
+  "status": "active",
+  "policy": "POLICY.md",
+  "description": "Coordination registry for agent-custom-setup. ACS owns execution coordination for multi-agent work on one repository, shipped as the multi-agent hotload pack (join-order roles, boss lease, claim queue, agent-less watchdog, proposals). Path layout: modules/<area>/<setup-id>/v<semver>/. ACS is source of truth; Desktop paths are deploy mirrors.",
+  "modules": [
+    {
+      "id": "multi-agent-hotload",
+      "name": "Multi-agent hotload coordination",
+      "purpose": "Install surface: hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue, agent-less ~10m watchdog, proposals/claim/PR). Versions come from the release train via stack-mesh.json.",
+      "harness": "coordination",
+      "created": "2026-09-27",
+      "updated": "2026-10-05",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
+      "owning_agent": "agent-custom-setup",
+      "deploy_mirrors": [
+        {
+          "label": "ACS module tree (SoT; agents load from checkout)",
+          "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+          "notes": "ACS is SoT. Agents load from the checkout; no Desktop mirror required for this docs/runtime pack."
+        }
+      ],
+      "version": "0.1.0",
+      "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+      "recorded_at": "2026-09-27T04:55:00Z",
+      "valid_time": {
+        "start": "2026-09-27T00:00:00-04:00",
+        "end": null
+      },
+      "status": "active",
+      "summary": "FULL PCM + FULL CGM 0.5.12 + OIO + coordination runtime (join-order, 30m lease, claim-file claim_queue, agent-less watchdog). The adopter follows the release train via stack-manifest.json (empty pins). Slim subsets are incomplete installs; an uninstallable component (e.g. OIO) is reported PARTIAL, never as success.",
+      "dependencies": [
+        "PCM version and commit from stack-mesh.json (full stack)",
+        "CGM version and commit from stack-mesh.json (full eight modules incl. human-output-naming)",
+        "OIO version and commit from stack-mesh.json (observational issue-log surface; installer invoked by acs_install.py)",
+        "agent-stack-train stack-releases.json (certified version set the adopter manifest follows)"
+      ]
+    }
+  ]
+}
