@@ -3,17 +3,16 @@
 
 A stack document -- ``README.md``, ``AGENTS.md``, ``PROJECT.md`` -- sometimes
 restates a sibling component's version or commit as if it were current. No
-validator reads prose: ``check_manifest.py`` reads ``stack-manifest.json``,
-``mesh.py`` reads ``stack-mesh.json``, and ACS's ``check_pins.py`` reads only
-the projections ``pins.json`` declares. A reader who follows the prose installs
-the wrong versions, and every check stays green. That is the 2026-10-13 defect
-in agent-stack-train#16.
+validator reads prose: ``check_manifest.py`` reads ``stack-manifest.json``, and
+ACS's ``check_pins.py`` reads only the projections ``pins.json`` declares. A
+reader who follows the prose installs the wrong versions, and every check stays
+green. That is the 2026-10-13 defect in agent-stack-train#16.
 
 This script is the missing reader. The rule it enforces is the one the train's
 own README already practices: a stack document points at ``stack-releases.json``
-(or ``stack-mesh.json``) instead of restating a current value, because a
-hand-copied pin was correct for eleven hours on 2026-10-10 and stale ever since
-(OIO PR #44 vs train commits 83379c6 and bc212fa).
+instead of restating a current value, because a hand-copied pin was correct for
+eleven hours on 2026-10-10 and stale ever since (OIO PR #44 vs train commits
+83379c6 and bc212fa).
 
 Usage (pure, offline -- the certified set is passed as a file):
 

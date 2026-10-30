@@ -18,7 +18,7 @@ Each folder keeps its own README, AGENTS.md, tasks and tests. Read the folder's 
 
 ## Where the move stands
 
-1. **Freeze.** Done. The open pull requests in the four old repositories were merged or closed, and the mesh and train refresh workflows were turned off.
+1. **Freeze.** Done. The open pull requests in the four old repositories were merged or closed. The workflows that kept their pins in step (the mesh and the train refresh) were turned off and are now removed from this repository: one repository has one commit, so nothing needs syncing.
 2. **Combine.** This repository now holds all four components with their history. One `gates` check runs every component's tests.
 3. **Switch install.** Done. ACS's installer takes one checkout of this repository and installs PCM, CGM and OIO from its folders, all at that checkout's commit. OIO's reusable close workflows live in this repository's root [`.github/workflows/`](.github/workflows/), and the callers OIO installs name `Pukujan/agent-stack-train`.
 4. **Release.** Not done. The first stack version will be 1.0.0. Tagging it adds an `agent-stack-train` entry to the train, which manifests from the new install pin. The old repositories are archived after it ships, never deleted.
@@ -47,7 +47,7 @@ Adopters still pin the stack through the train, as before the move.
 | [`stack-releases.json`](stack-releases.json) | **this repository** | The certified versions: one entry per component, with version, commit, and role. |
 | `stack-manifest.json` | **each adopter** | That adopter's pins: which train it follows, and either `agent-stack-train` alone (installed from one checkout of this repository) or one pin per component (installed before the move). |
 
-The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.schema.json). Versions are not copied into this README; [`stack-releases.json`](stack-releases.json) is the one answer. The train was last refreshed from the old repositories' default branches when they were frozen, and its refresh workflow is now off.
+The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.schema.json). Versions are not copied into this README; [`stack-releases.json`](stack-releases.json) is the one answer. The train was last refreshed from the old repositories' default branches when they were frozen. Nothing refreshes it now; a pull request changes it.
 
 To check an adopter's pins in CI:
 
