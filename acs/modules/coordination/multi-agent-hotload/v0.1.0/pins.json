@@ -1,6 +1,6 @@
 {
   "schema": "acs.hotload.pins.v1",
-  "note": "Module shape for the hotloader. Version commits are not pinned here. stack-mesh.json, written from agent-stack-train stack-releases.json, is the version requirement. An older checkout is refused.",
+  "note": "Module shape for the hotloader. Version commits are not pinned here. Every component comes from the same agent-stack-train checkout, at its one commit.",
   "pins": {
     "cgm": {
       "version": "0.5.12",

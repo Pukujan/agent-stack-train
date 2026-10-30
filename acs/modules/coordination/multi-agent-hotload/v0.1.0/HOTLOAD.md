@@ -2,7 +2,7 @@
 
 When an agent starts on Agent Custom Setup (or is told to load the **agent hot-loader** into a working repo), load in this order. This module is the **install surface**: it wires PCM + CGM + OIO + this coordination runtime together. ACS does **not** replace PCM, CGM, or OIO.
 
-Component versions are **not** written down in this file. They come from the release train (`agent-stack-train`'s `stack-releases.json`) through the pack's `stack-mesh.json`, and the adopter follows the train through its own `stack-manifest.json`. See [SPEC.md](SPEC.md) §1. Do not restate a commit here — a copied pin is exactly the drift the train exists to remove.
+Component versions are **not** written down in this file. This pack ships in [Pukujan/agent-stack-train](https://github.com/Pukujan/agent-stack-train) next to `pcm/`, `cgm/` and `oio/`, so one checkout of that repository is the whole stack, every component at the checkout's one commit. The adopter follows the release train through its own `stack-manifest.json`. See [SPEC.md](SPEC.md) §1. Do not restate a commit here — a copied pin is exactly the drift the train exists to remove.
 
 ## Done when
 
@@ -38,7 +38,7 @@ The dev root is where the operator keeps the main checkout of each repo. It defa
 | Scratch, probes, throwaway copies | `%LOCALAPPDATA%\acs\scratch\<name>` | `~/.cache/acs/scratch/<name>` |
 | Linked worktrees (`git worktree add`) | `%LOCALAPPDATA%\acs\worktrees\<repo>-<branch>` | `~/.cache/acs/worktrees/<repo>-<branch>` |
 
-`hotload_check` looks for the pinned CGM checkout in `<cache>/deps/` first and refuses a dependency path that sits inside the dev root unless it is one of the main checkouts there. It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
+`hotload_check` validates against the stack checkout's own `cgm/` folder. It refuses a `--cgm-root` or `CGM_ROOT` override that sits inside the dev root unless it is one of the main checkouts there. It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
 
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --dev-root D:/development
@@ -64,11 +64,11 @@ Binding MUST/MUST NOT + paste-ready provenance checklist: [BEHAVIOR.md](BEHAVIOR
 
 ### 2. FULL PCM (continuity + GitHub governance)
 
-Check out [Pukujan/project-continuity-modules](https://github.com/Pukujan/project-continuity-modules) at the commit `stack-mesh.json` requires for `project-continuity-modules` (the train's certified revision — read it from the mesh, do not copy it here). The installer verifies the checkout with `--pcm-root`.
+PCM is the stack checkout's `pcm/` folder, at the same commit as this pack. The installer takes the checkout with `--stack-root` (default: the checkout it runs from).
 
-- Do **not** silently follow moving `main`; use the mesh revision. Do **not** copy PCM source into ACS.
+- Do **not** silently follow moving `main`; install from the stack commit your project approved. Do **not** copy PCM source into ACS.
 
-Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md) (PR-only + required gates; live), `docs/TARGET_ADOPTION.md`, `SPEC.md` §8, `AGENTS.md`):
+Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](../../../../../pcm/docs/adopter-enforcement.md) (PR-only + required gates; live), `docs/TARGET_ADOPTION.md`, `SPEC.md` §8, `AGENTS.md`):
 
 | Required | Meaning |
 | --- | --- |
@@ -84,9 +84,9 @@ Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](h
 
 ### 3. FULL CGM 0.5.12 (all modules + contracts)
 
-Check out [Pukujan/content-generation-modules](https://github.com/Pukujan/content-generation-modules) at the commit `stack-mesh.json` requires for `content-generation-modules` (the train's certified revision — read it from the mesh, do not copy it here). The installer verifies the checkout with `--cgm-root`.
+CGM is the stack checkout's `cgm/` folder, at the same commit as this pack. `hotload_check` validates against it unless `--cgm-root` or `CGM_ROOT` names another checkout, which must then sit at the stack commit.
 
-- Do **not** silently follow moving `main`; use the mesh revision. Do **not** copy CGM source into ACS.
+- Do **not** silently follow moving `main`; install from the stack commit your project approved. Do **not** copy CGM source into ACS.
 - Adapter shape: target `.content-system/system-version.json` lists all eight module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
 
 **Required modules** (complete stack — a two-module pin is incomplete):
@@ -114,7 +114,7 @@ Check out [Pukujan/content-generation-modules](https://github.com/Pukujan/conten
 
 ### 4. OIO (observational issue-log surface)
 
-Check out [Pukujan/observational-issue-ops](https://github.com/Pukujan/observational-issue-ops) at the commit `stack-mesh.json` requires for `observational-issue-ops`. The installer verifies the checkout with `--oio-root`, then invokes OIO's own installer (`.github/scripts/oio_installer.py --target <adopter>`) — ACS does not vendor or re-implement OIO.
+OIO is the stack checkout's `oio/` folder, at the same commit as this pack. The installer invokes OIO's own installer from it (`oio/.github/scripts/oio_installer.py --target <adopter>`) — ACS does not vendor or re-implement OIO. The close callers OIO writes call the reusable workflows at the root of agent-stack-train, pinned to the stack commit.
 
 - OIO writes the issue-log surface: the project ontology, the observational issue form, the triage workflow, and a **delimited region** inside `AGENTS.md` (`<!-- oio:issue-log-guidance:start/end -->`). Text outside that region is never touched; an edited region is refused on hash mismatch (see [SPEC.md](SPEC.md) §5).
 - OIO's installer is transactional and fail-closed. Where the platform cannot support its symlink/reparse-point control, it refuses; ACS reports the install **PARTIAL** with the exact remaining command rather than claiming success ([SPEC.md](SPEC.md) §6).
@@ -164,21 +164,18 @@ Before acting as decision boss:
 ### 8. Verify (FULL CGM validate required)
 
 ```bash
-# Check out CGM at the commit stack-mesh.json requires for content-generation-modules:
-#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout "$(python -c \
-#     "import json;print(json.load(open('stack-mesh.json'))['requires']['content-generation-modules']['commit'])")"
-export CGM_ROOT=/path/to/content-generation-modules   # or pass --cgm-root
+# Run from the agent-stack-train checkout; CGM is its own cgm/ folder.
 export ADOPTER_ROOT=/path/to/working-repo             # must contain .content-system/
 
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
-  --cgm-root "$CGM_ROOT" --adopter-root "$ADOPTER_ROOT"
+python acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
+  --adopter-root "$ADOPTER_ROOT"
 ```
 
 `hotload_check` fails the install unless **all** of the following succeed:
 
 1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.12 (eight modules; slim HSW+WD-only fails).
 2. `boss_failover` / `watchdog` / `claim_queue` rules validate (lease **15–120** minutes, default 30).
-3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at the commit `stack-mesh.json` requires (0.5.12).
+3. The CGM it validates against is at the stack commit: the stack checkout's own `cgm/` (0.5.12), or a `--cgm-root` / `CGM_ROOT` override at that commit.
 4. It runs `python "$CGM_ROOT/scripts/validate_content_system.py" --root "$CGM_ROOT" --adapter "$ADOPTER_ROOT/.content-system" --project-root "$ADOPTER_ROOT"` and the stdout **starts with `VALID`** (exit 0). There is **no** separate HSW-only script. On OK, `hotload_check` writes `PROMPT_INJECT.md` from `acs_prompt_inject` and prints the instruction (primary done-when remains full adapter VALID; `--mode writing` is optional secondary only).
 
 ### 9. After validate — MUST load writing modules + acs_prompt_inject
@@ -214,11 +211,12 @@ The pack installs one thing: the coordination runtime over the full stack. There
 are no optional seatbelt layers.
 
 1. ACS policy + registry
-2. FULL PCM + FULL CGM + OIO (versions from `stack-mesh.json`)
+2. FULL PCM + FULL CGM + OIO (from the same agent-stack-train checkout)
 3. This coordination runtime (roles, lease, claim queue, watchdog, proposals)
 
-The conductor is `scripts/acs_install.py`: it reads the mesh, verifies the
-checkouts, classifies every path it would touch (refusing to clobber foreign or
+The conductor is `scripts/acs_install.py`: it reads each component's version
+from the stack checkout, refuses a checkout missing a component, classifies
+every path it would touch (refusing to clobber foreign or
 hand-edited content), writes the adopter's `.coord/` surface and its
 `stack-manifest.json`, then runs `hotload_check` and installs OIO. It exits
 non-zero with a precise report on any unmet gate, and reports a **PARTIAL**
@@ -236,10 +234,11 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
 ## Minimal session checklist
 
-- [ ] FULL PCM checked out at the `stack-mesh.json` commit — continuity **and** PR-only + required gates + protection/auto-merge preference
-- [ ] FULL CGM 0.5.12 checked out at the `stack-mesh.json` commit — all eight modules + human_output_contract (not HSW+WD only)
-- [ ] OIO checked out at the `stack-mesh.json` commit and installed (`--oio-root`); a component that cannot run is reported PARTIAL, not OK
-- [ ] Adopter `stack-manifest.json` written with **empty pins** (follows the train); a `check_manifest.py` CI step added
+- [ ] One agent-stack-train checkout at the approved stack commit; PCM, CGM and OIO come from its folders
+- [ ] FULL PCM wired — continuity **and** PR-only + required gates + protection/auto-merge preference
+- [ ] FULL CGM 0.5.12 wired — all eight modules + human_output_contract (not HSW+WD only)
+- [ ] OIO installed; a component that cannot run is reported PARTIAL, not OK
+- [ ] Adopter `stack-manifest.json` written with an empty `agent-stack-train` pin (follows the train); a `check_manifest.py` CI step added
 - [ ] Join order understood; I know boss / coderN for this session
 - [ ] Re-read the claim file / `who_is_boss_now` / `claim_queue` on wake
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)

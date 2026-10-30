@@ -4,7 +4,7 @@
 ``pins.json`` (next to the pack this script lives in) records the hotload pack's
 **module shape** -- the CGM module list/count, the advertised CGM version, the
 PCM CLI version, and the ACS module id/version. It is NOT a version-commit pin:
-component commits come from ``stack-mesh.json`` (the release train), and the
+every component sits at the agent-stack-train checkout's one commit, and the
 adopter follows the train through its own ``stack-manifest.json``. Every other
 file that records one of the module-shape values is a *projection* and must
 agree with the manifest. This script reads ``pins.json``, scans each declared
@@ -64,9 +64,9 @@ NUMBER_WORDS = {
 }
 # Projection keys are terse; map them onto the manifest's `pins` block.
 KEY_ALIASES = {"acs": "acs_hotload_module"}
-# Version commits are not copied into these files. stack-mesh.json is the
-# requirement, and the hotloader reads it. A projection may still record the
-# module count and the ACS module id.
+# Version commits are not copied into these files: every component is at the
+# stack checkout's commit. A projection may still record the module count and
+# the ACS module id.
 CONSTANT_FILES: dict[str, dict[str, str]] = {}
 
 

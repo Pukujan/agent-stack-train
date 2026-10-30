@@ -304,16 +304,32 @@ def test_hotload_refuses_dependency_inside_dev_root(tmp_path: Path, remote: Path
     assert hc.dependency_location_problem(tmp_path / "cache" / "deps" / "cgm", root) is None
 
 
-def test_hotload_discovery_prefers_cache_and_skips_dev_root_copies(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_hotload_discovery_uses_the_stack_cgm_unless_told_otherwise(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
     hc = _load("hotload_check")
     root = make_dev_root(tmp_path)
-    _fake_cgm(root / "_deps" / "cgm")
-    cached = _fake_cgm(tmp_path / "cache" / "deps" / "content-generation-modules")
-    found = hc.discover_cgm_root(None, dev_root=root)
-    assert found == cached.resolve()
-    # An explicit path inside the dev root is returned so run() can report it.
-    explicit = hc.discover_cgm_root(root / "_deps" / "cgm", dev_root=root)
-    assert explicit == (root / "_deps" / "cgm").resolve()
+    stack_cgm = _fake_cgm(tmp_path / "stack" / "cgm")
+    in_dev_root = _fake_cgm(root / "_deps" / "cgm")
+    other = _fake_cgm(tmp_path / "cache" / "deps" / "content-generation-modules")
+    # No explicit path and no CGM_ROOT: the stack checkout's own cgm/ folder.
+    assert hc.discover_cgm_root(None, stack_root=tmp_path / "stack") == stack_cgm.resolve()
+    # CGM_ROOT comes next.
+    monkeypatch.setenv("CGM_ROOT", str(other))
+    assert hc.discover_cgm_root(None, stack_root=tmp_path / "stack") == other.resolve()
+    # An explicit path wins, and is returned as-is -- even inside the dev root --
+    # so run() can report why it is refused.
+    explicit = hc.discover_cgm_root(in_dev_root, stack_root=tmp_path / "stack")
+    assert explicit == in_dev_root.resolve()
+    assert hc.dependency_location_problem(explicit, root)
+
+
+def test_hotload_discovery_finds_nothing_in_an_incomplete_stack(tmp_path: Path):
+    hc = _load("hotload_check")
+    # A stack whose cgm/ folder lacks the validator or the version file.
+    (tmp_path / "stack" / "cgm").mkdir(parents=True)
+    assert hc.discover_cgm_root(None, stack_root=tmp_path / "stack") is None
+    assert hc.discover_cgm_root(None, stack_root=tmp_path / "no-stack") is None
 
 
 def test_hotload_warns_on_dev_root_findings(tmp_path: Path, remote: Path, capsys: pytest.CaptureFixture[str]):
@@ -352,11 +368,12 @@ def test_hotload_clean_dev_root_has_no_warning(tmp_path: Path, remote: Path, cap
 
 def test_prompt_inject_render_carries_dev_root_rule():
     hc = _load("hotload_check")
+    version = hc.stack_component("content-generation-modules")["version"]
     md = hc.render_prompt_inject_md(
         {"acs_prompt_inject": {"instruction": "x", "system_block": "y"}},
-        pin_sha=hc.mesh_component("content-generation-modules")["commit"],
-        pin_version=hc.mesh_component("content-generation-modules")["version"],
+        pin_version=version,
     )
+    assert f"CGM `{version}`" in md
     assert "dev root hygiene" in md
     assert hc.DEV_ROOT_RULE in md
     committed = (MODULE_ROOT / "PROMPT_INJECT.md").read_text(encoding="utf-8")

@@ -2,9 +2,9 @@
 
 The five install test modules (acceptance/PDD, states/SDD, gates/TDD,
 metamorphic, manifest/differential) all drive the same installer against the
-same fake world: a fixture ACS root, fake PCM/CGM/OIO checkouts, and stubbed
-external checkers. Keeping that world here means the tests assert behaviour, not
-scaffolding.
+same fake world: a fixture agent-stack-train checkout (``acs/``, ``pcm/``,
+``cgm/``, ``oio/`` folders at one commit) and stubbed external checkers.
+Keeping that world here means the tests assert behaviour, not scaffolding.
 
 The seat-protocol fixtures at the bottom of this file (``seat_protocol``,
 ``claim_store``, ``clock``) are the same idea for the coordination runtime:
@@ -18,6 +18,7 @@ cross-platform (Windows, macOS, Linux).
 
 from __future__ import annotations
 
+import copy
 import json
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -31,10 +32,15 @@ SCRIPT = MODULE_ROOT / "scripts" / "acs_install.py"
 SEAT_PROTOCOL = MODULE_ROOT / "scripts" / "seat_protocol.py"
 MODULE_REL = "modules/coordination/multi-agent-hotload/v0.1.0"
 
-PCM_SHA = "a" * 40
-CGM_SHA = "b" * 40
-ACS_SHA = "c" * 40
-OIO_SHA = "d" * 40
+# The fixture stack checkout's one commit: every component is at it.
+STACK_SHA = "e" * 40
+# The versions the fixture stack's component version files declare.
+VERSIONS = {
+    "project-continuity-modules": "0.6.0",
+    "content-generation-modules": "0.5.12",
+    "agent-custom-setup": "0.2.0",
+    "observational-issue-ops": "0.1.0",
+}
 
 CGM_MODULES = [
     "brand-foundation",
@@ -48,8 +54,8 @@ CGM_MODULES = [
 ]
 
 PINS = {
-    "pcm": {"cli_version": "0.6.0", "commit": PCM_SHA},
-    "cgm": {"version": "0.5.12", "commit": CGM_SHA, "modules": list(CGM_MODULES)},
+    "pcm": {"cli_version": "0.6.0"},
+    "cgm": {"version": "0.5.12", "modules": list(CGM_MODULES)},
     "acs_hotload_module": {"id": "multi-agent-hotload", "version": "0.1.0"},
 }
 
@@ -62,17 +68,52 @@ def load_installer():
     return mod
 
 
-def mesh_doc() -> dict:
-    """A fixture mesh. The installer reads commits from here, never from pins.json."""
-    return {
-        "source": "fixture-train",
-        "requires": {
-            "project-continuity-modules": {"version": "0.6.0", "commit": PCM_SHA},
-            "content-generation-modules": {"version": "0.5.12", "commit": CGM_SHA},
-            "agent-custom-setup": {"version": "0.2.0", "commit": ACS_SHA},
-            "observational-issue-ops": {"version": "0.1.0", "commit": OIO_SHA},
-        },
-    }
+def stack_requires() -> dict:
+    """What the fixture stack provides: each component's version at STACK_SHA."""
+    return {name: {"version": version, "commit": STACK_SHA} for name, version in VERSIONS.items()}
+
+
+def pins_at_stack() -> dict:
+    """``pins.json`` as ``acs_install.run`` overlays it: both revisions are the stack commit."""
+    pins = copy.deepcopy(PINS)
+    pins["pcm"]["commit"] = STACK_SHA
+    pins["cgm"]["commit"] = STACK_SHA
+    return pins
+
+
+def write_stack(root: Path, *, with_oio_installer: bool = True, omit: str | None = None) -> Path:
+    """Lay out a fixture agent-stack-train checkout at ``root``.
+
+    ``omit`` names a folder (``pcm``, ``cgm``, ``oio``) to leave out, for the
+    incomplete-checkout cases. The git commit itself is stubbed (``stub_externals``).
+    """
+    pack = root / "acs" / MODULE_REL
+    pack.mkdir(parents=True)
+    (pack / "pins.json").write_text(json.dumps({"pins": PINS}), encoding="utf-8")
+    (root / "acs" / "registry.json").write_text(
+        json.dumps({"version": VERSIONS["agent-custom-setup"]}), encoding="utf-8"
+    )
+    if omit != "pcm":
+        init = root / "pcm" / "src" / "continuity" / "__init__.py"
+        init.parent.mkdir(parents=True)
+        init.write_text(
+            f'__version__ = "{VERSIONS["project-continuity-modules"]}"\n', encoding="utf-8"
+        )
+    if omit != "cgm":
+        (root / "cgm").mkdir()
+        (root / "cgm" / "system-version.json").write_text(
+            json.dumps({"version": VERSIONS["content-generation-modules"]}), encoding="utf-8"
+        )
+    if omit != "oio":
+        (root / "oio").mkdir()
+        (root / "oio" / "VERSION").write_text(
+            VERSIONS["observational-issue-ops"] + "\n", encoding="utf-8"
+        )
+        if with_oio_installer:
+            scripts = root / "oio" / ".github" / "scripts"
+            scripts.mkdir(parents=True)
+            (scripts / "oio_installer.py").write_text("# stub\n", encoding="utf-8")
+    return root
 
 
 def git_repo(path: Path) -> str:
@@ -96,16 +137,11 @@ def installer():
 
 
 @pytest.fixture
-def make_acs_root(tmp_path: Path):
-    def _make(mesh: dict | None = None) -> Path:
-        root = tmp_path / "acs"
-        pack = root / MODULE_REL
-        pack.mkdir(parents=True)
-        (pack / "pins.json").write_text(json.dumps({"pins": PINS}), encoding="utf-8")
-        (root / "stack-mesh.json").write_text(
-            json.dumps(mesh if mesh is not None else mesh_doc()), encoding="utf-8"
-        )
-        return root
+def make_stack(tmp_path: Path):
+    """A fixture agent-stack-train checkout; see ``write_stack`` for the options."""
+
+    def _make(**options) -> Path:
+        return write_stack(tmp_path / "stack", **options)
 
     return _make
 
@@ -123,42 +159,19 @@ def make_adopter(tmp_path: Path):
 
 
 @pytest.fixture
-def make_checkouts(tmp_path: Path):
-    def _make() -> tuple[Path, Path]:
-        pcm = tmp_path / "pcm-ck"
-        cgm = tmp_path / "cgm-ck"
-        pcm.mkdir()
-        cgm.mkdir()
-        return pcm, cgm
-
-    return _make
-
-
-@pytest.fixture
-def make_oio_checkout(tmp_path: Path):
-    def _make() -> Path:
-        oio = tmp_path / "oio-ck"
-        (oio / ".github" / "scripts").mkdir(parents=True)
-        (oio / ".github" / "scripts" / "oio_installer.py").write_text("# stub\n", encoding="utf-8")
-        return oio
-
-    return _make
-
-
-@pytest.fixture
 def stub_externals(monkeypatch, installer):
-    """Make check_pins/hotload_check succeed and report the pinned HEADs."""
+    """Make check_pins/hotload_check succeed and report the stack commit.
 
-    def _stub(*, oio_supported: bool = True) -> None:
-        def fake_git_head(root):
-            return {
-                "pcm-ck": PCM_SHA,
-                "cgm-ck": CGM_SHA,
-                "oio-ck": OIO_SHA,
-            }.get(Path(root).name, ACS_SHA)
+    ``oio_exit`` is the exit code of OIO's own installer (the one script
+    ``run_script`` is asked to run for it); non-zero leaves the install PARTIAL.
+    """
 
-        monkeypatch.setattr(installer, "git_head", fake_git_head)
-        monkeypatch.setattr(installer, "run_script", lambda argv: 0)
+    def _stub(*, oio_supported: bool = True, oio_exit: int = 0) -> None:
+        def fake_run_script(argv):
+            return oio_exit if Path(str(argv[1])).name == "oio_installer.py" else 0
+
+        monkeypatch.setattr(installer, "git_head", lambda root: STACK_SHA)
+        monkeypatch.setattr(installer, "run_script", fake_run_script)
         monkeypatch.setattr(
             installer,
             "oio_platform_supported",
@@ -170,13 +183,10 @@ def stub_externals(monkeypatch, installer):
 
 @pytest.fixture
 def run_args(installer):
-    def _make(acs_root, adopter, pcm, cgm, oio=None, **over):
+    def _make(stack_root, adopter, **over):
         base = dict(
             adopter_root=adopter,
-            acs_root=acs_root,
-            pcm_root=pcm,
-            cgm_root=cgm,
-            oio_root=oio,
+            stack_root=stack_root,
             project_name=None,
             project_id=None,
             dry_run=False,

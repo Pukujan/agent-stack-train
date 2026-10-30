@@ -135,13 +135,14 @@ class InstallerTests(unittest.TestCase):
         for relative, (reusable, _) in oio_installer.CALLER_FILES.items():
             with self.subTest(relative=relative):
                 text = (self.target / relative).read_text()
-                self.assertIn(f"observational-issue-ops/.github/workflows/{reusable}@{head}\n", text)
+                self.assertIn(f"uses: Pukujan/agent-stack-train/.github/workflows/{reusable}@{head}\n", text)
                 self.assertIn(f"oio_ref: {head}\n", text)
                 self.assertIn(relative, manifest["managed_files"])
         sweep = (self.target / ".github/workflows/oio-close-sweep.yml").read_text()
         self.assertIn("apply: ${{ vars.OIO_CLOSE_SWEEP_APPLY == 'true' }}", sweep)
 
     def test_existing_close_caller_is_left_alone(self):
+        # A hand-added caller from before the move names the old repository.
         own = self.target / ".github/workflows/close-on-merge-caller.yml"
         own.parent.mkdir(parents=True)
         own.write_text("jobs:\n  close:\n    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@abc\n")
@@ -150,6 +151,15 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse((self.target / ".github/workflows/oio-close-on-merge.yml").exists())
         self.assertTrue((self.target / ".github/workflows/oio-close-sweep.yml").exists())
         self.assertIn("VALID", " ".join(install(str(self.target), check_only=True)))
+
+    def test_existing_stack_close_caller_is_left_alone(self):
+        own = self.target / ".github/workflows/sweep.yml"
+        own.parent.mkdir(parents=True)
+        own.write_text("jobs:\n  sweep:\n    uses: Pukujan/agent-stack-train/.github/workflows/close-sweep.yml@abc\n")
+        messages = " ".join(install(str(self.target)))
+        self.assertIn(".github/workflows/sweep.yml already calls OIO's close-sweep.yml", messages)
+        self.assertFalse((self.target / ".github/workflows/oio-close-sweep.yml").exists())
+        self.assertTrue((self.target / ".github/workflows/oio-close-on-merge.yml").exists())
 
     def test_edited_close_caller_blocks_the_upgrade(self):
         install(str(self.target))

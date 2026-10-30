@@ -6,6 +6,12 @@ and the train's stack-releases.json and fails closed on any disagreement.
 An empty pin follows the train. A pin that copies a version or commit must
 equal the train, so a frozen copy cannot pretend to be current.
 
+A manifest takes one of two shapes. A manifest from the one-checkout install
+pins ``agent-stack-train`` alone: that one checkout provides every component.
+A manifest from before the move pins each component the train certifies, and
+keeps working unchanged. The train certifies ``agent-stack-train`` once a
+stack release is tagged; until then a one-checkout manifest fails here.
+
 Usage:
     python scripts/check_manifest.py --manifest ../stack-manifest.json
     python scripts/check_manifest.py --manifest m.json --train-url https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json
@@ -26,6 +32,8 @@ DEFAULT_TRAIN_URL = (
 )
 MANIFEST_SCHEMA = "agent-stack-train.stack-manifest.v1"
 SHARED_FIELDS = ("version", "commit", "cli", "module", "modules")
+# The pin a one-checkout manifest carries instead of one pin per component.
+STACK = "agent-stack-train"
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -86,7 +94,19 @@ def check(manifest: dict, train: dict, train_label: str) -> list[str]:
             f"the train is {train_name!r}"
         )
 
+    if STACK in pins:
+        required = {STACK}
+        for name in sorted(set(pins) - required):
+            errors.append(
+                f"manifest pins {STACK!r} and also {name!r}; "
+                f"the {STACK} checkout provides every component, so pin it alone"
+            )
+    else:
+        required = set(certified) - {STACK}
+
     for name, pin in sorted(pins.items()):
+        if STACK in pins and name != STACK:
+            continue  # reported above
         if not isinstance(pin, dict):
             errors.append(f"pin {name!r} must be an object")
             continue
@@ -100,7 +120,7 @@ def check(manifest: dict, train: dict, train_label: str) -> list[str]:
                     f"{certified[name][field]!r}"
                 )
 
-    for name in sorted(certified):
+    for name in sorted(required & set(certified)):
         if name not in pins:
             errors.append(f"the train certifies {name!r} but the manifest does not pin it")
 

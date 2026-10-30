@@ -14,6 +14,6 @@ These rules apply everywhere in this repository. Each component folder has its o
 - **No version pins in prose.** Point at `stack-releases.json`. `scripts/check_prose_pins.py` fails a root document that restates a current component version or commit.
 - **Issues follow OIO.** File with the form in [`oio/`](oio/). A filed issue is a proposal, not a mandate. Prepare a draft locally; submit it only when a human names the destination and the action.
 - **Pull requests only.** Nothing is pushed to `main` directly. The `gates` check must pass.
-- **The old repositories are frozen.** Don't open pull requests there. A change that has to reach adopters before the switch in step 3 of #21 needs the owner's direction.
+- **The old repositories are frozen.** Don't open pull requests there. Adopters still pinned to them keep those pins until they move (step 5 of #21); a change that has to reach them sooner needs the owner's direction.
 - **License.** Everything here is FSL-1.1-ALv2. Don't add a per-folder license.
 - **Secrets.** Never commit a credential. CI scans the tracked tree.

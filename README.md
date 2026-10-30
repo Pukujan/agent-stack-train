@@ -20,11 +20,11 @@ Each folder keeps its own README, AGENTS.md, tasks and tests. Read the folder's 
 
 1. **Freeze.** Done. The open pull requests in the four old repositories were merged or closed, and the mesh and train refresh workflows were turned off.
 2. **Combine.** This repository now holds all four components with their history. One `gates` check runs every component's tests.
-3. **Switch install.** Not done. ACS still installs PCM, CGM and OIO from their old repositories, and OIO's reusable workflows are still called from `Pukujan/observational-issue-ops`.
-4. **Release.** Not done. The first stack version will be 1.0.0. The old repositories are archived after it ships, never deleted.
+3. **Switch install.** Done. ACS's installer takes one checkout of this repository and installs PCM, CGM and OIO from its folders, all at that checkout's commit. OIO's reusable close workflows live in this repository's root [`.github/workflows/`](.github/workflows/), and the callers OIO installs name `Pukujan/agent-stack-train`.
+4. **Release.** Not done. The first stack version will be 1.0.0. Tagging it adds an `agent-stack-train` entry to the train, which manifests from the new install pin. The old repositories are archived after it ships, never deleted.
 5. **Move adopters.** Not done. Old pins keep working until each adopter moves.
 
-Until step 3, the old repositories stay the source adopters install from. Any change merged there has to be carried into this repository by hand.
+Until step 4 records the `agent-stack-train` entry, a manifest written by the new installer fails `check-adopter`, so no adopter moves before then.
 
 ## Run the checks
 
@@ -45,7 +45,7 @@ Adopters still pin the stack through the train, as before the move.
 | Document | Lives in | Owns |
 | --- | --- | --- |
 | [`stack-releases.json`](stack-releases.json) | **this repository** | The certified versions: one entry per component, with version, commit, and role. |
-| `stack-manifest.json` | **each adopter** | That adopter's pins: which train it follows and which component versions it consumes. |
+| `stack-manifest.json` | **each adopter** | That adopter's pins: which train it follows, and either `agent-stack-train` alone (installed from one checkout of this repository) or one pin per component (installed before the move). |
 
 The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.schema.json). Versions are not copied into this README; [`stack-releases.json`](stack-releases.json) is the one answer. The train was last refreshed from the old repositories' default branches when they were frozen, and its refresh workflow is now off.
 
@@ -56,7 +56,7 @@ python scripts/check_manifest.py --manifest stack-manifest.json \
   --train-url https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json
 ```
 
-The check fails closed: a missing component, a version or commit that disagrees with the train, or a manifest that pins a component the train does not certify all exit non-zero.
+The check fails closed: a missing component, a version or commit that disagrees with the train, a manifest that pins a component the train does not certify, or an `agent-stack-train` pin next to component pins all exit non-zero.
 
 **A stack document may not restate a current component version or commit.** It points at `stack-releases.json` instead. `scripts/check_prose_pins.py` fails this README, `AGENTS.md` or `PROJECT.md` when one states a pin the certified set does not name.
 

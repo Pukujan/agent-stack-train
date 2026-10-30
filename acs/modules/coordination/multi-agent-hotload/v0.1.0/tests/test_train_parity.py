@@ -1,44 +1,49 @@
-"""Differential check: the pack's mesh and the adopter manifest against the train.
+"""Differential check: the stack checkout and the adopter manifest against the train.
 
 Two layers:
 
-* **Offline** (always runs): the pack's ``stack-mesh.json`` and a manifest built
-  from it agree with each other and with the train's component set, and every
-  component carries a version and a commit.
-* **Live** (skipped when the train is unreachable): the pack is not behind the
-  certified release train. This is the check that would have caught the
-  2026-10-01 snapshot staying on PCM 0.6.0 after 0.7.0 shipped.
+* **Offline** (always runs): the stack checkout this pack sits in provides all
+  four components, each with a version and the one stack commit, and the
+  manifest the installer builds pins exactly the stack (``agent-stack-train``)
+  with an empty pin, in the train's schema.
+* **Live** (skipped when the train is unreachable): each of the four components
+  the live release train certifies is at the version the stack's own version
+  file declares. This is the check that would have caught the 2026-10-01
+  snapshot staying on PCM 0.6.0 after 0.7.0 shipped.
+
+The live layer compares versions only. The train still certifies the old
+repositories' commits until a later step, so a commit comparison would fail
+against a correct stack; and any other certified key (a future
+``agent-stack-train`` entry, say) is not one of the four components and is
+ignored.
 
 The live layer needs the network, so it is skipped in an offline CI; the train's
-own ``require-mesh.yml`` / ``check-adopter.yml`` run the live comparison in the
-repos that call them.
+own ``check-adopter.yml`` runs the live manifest comparison in the repos that
+call it.
 """
 
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import pytest
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = MODULE_ROOT.parents[3]
-MESH_FILE = REPO_ROOT / "stack-mesh.json"
+# v0.1.0 -> multi-agent-hotload -> coordination -> modules -> acs folder -> stack root
+STACK_ROOT = MODULE_ROOT.parents[4]
 TRAIN_URL = "https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json"
+TRAIN_SCHEMA = "agent-stack-train.stack-manifest.v1"
 COMPONENTS = {
     "project-continuity-modules",
     "content-generation-modules",
     "agent-custom-setup",
     "observational-issue-ops",
 }
-# This pack's own component name; it requires its siblings by commit, not itself.
-SELF = "agent-custom-setup"
-
-
-def _load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def _live_train() -> dict | None:
@@ -49,66 +54,67 @@ def _live_train() -> dict | None:
         return None
 
 
-def _installer():
-    from importlib.util import module_from_spec, spec_from_file_location
-
-    spec = spec_from_file_location("acs_install", MODULE_ROOT / "scripts" / "acs_install.py")
+def _load_script(name: str):
+    spec = spec_from_file_location(name, MODULE_ROOT / "scripts" / f"{name}.py")
     assert spec and spec.loader
     mod = module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
+def _installer():
+    return _load_script("acs_install")
+
+
+def _stack_checkout():
+    return _load_script("stack_checkout")
+
+
 # --- offline ---------------------------------------------------------------
 
 
-def test_mesh_requires_every_component():
-    mesh = _load(MESH_FILE)
-    requires = mesh.get("requires")
-    assert isinstance(requires, dict)
+def test_stack_provides_every_component_at_one_commit():
+    stack = _stack_checkout()
+    requires = stack.requires(STACK_ROOT)
     assert set(requires) == COMPONENTS
     for name, entry in requires.items():
         assert entry.get("version"), f"{name} has no version"
         assert entry.get("commit"), f"{name} has no commit"
+    commits = {entry["commit"] for entry in requires.values()}
+    assert len(commits) == 1, f"components are not at one commit: {commits}"
+    assert re.fullmatch(r"[0-9a-f]{40}", commits.pop())
 
 
-def test_manifest_pins_match_mesh_components():
-    """The manifest the installer writes pins exactly the mesh's components."""
-    mod = _installer()
-    mesh = _load(MESH_FILE)
-    manifest = mod.build_stack_manifest(mesh, "adopter-x")
-    assert set(manifest["pins"]) == set(mesh["requires"])
-    assert all(pin == {} for pin in manifest["pins"].values())
+def test_manifest_pins_exactly_the_stack():
+    """The manifest the installer writes pins the stack as one empty entry."""
+    manifest = _installer().build_stack_manifest("adopter-x")
+    assert manifest["adopter"] == "adopter-x"
+    assert manifest["pins"] == {"agent-stack-train": {}}
 
 
 def test_manifest_shape_is_train_schema():
     mod = _installer()
-    manifest = mod.build_stack_manifest(_load(MESH_FILE), "adopter-x")
-    assert manifest["schema_version"] == "agent-stack-train.stack-manifest.v1"
+    manifest = mod.build_stack_manifest("adopter-x")
+    assert manifest["schema_version"] == TRAIN_SCHEMA
     assert manifest["release_train"] == mod.TRAIN_RELEASE
-    assert manifest["source"] == _load(MESH_FILE)["source"]
+    assert manifest["source"] == mod.TRAIN_SOURCE
 
 
 # --- live (skipped offline) ------------------------------------------------
 
 
-def test_pack_is_not_behind_the_live_train():
+def test_stack_is_not_behind_the_live_train():
     train = _live_train()
     if train is None:
         pytest.skip("release train unreachable; live differential needs the network")
+    stack = _stack_checkout()
     certified = train.get("certified", {})
-    requires = _load(MESH_FILE).get("requires", {})
-    assert set(certified) == COMPONENTS
-    for name, entry in sorted(certified.items()):
-        local = requires.get(name) or {}
-        assert local.get("version") == entry.get("version"), f"{name}: version is behind the train"
-        if name == SELF:
-            # A repository does not pin itself by commit: it cannot require a
-            # commit it has not written yet, and a mesh that did would fail the
-            # moment it merged. Its own consistency is its declared version
-            # (checked above) plus its own gates. See agent-stack-train#11.
-            continue
-        assert local.get("commit") == entry.get("commit"), f"{name}: commit is behind the train"
+    present = sorted(COMPONENTS & set(certified))
+    assert present, "the live train certifies none of the stack's components"
+    for name in present:
+        assert stack.component_version(STACK_ROOT, name) == certified[name].get("version"), (
+            f"{name}: the stack's version differs from the train's"
+        )
 
 
 def test_release_train_constant_is_current():

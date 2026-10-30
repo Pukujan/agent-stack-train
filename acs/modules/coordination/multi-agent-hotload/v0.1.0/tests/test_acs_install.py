@@ -1,183 +1,110 @@
 """Tests for the multi-agent hotload installer (acs_install.py).
 
-Pure-function tests plus end-to-end runs of ``run()`` with the pack's external
-checkers stubbed, so the suite needs no network and no pinned checkouts.
+Pure-function tests plus end-to-end runs of ``run()`` against a fixture
+agent-stack-train checkout (``tests/conftest.py``) with the pack's external
+checkers stubbed, so the suite needs no network and no real stack.
 """
 
 from __future__ import annotations
 
 import json
-import os
-import subprocess
-import sys
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import pytest
 
-MODULE_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = MODULE_ROOT / "scripts" / "acs_install.py"
-MODULE_REL = "modules/coordination/multi-agent-hotload/v0.1.0"
+from conftest import (
+    CGM_MODULES,
+    MODULE_REL,
+    MODULE_ROOT,
+    SCRIPT,
+    STACK_SHA,
+    VERSIONS,
+    git_repo,
+    pins_at_stack,
+    stack_requires,
+)
 
-PCM_SHA = "a" * 40
-CGM_SHA = "b" * 40
-ACS_SHA = "c" * 40
-OIO_SHA = "d" * 40
-
-CGM_MODULES = [
-    "brand-foundation",
-    "content-context",
-    "writing-direction",
-    "human-sounding-writing",
-    "human-output-naming",
-    "visual-direction",
-    "image-generation",
-    "html-demo",
-]
-
-PINS = {
-    "pcm": {"cli_version": "0.6.0", "commit": PCM_SHA},
-    "cgm": {"version": "0.5.12", "commit": CGM_SHA, "modules": list(CGM_MODULES)},
-    "acs_hotload_module": {"id": "multi-agent-hotload", "version": "0.1.0"},
-}
+REPOSITORY = "Pukujan/agent-stack-train"
 
 
-def _load_mod():
-    from importlib.util import module_from_spec, spec_from_file_location
+def _example() -> dict:
+    return json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
 
-    spec = spec_from_file_location("acs_install", SCRIPT)
+
+def _load_hotload_check():
+    spec = spec_from_file_location("hotload_check", MODULE_ROOT / "scripts" / "hotload_check.py")
     assert spec and spec.loader
     mod = module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
-def _git_repo(path: Path) -> str:
-    path.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
-    subprocess.run(["git", "config", "user.email", "t@t.invalid"], cwd=path, check=True)
-    subprocess.run(["git", "config", "user.name", "t"], cwd=path, check=True)
-    (path / "f.txt").write_text("x", encoding="utf-8")
-    subprocess.run(["git", "add", "."], cwd=path, check=True)
-    subprocess.run(["git", "commit", "-qm", "init"], cwd=path, check=True)
-    out = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=path, capture_output=True, text=True, check=True
-    )
-    return out.stdout.strip()
-
-
-def _mesh_doc() -> dict:
-    """Fixture mesh. The installer reads commits from this file, not from pins.json."""
-    return {
-        "source": "fixture",
-        "requires": {
-            "project-continuity-modules": {"version": "0.6.0", "commit": PCM_SHA},
-            "content-generation-modules": {"version": "0.5.12", "commit": CGM_SHA},
-            "agent-custom-setup": {"version": "0.2.0", "commit": ACS_SHA},
-            "observational-issue-ops": {"version": "0.1.0", "commit": "d" * 40},
-        },
-    }
-
-
-def _fake_acs_root(tmp_path: Path) -> Path:
-    root = tmp_path / "acs"
-    pack = root / MODULE_REL
-    pack.mkdir(parents=True)
-    (pack / "pins.json").write_text(json.dumps({"pins": PINS}), encoding="utf-8")
-    (root / "stack-mesh.json").write_text(json.dumps(_mesh_doc()), encoding="utf-8")
-    return root
-
-
-def _fake_checkouts(tmp_path: Path) -> tuple[Path, Path]:
-    pcm = tmp_path / "pcm-ck"
-    cgm = tmp_path / "cgm-ck"
-    pcm.mkdir()
-    cgm.mkdir()
-    return pcm, cgm
-
-
-def _fake_oio_checkout(tmp_path: Path) -> Path:
-    oio = tmp_path / "oio-ck"
-    (oio / ".github" / "scripts").mkdir(parents=True)
-    (oio / ".github" / "scripts" / "oio_installer.py").write_text("# stub\n", encoding="utf-8")
-    return oio
-
-
-def _stub_externals(monkeypatch, mod) -> None:
-    """Make check_pins/hotload_check succeed and report pinned HEADs."""
-
-    def fake_git_head(root):
-        name = Path(root).name
-        if name == "pcm-ck":
-            return PCM_SHA
-        if name == "cgm-ck":
-            return CGM_SHA
-        if name == "oio-ck":
-            return OIO_SHA
-        return ACS_SHA
-
-    monkeypatch.setattr(mod, "git_head", fake_git_head)
-    monkeypatch.setattr(mod, "run_script", lambda argv: 0)
-    monkeypatch.setattr(mod, "oio_platform_supported", lambda *_: (True, ""))
-
-
-def _adopter(tmp_path: Path, *, with_adapter: bool = True) -> Path:
-    adopter = tmp_path / "adopter"
-    adopter.mkdir()
-    if with_adapter:
-        (adopter / ".content-system").mkdir()
-    return adopter
+def _lock(adopter: Path) -> dict:
+    return json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
 
 
 # --- pure functions -------------------------------------------------------
 
 
-def test_commits_agree():
-    mod = _load_mod()
-    assert mod.commits_agree(PCM_SHA, PCM_SHA)
-    assert mod.commits_agree(PCM_SHA, PCM_SHA[:12])
-    assert mod.commits_agree(PCM_SHA[:12], PCM_SHA)
-    assert not mod.commits_agree(PCM_SHA, CGM_SHA)
+def test_commits_agree(installer):
+    other = "f" * 40
+    assert installer.commits_agree(STACK_SHA, STACK_SHA)
+    assert installer.commits_agree(STACK_SHA, STACK_SHA[:12])
+    assert installer.commits_agree(STACK_SHA[:12], STACK_SHA)
+    assert not installer.commits_agree(STACK_SHA, other)
 
 
-def test_verify_checkout_requires_a_path():
-    mod = _load_mod()
-    errors = mod.verify_checkout(None, PCM_SHA, "pcm")
-    assert errors and "not provided" in errors[0]
+def test_resolve_stack_root_defaults_to_the_stack_the_pack_sits_in(installer, tmp_path: Path):
+    assert installer.stack_checkout.DEFAULT_ROOT == MODULE_ROOT.parents[4]
+    assert installer.resolve_stack_root(None) == installer.stack_checkout.DEFAULT_ROOT.resolve()
+    assert installer.resolve_stack_root(tmp_path) == tmp_path.resolve()
 
 
-def test_verify_checkout_rejects_non_git_dir(tmp_path: Path):
-    mod = _load_mod()
-    plain = tmp_path / "plain"
-    plain.mkdir()
-    errors = mod.verify_checkout(plain, PCM_SHA, "pcm")
-    assert errors and "not a git checkout" in errors[0]
+def test_stack_requires_gives_each_component_its_version_at_the_one_commit(installer, make_stack):
+    found = installer.stack_checkout.requires(make_stack(), head=STACK_SHA)
+    assert found == stack_requires()
+    assert {entry["commit"] for entry in found.values()} == {STACK_SHA}
 
 
-def test_verify_checkout_rejects_wrong_revision(tmp_path: Path):
-    mod = _load_mod()
-    repo = tmp_path / "repo"
-    _git_repo(repo)
-    errors = mod.verify_checkout(repo, "0" * 40, "cgm")
-    assert errors and "an older version is refused" in errors[0]
+def test_stack_requires_reads_the_commit_from_git(installer, make_stack):
+    stack = make_stack()
+    head = git_repo(stack)
+    found = installer.stack_checkout.requires(stack)
+    assert {entry["commit"] for entry in found.values()} == {head}
+    assert {name: entry["version"] for name, entry in found.items()} == VERSIONS
 
 
-def test_verify_checkout_accepts_pinned_revision(tmp_path: Path):
-    mod = _load_mod()
-    repo = tmp_path / "repo"
-    head = _git_repo(repo)
-    assert mod.verify_checkout(repo, head, "cgm") == []
+def test_stack_requires_rejects_a_non_git_directory(installer, make_stack):
+    with pytest.raises(installer.stack_checkout.StackError, match="not a git checkout"):
+        installer.stack_checkout.requires(make_stack())
 
 
-def test_build_assignment_repins_from_pins():
-    mod = _load_mod()
-    example = json.loads(
-        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
-    )
-    data = mod.build_assignment(example, PINS, "adopter-x")
+@pytest.mark.parametrize("folder", ["pcm", "cgm", "oio"])
+def test_stack_requires_rejects_a_missing_component_folder(installer, make_stack, folder):
+    stack = make_stack(omit=folder)
+    with pytest.raises(installer.stack_checkout.StackError, match=f"no {folder}/ folder"):
+        installer.stack_checkout.requires(stack, head=STACK_SHA)
+
+
+def test_stack_requires_rejects_an_unreadable_version(installer, make_stack):
+    stack = make_stack()
+    (stack / "cgm" / "system-version.json").write_text("{not json", encoding="utf-8")
+    with pytest.raises(
+        installer.stack_checkout.StackError,
+        match="cannot read the content-generation-modules version",
+    ):
+        installer.stack_checkout.requires(stack, head=STACK_SHA)
+
+
+def test_build_assignment_repins_from_pins(installer):
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x")
     assert data["project"] == "adopter-x"
-    assert data["pins"]["pcm"]["revision"] == PCM_SHA
+    assert data["pins"]["pcm"]["revision"] == STACK_SHA
     assert data["pins"]["pcm"]["cli_version"] == "0.6.0"
-    assert data["pins"]["cgm"]["revision"] == CGM_SHA
+    assert data["pins"]["cgm"]["revision"] == STACK_SHA
     assert data["pins"]["cgm"]["version"] == "0.5.12"
     assert data["pins"]["cgm"]["modules"] == CGM_MODULES
     # No foreign repo's issue URL leaks into the adopter assignment.
@@ -187,71 +114,57 @@ def test_build_assignment_repins_from_pins():
     assert data["boss_failover"]["claim_queue"] == []
 
 
-def test_build_assignment_is_schema_valid():
+def test_build_assignment_is_schema_valid(installer):
     jsonschema = __import__("jsonschema", fromlist=["Draft202012Validator"])
-    mod = _load_mod()
-    example = json.loads(
-        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
-    )
     schema = json.loads(
         (MODULE_ROOT / "schema" / "assignment.schema.json").read_text(encoding="utf-8")
     )
-    data = mod.build_assignment(example, PINS, "adopter-x")
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x")
     jsonschema.Draft202012Validator(schema).validate(data)
 
 
-def test_generated_assignment_passes_pack_validator(tmp_path: Path):
+def test_generated_assignment_passes_pack_validator(installer, tmp_path: Path):
     """The installer's output must satisfy hotload_check's own pin/failover rules."""
-    from importlib.util import module_from_spec, spec_from_file_location
-
-    mod = _load_mod()
-    spec = spec_from_file_location("hotload_check", MODULE_ROOT / "scripts" / "hotload_check.py")
-    assert spec and spec.loader
-    check = module_from_spec(spec)
-    spec.loader.exec_module(check)
-
-    example = json.loads(
-        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
-    )
-    # The installer overlays stack-mesh.json onto pins.json before it writes.
-    real_pins = mod.load_json(MODULE_ROOT / "pins.json")["pins"]
-    mesh = mod.load_json(MODULE_ROOT.parents[3] / "stack-mesh.json")["requires"]
-    real_pins["pcm"]["commit"] = mesh["project-continuity-modules"]["commit"]
-    real_pins["pcm"]["cli_version"] = mesh["project-continuity-modules"]["version"]
-    real_pins["cgm"]["commit"] = mesh["content-generation-modules"]["commit"]
-    real_pins["cgm"]["version"] = mesh["content-generation-modules"]["version"]
-    generated = mod.build_assignment(example, real_pins, "adopter-x")
+    check = _load_hotload_check()
+    stack = installer.stack_checkout
+    # The installer overlays the stack checkout onto pins.json before it writes.
+    requires = stack.requires(stack.DEFAULT_ROOT)
+    pcm = requires["project-continuity-modules"]
+    cgm = requires["content-generation-modules"]
+    real_pins = installer.load_json(MODULE_ROOT / "pins.json")["pins"]
+    real_pins["pcm"]["commit"] = pcm["commit"]
+    real_pins["pcm"]["cli_version"] = pcm["version"]
+    real_pins["cgm"]["commit"] = cgm["commit"]
+    real_pins["cgm"]["version"] = cgm["version"]
+    generated = installer.build_assignment(_example(), real_pins, "adopter-x")
     out = tmp_path / "assignment.json"
     out.write_text(json.dumps(generated), encoding="utf-8")
     errors = check.validate_assignment(MODULE_ROOT / "schema" / "assignment.schema.json", out)
     assert errors == [], errors
 
 
-def test_build_lock_has_no_absolute_paths(tmp_path: Path):
-    mod = _load_mod()
-    acs_root = _fake_acs_root(tmp_path)
-    checkouts = {"pcm": {"commit": PCM_SHA, "verified": True},
-                 "cgm": {"commit": CGM_SHA, "verified": True}}
-    lock = mod.build_lock(PINS, acs_root, checkouts, validated=True)
+def test_build_lock_has_no_absolute_paths(installer, tmp_path: Path):
+    checkouts = {label: {"commit": STACK_SHA, "verified": True} for label in ("pcm", "cgm", "oio")}
+    lock = installer.build_lock(pins_at_stack(), STACK_SHA, checkouts, validated=True)
     assert lock["schema"] == "acs.hotload.lock.v1"
     assert lock["hotload_check"] == "OK"
+    assert lock["stack"] == {"repository": REPOSITORY, "commit": STACK_SHA}
+    assert lock["acs"]["commit"] == STACK_SHA
     blob = json.dumps(lock)
     assert str(tmp_path) not in blob
     assert ":\\" not in blob and '"/' not in blob
 
 
-def test_write_json_atomic_leaves_no_temp_files(tmp_path: Path):
-    mod = _load_mod()
+def test_write_json_atomic_leaves_no_temp_files(installer, tmp_path: Path):
     target = tmp_path / "sub" / "out.json"
-    mod.write_json_atomic(target, {"a": 1}, root=tmp_path)
+    installer.write_json_atomic(target, {"a": 1}, root=tmp_path)
     assert json.loads(target.read_text(encoding="utf-8")) == {"a": 1}
-    mod.write_json_atomic(target, {"a": 2}, root=tmp_path)
+    installer.write_json_atomic(target, {"a": 2}, root=tmp_path)
     assert json.loads(target.read_text(encoding="utf-8")) == {"a": 2}
     assert [p.name for p in target.parent.iterdir()] == ["out.json"]
 
 
-def test_write_json_atomic_refuses_to_escape_root(tmp_path: Path):
-    mod = _load_mod()
+def test_write_json_atomic_refuses_to_escape_root(installer, tmp_path: Path):
     adopter = tmp_path / "adopter"
     adopter.mkdir()
     outside = tmp_path / "outside"
@@ -261,7 +174,7 @@ def test_write_json_atomic_refuses_to_escape_root(tmp_path: Path):
     except (OSError, NotImplementedError):
         pytest.skip("symlinks not permitted on this platform")
     with pytest.raises(ValueError):
-        mod.write_json_atomic(
+        installer.write_json_atomic(
             adopter / ".coord" / "assignment.json", {"x": 1}, root=adopter
         )
     assert list(outside.iterdir()) == []
@@ -270,211 +183,196 @@ def test_write_json_atomic_refuses_to_escape_root(tmp_path: Path):
 # --- end-to-end run() -----------------------------------------------------
 
 
-def _run_args(mod, acs_root, adopter, pcm, cgm, oio=None, **over):
-    base = dict(
-        adopter_root=adopter,
-        acs_root=acs_root,
-        pcm_root=pcm,
-        cgm_root=cgm,
-        oio_root=oio,
-        project_name=None,
-        project_id=None,
-        dry_run=False,
-        force=False,
-    )
-    base.update(over)
-    return mod.argparse.Namespace(**base)
+def test_run_success_writes_surface(installer, make_stack, make_adopter, stub_externals, run_args):
+    stub_externals()
+    adopter = make_adopter()
 
-
-def test_run_success_writes_surface(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
-
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 0
     assignment = json.loads((adopter / ".coord" / "assignment.json").read_text(encoding="utf-8"))
-    lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
-    assert assignment["pins"]["cgm"]["revision"] == CGM_SHA
+    lock = _lock(adopter)
+    # Every revision the adopter records is the one stack commit.
+    assert assignment["pins"]["pcm"]["revision"] == STACK_SHA
+    assert assignment["pins"]["pcm"]["cli_version"] == VERSIONS["project-continuity-modules"]
+    assert assignment["pins"]["cgm"]["revision"] == STACK_SHA
+    assert assignment["pins"]["cgm"]["version"] == VERSIONS["content-generation-modules"]
     assert lock["hotload_check"] == "OK"
     assert lock["state"] == "READY"
     assert lock["oio_install"] == "OK"
-    assert lock["checkouts"]["pcm"]["verified"] is True
-    assert lock["checkouts"]["oio"]["verified"] is True
+    assert lock["stack"] == {"repository": REPOSITORY, "commit": STACK_SHA}
+    for label in ("pcm", "cgm", "oio"):
+        assert lock["checkouts"][label] == {"commit": STACK_SHA, "verified": True}
 
 
-def test_run_writes_empty_pin_manifest(tmp_path: Path, monkeypatch):
-    """Train routing: every component pinned, every pin empty (follow the train)."""
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_writes_empty_pin_manifest(installer, make_stack, make_adopter, stub_externals, run_args):
+    """Train routing: one pin on the whole stack, left empty (follow the train)."""
+    stub_externals()
+    adopter = make_adopter()
 
-    assert mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio)) == 0
+    assert installer.run(run_args(make_stack(), adopter)) == 0
     manifest = json.loads((adopter / "stack-manifest.json").read_text(encoding="utf-8"))
     assert manifest["schema_version"] == "agent-stack-train.stack-manifest.v1"
     assert manifest["release_train"] == "current"
-    assert set(manifest["pins"]) == {
-        "project-continuity-modules",
-        "content-generation-modules",
-        "agent-custom-setup",
-        "observational-issue-ops",
-    }
-    assert all(pin == {} for pin in manifest["pins"].values())
+    assert manifest["source"] == installer.TRAIN_SOURCE
+    assert manifest["pins"] == {"agent-stack-train": {}}
     # No install-day version leaked into the manifest.
-    assert PCM_SHA not in json.dumps(manifest)
+    assert STACK_SHA not in json.dumps(manifest)
 
 
-def test_run_refuses_foreign_manifest(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_refuses_foreign_manifest(installer, make_stack, make_adopter, stub_externals, run_args):
+    stub_externals()
+    adopter = make_adopter()
     foreign = {"schema_version": "someone-else.v1", "pins": {"pcm": "0.6.0"}}
     (adopter / "stack-manifest.json").write_text(json.dumps(foreign), encoding="utf-8")
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 1
     assert json.loads((adopter / "stack-manifest.json").read_text(encoding="utf-8")) == foreign
     assert not (adopter / ".coord").exists()
 
 
-def test_run_partial_without_oio_root(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_fails_closed_without_the_oio_installer(
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys
+):
+    """The stack's oio/ folder has no installer: nothing is written, not even PARTIAL."""
+    stub_externals()
+    adopter = make_adopter()
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, None))
+    rc = installer.run(run_args(make_stack(with_oio_installer=False), adopter))
+    out = capsys.readouterr().out
     assert rc == 1
-    lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
+    assert "oio_installer.py" in out
+    assert not (adopter / ".coord").exists()
+    assert not (adopter / "stack-manifest.json").exists()
+
+
+def test_run_partial_when_oio_install_fails(
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys
+):
+    """OIO's own installer failing leaves the validated coordination surface in place."""
+    stub_externals(oio_exit=1)
+    adopter = make_adopter()
+
+    rc = installer.run(run_args(make_stack(), adopter))
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "OIO install did not complete (exit 1)" in out
+    lock = _lock(adopter)
     assert lock["state"] == "PARTIAL"
-    assert lock["oio_install"] == "not_run"
-    # The coordination surface is still written and valid.
+    assert lock["oio_install"] == "FAILED"
+    assert lock["hotload_check"] == "OK"
     assert (adopter / ".coord" / "assignment.json").is_file()
     assert (adopter / "stack-manifest.json").is_file()
 
 
-def test_run_partial_when_oio_unsupported(tmp_path: Path, monkeypatch):
+def test_run_partial_when_oio_unsupported(
+    installer, make_stack, make_adopter, stub_externals, run_args
+):
     """A platform OIO cannot run on reports PARTIAL, never a fake OK."""
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    monkeypatch.setattr(
-        mod, "oio_platform_supported", lambda *_: (False, "os.O_NOFOLLOW is unavailable")
-    )
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+    stub_externals(oio_supported=False)
+    adopter = make_adopter()
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 1
-    lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
+    lock = _lock(adopter)
     assert lock["state"] == "PARTIAL"
+    assert lock["oio_install"] == "not_run"
 
 
-def test_run_dry_run_writes_nothing(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_dry_run_writes_nothing(installer, make_stack, make_adopter, stub_externals, run_args):
+    stub_externals()
+    adopter = make_adopter()
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio, dry_run=True))
+    rc = installer.run(run_args(make_stack(), adopter, dry_run=True))
     assert rc == 0
     assert not (adopter / ".coord").exists()
     assert not (adopter / "stack-manifest.json").exists()
 
 
-def test_run_missing_adapter_fails_closed(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path, with_adapter=False)
+def test_run_missing_adapter_fails_closed(
+    installer, make_stack, make_adopter, stub_externals, run_args
+):
+    stub_externals()
+    adopter = make_adopter(with_adapter=False)
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 1
     assert not (adopter / ".coord").exists()
 
 
-def test_run_missing_checkout_fails_closed(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, _ = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+@pytest.mark.parametrize("folder", ["pcm", "cgm", "oio"])
+def test_run_missing_component_folder_fails_closed(
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys, folder
+):
+    stub_externals()
+    adopter = make_adopter()
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, None, oio))
-    assert rc == 1
+    rc = installer.run(run_args(make_stack(omit=folder), adopter))
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert f"no {folder}/ folder" in out
     assert not (adopter / ".coord").exists()
 
 
-def test_run_keeps_existing_files_without_force(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_non_git_stack_fails_closed(
+    installer, make_stack, make_adopter, run_args, monkeypatch, capsys
+):
+    """A stack root with no commit is refused before any checker runs or file is written."""
+    ran: list[list[str]] = []
+    monkeypatch.setattr(installer, "run_script", lambda argv: ran.append(argv) or 0)
+    adopter = make_adopter()
+
+    rc = installer.run(run_args(make_stack(), adopter))
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert "not a git checkout" in out
+    assert ran == []
+    assert not (adopter / ".coord").exists()
+
+
+def test_run_keeps_existing_files_without_force(
+    installer, make_stack, make_adopter, stub_externals, run_args
+):
+    stub_externals()
+    adopter = make_adopter()
     coord = adopter / ".coord"
     coord.mkdir()
     sentinel = {"project": "hand-edited"}
     (coord / "assignment.json").write_text(json.dumps(sentinel), encoding="utf-8")
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 0
     kept = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
     assert kept == sentinel  # untouched without --force
     assert (coord / "hotload.lock.json").is_file()
 
 
-def test_run_force_overwrites(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    _stub_externals(monkeypatch, mod)
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
+def test_run_force_overwrites(installer, make_stack, make_adopter, stub_externals, run_args):
+    stub_externals()
+    adopter = make_adopter()
     coord = adopter / ".coord"
     coord.mkdir()
     (coord / "assignment.json").write_text('{"project": "hand-edited"}', encoding="utf-8")
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio, force=True))
+    rc = installer.run(run_args(make_stack(), adopter, force=True))
     assert rc == 0
     data = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
     assert data["project"] == "adopter"
 
 
-def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
-    mod = _load_mod()
-    acs_root = _fake_acs_root(tmp_path)
-    pcm, cgm = _fake_checkouts(tmp_path)
-    oio = _fake_oio_checkout(tmp_path)
-    adopter = _adopter(tmp_path)
-
-    monkeypatch.setattr(mod, "git_head", lambda root: {
-        "pcm-ck": PCM_SHA, "cgm-ck": CGM_SHA, "oio-ck": OIO_SHA}.get(Path(root).name, ACS_SHA))
-    monkeypatch.setattr(mod, "oio_platform_supported", lambda *_: (True, ""))
+def test_run_fails_closed_when_hotload_check_fails(
+    installer, make_stack, make_adopter, stub_externals, run_args, monkeypatch
+):
+    stub_externals()
+    adopter = make_adopter()
     calls = {"n": 0}
 
     def run_script(argv):
         calls["n"] += 1
         return 0 if calls["n"] == 1 else 1  # check_pins OK, hotload_check FAIL
 
-    monkeypatch.setattr(mod, "run_script", run_script)
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    monkeypatch.setattr(installer, "run_script", run_script)
+    rc = installer.run(run_args(make_stack(), adopter))
     assert rc == 1
     # A failed final check must not leave a partial install behind.
     assert not (adopter / ".coord" / "assignment.json").exists()
@@ -482,52 +380,78 @@ def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
     assert not (adopter / "stack-manifest.json").exists()
 
 
-def test_build_stack_manifest_empty_pins():
-    mod = _load_mod()
-    manifest = mod.build_stack_manifest(_mesh_doc(), "adopter-x")
+def test_run_hands_the_stack_root_to_every_checker(
+    installer, make_stack, make_adopter, stub_externals, run_args, monkeypatch
+):
+    """check_pins, hotload_check and OIO's installer all come from the one stack checkout."""
+    stub_externals()
+    calls: list[list[str]] = []
+    monkeypatch.setattr(installer, "run_script", lambda argv: calls.append(list(argv)) or 0)
+    stack = make_stack()
+    adopter = make_adopter()
+
+    assert installer.run(run_args(stack, adopter, project_id="owner/repo")) == 0
+
+    def value(argv: list[str], flag: str) -> str:
+        return argv[argv.index(flag) + 1]
+
+    def calls_of(script: str) -> list[list[str]]:
+        return [argv for argv in calls if Path(argv[1]).name == script]
+
+    stack_r = stack.resolve()
+    (pins_call,) = calls_of("check_pins.py")
+    assert value(pins_call, "--root") == str(stack_r / "acs")
+    (check_call,) = calls_of("hotload_check.py")
+    assert value(check_call, "--stack-root") == str(stack_r)
+    assert value(check_call, "--root") == str(stack_r / "acs" / MODULE_REL)
+    assert value(check_call, "--adopter-root") == str(adopter.resolve())
+    # hotload_check finds the stack's own cgm/ folder; no CGM path is handed over.
+    assert "--cgm-root" not in check_call
+    oio_install, oio_check = calls_of("oio_installer.py")
+    oio_script = stack_r / "oio" / ".github" / "scripts" / "oio_installer.py"
+    assert Path(oio_install[1]) == oio_script
+    assert value(oio_install, "--target") == str(adopter.resolve())
+    assert value(oio_install, "--project-id") == "owner/repo"
+    assert oio_check[-1] == "--check"
+
+
+def test_build_stack_manifest_empty_pins(installer):
+    manifest = installer.build_stack_manifest("adopter-x")
     assert manifest["adopter"] == "adopter-x"
-    assert manifest["source"] == "fixture"
-    assert manifest["pins"] == {
-        "agent-custom-setup": {},
-        "content-generation-modules": {},
-        "observational-issue-ops": {},
-        "project-continuity-modules": {},
-    }
+    assert manifest["source"] == installer.TRAIN_SOURCE
+    assert manifest["pins"] == {"agent-stack-train": {}}
 
 
-def test_oio_platform_probe_comes_from_the_pinned_installer(tmp_path: Path):
+def test_oio_platform_probe_comes_from_the_pinned_installer(installer, tmp_path: Path):
     """The verdict is OIO's, not a copy of its precondition kept here.
 
     A local copy is what went stale: it kept reporting Windows unsupported
     after OIO gained a Windows backend, so an install that would have succeeded
     reported PARTIAL. This asserts ACS reads the installer's answer instead.
     """
-    mod = _load_mod()
-
     supported = tmp_path / "supports.py"
     supported.write_text('import sys; print("supported: fake backend"); sys.exit(0)', encoding="utf-8")
-    assert mod.oio_platform_supported(supported) == (True, "")
+    assert installer.oio_platform_supported(supported) == (True, "")
 
     refuses = tmp_path / "refuses.py"
     refuses.write_text('import sys; print("unsupported: no dir_fd"); sys.exit(1)', encoding="utf-8")
-    ok, why = mod.oio_platform_supported(refuses)
+    ok, why = installer.oio_platform_supported(refuses)
     assert ok is False
     assert "no dir_fd" in why
 
 
-def test_oio_platform_probe_defers_when_the_installer_cannot_answer(tmp_path: Path):
+def test_oio_platform_probe_defers_when_the_installer_cannot_answer(installer, tmp_path: Path):
     """An installer too old to carry the probe is not guessed about.
 
     Such a checkout predates the backend the probe describes, so ACS attempts
     the install and lets OIO fail closed on its own terms.
     """
-    mod = _load_mod()
     old = tmp_path / "old.py"
     old.write_text("import sys; sys.exit(2)", encoding="utf-8")
-    assert mod.oio_platform_supported(old) == (True, "")
+    assert installer.oio_platform_supported(old) == (True, "")
 
     missing = tmp_path / "absent.py"
-    assert mod.oio_platform_supported(missing) == (True, "")
+    assert installer.oio_platform_supported(missing) == (True, "")
 
 
 def test_module_has_no_hardcoded_pins():

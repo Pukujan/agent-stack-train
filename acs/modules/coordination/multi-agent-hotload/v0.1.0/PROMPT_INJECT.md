@@ -1,11 +1,11 @@
-# PROMPT_INJECT — acs_prompt_inject (CGM 0.5.12)
+# PROMPT_INJECT — acs_prompt_inject (CGM 0.5.13)
 
 Generated / refreshed by `hotload_check` after full adapter `VALID`.
-Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `4cea25e028e0ad9a5a66f4c30855fe9db069ba58`.
+Source: CGM `docs/writing-routing.json` → `acs_prompt_inject`, from the `cgm/` folder of the same agent-stack-train checkout as this pack.
 
-Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/4cea25e028e0ad9a5a66f4c30855fe9db069ba58/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/4cea25e028e0ad9a5a66f4c30855fe9db069ba58/docs/writing-routing.json).
+Also see: CGM [`docs/ACS_VERIFY.md`](../../../../../cgm/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](../../../../../cgm/docs/writing-routing.json).
 
-**Pin:** CGM `0.5.12` @ `4cea25e028e0ad9a5a66f4c30855fe9db069ba58` (main). After any future CGM merge that moves the tip, re-pin ACS hotload to the new main SHA.
+**Version:** CGM `0.5.13`. It moves with the stack: re-run `hotload_check` after updating the agent-stack-train checkout.
 
 ## application
 
@@ -40,6 +40,8 @@ Exceptions (only these):
 - Human-facing research plans, architecture explanations, and evidence briefs → load modules/writing-direction/SKILL.md (reader-facing explanation, not a manuscript or data writeup)
 - Generated artifact filenames / asset-manifest paths / media basenames / filename legends → load modules/human-output-naming/SKILL.md (hon) for basenames; visible prose inside HTML still uses hsw
 
+Marketing intro sites, sales sites, and technical demo pages are not one of those exceptions. Load modules/writing-direction/SKILL.md and modules/human-sounding-writing/SKILL.md together, plus modules/visual-direction/SKILL.md, modules/brand-foundation/SKILL.md, and modules/html-demo/SKILL.md, and follow the marketing_intro_site review checklist. Product-entry bold stays one short scan anchor. The human-sounding tell scrub and the verified-number rule still apply. Words and pictures come from the brand feeling.
+
 HTML reports, compare HTML, and compare UIs have NO skip path. An exception reason is not allowed for those surfaces.
 
 If you cannot load the skill file from the pinned CGM checkout, stop and report that — do not draft jargon-heavy or tool-dump HTML instead.
@@ -57,7 +59,7 @@ Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\development on Wi
 
 ## Instruction (MUST paste/apply into system or task prompts)
 
-ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for EVERY human-facing task/output. Before writing ANY human-facing output (including HTML/compare), MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true. Skipping requires an explicit machine-readable exception reason that is NOT allowed for HTML reports, compare HTML, or compare UIs. README and product entry pages → writing-direction. Human-facing research plans, architecture explanations, and evidence briefs → writing-direction (reader_facing_explanations; a scholarly paper or raw data writeup stays on hsw). Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups, HTML reports, compare HTML, compare UIs, appendable HTML reports, and other agent-produced human-readable HTML → human-sounding-writing (hsw). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on, not prefer. Follow apply_checklist and human_facing_default in this file. Generated artifact filenames, asset-manifest paths, committed media basenames, and filename legends → human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames (omit defaults; optional safe_twin); keep a per-feature legend (glossary + file list); never opaque p0/hex stems or robot key=value stems. Prose and visible text inside HTML still use hsw; basenames use hon.
+ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for EVERY human-facing task/output. Before writing ANY human-facing output (including HTML/compare), MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true. Skipping requires an explicit machine-readable exception reason that is NOT allowed for HTML reports, compare HTML, or compare UIs. README and product entry pages → writing-direction. Human-facing research plans, architecture explanations, and evidence briefs → writing-direction (reader_facing_explanations; a scholarly paper or raw data writeup stays on hsw). Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups, HTML reports, compare HTML, compare UIs, appendable HTML reports, and other agent-produced human-readable HTML → human-sounding-writing (hsw). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on, not prefer. Follow apply_checklist and human_facing_default in this file. Generated artifact filenames, asset-manifest paths, committed media basenames, and filename legends → human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames (omit defaults; optional safe_twin); keep a per-feature legend (glossary + file list); never opaque p0/hex stems or robot key=value stems. Prose and visible text inside HTML still use hsw; basenames use hon. Marketing intro sites, sales sites, and technical demo pages load writing-direction and human-sounding-writing together (route marketing_intro_site, also visual-direction, brand-foundation, and html-demo). That surface is not the README exception.
 
 ## apply_checklist
 
@@ -66,9 +68,10 @@ ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste a
 3. MUST load modules/<load>/SKILL.md for that route before drafting — required_load is true; do not skip because the surface is short, 'just a commit', or 'just an HTML report'.
 4. Apply the module rules to the draft (voice, AI-tell scrub, bold policy as the module states).
 5. README / product entry stays on writing-direction; do not apply hsw bold restraints there.
-6. Human-facing research plans, architecture explanations, and evidence briefs route to writing-direction (reader_facing_explanations); apply its review_checklist. A scholarly paper or raw data writeup still routes to hsw.
-7. If the surface is a generated artifact filename, asset-manifest path, committed media basename, or filename legend, MUST load modules/human-output-naming/SKILL.md (hon), call scripts/human_filename (speakable by default; optional safe_twin), and keep a per-feature legend.
-8. Never treat HSW as optional, soft-skip, or per-report opt-in for human-facing HTML, compare UIs, or agent-produced readable artifacts.
+6. A marketing intro site, sales site, or technical demo page is route marketing_intro_site. MUST load writing-direction and human-sounding-writing together, plus visual-direction, brand-foundation, and html-demo. Follow that route's review checklist. It is not the README exception.
+7. Human-facing research plans, architecture explanations, and evidence briefs route to writing-direction (reader_facing_explanations); apply its review_checklist. A scholarly paper or raw data writeup still routes to hsw.
+8. If the surface is a generated artifact filename, asset-manifest path, committed media basename, or filename legend, MUST load modules/human-output-naming/SKILL.md (hon), call scripts/human_filename (speakable by default; optional safe_twin), and keep a per-feature legend.
+9. Never treat HSW as optional, soft-skip, or per-report opt-in for human-facing HTML, compare UIs, or agent-produced readable artifacts.
 
 ## routes (Surface → module MUST load)
 
@@ -76,6 +79,7 @@ ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste a
 | --- | --- |
 | README.md; product entry pages | `writing-direction` |
 | human-facing research plans; reader-facing research briefs; architecture explanations; evidence briefs; human-facing project explanations | `writing-direction` |
+| marketing intro sites; sales sites; technical demo pages; big-tech intro websites; product demo pages | `writing-direction` |
 | pull request titles; pull request bodies; issue titles; issue bodies; issue log titles; receipts; push receipts; commit messages; ... | `human-sounding-writing` (hsw/HSW) |
 | generated artifact filenames; asset-manifest paths; committed media basenames; filename legends | `human-output-naming` (hon/HON) |
 

@@ -49,12 +49,11 @@ command that fails closed on a partial install.
 is the user-facing entry point. An adopter repo loads `HOTLOAD.md` and gets a
 complete, pinned install:
 
-- **Full-stack wiring** — PCM (CLI and commit at [`stack-mesh.json`](stack-mesh.json):
-  PR-only delivery, required CI gates, protection/auto-merge preference,
-  leaf/parent receipts) plus the full Content Generation Modules contract (all
-  eight modules including human-output-naming, at the commit `stack-mesh.json`
-  requires), joined to the coordination runtime. A slim subset fails the install
-  on purpose.
+- **Full-stack wiring** — PCM (PR-only delivery, required CI gates,
+  protection/auto-merge preference, leaf/parent receipts) plus the full Content
+  Generation Modules contract (all eight modules including human-output-naming),
+  both from the same agent-stack-train checkout as ACS, joined to the
+  coordination runtime. A slim subset fails the install on purpose.
 - **Coordination rules** — join-order roles, a boss **lease** with FIFO failover,
   a **claim queue**, and a **watchdog** that flags stale seats without making
   decisions ([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
@@ -66,9 +65,10 @@ complete, pinned install:
   prompt at session start, so every fresh session inherits the same rules.
 - **A one-command install** —
   [`acs_install.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py)
-  prepares the adopter's coordination surface against the pinned checkouts and
-  fails closed: it never clones, fetches, or vendors, and it refuses to write
-  until the pins and the adopter's existing `.content-system/` adapter check out.
+  prepares the adopter's coordination surface from the agent-stack-train
+  checkout it runs in and fails closed: it never clones, fetches, or vendors,
+  and it refuses to write until the pins and the adopter's existing
+  `.content-system/` adapter check out.
 - **A one-command check** —
   [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py)
   fails closed unless the assignment pins, the helper checkout revision, and the
@@ -84,8 +84,9 @@ complete, pinned install:
 
 ### Step 1: Install the hotloader into a repo
 
-An adopter runs `acs_install.py` with its pinned PCM and Content Generation
-Modules checkouts; the installer declares the pins into `.coord/assignment.json`,
+An adopter runs `acs_install.py` from one checkout of agent-stack-train, which
+holds PCM, Content Generation Modules, ACS and OIO at one commit; the installer
+declares the pins into `.coord/assignment.json`,
 records the install in `.coord/hotload.lock.json`, and then runs `hotload_check.py`,
 which resolves the checkouts, runs the adapter validator, and only on success
 writes `PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale
@@ -120,7 +121,7 @@ ACS grounds every public claim in versioned repository artifacts:
 
 | Claim | Source | Status | What this supports | What this leaves unproven |
 | --- | --- | --- | --- | --- |
-| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; the pack's module shape is [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) and the component versions and commits are [`stack-mesh.json`](stack-mesh.json); `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
+| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; the pack's module shape is [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) and every component is at the agent-stack-train checkout's one commit; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
 | **Pin drift is caught, not assumed** | [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) + [`check_pins.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py) | Shipped | The checker scans every declared projection for the pinned PCM/CGM commits, version families, and the "eight modules" count; CI runs it on every candidate. | It verifies that declared projections agree; it cannot see a surface nobody declared. |
 | **Roles, lease, and queue are specified** | [`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md) | Shipped | Join-order fill, boss lease (default 30m, range 15–120m), FIFO claim queue, watchdog-as-liveness-only, and the zombie rule are written down as binding. | A specification is not an enforcement mechanism; adherence is a process commitment. |
 | **Proposals gate the path to PR** | [`PROPOSALS.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md) | Shipped | Propose → boss ACCEPT/REJECT → claim → PR; no direct commits to the protected default branch. | Relies on the adopter enabling branch protection and required checks. |
@@ -135,8 +136,8 @@ ACS grounds every public claim in versioned repository artifacts:
   (`.github/workflows/issue-triage.yml` + `.github/scripts/oio_triage.py`),
   the ontology, and the schemas under `.oio/` are OIO-managed files, installed
   by OIO's canonical installer
-  (`.github/scripts/oio_installer.py`, from the `stack-mesh.json` commit for
-  `observational-issue-ops`). They are never hand-edited; OIO's installer
+  (`oio/.github/scripts/oio_installer.py` in the same agent-stack-train
+  checkout). They are never hand-edited; OIO's installer
   refuses to overwrite a locally modified managed file. Updates come from
   rerunning the pinned installer, not from copying files into ACS. The
   project's own meanings — priority definitions and the account map — live in
@@ -160,18 +161,17 @@ ACS grounds every public claim in versioned repository artifacts:
 The fastest path is the installer; the rest exercise what it brings in:
 
 ```bash
-# 1. Install into a working repo (needs PCM + CGM checkouts at the pinned
-#    commits, and an existing .content-system/ adapter). Fails closed otherwise.
+# 1. Install into a working repo from this agent-stack-train checkout (the
+#    working repo needs an existing .content-system/ adapter). Fails closed
+#    otherwise.
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py \
-  --adopter-root /path/to/working-repo \
-  --pcm-root /path/to/project-continuity-modules \
-  --cgm-root /path/to/content-generation-modules
+  --adopter-root /path/to/working-repo
 
 # 2. Validate a hotload install (schema-only here; a real install drops
-#    --skip-cgm-validate and passes --cgm-root <a CGM checkout at the commit
-#    stack-mesh.json requires>. Without --assignment the pack's example is
-#    checked as a template: its pin revisions are reserved placeholders,
-#    rebuilt from stack-mesh.json by a real install.)
+#    --skip-cgm-validate and validates against the stack's own cgm/. Without
+#    --assignment the pack's example is checked as a template: its pin
+#    revisions are reserved placeholders, rebuilt from the stack commit by a
+#    real install.)
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --adopter-root . \
   --skip-cgm-validate

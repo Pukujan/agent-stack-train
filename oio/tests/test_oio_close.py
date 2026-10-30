@@ -14,6 +14,10 @@ from unittest import mock
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+# The agent-stack-train checkout OIO lives in. GitHub runs workflows only from
+# its root, so the reusable close workflows live there; the same-repo callers
+# stay in OIO's own .github/workflows.
+STACK_ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT / ".github/scripts"))
 
 import oio_installer  # noqa: E402
@@ -456,12 +460,26 @@ class TriageOptionalFieldTests(unittest.TestCase):
 
 
 class WorkflowContractTests(unittest.TestCase):
+    REUSABLE = ("close-on-merge.yml", "close-sweep.yml", "oio-status-drift.yml")
+
     def workflow(self, name: str) -> dict:
-        return yaml.safe_load((ROOT / ".github/workflows" / name).read_text(encoding="utf-8"))
+        folder = STACK_ROOT if name in self.REUSABLE else ROOT
+        return yaml.safe_load((folder / ".github/workflows" / name).read_text(encoding="utf-8"))
 
     @staticmethod
     def triggers(workflow: dict) -> dict:
         return workflow.get("on", workflow.get(True))
+
+    def test_reusable_workflows_run_the_close_script_from_the_stack(self):
+        script = ROOT.relative_to(STACK_ROOT) / ".github/scripts/oio_close_refs.py"
+        self.assertTrue((STACK_ROOT / script).is_file())
+        for name in self.REUSABLE:
+            with self.subTest(name=name):
+                steps = next(iter(self.workflow(name)["jobs"].values()))["steps"]
+                checkout = steps[0]["with"]
+                self.assertEqual(checkout["repository"], "Pukujan/agent-stack-train")
+                self.assertEqual(checkout["ref"], "${{ inputs.oio_ref }}")
+                self.assertIn(f"python {checkout['path']}/{script.as_posix()}", steps[-1]["run"])
 
     def test_close_workflow_is_reusable_and_merged_only(self):
         workflow = self.workflow("close-on-merge.yml")
