@@ -21,35 +21,9 @@ Three consequences follow, and they are the whole reason for the split:
 
 ## PCM's role in the stack release train
 
-The stack's certified version set lives in one place. [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train) publishes `stack-releases.json`, and every repository that ships with the stack pins that train once in its own `stack-manifest.json` instead of hand-copying component versions into several files. PCM is certified as a component of train `2026-10-01`; OIO and PCM's other siblings are adopters of the same train.
+The stack's certified version set lives in one place: `stack-releases.json` at the root of [`Pukujan/agent-stack-train`](https://github.com/Pukujan/agent-stack-train). PCM is the `pcm/` folder of that repository, so it moves with the stack at one commit. Every adopter pins the train once in its own `stack-manifest.json` instead of hand-copying component versions into several files.
 
-PCM keeps **no copy** of the certified set. The block below is PCM's own checked-in record of the pin that names *this* repository. `tests/test_observational_issue_delegation.py` checks it against PCM's own version sources, offline, with no network access.
-
-<!-- pcm:stack-release-train:start -->
-```json
-{
-  "release_train": "2026-10-01",
-  "train_publisher": "https://github.com/Pukujan/agent-stack-train",
-  "train_source": "stack-releases.json",
-  "component": "project-continuity-modules",
-  "certified": {
-    "version": "0.6.0",
-    "cli": "0.6.0",
-    "protocol_version": "0.1.0-draft",
-    "commit": "4e2385474b4af9249ca009cbdcb38c4498932475",
-    "commit_subject": "Mandatory adopter enforcement: gates required check + docs (Refs #211) (#212)",
-    "as_of": "2026-10-02"
-  },
-  "source": {
-    "version": "0.7.0",
-    "protocol_version": "0.1.0-draft",
-    "as_of": "2026-10-04"
-  }
-}
-```
-<!-- pcm:stack-release-train:end -->
-
-The block keeps two versions apart on purpose. The `certified` half is what train `2026-10-01` published for PCM — version `0.6.0`, at commit `4e2385474b4af9249ca009cbdcb38c4498932475`, whose message is `commit_subject`, so the check can confirm the pin names the revision it claims to. The `source` half is what this checkout declares today. A source version may **lead** the last certified train: PCM #234 raised the CLI to `0.7.0` after the train was published, and the train is re-certified separately once the new build is on `main`. Forcing the two equal would make the pin assert a certification the train has not published, so they are recorded separately and each is checked against its own authority — `source` against `src/continuity/__init__.py` and `.continuity/config.json`, `certified` against the commit it names.
+PCM keeps **no copy** of the certified set, not even of its own entry. An earlier version of this record carried one, naming a commit in the old `project-continuity-modules` repository. That commit is not in agent-stack-train's history, so the record could no longer be checked and had drifted to version `0.6.0` while the train certified `0.7.0`. Instead, `tests/test_observational_issue_delegation.py` reads the root `stack-releases.json` offline and checks that the PCM version it certifies is not ahead of this folder's `src/continuity/__init__.py`. The folder may lead the train: a new build lands before the train is re-certified.
 
 ### Where the train is published (as of 2026-10-02)
 

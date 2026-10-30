@@ -69,10 +69,10 @@ complete, pinned install:
   checkout it runs in and fails closed: it never clones, fetches, or vendors,
   and it refuses to write until the pins and the adopter's existing
   `.content-system/` adapter check out.
-- **A one-command check** —
-  [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py)
-  fails closed unless the assignment pins, the helper checkout revision, and the
-  adapter validation all pass.
+- **A one-command check** — the install check in
+  [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md)
+  fails closed unless the assignment pins, the stack commit, and the adapter
+  validation all pass.
 
 | Surface | What it is for | How you reach it | Status |
 | --- | --- | --- | --- |
@@ -87,8 +87,8 @@ complete, pinned install:
 An adopter runs `acs_install.py` from one checkout of agent-stack-train, which
 holds PCM, Content Generation Modules, ACS and OIO at one commit; the installer
 declares the pins into `.coord/assignment.json`,
-records the install in `.coord/hotload.lock.json`, and then runs `hotload_check.py`,
-which resolves the checkouts, runs the adapter validator, and only on success
+records the install in `.coord/hotload.lock.json`, and then runs the install check,
+which checks the pins against the stack commit, runs the adapter validator, and only on success
 writes `PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale
 pins fail closed — a partial install never looks complete.
 
@@ -121,16 +121,16 @@ ACS grounds every public claim in versioned repository artifacts:
 
 | Claim | Source | Status | What this supports | What this leaves unproven |
 | --- | --- | --- | --- | --- |
-| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; the pack's module shape is [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) and every component is at the agent-stack-train checkout's one commit; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
-| **Pin drift is caught, not assumed** | [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) + [`check_pins.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py) | Shipped | The checker scans every declared projection for the pinned PCM/CGM commits, version families, and the "eight modules" count; CI runs it on every candidate. | It verifies that declared projections agree; it cannot see a surface nobody declared. |
+| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; the pack's module shape is [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) and every component is at the agent-stack-train checkout's one commit; the install check fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
+| **Pin drift is caught, not assumed** | [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) + [`check_pins.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py) | Shipped | The checker scans every declared projection for the pack's module shape: the "eight modules" count and the ACS module id. Component versions are not copied into the pack; the installer reads them from the checkout. CI runs it on every candidate. | It verifies that declared projections agree; it cannot see a surface nobody declared. |
 | **Roles, lease, and queue are specified** | [`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md) | Shipped | Join-order fill, boss lease (default 30m, range 15–120m), FIFO claim queue, watchdog-as-liveness-only, and the zombie rule are written down as binding. | A specification is not an enforcement mechanism; adherence is a process commitment. |
 | **Proposals gate the path to PR** | [`PROPOSALS.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md) | Shipped | Propose → boss ACCEPT/REJECT → claim → PR; no direct commits to the protected default branch. | Relies on the adopter enabling branch protection and required checks. |
 
 ### Operational Boundaries
 
 - **No upstream replacement:** ACS does not replace Project Continuity Modules
-  (PCM) or Content Generation Modules; it pins them as external authorities and
-  never vendors their source.
+  (PCM) or Content Generation Modules; they are sibling folders in the same
+  agent-stack-train checkout, and ACS never copies their source.
 - **Issue intake is adopted, not duplicated:** the issue-log form
   (`.github/ISSUE_TEMPLATE/observational-issue.yml`), the triage workflow
   (`.github/workflows/issue-triage.yml` + `.github/scripts/oio_triage.py`),

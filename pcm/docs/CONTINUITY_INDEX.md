@@ -107,7 +107,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9`
-- Current SHA-256: `253689c693055a165a5a318ca7175e5d1dfcba18d27812865aaf12190287deb6`
+- Current SHA-256: `6a495b9ba9a6fa0e009a1b9078e7f5819954215d482c360fe0bb8b83911e0f75`
 - Summary: PCM delegates the human observational-issue protocol and its triage to observational-issue-ops (OIO) and records its pinned role in the stack release train.
 - Search terms: `boundary`, `delegation`, `observational issue`, `oio`, `release train`, `stack-releases`
 - Neighboring records: `architecture-guide`, `github-progression-spec`, `issue-log-format`

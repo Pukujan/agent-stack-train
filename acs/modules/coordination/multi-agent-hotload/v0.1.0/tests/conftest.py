@@ -53,9 +53,11 @@ CGM_MODULES = [
     "html-demo",
 ]
 
+# Mirrors the real ``pins.json``: the CGM module shape and the ACS module id/version.
+# It carries no ``pcm`` block and no ``cgm.version``; ``pins_at_stack`` adds those
+# from the fixture stack, as ``acs_install.run`` does.
 PINS = {
-    "pcm": {"cli_version": "0.6.0"},
-    "cgm": {"version": "0.5.12", "modules": list(CGM_MODULES)},
+    "cgm": {"modules": list(CGM_MODULES)},
     "acs_hotload_module": {"id": "multi-agent-hotload", "version": "0.1.0"},
 }
 
@@ -74,10 +76,12 @@ def stack_requires() -> dict:
 
 
 def pins_at_stack() -> dict:
-    """``pins.json`` as ``acs_install.run`` overlays it: both revisions are the stack commit."""
+    """``pins.json`` as ``acs_install.run`` overlays it: the stack's commit and versions."""
     pins = copy.deepcopy(PINS)
-    pins["pcm"]["commit"] = STACK_SHA
-    pins["cgm"]["commit"] = STACK_SHA
+    pins.setdefault("pcm", {})["commit"] = STACK_SHA
+    pins["pcm"]["cli_version"] = VERSIONS["project-continuity-modules"]
+    pins.setdefault("cgm", {})["commit"] = STACK_SHA
+    pins["cgm"]["version"] = VERSIONS["content-generation-modules"]
     return pins
 
 
