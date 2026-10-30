@@ -1,0 +1,22 @@
+name: Close observational issue on merge
+
+# OIO owns the close-on-merge contract; this caller only grants the event and
+# scopes. The called workflow is pinned to a commit SHA, not a branch, so the
+# contract PCM relies on cannot move underneath it.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  close:
+    if: github.event.pull_request.merged == true
+    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@305adc5d09920d28e603a1b317108637cc30a624
+    with:
+      oio_ref: 305adc5d09920d28e603a1b317108637cc30a624
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

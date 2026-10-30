@@ -1,0 +1,53 @@
+{
+ "variants": {
+  "valid_append": {
+   "verdict": "pass",
+   "failed_checks": [],
+   "entries": {
+    "### 2026-09-20T10:00:00Z owner": true,
+    "### 2026-09-21T11:00:00Z owner": true
+   }
+  },
+  "tampered_prior_entry": {
+   "verdict": "fail",
+   "failed_checks": [
+    "no_deletions",
+    "additions_after_last_entry"
+   ],
+   "entries": {
+    "### 2026-09-20T10:00:00Z owner": false,
+    "### 2026-09-21T11:00:00Z owner": true
+   }
+  },
+  "inserted_between_entries": {
+   "verdict": "fail",
+   "failed_checks": [
+    "additions_after_last_entry"
+   ],
+   "entries": {
+    "### 2026-09-20T10:00:00Z owner": true,
+    "### 2026-09-21T11:00:00Z owner": false
+   }
+  },
+  "deleted_prior_line": {
+   "verdict": "fail",
+   "failed_checks": [
+    "no_deletions"
+   ],
+   "entries": {
+    "### 2026-09-20T10:00:00Z owner": true,
+    "### 2026-09-21T11:00:00Z owner": false
+   }
+  },
+  "prose_after_handoff": {
+   "verdict": "fail",
+   "failed_checks": [
+    "additions_after_last_entry"
+   ],
+   "entries": {
+    "### 2026-09-20T10:00:00Z owner": true,
+    "### 2026-09-21T11:00:00Z owner": true
+   }
+  }
+ }
+}

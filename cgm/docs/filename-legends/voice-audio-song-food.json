@@ -1,0 +1,76 @@
+{
+  "schema_version": "content-generation.filename-legend.v1",
+  "feature": "voice-audio-song-food",
+  "module": "human-output-naming",
+  "title": "Song Food voice/audio filenames",
+  "glossary": [
+    {
+      "token": "Song Food",
+      "meaning": "The clip identity (line / piece name). Always leads the basename."
+    },
+    {
+      "token": "up 8",
+      "meaning": "Pitch raised by 8 semitones from the default."
+    },
+    {
+      "token": "down 4",
+      "meaning": "Pitch lowered by 4 semitones from the default."
+    },
+    {
+      "token": "20% faster",
+      "meaning": "Playback speed increased by 20% from the default."
+    },
+    {
+      "token": "10% slower",
+      "meaning": "Playback speed decreased by 10% from the default."
+    },
+    {
+      "token": "–",
+      "meaning": "En dash separating identity from non-default pitch/speed phrases (speakable style only)."
+    },
+    {
+      "token": "--",
+      "meaning": "Machine-safe twin separator between identity and modifier segments."
+    }
+  ],
+  "rules_summary": [
+    "Identity first; then pitch; then speed.",
+    "Omit default pitch and default speed from the basename.",
+    "Hash is never the basename; optional short suffix only after human labels.",
+    "Folders by identity are optional; the basename still repeats the identity."
+  ],
+  "files": [
+    {
+      "path": "Song Food.mp3",
+      "identity": "Song Food",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "speakable",
+      "note": "Defaults omitted."
+    },
+    {
+      "path": "Song Food – up 8.mp3",
+      "identity": "Song Food",
+      "pitch": 8,
+      "speed_pct": null,
+      "style": "speakable",
+      "note": "Pitch only."
+    },
+    {
+      "path": "Song Food – up 8, 20% faster.mp3",
+      "identity": "Song Food",
+      "pitch": 8,
+      "speed_pct": 20,
+      "style": "speakable",
+      "note": "Pitch + speed."
+    },
+    {
+      "path": "song-food--up-8--20-pct-faster.mp3",
+      "identity": "Song Food",
+      "pitch": 8,
+      "speed_pct": 20,
+      "style": "safe_twin",
+      "note": "Optional machine-safe twin of the pitch+speed speakable name."
+    }
+  ]
+}

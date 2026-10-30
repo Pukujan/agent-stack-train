@@ -1,38 +1,30 @@
-# Agent Stack Train — Project Contract
+# Agent Stack — Project Contract
 
 ## Main goal
 
-Own the **one certified version set** for the agent stack — a single, versioned record of which component versions are compatible with each other — so that every repository in the stack reads compatible versions from one place instead of hand-copying a pin into many files.
+Hold the whole agent stack in one repository and ship it as one version, so a change to one component never again needs a pin bump in three others.
 
 ## Why
 
-The same version pin was hand-copied across many files and drifted: measured 2026-10-01, one pin lived in thirteen files across three revisions. Worse, the pin lived inside one of the product repositories, so that repository certified its own siblings and every other repository had to trust a peer's file to learn what "compatible" meant. Versions are a different kind of artifact from the products they describe, so they get their own home.
+PCM, CGM, ACS and OIO always had to move together, but each lived in its own repository and pinned the other three. Between 2026-09-30 and 2026-10-30, 73 of the 130 pull requests merged in those repositories only moved versions, and the certified train could still not be installed because ACS pinned older PCM and CGM commits than the train certified (#20). One repository cannot have that mismatch.
+
+The release train came first: versions got their own repository so that no component certified its own siblings. That rule still holds inside one repository. The version record lives at the root, and no component folder restates another's version.
 
 ## Scope
 
-- `stack-releases.json` — the certified version set: one entry per component, with version, commit, and role. It records each component's default-branch head.
-- `components.json` — where each version is read from (repository, version file, and role).
-- `stack-manifest.schema.json` — the shape of an adopter's own pin file. An empty pin follows the train.
-- `scripts/check_manifest.py` — the reusable check an adopter runs in CI to prove its manifest agrees with the train.
-- `scripts/refresh_train.py` — rewrites the certified set from those default branches, skipping a head that changed only the mesh. The refresh workflow runs it on a schedule.
-- The rule for reading the train: pin once, read the version from the train, never hand-copy.
+- `pcm/`, `cgm/`, `acs/`, `oio/`: the four components, each with its own history, tasks and tests.
+- `stack-releases.json`: the certified version record adopters read. Until the first combined release it records each component separately.
+- `stack-manifest.schema.json` and `scripts/check_manifest.py`: the shape of an adopter's pins and the check that proves they agree with the train.
+- `.github/workflows/ci.yml`: one required `gates` check over every component.
 
 ## Non-goals
 
-- **Does not own any adopter's product code, issues, or releases.** It describes them.
-- **Does not own the components' own development.** Each component repository owns its code, its issues, and its release.
-- **Does not replace** PCM (execution continuity), CGM (narrative and style), ACS (the install surface), or OIO (the issue log).
-- **Does not invent a version.** It records the version each component's default branch declares. The owner asked for that channel on 2026-10-05, when the frozen `2026-10-01` snapshot was still certifying PCM 0.6.0 after 0.7.0 had shipped.
-
-## Who owns which pins
-
-- **This repository** owns the certified version set — the answer to "which versions are compatible".
-- **Each adopter** owns its own `stack-manifest.json` — the answer to "which train and components this repository consumes".
-- No repository owns another repository's pins.
+- **Does not own any adopter's product code, issues, or releases.**
+- **Does not change what each component does.** The move changes where code lives, not how it behaves.
+- **Does not delete history.** The old repositories are archived after the first combined release, never deleted; adopters' pinned commits exist only there.
 
 ## Definition of success
 
-- An adopter reads every compatible version from one train, and a check fails closed when a copied pin disagrees.
-- A version pin appears in exactly one place — the train — and every adopter points at it rather than restating it.
-- The train moves when a component's default branch moves, so a newer commit is the certified commit without a separate re-certification.
-- No product repository certifies its own siblings.
+- One pull request can change any component, and one `gates` check proves the whole stack still works.
+- An adopter installs one commit of this repository instead of four.
+- A version appears in one place, and every document points at it rather than restating it.

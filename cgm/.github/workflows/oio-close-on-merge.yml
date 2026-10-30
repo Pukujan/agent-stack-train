@@ -1,0 +1,29 @@
+name: OIO close on merge
+
+# Settles the issue log's lifecycle status when a merged pull request closes
+# its tracked issue: the log must not keep saying status:open for an issue
+# GitHub has already closed. The contract itself lives in OIO; pin it to a
+# commit so a moving branch cannot silently change what runs on merge.
+#
+# The merged guard is repeated here (OIO's called workflow also checks it) so
+# an abandoned pull request never reaches the reusable workflow at all.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # Distinct from ci.yml's tracked-issue/contract jobs: those read the pull
+  # request body and the tree on open/synchronize; this one only runs after
+  # close and touches issues. None of the three are the same check.
+  oio-close:
+    if: github.event.pull_request.merged == true
+    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@305adc5d09920d28e603a1b317108637cc30a624
+    with:
+      oio_ref: 305adc5d09920d28e603a1b317108637cc30a624
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "docs/assets/oio-hero-banner.png",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting"
+  ],
+  "palette": {
+    "background": "#111B4D",
+    "surface": "#F4F1FF"
+  },
+  "roles": {
+    "hero": {
+      "purpose": "show loose notes from several repositories gathered onto one shared ledger"
+    },
+    "problem": {
+      "purpose": "show the same rule hand-copied into several folders, drifting with no single trail"
+    },
+    "supporting": {
+      "purpose": "show one shared path — observe, file, triage, review, resolve — across every repository"
+    }
+  },
+  "reject_when": [
+    "busy governance diagram",
+    "tiny unreadable labels",
+    "garbled or misspelled title text",
+    "fake metrics or decorative pseudo-text",
+    "dark cyber imagery or sterile dashboards"
+  ]
+}

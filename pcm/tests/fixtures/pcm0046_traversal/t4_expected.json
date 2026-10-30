@@ -1,0 +1,32 @@
+{
+ "snapshots": {
+  "t4_snapshot_fresh.json": {
+   "verdict": "pass",
+   "failed_checks": [],
+   "docs": {
+    "alpha-guide": true,
+    "beta-notes": true
+   }
+  },
+  "t4_snapshot_stale_doc.json": {
+   "verdict": "fail",
+   "failed_checks": [
+    "per_doc_current_sha"
+   ],
+   "docs": {
+    "alpha-guide": false,
+    "beta-notes": true
+   }
+  },
+  "t4_snapshot_tampered_header.json": {
+   "verdict": "fail",
+   "failed_checks": [
+    "catalog_sha_matches"
+   ],
+   "docs": {
+    "alpha-guide": true,
+    "beta-notes": true
+   }
+  }
+ }
+}

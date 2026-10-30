@@ -1,5 +1,10 @@
 name: CI
 
+# One workflow for the whole stack (#21). Each component's jobs run from inside
+# its folder, with the commands its own repository ran before the move. A
+# component that needs another one installs it from this checkout, not from a
+# pinned commit of an old repository. `gates` is the one check to require.
+
 on:
   push:
     branches: [main]
@@ -10,14 +15,21 @@ permissions:
   contents: read
 
 jobs:
-  gates:
-    name: Train gates
+  train:
+    name: train
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: The release train is well-formed
         run: python scripts/check_manifest.py --self
+
+      - name: The train's own tests pass
+        run: python scripts/test_train.py
 
       - name: The manifest schema is valid JSON
         run: python -c "import json; json.load(open('stack-manifest.schema.json'))"
@@ -25,17 +37,209 @@ jobs:
       - name: The prose-pin check's tests pass
         run: python scripts/test_prose_pins.py
 
-      # A stack document that restates a component version/commit the certified
-      # set does not name is drift no other validator can see (issue #16):
-      # check_manifest.py reads stack-manifest.json, mesh.py reads
-      # stack-mesh.json, and ACS's check_pins.py reads only declared
-      # projections -- none of them reads README.md/AGENTS.md/PROJECT.md.
-      # Scoped to the default branch: a pull request that legitimately
-      # advances the mesh disagrees with a train it has not yet been certified
-      # into, and a mesh/sync head exists precisely to take a sibling's new
-      # version before the train records it, so those heads are exempt.
-      - name: The train's own prose states no stale component pin
-        if: >-
-          github.event_name == 'push' && github.ref == 'refs/heads/main'
-          || (github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'mesh/sync')
+      - name: The root documents state no stale component pin
         run: python scripts/check_prose_pins.py --root .
+
+  pcm-quality:
+    name: pcm / quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pcm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check .
+      - run: mypy src
+      - run: python -m compileall -q src tests
+      - run: python -m build
+
+  pcm-test:
+    name: pcm / test (${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pcm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: python -m pip install -e ".[dev]"
+      - run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - run: PYTHONPATH=src python -m continuity validate --root .
+      - run: python tests/package_smoke.py --root .
+
+  cgm:
+    name: cgm / contract (${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cgm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Validate contract
+        run: python scripts/validate_content_system.py --root .
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+  acs:
+    name: acs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: acs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the continuity CLI from this checkout
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml pytest jsonschema ../pcm
+          continuity --version
+
+      - name: Continuity validate
+        run: continuity validate --root .
+
+      - name: Continuity preflight (TARGET_VALID)
+        run: continuity preflight --root .
+
+      - name: Hotloader pin drift check (fail closed on stale pins)
+        run: python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
+
+      - name: Hotloader pack tests
+        run: python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
+
+      - name: Exercise the agent-less watchdog
+        run: |
+          mkdir -p /tmp/coord
+          printf '{"status":"held","who_is_boss_now":"ci-probe@runner","last_heartbeat":"2020-01-01T00:00:00+00:00","claim_queue":[],"as_of_history":[]}' > /tmp/coord/boss_claim.json
+          python modules/coordination/multi-agent-hotload/v0.1.0/scripts/watchdog_check.py \
+            --claim-file /tmp/coord/boss_claim.json | grep -q "watchdog_check: vacant"
+          grep -q '"status": "vacant"' /tmp/coord/boss_claim.json
+          grep -q '"as_of_history"' /tmp/coord/boss_claim.json
+
+  oio-windows:
+    name: oio / windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: oio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the installer and triage suite on Windows
+        run: |
+          python -m pip install -r requirements.txt
+          python -m unittest discover -s tests -v
+
+  oio:
+    name: oio
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: oio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the continuity CLI from this checkout
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml ../pcm -r requirements.txt
+          continuity --version
+
+      - name: Continuity validate
+        run: continuity validate --root .
+
+      - name: Continuity preflight (TARGET_VALID)
+        run: continuity preflight --root .
+
+      - name: Installer and triage regression suite
+        run: python -m unittest discover -s tests -v
+
+      - name: Validate the content adapter against CGM in this checkout
+        run: |
+          python ../cgm/scripts/validate_content_system.py \
+            --root ../cgm \
+            --adapter .content-system \
+            --project-root .
+
+      - name: Stack manifest agrees with the release train
+        run: python ../scripts/check_manifest.py --manifest stack-manifest.json --train ../stack-releases.json
+
+      - name: Issue templates and workflows parse
+        run: |
+          python - <<'PY'
+          import glob, yaml
+          files = sorted(glob.glob(".github/ISSUE_TEMPLATE/*.yml")) + sorted(glob.glob(".github/workflows/*.yml"))
+          for f in files:
+              with open(f, encoding="utf-8") as fh:
+                  yaml.safe_load(fh)
+              print("OK", f)
+          print(f"OK: {len(files)} file(s) parse")
+          PY
+
+  secrets:
+    name: no committed secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No committed secrets (tracked tree)
+        run: |
+          if git grep -nIE 'sk-or-[A-Za-z0-9]|yolo_[A-Za-z0-9]{4,}|api[_-]?key["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9]{20}'; then
+            echo "FAIL: tracked secret-like string found"
+            exit 1
+          fi
+          echo "OK: no committed secrets"
+
+  gates:
+    name: gates
+    if: always()
+    needs: [train, pcm-quality, pcm-test, cgm, acs, oio-windows, oio, secrets]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every component's jobs green
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          results = {name: job["result"] for name, job in json.loads(os.environ["RESULTS"]).items()}
+          for name, result in sorted(results.items()):
+              print(f"{name}={result}")
+          sys.exit(0 if all(result == "success" for result in results.values()) else 1)
+          PY

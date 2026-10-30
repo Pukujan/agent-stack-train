@@ -1,0 +1,6 @@
+{
+  "provider": "built-in image_gen",
+  "model": "google/gemini-3-pro-image",
+  "endpoint": "https://openrouter.ai/api/v1",
+  "note": "Regenerated hero PNG replacing the prior JPG; same art direction and characters as the supporting visuals."
+}

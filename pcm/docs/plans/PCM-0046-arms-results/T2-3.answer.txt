@@ -1,0 +1,1 @@
+Issue #53 "Make GitHub authority and evidence real" is closed on GitHub. CURRENT.md shows Leaf #53 owns this work with status open; next action is to execute the hosted two-user acceptance on the parent issue.

@@ -1,0 +1,40 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.5.12",
+  "assets": [
+    {
+      "id": "acs-adapter-placeholder",
+      "path": ".content-system/assets/adapter-placeholder.txt",
+      "role": "documentation",
+      "description": "Non-narrative placeholder so the CGM adapter validates while ACS narrative art remains deferred.",
+      "usage": "adapter completeness only; not a README hero",
+      "review_decision": "accepted-as-placeholder",
+      "status_note": "Replace with narrative raster under IMAGE_GUIDE when ACS root README gets art."
+    },
+    {
+      "id": "acs-readme-hero",
+      "path": "assets/acs-readme-hero.png",
+      "role": "hero",
+      "orientation": "wide",
+      "dimensions": "1280x720",
+      "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
+      "prompt_recipe": "Anime-inspired editorial hero illustration, wide cinematic composition. A focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop whose screen shows a repository tree of folders and files as clean abstract shapes. Around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram of soft neon connector lines. A small companion robot holds a checklist with green check marks and one red X. Cozy workspace in blue-violet night light with a warm desk lamp. A quiet right-side panel is the only lettering in the image, set in crisp readable type: title 'One pack. Any repo.' and subtitle 'The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'. Every other surface in the scene stays free of words, labels, numbers, and logos.",
+      "exact_title": "One pack. Any repo.",
+      "exact_subtitle": "The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs",
+      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'.",
+      "usage": "root README hero (Refs #19)",
+      "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
+      "rejection_conditions": [
+        "garbled or extra text in the panel",
+        "characters obscured or competing focal points",
+        "secrets or private paths visible"
+      ],
+      "review_decision": "accepted",
+      "review": "accepted; re-rendered to the coordination-only story after the narrowing (the previous pass carried stale 'decision gates' framing); panel lettering legible and correctly spelled; native 1280x720 render",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/acs-readme-hero-prompt.md",
+      "hash": "65e43d5b162b4b244f9061e389e7eed043f8e4756ef026333c329f419be4a08f",
+      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19 #44); subtitle states the coordination story only."
+    }
+  ]
+}

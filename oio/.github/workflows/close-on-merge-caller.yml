@@ -1,0 +1,23 @@
+name: Close referenced issues on merge
+
+# Same-repo caller for the reusable close contract. `pull_request: closed`
+# fires for both merged and abandoned pull requests, so the job guard checks
+# the merged flag before calling the reusable workflow.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  close:
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/close-on-merge.yml
+    with:
+      oio_ref: ${{ github.event.repository.default_branch }}
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

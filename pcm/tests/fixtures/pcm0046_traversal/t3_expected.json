@@ -1,0 +1,28 @@
+{
+ "commits": {
+  "t3_commit_keyword.txt": {
+   "False": {
+    "verdict": "fail",
+    "failed_checks": [
+     "no_closing_keyword"
+    ]
+   },
+   "True": {
+    "verdict": "inconclusive",
+    "failed_checks": [
+     "no_closing_keyword"
+    ]
+   }
+  },
+  "t3_commit_clean.txt": {
+   "False": {
+    "verdict": "pass",
+    "failed_checks": []
+   },
+   "True": {
+    "verdict": "pass",
+    "failed_checks": []
+   }
+  }
+ }
+}

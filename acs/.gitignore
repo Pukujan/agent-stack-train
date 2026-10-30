@@ -1,0 +1,8 @@
+.env
+*.local.json
+.DS_Store
+__pycache__/
+**/.acs/
+
+# local-only task worktrees (PCM: never tracked)
+pcm/

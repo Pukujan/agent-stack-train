@@ -1,0 +1,25 @@
+# NOTICE
+
+Agent Stack: Project Continuity Modules (`pcm/`), Content Generation Modules
+(`cgm/`), Agent Custom Setup (`acs/`), Observational Issue Ops (`oio/`), and the
+release train at the repository root.
+
+Copyright 2026 Pukujan
+
+This repository is licensed under the Functional Source License, Version 1.1,
+ALv2 Future License (FSL-1.1-ALv2). See `LICENSE`. On the second anniversary of
+the date each version is made available, that version becomes available under
+the Apache License, Version 2.0.
+
+## Earlier licenses
+
+Before the four components moved into this repository, PCM, CGM, OIO and the
+release train were published under the Apache License, Version 2.0, and ACS under
+FSL-1.1-ALv2. A commit published under the Apache License, Version 2.0 stays
+available under it. The license change applies from the commit that moved the
+components here.
+
+## Third-party components
+
+The stack does not vendor third-party source. Each component's dependencies are
+installed from their own package indexes and carry their own licenses.

@@ -1,0 +1,27 @@
+name: OIO status drift audit
+
+# Read-only audit: fails when an issue's status:* label contradicts its open
+# or closed state. It never edits anything, so a failing run is the signal to
+# correct the log, not a repair step. Off-minute cron keeps it from stacking
+# with the hourly mesh check.
+#
+# Pinned to the same OIO commit as the close caller so both halves of the
+# lifecycle contract move together.
+on:
+  schedule:
+    - cron: "29 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  # Not a required check: a drift failure must surface in the audit's own run
+  # history, not block unrelated pull requests.
+  oio-drift:
+    uses: Pukujan/observational-issue-ops/.github/workflows/oio-status-drift.yml@305adc5d09920d28e603a1b317108637cc30a624
+    with:
+      oio_ref: 305adc5d09920d28e603a1b317108637cc30a624
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "oio.project-issue-log-ontology.v1",
+  "project_id": "Pukujan/observational-issue-ops",
+  "namespace": "oio-project",
+  "extends": {
+    "ontology_id": "oio:issue-log",
+    "version": "1.0.0"
+  },
+  "version": "1.0.0",
+  "concepts": [],
+  "priorities": [
+    {
+      "path": "5",
+      "concept_id": "oio-project:priority-5",
+      "label": "Core protocol or enforcement gap",
+      "definition": "An issue with a direct effect on OIO's supported issue-log contract or safe adopter installation."
+    }
+  ],
+  "account_authority": [
+    {
+      "github_user_id": "137629468",
+      "login": "Pukujan",
+      "authority": "owner"
+    }
+  ]
+}
