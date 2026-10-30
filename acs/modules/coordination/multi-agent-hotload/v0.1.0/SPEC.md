@@ -18,20 +18,21 @@ source of truth for what "current" means.
 
 | Record | Owner | What it is | What it is NOT |
 | --- | --- | --- | --- |
-| `stack-releases.json` | train | The certified version set (one entry per component). | Not an adopter's pin. |
-| `stack-mesh.json` | each stack repo | That repo's **requirement**, written from the train by the train's `mesh.py` and enforced by the train's `require-mesh.yml` CI. | Not hand-edited; an older requirement fails CI. |
+| `stack-releases.json` | train | The certified version set (one entry per component, and an `agent-stack-train` entry per stack release). | Not an adopter's pin. |
+| The agent-stack-train checkout | the operator | PCM, CGM, ACS and OIO as `pcm/`, `cgm/`, `acs/` and `oio/`, all at one commit. Each version comes from the component's own version file (`scripts/stack_checkout.py`). | Not four checkouts to line up; a checkout missing a component fails closed. |
 | `pins.json` | ACS (this pack) | **Module shape only** — the CGM module list/count and the ACS module id/version. | Not a version pin. Component commits are not copied here. |
-| `stack-manifest.json` | the adopter | The adopter's own pins. **Empty entries follow the train.** | Not a frozen copy of install-day versions. |
-| `.coord/hotload.lock.json` | the adopter | A **historical** record of what was installed, and when. | Not a forward pin — it must never hold an adopter back. |
+| `stack-manifest.json` | the adopter | The adopter's own pin: `agent-stack-train` alone. **An empty entry follows the train.** | Not a frozen copy of install-day versions. |
+| `.coord/hotload.lock.json` | the adopter | A **historical** record of what was installed, and when, including the stack repository and commit. | Not a forward pin — it must never hold an adopter back. |
 
 **Binding:**
 
-- Version requirements live in `stack-mesh.json`, generated from the train by
-  the train's own `mesh.py`. This pack MUST NOT carry a second, hand-maintained
-  copy of component commits — a copied pin is exactly the drift the train exists
-  to remove.
-- The installer MUST write the adopter's `stack-manifest.json` with **empty
-  pins** (follow the train) and MUST NOT write install-day versions into it.
+- Components come from one agent-stack-train checkout, so they sit at one
+  commit by construction. This pack MUST NOT carry a hand-maintained copy of
+  component commits — a copied pin is exactly the drift the train exists to
+  remove.
+- The installer MUST write the adopter's `stack-manifest.json` with an **empty
+  `agent-stack-train` pin** (follow the train) and MUST NOT write install-day
+  versions into it.
 - `hotload_check` MUST NOT validate the adopter's checkouts against the frozen
   lock. The lock is evidence of the install, not a ceiling on it.
 
@@ -178,7 +179,8 @@ path is exercised without a Linux host.
 - **Recoverable.** An interrupted install is restored from its journal on the
   next run.
 - **No network at install.** The installer never clones, fetches, or vendors
-  PCM/CGM/OIO source. Checkouts are brought at the pinned revisions.
+  PCM/CGM/OIO source. It installs from the agent-stack-train checkout it is
+  given, at that checkout's commit.
 
 ## 8. Test plan (the taxonomy this contract is proven against)
 
@@ -190,7 +192,7 @@ Each claim above is backed by more than one kind of test:
 | **SDD** (spec/semantics) | The state machine's states and transitions match this document. | `tests/test_install_states.py` |
 | **TDD** (unit) | Each gate (§4) classifies each path kind correctly. | `tests/test_install_gates.py` |
 | **Metamorphic (install)** | Reordering components, or rerunning install, does not change the final tree; an added foreign file cannot be overwritten. | `tests/test_install_metamorphic.py` |
-| **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the pack's `stack-mesh.json` sits at the certified commits (`mesh.py --check`). | `tests/test_install_manifest.py` (offline shape) + the train's `check-adopter.yml` / `require-mesh.yml` (live) |
+| **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the stack checkout's component versions match the versions the train certifies. | `tests/test_install_manifest.py` (offline shape) + `tests/test_train_parity.py` + the train's `check-adopter.yml` (live) |
 | **Protocol** | The seat state machine matches ROLES.md step for step: lease, FIFO queue, zombie rejection, append-only history — driven by scripted fake agents, no model. | `tests/test_coordination.py` (parametrised over both `ClaimStore` implementations) |
 | **Failure paths** | Duplicate delivery, simultaneous claimants, zombie wake, restart mid-claim, clock regression, corrupt/absent claim. | `tests/test_coordination_failures.py` |
 | **Scenario (BDD)** | The ROLES.md narratives a human can name: an empty room appoints its first boss; a dethroned boss is refused and re-queued at the end; two claimants resolve FIFO; the watchdog never appoints. | `tests/test_coordination_scenarios.py` |

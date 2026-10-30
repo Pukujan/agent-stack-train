@@ -29,7 +29,7 @@
     "certified": {
       "type": "object",
       "minProperties": 1,
-      "description": "One entry per certified component, keyed by component name.",
+      "description": "One entry per certified component, keyed by component name. An agent-stack-train entry certifies a stack release, the one commit a one-checkout adopter installs from.",
       "additionalProperties": {
         "type": "object",
         "minProperties": 1,

@@ -1,8 +1,8 @@
 """SDD (spec/semantics): the install state machine matches SPEC.md section 3.
 
 States are read from the adopter's own records (``adopter_state``); ``DRIFTED``
-is derived when a ``READY`` repo's records name older commits than the train;
-``CONFLICTED`` is a plan outcome (zero writes, non-zero exit).
+is derived when a ``READY`` repo's records name another commit than the stack
+checkout; ``CONFLICTED`` is a plan outcome (zero writes, non-zero exit).
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from conftest import CGM_SHA, PCM_SHA
+from conftest import STACK_SHA, stack_requires
 
 
 def _write(path: Path, data: object) -> None:
@@ -18,11 +18,11 @@ def _write(path: Path, data: object) -> None:
     path.write_text(json.dumps(data), encoding="utf-8")
 
 
-def _ready_records(adopter: Path, *, pcm_revision: str = PCM_SHA) -> None:
+def _ready_records(adopter: Path, *, pcm_revision: str = STACK_SHA) -> None:
     """Lay down the three records that make a repo READY."""
     _write(
         adopter / ".coord" / "assignment.json",
-        {"pins": {"pcm": {"revision": pcm_revision}, "cgm": {"revision": CGM_SHA}}},
+        {"pins": {"pcm": {"revision": pcm_revision}, "cgm": {"revision": STACK_SHA}}},
     )
     _write(adopter / "stack-manifest.json", {"schema_version": "agent-stack-train.stack-manifest.v1"})
     _write(adopter / ".oio" / "install-manifest.json", {"version": "0.1.0"})
@@ -60,42 +60,43 @@ def test_ready_when_all_records_present(tmp_path: Path, installer):
 # --- drift (pure) ----------------------------------------------------------
 
 
-def test_lock_drift_when_lock_is_behind_the_mesh(tmp_path: Path, installer):
+def test_lock_drift_when_lock_is_behind_the_stack(tmp_path: Path, installer):
     adopter = tmp_path / "adopter"
     _write(
         adopter / ".coord" / "hotload.lock.json",
-        {"checkouts": {"pcm": {"commit": "0" * 40}, "cgm": {"commit": CGM_SHA}}},
+        {"checkouts": {"pcm": {"commit": "0" * 40}, "cgm": {"commit": STACK_SHA}}},
     )
-    drift = installer.lock_drift(adopter, _requires())
-    assert drift and "pcm" in drift[0]
+    drift = installer.lock_drift(adopter, stack_requires())
+    assert len(drift) == 1 and "pcm" in drift[0]
 
 
-def test_assignment_drift_when_assignment_is_behind_the_mesh(tmp_path: Path, installer):
+def test_assignment_drift_when_assignment_is_behind_the_stack(tmp_path: Path, installer):
     adopter = tmp_path / "adopter"
     _write(adopter / ".coord" / "assignment.json", {"pins": {"pcm": {"revision": "0" * 40}}})
-    drift = installer.assignment_drift(adopter, _requires())
+    drift = installer.assignment_drift(adopter, stack_requires())
     assert drift and "re-run with --force" in drift[0]
 
 
-def _requires() -> dict:
-    from conftest import mesh_doc
-
-    return mesh_doc()["requires"]
+def test_no_drift_when_the_records_name_the_stack_commit(tmp_path: Path, installer):
+    adopter = tmp_path / "adopter"
+    _ready_records(adopter)
+    _write(
+        adopter / ".coord" / "hotload.lock.json",
+        {"checkouts": {label: {"commit": STACK_SHA} for label in ("pcm", "cgm", "oio")}},
+    )
+    assert installer.lock_drift(adopter, stack_requires()) == []
+    assert installer.assignment_drift(adopter, stack_requires()) == []
 
 
 # --- transitions (through run()) ------------------------------------------
 
 
 def test_run_reports_absent_then_records_ready(
-    tmp_path, installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args, capsys,
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys,
 ):
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    rc = installer.run(
-        run_args(make_acs_root(), adopter, pcm, cgm, make_oio_checkout())
-    )
+    rc = installer.run(run_args(make_stack(), adopter))
     out = capsys.readouterr().out
     assert rc == 0
     assert "state=ABSENT" in out
@@ -104,43 +105,36 @@ def test_run_reports_absent_then_records_ready(
 
 
 def test_rerun_keeps_the_edited_assignment(
-    tmp_path, installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args,
+    installer, make_stack, make_adopter, stub_externals, run_args,
 ):
     """A rerun is a no-op for an edited managed file: it is kept, not clobbered."""
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    oio = make_oio_checkout()
-    acs_root = make_acs_root()
-    assert installer.run(run_args(acs_root, adopter, pcm, cgm, oio)) == 0
+    stack = make_stack()
+    assert installer.run(run_args(stack, adopter)) == 0
     assignment = adopter / ".coord" / "assignment.json"
     edited = json.loads(assignment.read_text(encoding="utf-8"))
     edited["project"] = "operator-edit"
     assignment.write_text(json.dumps(edited), encoding="utf-8")
     before = assignment.read_bytes()
 
-    assert installer.run(run_args(acs_root, adopter, pcm, cgm, oio)) == 0
+    assert installer.run(run_args(stack, adopter)) == 0
     assert assignment.read_bytes() == before  # untouched
     lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
     assert lock["state"] == "READY"
 
 
-def test_run_reports_drifted_when_records_are_behind_the_train(
-    tmp_path, installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args, capsys,
+def test_run_reports_drifted_when_records_are_behind_the_stack(
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys,
 ):
     stub_externals()
     adopter = make_adopter()
     _ready_records(adopter, pcm_revision="0" * 40)
     _write(
         adopter / ".coord" / "hotload.lock.json",
-        {"checkouts": {"pcm": {"commit": "0" * 40}, "cgm": {"commit": CGM_SHA}}},
+        {"checkouts": {"pcm": {"commit": "0" * 40}, "cgm": {"commit": STACK_SHA}}},
     )
-    pcm, cgm = make_checkouts()
-    rc = installer.run(
-        run_args(make_acs_root(), adopter, pcm, cgm, make_oio_checkout(), dry_run=True)
-    )
+    rc = installer.run(run_args(make_stack(), adopter, dry_run=True))
     out = capsys.readouterr().out
     assert rc == 0
     assert "state=DRIFTED" in out
@@ -148,18 +142,14 @@ def test_run_reports_drifted_when_records_are_behind_the_train(
 
 
 def test_run_reports_conflicted_on_a_foreign_target(
-    tmp_path, installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args, capsys,
+    installer, make_stack, make_adopter, stub_externals, run_args, capsys,
 ):
     stub_externals()
     adopter = make_adopter()
     (adopter / "stack-manifest.json").write_text(
         json.dumps({"schema_version": "someone-else.v1"}), encoding="utf-8"
     )
-    pcm, cgm = make_checkouts()
-    rc = installer.run(
-        run_args(make_acs_root(), adopter, pcm, cgm, make_oio_checkout())
-    )
+    rc = installer.run(run_args(make_stack(), adopter))
     out = capsys.readouterr().out
     assert rc == 1
     assert "state=CONFLICTED" in out

@@ -1,19 +1,20 @@
 name: OIO close on merge
 
-# Reusable close contract. A caller passes the OIO ref that supplies the
-# script; this workflow only runs for a merged pull request, closes the issues
-# named by native closing verbs, and syncs the log's lifecycle status.
+# Reusable close contract. A caller passes the agent-stack-train ref that
+# supplies OIO's script; this workflow only runs for a merged pull request,
+# closes the issues named by native closing verbs, and syncs the log's
+# lifecycle status.
 #
 # The `github` context in a called workflow belongs to the caller's event, so
 # `github.event.pull_request.merged` is the merged flag of the pull request
-# that triggered the caller. The same guard is repeated in the same-repo
-# caller so an unmerged close never reaches this workflow.
+# that triggered the caller. The same guard is repeated in the callers OIO's
+# installer writes, so an unmerged close never reaches this workflow.
 
 on:
   workflow_call:
     inputs:
       oio_ref:
-        description: Git ref of Pukujan/observational-issue-ops that supplies oio_close_refs.py.
+        description: Git ref of Pukujan/agent-stack-train that supplies oio/.github/scripts/oio_close_refs.py.
         required: true
         type: string
     secrets:
@@ -31,12 +32,13 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Check out OIO at the caller-pinned ref
+      - name: Check out OIO's scripts at the caller-pinned stack ref
         uses: actions/checkout@v4
         with:
-          repository: Pukujan/observational-issue-ops
+          repository: Pukujan/agent-stack-train
           ref: ${{ inputs.oio_ref }}
           path: .oio-src
+          sparse-checkout: oio/.github/scripts
 
       - uses: actions/setup-python@v5
         with:
@@ -46,7 +48,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CROSS_REPO_TOKEN || github.token }}
         run: |
-          python .oio-src/.github/scripts/oio_close_refs.py \
+          python .oio-src/oio/.github/scripts/oio_close_refs.py \
             --apply \
             --repo "${{ github.repository }}" \
             --pr "${{ github.event.pull_request.html_url }}"

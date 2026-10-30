@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Component versions come from the release train via stack-mesh.json.",
+  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-10-05",
@@ -185,11 +185,11 @@
     "repo_rule": "Docs, schemas, and agent-less stubs only. No secrets."
   },
   "dependencies": [
-    "PCM version and commit from stack-mesh.json (the train's certified set) — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
-    "CGM version and commit from stack-mesh.json — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
-    "OIO version and commit from stack-mesh.json — the observational issue-log surface (ontology, issue form, triage workflow, AGENTS.md guidance block); the ACS installer invokes OIO's own installer; pin/reference, do not vendor",
+    "PCM from the agent-stack-train checkout's pcm/ folder, at the stack commit — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
+    "CGM from the agent-stack-train checkout's cgm/ folder, at the stack commit — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "OIO from the agent-stack-train checkout's oio/ folder, at the stack commit — the observational issue-log surface (ontology, issue form, triage workflow, AGENTS.md guidance block); the ACS installer invokes OIO's own installer; pin/reference, do not vendor",
     "agent-stack-train stack-releases.json — the certified version set the adopter's stack-manifest.json follows (empty pins)",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Versions come from the release train via stack-mesh.json; the adopter's stack-manifest.json carries empty pins and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). claim-file claim_queue after vacancy (scripts/seat_protocol.py executes the seat state machine); returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
+  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Every component comes from one agent-stack-train checkout, at one commit; the adopter's stack-manifest.json carries an empty agent-stack-train pin and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). claim-file claim_queue after vacancy (scripts/seat_protocol.py executes the seat state machine); returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
 }

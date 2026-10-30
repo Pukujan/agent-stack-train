@@ -1,8 +1,10 @@
-"""Metamorphic: reruns and reorderings must not change the final tree.
+"""Metamorphic: reruns and a moved stack must not change the final tree.
 
-SPEC.md section 8 asks that reordering components, or rerunning the install, does
-not change the result, and that an added foreign file can never be overwritten.
-These properties are what make the installer safe to run repeatedly.
+SPEC.md section 8 asks that rerunning the install does not change the result, and
+that an added foreign file can never be overwritten. A third relation follows from
+the adopter following the train: moving the stack to another commit and component
+versions leaves the adopter's manifest byte-for-byte the same. These properties
+are what make the installer safe to run repeatedly.
 """
 
 from __future__ import annotations
@@ -10,91 +12,100 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from conftest import mesh_doc
+from conftest import STACK_SHA, write_stack
 
 
-def _install(installer, run_args, acs_root, adopter, pcm, cgm, oio, **over):
-    return installer.run(run_args(acs_root, adopter, pcm, cgm, oio, **over))
+def _install(installer, run_args, stack, adopter, **over):
+    return installer.run(run_args(stack, adopter, **over))
 
 
 def test_rerun_does_not_change_the_managed_files(
-    installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args,
+    installer, make_stack, make_adopter, stub_externals, run_args,
 ):
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    oio = make_oio_checkout()
-    acs_root = make_acs_root()
+    stack = make_stack()
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 0
+    assert _install(installer, run_args, stack, adopter) == 0
     assignment_before = (adopter / ".coord" / "assignment.json").read_bytes()
     manifest_before = (adopter / "stack-manifest.json").read_bytes()
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 0
+    assert _install(installer, run_args, stack, adopter) == 0
     assert (adopter / ".coord" / "assignment.json").read_bytes() == assignment_before
     assert (adopter / "stack-manifest.json").read_bytes() == manifest_before
 
 
-def test_component_order_does_not_change_the_manifest(installer):
-    mesh = mesh_doc()
-    forward = installer.build_stack_manifest(mesh, "adopter-x")
-    reversed_mesh = dict(mesh)
-    reversed_mesh["requires"] = dict(reversed(list(mesh["requires"].items())))
-    backward = installer.build_stack_manifest(reversed_mesh, "adopter-x")
-    assert forward == backward
+def test_a_moved_stack_does_not_change_the_manifest(
+    tmp_path: Path, installer, make_stack, make_adopter, stub_externals, run_args, monkeypatch,
+):
+    """The manifest follows the train, so another stack commit and versions leave it identical."""
+    stub_externals()
+    first = make_adopter("first")
+    second = make_adopter("second")
+    stack = make_stack()
+    assert _install(installer, run_args, stack, first, project_name="adopter-x") == 0
+
+    moved = write_stack(tmp_path / "moved-stack")
+    (moved / "cgm" / "system-version.json").write_text(
+        json.dumps({"version": "9.9.9"}), encoding="utf-8"
+    )
+    other_sha = "f" * 40
+    assert other_sha != STACK_SHA
+    monkeypatch.setattr(installer, "git_head", lambda root: other_sha)
+    assert _install(installer, run_args, moved, second, project_name="adopter-x") == 0
+
+    # The assignment does record the stack it was installed from...
+    moved_assignment = json.loads(
+        (second / ".coord" / "assignment.json").read_text(encoding="utf-8")
+    )
+    assert moved_assignment["pins"]["cgm"]["revision"] == other_sha
+    # ...the stack manifest does not.
+    assert (first / "stack-manifest.json").read_bytes() == (
+        second / "stack-manifest.json"
+    ).read_bytes()
 
 
 def test_an_added_foreign_file_is_never_overwritten(
-    installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args,
+    installer, make_stack, make_adopter, stub_externals, run_args,
 ):
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    oio = make_oio_checkout()
-    acs_root = make_acs_root()
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 0
+    stack = make_stack()
+    assert _install(installer, run_args, stack, adopter) == 0
 
     # An operator (or another tool) replaces a managed file with foreign content.
     foreign = json.dumps({"schema_version": "someone-else.v1", "pins": {}})
     (adopter / "stack-manifest.json").write_text(foreign, encoding="utf-8")
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 1
+    assert _install(installer, run_args, stack, adopter) == 1
     assert (adopter / "stack-manifest.json").read_text(encoding="utf-8") == foreign
 
 
 def test_dry_run_leaves_the_tree_unchanged_then_real_run_matches(
-    installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args,
+    installer, make_stack, make_adopter, stub_externals, run_args,
 ):
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    oio = make_oio_checkout()
-    acs_root = make_acs_root()
+    stack = make_stack()
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio, dry_run=True) == 0
+    assert _install(installer, run_args, stack, adopter, dry_run=True) == 0
     assert not (adopter / ".coord").exists()
     assert not (adopter / "stack-manifest.json").exists()
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 0
+    assert _install(installer, run_args, stack, adopter) == 0
     assert (adopter / "stack-manifest.json").is_file()
     assert (adopter / ".coord" / "assignment.json").is_file()
 
 
 def test_force_is_idempotent_for_an_unedited_file(
-    installer, make_acs_root, make_adopter, make_checkouts, make_oio_checkout,
-    stub_externals, run_args,
+    installer, make_stack, make_adopter, stub_externals, run_args,
 ):
     """--force regenerates; for an unedited file the regenerated bytes are stable."""
     stub_externals()
     adopter = make_adopter()
-    pcm, cgm = make_checkouts()
-    oio = make_oio_checkout()
-    acs_root = make_acs_root()
+    stack = make_stack()
 
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio) == 0
+    assert _install(installer, run_args, stack, adopter) == 0
     first = (adopter / "stack-manifest.json").read_bytes()
-    assert _install(installer, run_args, acs_root, adopter, pcm, cgm, oio, force=True) == 0
+    assert _install(installer, run_args, stack, adopter, force=True) == 0
     assert (adopter / "stack-manifest.json").read_bytes() == first

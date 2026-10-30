@@ -52,9 +52,9 @@ The stamp records content author, authenticated GitHub actor, session reference 
 | Understand the protocol before filing | The template's own field descriptions | the issue form itself |
 | Point another repository at one source | A single repository to reference | this repository |
 | Install the prepacked ontology and triage into one selected repository | A safe, pinned installer and project extension scaffold | [docs/ADOPTER_INSTALL.md](docs/ADOPTER_INSTALL.md) |
-| Close logs automatically when a pull request merges | The reusable close contract and same-repo callers | `.github/workflows/close-on-merge.yml` |
-| Find lifecycle labels that contradict the issue state | The reusable drift audit | `.github/workflows/oio-status-drift.yml` |
-| Close what bot merges left open, and flag parents whose sub-issues are all closed | The reusable close sweep | `.github/workflows/close-sweep.yml` |
+| Close logs automatically when a pull request merges | The reusable close contract | [`close-on-merge.yml`](../.github/workflows/close-on-merge.yml) at the stack root |
+| Find lifecycle labels that contradict the issue state | The reusable drift audit | [`oio-status-drift.yml`](../.github/workflows/oio-status-drift.yml) at the stack root |
+| Close what bot merges left open, and flag parents whose sub-issues are all closed | The reusable close sweep | [`close-sweep.yml`](../.github/workflows/close-sweep.yml) at the stack root |
 
 ## How it works
 
@@ -78,13 +78,13 @@ A merged pull request is the one transition OIO automates. The close contract re
 - `Refs #12` is a progress link and closes nothing.
 - Duplicate references collapse to one action.
 
-`.github/workflows/close-on-merge.yml` is reusable: a caller passes `oio_ref`, and its job runs only when `github.event.pull_request.merged == true`. For each referenced log it closes with reason `completed`, adds `status:resolved`, removes the other `status:*` labels, rewrites the body's Lifecycle Status section to `resolved`, and posts one comment carrying the `<!-- oio:close-on-merge -->` marker so a retry does not comment twice. An issue that is already closed is not closed a second time; its lifecycle fields are still synced. Cross-repository references are attempted with `CROSS_REPO_TOKEN`; when that token cannot see the issue, the run prints a warning and continues instead of failing the whole merge.
+The three close workflows live in the root `.github/workflows/` of agent-stack-train, the only place GitHub runs workflows from; they run the scripts in this folder. `close-on-merge.yml` is reusable: a caller passes `oio_ref`, the agent-stack-train commit to take OIO's script from, and its job runs only when `github.event.pull_request.merged == true`. For each referenced log it closes with reason `completed`, adds `status:resolved`, removes the other `status:*` labels, rewrites the body's Lifecycle Status section to `resolved`, and posts one comment carrying the `<!-- oio:close-on-merge -->` marker so a retry does not comment twice. An issue that is already closed is not closed a second time; its lifecycle fields are still synced. Cross-repository references are attempted with `CROSS_REPO_TOKEN`; when that token cannot see the issue, the run prints a warning and continues instead of failing the whole merge.
 
-`.github/workflows/oio-status-drift.yml` is the report-only audit. It reads every issue's `status:*` label and the GitHub open/closed state, prints each contradiction, and exits non-zero when any exist. A closed log must be `resolved`, `superseded`, `obsolete`, or `wontfix`; an open log must be `open`. Logs with no status label are ignored.
+`oio-status-drift.yml` is the report-only audit. It reads every issue's `status:*` label and the GitHub open/closed state, prints each contradiction, and exits non-zero when any exist. A closed log must be `resolved`, `superseded`, `obsolete`, or `wontfix`; an open log must be `open`. Logs with no status label are ignored.
 
-`.github/workflows/close-sweep.yml` catches what the merge event misses. A merge carried out with a workflow's own token closes nothing and starts no close-on-merge run, and GitHub never closes a parent when its last sub-issue closes. The sweep reads the last 100 merged pull requests and settles the open logs they name, unless a log was reopened after that merge or carries `oio:keep-open`. It labels each open parent whose sub-issues are all closed `oio:ready-to-close`, or closes it with `rollup: close`. It only reports until it is told to apply.
+`close-sweep.yml` catches what the merge event misses. A merge carried out with a workflow's own token closes nothing and starts no close-on-merge run, and GitHub never closes a parent when its last sub-issue closes. The sweep reads the last 100 merged pull requests and settles the open logs they name, unless a log was reopened after that merge or carries `oio:keep-open`. It labels each open parent whose sub-issues are all closed `oio:ready-to-close`, or closes it with `rollup: close`. It only reports until it is told to apply.
 
-Same-repo callers ship with OIO: `close-on-merge-caller.yml` runs on `pull_request: closed`, `status-drift-caller.yml` runs daily and on manual dispatch, and `close-sweep-caller.yml` runs daily and applies only when the repository variable `OIO_CLOSE_SWEEP_APPLY` is `true` or a manual dispatch sets `apply`. The installer adds pinned close and sweep callers to each adopter; see [docs/ADOPTER_INSTALL.md](docs/ADOPTER_INSTALL.md).
+OIO's own callers are still in this folder's `.github/workflows/`: `close-on-merge-caller.yml` runs on `pull_request: closed`, `status-drift-caller.yml` runs daily and on manual dispatch, and `close-sweep-caller.yml` runs daily and applies only when the repository variable `OIO_CLOSE_SWEEP_APPLY` is `true` or a manual dispatch sets `apply`. GitHub does not run them below the root, so nothing closes agent-stack-train's own issues on merge yet. The installer adds pinned close and sweep callers to each adopter; see [docs/ADOPTER_INSTALL.md](docs/ADOPTER_INSTALL.md).
 
 ## Version and release rule
 

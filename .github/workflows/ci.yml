@@ -205,6 +205,8 @@ jobs:
           python - <<'PY'
           import glob, yaml
           files = sorted(glob.glob(".github/ISSUE_TEMPLATE/*.yml")) + sorted(glob.glob(".github/workflows/*.yml"))
+          # OIO's reusable close workflows live at the stack root.
+          files += [f"../.github/workflows/{name}" for name in ("close-on-merge.yml", "close-sweep.yml", "oio-status-drift.yml")]
           for f in files:
               with open(f, encoding="utf-8") as fh:
                   yaml.safe_load(fh)

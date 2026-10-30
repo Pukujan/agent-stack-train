@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = MODULE_ROOT / "scripts" / "hotload_check.py"
+# v0.1.0 -> multi-agent-hotload -> coordination -> modules -> acs folder
+ACS_FOLDER = MODULE_ROOT.parents[3]
 
 
 def _load_mod():
@@ -26,39 +29,40 @@ def test_required_files_exist():
     assert mod.check_required_files(MODULE_ROOT) == []
 
 
-def test_example_is_a_template_not_a_mesh_pin():
+def test_example_is_a_template_not_a_stack_pin():
     """The shipped example is validated for shape, not for currency.
 
     ``acs_install.build_assignment`` rebuilds every pin-bearing field from
-    ``pins.json`` and ``stack-mesh.json``, so the example's revision is a
-    placeholder. Comparing it with live upstream coupled a template to the
-    train: a sibling re-certification moved the mesh, the placeholder went
+    ``pins.json`` and the stack checkout, so the example's revision is a
+    placeholder. Comparing it with the stack's commit coupled a template to the
+    checkout: every commit to the stack moves its HEAD, the placeholder went
     stale, and a pull request that changed nothing else failed.
     """
     mod = _load_mod()
     errors = mod.validate_assignment(
         MODULE_ROOT / "schema" / "assignment.schema.json",
         MODULE_ROOT / "examples" / "assignment.example.json",
-        against_mesh=False,
+        against_stack=False,
     )
     assert errors == [], errors
 
+
 def test_pack_check_validates_the_example_as_a_template(tmp_path: Path, monkeypatch):
-    """run() over the pack's own root must not gate the example on the mesh."""
+    """run() over the pack's own root must not gate the example on the stack."""
     mod = _load_mod()
     seen: list[bool] = []
     real = mod.validate_pins
 
-    def spy(data, *, against_mesh=True):
-        seen.append(against_mesh)
-        return real(data, against_mesh=against_mesh)
+    def spy(data, *, against_stack=True, stack_root=None):
+        seen.append(against_stack)
+        return real(data, against_stack=against_stack, stack_root=stack_root)
 
     monkeypatch.setattr(mod, "validate_pins", spy)
     rc = mod.run(MODULE_ROOT, skip_cgm_validate=True, dev_root=tmp_path)
     assert rc == 0
     assert seen == [False]
 
-def test_real_assignment_is_still_mesh_checked(tmp_path: Path):
+def test_real_assignment_is_still_stack_checked(tmp_path: Path, capsys):
     """The same example, offered as a real assignment, is refused when stale."""
     mod = _load_mod()
     data = json.loads(
@@ -68,7 +72,9 @@ def test_real_assignment_is_still_mesh_checked(tmp_path: Path):
     path = tmp_path / "assignment.json"
     path.write_text(json.dumps(data), encoding="utf-8")
     rc = mod.run(MODULE_ROOT, path, skip_cgm_validate=True, dev_root=tmp_path)
+    out = capsys.readouterr().out
     assert rc == 1
+    assert "pins.pcm.revision: must be the stack commit" in out
 
 
 def test_lease_ttl_accepts_default_30(tmp_path: Path):
@@ -80,10 +86,10 @@ def test_lease_ttl_accepts_default_30(tmp_path: Path):
     path = tmp_path / "ok.json"
     path.write_text(json.dumps(good), encoding="utf-8")
     # Template mode: the example's pin revisions are reserved placeholders, so
-    # mesh comparison is not part of this test. Currency is covered by
-    # test_real_assignment_is_still_mesh_checked.
+    # stack comparison is not part of this test. Currency is covered by
+    # test_real_assignment_is_still_stack_checked.
     errors = mod.validate_assignment(
-        MODULE_ROOT / "schema" / "assignment.schema.json", path, against_mesh=False
+        MODULE_ROOT / "schema" / "assignment.schema.json", path, against_stack=False
     )
     assert errors == [], errors
 
@@ -156,57 +162,46 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
     assert any("runner" in e for e in errors)
 
 
-def _find_cgm_for_tests() -> Path | None:
-    import subprocess
-    candidates = [
-        Path("/workspace/cgm-057"),
-        Path("/workspace/cgm-056"),
-        Path("/workspace/content-generation-modules"),
-        Path("/workspace/cgm-054"),
-        Path("/workspace/cgm-053"),
-        Path("/workspace/cgm-051"),
-        Path(r"D:\claude\content-generation-modules"),
-        Path.home() / "content-generation-modules",
-    ]
-    env = __import__("os").environ.get("CGM_ROOT")
-    if env:
-        candidates.insert(0, Path(env))
-    pin_prefix = "6831f91e"
-    matched = None
-    for cand in candidates:
-        if not (cand / "scripts" / "validate_content_system.py").is_file():
-            continue
-        try:
-            sha = subprocess.check_output(
-                ["git", "-C", str(cand), "rev-parse", "HEAD"], text=True
-            ).strip()
-        except Exception:
-            sha = ""
-        if sha.lower().startswith(pin_prefix):
-            return cand
-        if matched is None:
-            matched = cand
-    return matched
+def _stack_cgm() -> Path:
+    """The cgm/ folder of the stack checkout this pack sits in.
+
+    It is a folder of the same git checkout as the pack, so it is at the stack
+    commit by construction; there is no separate CGM checkout to find or skip.
+    """
+    cgm = _load_mod().stack_cgm_root()
+    assert (cgm / "scripts" / "validate_content_system.py").is_file(), (
+        f"{cgm} is not a complete CGM folder"
+    )
+    return cgm
 
 
-def test_cli_ok():
+def _adopter_with_adapter(tmp_path: Path) -> Path:
+    """A throwaway adopter that carries the ACS folder's own CGM adapter.
+
+    The adapter (and the assets it references) is copied; the README is a
+    product-only stand-in, because CGM refuses an adopter README that cites CGM
+    and what these tests exercise is the install check, not the ACS README.
+    """
+    adopter = tmp_path / "adopter"
+    adopter.mkdir()
+    shutil.copytree(ACS_FOLDER / ".content-system", adopter / ".content-system")
+    shutil.copytree(ACS_FOLDER / "assets", adopter / "assets")
+    (adopter / "README.md").write_text("# Widget\n\nA small widget.\n", encoding="utf-8")
+    return adopter
+
+
+def test_cli_ok(tmp_path: Path):
     import os
-    cgm = _find_cgm_for_tests()
-    adopter = MODULE_ROOT.parents[3]
-    args = [sys.executable, str(SCRIPT)]
+    cgm = _stack_cgm()
+    adopter = _adopter_with_adapter(tmp_path)
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
-    if cgm is not None:
-        args.extend(["--cgm-root", str(cgm), "--adopter-root", str(adopter)])
-        proc = subprocess.run(args, capture_output=True, text=True, check=False, env=env)
-        assert proc.returncode == 0, proc.stdout + proc.stderr
-        assert "hotload_check: OK" in proc.stdout
-        assert "cgm_validate=VALID" in proc.stdout
-        return
-    env["HOTLOAD_SKIP_CGM_VALIDATE"] = "1"
+    env.pop("HOTLOAD_SKIP_CGM_VALIDATE", None)
+    args = [sys.executable, str(SCRIPT), "--cgm-root", str(cgm), "--adopter-root", str(adopter)]
     proc = subprocess.run(args, capture_output=True, text=True, check=False, env=env)
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "hotload_check: OK" in proc.stdout or "WARN skip_cgm_validate" in proc.stdout
+    assert "hotload_check: OK" in proc.stdout
+    assert "cgm_validate=VALID" in proc.stdout
 
 
 def test_watchdog_evaluate_paths():
@@ -288,13 +283,13 @@ def test_example_pins_are_full_stacks():
 
     Pin revisions in the example are reserved placeholders (see
     test_example_pins_are_reserved_placeholders), so nothing here compares
-    against the live mesh — that coupling failed every train advance.
+    against the stack checkout — that coupling failed every commit to the stack.
     """
     mod = _load_mod()
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    errors = mod.validate_pins(data, against_mesh=False)
+    errors = mod.validate_pins(data, against_stack=False)
     assert errors == [], errors
     assert data["pins"]["pcm"].get("required_features"), "PCM pin must carry required_features"
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
@@ -306,13 +301,13 @@ def test_example_pins_are_full_stacks():
 
 
 def test_example_pins_are_reserved_placeholders():
-    """The example must never name a live mesh commit.
+    """The example must never name the stack's commit.
 
-    ``mesh.py --write`` (in the train) rewrites stack-mesh.json but not this
-    example; a real commit pasted here goes stale at the next train advance
-    and fails the pack's gates inside the bot's mesh/sync pull request — the
-    failure that blocked agent-custom-setup#89 and #95. This guard trips at
-    PR time instead.
+    The stack checkout moves with every commit but this example does not; a
+    real commit pasted here goes stale at the next commit to the stack and
+    fails the pack's gates — the failure that blocked agent-custom-setup#89
+    and #95 when the pins came from a mesh file. This guard trips at PR time
+    instead.
     """
     mod = _load_mod()
     zero = "0" * 40
@@ -323,19 +318,16 @@ def test_example_pins_are_reserved_placeholders():
     for component, entry in mod.load_requires().items():
         commit = entry.get("commit", "")
         assert commit not in raw, (
-            f"assignment.example.json embeds the live mesh commit of {component}; "
+            f"assignment.example.json embeds the stack commit ({component}); "
             "pin revisions are reserved placeholders rebuilt at install time"
         )
 
 
-def test_cli_ok_with_cgm_validate():
+def test_cli_ok_with_cgm_validate(tmp_path: Path):
     """Install check must run CGM validate_content_system (no HSW-only script)."""
     import os
-    cgm = _find_cgm_for_tests()
-    if cgm is None:
-        import pytest
-        pytest.skip("cgm-051 checkout not present on this machine")
-    adopter = MODULE_ROOT.parents[3]
+    cgm = _stack_cgm()
+    adopter = _adopter_with_adapter(tmp_path)
     env = os.environ.copy()
     env.pop("HOTLOAD_SKIP_CGM_VALIDATE", None)
     proc = subprocess.run(
@@ -371,23 +363,21 @@ def test_old_pcm_revision_is_refused():
     )
     data["pins"]["pcm"]["revision"] = "4e2385474b4af9249ca009cbdcb38c4498932475"
     errors = mod.validate_pins(data)
-    assert any("older version is refused" in error for error in errors), errors
+    stack_commit = mod.stack_component("project-continuity-modules")["commit"]
+    assert any(
+        error.startswith("pins.pcm.revision") and f"must be the stack commit {stack_commit}" in error
+        for error in errors
+    ), errors
 
 
 def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
-    """When CGM pin is available, apply_acs_prompt_inject writes PROMPT_INJECT.md."""
-    import os
-    cgm = _find_cgm_for_tests()
-    if cgm is None:
-        import pytest
-        pytest.skip("CGM checkout not present on this machine")
+    """apply_acs_prompt_inject writes PROMPT_INJECT.md from the stack's own cgm/ folder."""
+    cgm = _stack_cgm()
     mod = _load_mod()
-    # ensure pin SHA matches (caller responsibility in live install)
+    # The cgm/ folder is part of the stack checkout, so it is at the stack commit.
     sha = mod.cgm_checkout_sha(cgm)
-    expected = mod.mesh_component("content-generation-modules")["commit"]
-    if sha is None or not mod.commits_match(sha, expected):
-        import pytest
-        pytest.skip(f"CGM checkout HEAD={sha} is not the mesh commit {expected}")
+    expected = mod.stack_component("content-generation-modules")["commit"]
+    assert sha and mod.commits_match(sha, expected), f"CGM HEAD={sha} is not the stack commit {expected}"
     out_root = tmp_path
     text, notes = mod.apply_acs_prompt_inject(cgm, out_root)
     assert text and ("ALWAYS-ON" in text or "MUST load" in text or "human-sounding-writing" in text)

@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dev_root_check  # noqa: E402  (sibling script; stdlib only)
+import stack_checkout  # noqa: E402  (sibling script; stdlib only)
 
 REQUIRED_FILES = (
     "README.md",
@@ -34,6 +35,7 @@ REQUIRED_FILES = (
     "scripts/watchdog_check.py",
     "scripts/seat_protocol.py",
     "scripts/dev_root_check.py",
+    "scripts/stack_checkout.py",
     "workflow-stubs/watchdog.yml",
 )
 
@@ -146,28 +148,13 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
-MESH_FILE = MODULE_ROOT.parents[3] / "stack-mesh.json"
+def load_requires(stack_root: Path | None = None) -> dict:
+    """Each component's version, all at the stack checkout's one commit."""
+    return stack_checkout.requires(stack_root)
 
 
-def load_requires() -> dict:
-    """Versions the four repos must use. Written from stack-releases.json."""
-    try:
-        data = json.loads(MESH_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"stack-mesh.json unreadable at {MESH_FILE}: {exc}") from exc
-    requires = data.get("requires") if isinstance(data, dict) else None
-    if not isinstance(requires, dict):
-        raise RuntimeError(f"{MESH_FILE} has no requires object")
-    return requires
-
-
-def mesh_component(name: str) -> dict:
-    requires = load_requires()
-    entry = requires.get(name)
-    if not isinstance(entry, dict) or "version" not in entry or "commit" not in entry:
-        raise RuntimeError(f"{MESH_FILE} is missing version and commit for {name}")
-    return entry
+def stack_component(name: str, stack_root: Path | None = None) -> dict:
+    return load_requires(stack_root)[name]
 
 
 def commits_match(head: str, expected: str) -> bool:
@@ -196,53 +183,26 @@ def dependency_location_problem(path: Path, dev_root: Path | None = None) -> str
     )
 
 
-def discover_cgm_root(explicit: Path | None = None, *, dev_root: Path | None = None) -> Path | None:
-    """Resolve CGM checkout: --cgm-root, CGM_ROOT, the ACS deps cache, then sibling/local paths.
+def stack_cgm_root(stack_root: Path | None = None) -> Path:
+    """The stack checkout's own cgm/ folder."""
+    root = (stack_root or stack_checkout.DEFAULT_ROOT).expanduser().resolve()
+    return stack_checkout.folder(root, "content-generation-modules")
 
-    Discovered (not explicit) candidates inside the dev root are skipped unless they
-    are a main checkout there; explicit paths are returned as-is and checked by
-    ``dependency_location_problem`` so the operator sees why they were refused.
+
+def discover_cgm_root(explicit: Path | None = None, *, stack_root: Path | None = None) -> Path | None:
+    """Resolve CGM: --cgm-root, CGM_ROOT, else the stack checkout's own cgm/ folder.
+
+    An explicit path is returned as-is and checked by ``dependency_location_problem``
+    in ``run`` so the operator sees why it was refused. The stack's own folder is
+    part of the main checkout, never a dependency clone, so the dev root rule does
+    not apply to it.
     """
-    candidates: list[Path] = []
-    explicit_set: set[str] = set()
-    if explicit is not None:
-        candidates.append(explicit)
-        explicit_set.add(str(explicit))
-    env = os.environ.get("CGM_ROOT")
-    if env:
-        candidates.append(Path(env))
-        explicit_set.add(env)
-    deps = dev_root_check.cache_subdir("deps")
-    candidates.extend([deps / "content-generation-modules", deps / "cgm"])
-    here = Path(__file__).resolve()
-    # ACS repo root = parents[4] from scripts/ under v0.1.0 pack
-    acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
-    candidates.extend(
-        [
-            Path("/workspace/cgm-057"),
-            Path("/workspace/cgm-056"),
-            Path("/workspace/content-generation-modules"),
-            Path("/workspace/cgm-054"),
-            Path("/workspace/cgm-053"),
-            Path("/workspace/cgm-051"),
-            Path("/workspace/cgm-hsw"),
-            acs_root.parent / "content-generation-modules",
-            Path.home() / "content-generation-modules",
-            Path("D:/claude/content-generation-modules"),
-            Path("C:/Users/pujan/content-generation-modules"),
-        ]
-    )
-    for cand in candidates:
-        try:
-            root = cand.expanduser().resolve()
-        except OSError:
-            continue
-        if str(cand) not in explicit_set and dependency_location_problem(root, dev_root):
-            continue
-        marker = root / "scripts" / "validate_content_system.py"
-        version = root / "system-version.json"
-        if marker.is_file() and version.is_file():
-            return root
+    for cand in (explicit, os.environ.get("CGM_ROOT")):
+        if cand:
+            return Path(cand).expanduser().resolve()
+    root = stack_cgm_root(stack_root)
+    if (root / "scripts" / "validate_content_system.py").is_file() and (root / "system-version.json").is_file():
+        return root
     return None
 
 
@@ -276,15 +236,16 @@ def validate_cgm_live(
     adopter_root: Path,
     *,
     require: bool = True,
+    stack_root: Path | None = None,
 ) -> list[str]:
-    """Fail install unless the CGM checkout is the mesh version and validate_content_system prints VALID."""
+    """Fail install unless CGM is at the stack commit and validate_content_system prints VALID."""
     errors: list[str] = []
-    expected = mesh_component("content-generation-modules")
+    expected = stack_component("content-generation-modules", stack_root)
     if cgm_root is None:
         if require:
             errors.append(
-                "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree at {expected['version']} {expected['commit']}"
+                f"CGM not found: {stack_cgm_root(stack_root)} is missing; install from a "
+                f"complete {stack_checkout.REPOSITORY} checkout"
             )
         return errors
 
@@ -294,22 +255,19 @@ def validate_cgm_live(
         return errors
     if not commits_match(sha, expected["commit"]):
         errors.append(
-            f"CGM checkout HEAD={sha} must be {expected['version']} at {expected['commit']}; "
-            "an older version is refused"
+            f"CGM checkout HEAD={sha} must be the stack commit {expected['commit']}; "
+            "use the stack checkout's own cgm/ folder"
         )
         return errors
 
-    # Confirm helper system-version.json reports the mesh version + eight modules
+    # Confirm helper system-version.json reports the stack's version + eight modules
     try:
         version = load_json(cgm_root / "system-version.json")
     except Exception as exc:  # noqa: BLE001
         errors.append(f"CGM system-version.json unreadable: {exc}")
         return errors
     if not isinstance(version, dict) or str(version.get("version")) != expected["version"]:
-        errors.append(
-            f"CGM system-version.json version must be {expected['version']} at "
-            f"{expected['commit']}"
-        )
+        errors.append(f"CGM system-version.json version must be {expected['version']}")
     mods = version.get("modules") if isinstance(version, dict) else None
     if not isinstance(mods, list) or set(mods) != set(REQUIRED_CGM_MODULES):
         errors.append(
@@ -378,7 +336,11 @@ def load_writing_routing(cgm_root: Path) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
-def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) -> str:
+# From PROMPT_INJECT.md in this pack up to the stack root, then into cgm/.
+CGM_DOCS_FROM_PACK = "../../../../../cgm/docs"
+
+
+def render_prompt_inject_md(routing: dict, *, pin_version: str) -> str:
     """Render PROMPT_INJECT.md from CGM writing-routing acs_prompt_inject fields.
 
     Injects application, human_facing_default, routes, apply_checklist, and
@@ -428,11 +390,12 @@ def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) ->
     return (
         f"# PROMPT_INJECT — acs_prompt_inject (CGM {pin_version})\n\n"
         f"Generated / refreshed by `hotload_check` after full adapter `VALID`.\n"
-        f"Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `{pin_sha}`.\n\n"
-        f"Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/ACS_VERIFY.md) "
-        f"and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/writing-routing.json).\n\n"
-        f"**Pin:** CGM `{pin_version}` @ `{pin_sha}` (main). After any future CGM merge that "
-        f"moves the tip, re-pin ACS hotload to the new main SHA.\n\n"
+        f"Source: CGM `docs/writing-routing.json` → `acs_prompt_inject`, from the `cgm/` folder "
+        f"of the same agent-stack-train checkout as this pack.\n\n"
+        f"Also see: CGM [`docs/ACS_VERIFY.md`]({CGM_DOCS_FROM_PACK}/ACS_VERIFY.md) "
+        f"and [`docs/writing-routing.json`]({CGM_DOCS_FROM_PACK}/writing-routing.json).\n\n"
+        f"**Version:** CGM `{pin_version}`. It moves with the stack: re-run `hotload_check` "
+        f"after updating the agent-stack-train checkout.\n\n"
         f"## application\n\n`{application}` — agents MUST load the listed module before writing each surface.\n\n"
         "## When\n\n"
         f"{when_block}\n\n"
@@ -467,7 +430,9 @@ def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) ->
         "Contract language is **MUST / APPLY / default_on**, not prefer. Soft enforcement = no NLP CI grade of prose.\n"
     )
 
-def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None, list[str]]:
+def apply_acs_prompt_inject(
+    cgm_root: Path, pack_root: Path, *, stack_root: Path | None = None
+) -> tuple[str | None, list[str]]:
     """After VALID: load writing-routing.json, write PROMPT_INJECT.md, return instruction text."""
     notes: list[str] = []
     routing = load_writing_routing(cgm_root)
@@ -484,11 +449,9 @@ def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None
     instruction = str(inject["instruction"]).strip()
     out = pack_root / "PROMPT_INJECT.md"
     try:
-        cgm_req = mesh_component("content-generation-modules")
+        cgm_req = stack_component("content-generation-modules", stack_root)
         out.write_text(
-            render_prompt_inject_md(
-                routing, pin_sha=cgm_req["commit"], pin_version=cgm_req["version"]
-            ),
+            render_prompt_inject_md(routing, pin_version=cgm_req["version"]),
             encoding="utf-8",
         )
         notes.append(f"acs_prompt_inject: wrote {out} (system_block boot paste)")
@@ -504,18 +467,19 @@ def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None
     return (system_block or instruction), notes
 
 
-def validate_pins(data: object, *, against_mesh: bool = True) -> list[str]:
+def validate_pins(
+    data: object, *, against_stack: bool = True, stack_root: Path | None = None
+) -> list[str]:
     """Require FULL PCM + FULL CGM pins (Alex binding: no slim subsets).
 
-    ``against_mesh`` compares the pinned revision and version with
-    ``stack-mesh.json``. The pack's own example is checked with it off: that
-    file is a template whose pin-bearing fields
-    ``acs_install.build_assignment`` rebuilds from ``pins.json`` and the mesh
-    before an adopter sees them, so its revision is a placeholder. Comparing a
-    placeholder with live upstream coupled the template to the train -- every
-    sibling re-certification moved the mesh, the example went stale, and a pull
-    request that changed nothing else failed. The shape checks (FULL PCM
-    features, all eight CGM modules, the human-output contract) run either way.
+    ``against_stack`` compares the pinned revision and version with the stack
+    checkout (``stack_checkout.py``). The pack's own example is checked with it
+    off: that file is a template whose pin-bearing fields
+    ``acs_install.build_assignment`` rebuilds from ``pins.json`` and the
+    checkout before an adopter sees them, so its revision is a placeholder.
+    Comparing a placeholder with the live commit would fail every pull request.
+    The shape checks (FULL PCM features, all eight CGM modules, the
+    human-output contract) run either way.
     """
     errors: list[str] = []
     if not isinstance(data, dict):
@@ -529,13 +493,13 @@ def validate_pins(data: object, *, against_mesh: bool = True) -> list[str]:
     if not isinstance(pcm, dict):
         errors.append("pins.pcm: required (FULL PCM stack)")
     else:
-        if against_mesh:
-            pcm_req = mesh_component("project-continuity-modules")
+        if against_stack:
+            pcm_req = stack_component("project-continuity-modules", stack_root)
             rev = str(pcm.get("revision") or "")
             if not commits_match(rev, pcm_req["commit"]):
                 errors.append(
-                    f"pins.pcm.revision: must be {pcm_req['version']} at {pcm_req['commit']}; "
-                    f"got {rev or '(none)'}; an older version is refused"
+                    f"pins.pcm.revision: must be the stack commit {pcm_req['commit']}; "
+                    f"got {rev or '(none)'}; re-run acs_install.py --force from this checkout"
                 )
         feats = pcm.get("required_features")
         if not isinstance(feats, list):
@@ -552,18 +516,18 @@ def validate_pins(data: object, *, against_mesh: bool = True) -> list[str]:
     if not isinstance(cgm, dict):
         errors.append("pins.cgm: required (FULL CGM 0.5.12 stack)")
     else:
-        if against_mesh:
-            cgm_req = mesh_component("content-generation-modules")
+        if against_stack:
+            cgm_req = stack_component("content-generation-modules", stack_root)
             ver = str(cgm.get("version") or "")
             if ver != cgm_req["version"]:
                 errors.append(
-                    f"pins.cgm.version: must be {cgm_req['version']} (FULL stack; an older version is refused)"
+                    f"pins.cgm.version: must be {cgm_req['version']}, the stack checkout's CGM"
                 )
             rev = str(cgm.get("revision") or "")
             if not commits_match(rev, cgm_req["commit"]):
                 errors.append(
-                    f"pins.cgm.revision: must be {cgm_req['version']} at {cgm_req['commit']}; "
-                    f"got {rev or '(none)'}; an older version is refused"
+                    f"pins.cgm.revision: must be the stack commit {cgm_req['commit']}; "
+                    f"got {rev or '(none)'}; re-run acs_install.py --force from this checkout"
                 )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -596,7 +560,11 @@ def validate_pins(data: object, *, against_mesh: bool = True) -> list[str]:
 
 
 def validate_assignment(
-    schema_path: Path, assignment_path: Path, *, against_mesh: bool = True
+    schema_path: Path,
+    assignment_path: Path,
+    *,
+    against_stack: bool = True,
+    stack_root: Path | None = None,
 ) -> list[str]:
     errors: list[str] = []
     schema = load_json(schema_path)
@@ -609,7 +577,7 @@ def validate_assignment(
         loc = ".".join(str(p) for p in err.path) or "<root>"
         errors.append(f"{loc}: {err.message}")
     errors.extend(validate_failover_watchdog(data))
-    errors.extend(validate_pins(data, against_mesh=against_mesh))
+    errors.extend(validate_pins(data, against_stack=against_stack, stack_root=stack_root))
     return errors
 
 
@@ -675,10 +643,17 @@ def run(
     dev_root: Path | None = None,
     check_dev_root: bool = True,
     strict_dev_root: bool = False,
+    stack_root: Path | None = None,
 ) -> int:
     problems: list[str] = []
     warnings: list[str] = []
     resolved_dev_root = (dev_root or dev_root_check.default_dev_root()).expanduser()
+    try:
+        requires = load_requires(stack_root)
+    except stack_checkout.StackError as exc:
+        print("hotload_check: FAIL")
+        print(f"  - {exc}")
+        return 1
     missing = check_required_files(root)
     if missing:
         problems.extend(f"missing file: {m}" for m in missing)
@@ -686,18 +661,23 @@ def run(
     schema_path = root / "schema" / "assignment.schema.json"
     example_path = assignment or (root / "examples" / "assignment.example.json")
     if schema_path.is_file() and example_path.is_file():
-        # A real assignment (--assignment) must pin the mesh commit. The pack's
+        # A real assignment (--assignment) must pin the stack commit. The pack's
         # own example is a template whose pins build_assignment rebuilds; see
         # validate_pins.
         problems.extend(
-            validate_assignment(schema_path, example_path, against_mesh=assignment is not None)
+            validate_assignment(
+                schema_path,
+                example_path,
+                against_stack=assignment is not None,
+                stack_root=stack_root,
+            )
         )
     elif not example_path.is_file():
         problems.append(f"assignment not found: {example_path}")
 
     resolved_adopter = discover_adopter_root(adopter_root)
-    resolved_cgm = discover_cgm_root(cgm_root, dev_root=resolved_dev_root)
-    if resolved_cgm is not None:
+    resolved_cgm = discover_cgm_root(cgm_root, stack_root=stack_root)
+    if resolved_cgm is not None and resolved_cgm != stack_cgm_root(stack_root):
         where = dependency_location_problem(resolved_cgm, resolved_dev_root)
         if where:
             problems.append(where)
@@ -709,7 +689,7 @@ def run(
         print("hotload_check: WARN skip_cgm_validate=1 (schema-only; install incomplete)")
     else:
         problems.extend(
-            validate_cgm_live(resolved_cgm, resolved_adopter, require=True)
+            validate_cgm_live(resolved_cgm, resolved_adopter, require=True, stack_root=stack_root)
         )
 
     for item in warnings:
@@ -723,17 +703,17 @@ def run(
     # After full adapter VALID: wire acs_prompt_inject (primary done-when remains VALID)
     inject_text = None
     inject_notes: list[str] = []
-    if resolved_cgm is not None:
-        inject_text, inject_notes = apply_acs_prompt_inject(resolved_cgm, root)
+    if resolved_cgm is not None and not skip_cgm_validate:
+        inject_text, inject_notes = apply_acs_prompt_inject(resolved_cgm, root, stack_root=stack_root)
 
     print("hotload_check: OK")
     print(f"  module_root={root}")
     print(f"  assignment={example_path}")
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
-    cgm_req = mesh_component("content-generation-modules")
-    print(f"  cgm_pin={cgm_req['version']}@{cgm_req['commit']}")
-    print("  install_surface=FULL PCM + FULL CGM 0.5.12 + this runtime")
+    cgm_req = requires["content-generation-modules"]
+    print(f"  stack_commit={cgm_req['commit']}")
+    print(f"  install_surface=FULL PCM + FULL CGM {cgm_req['version']} + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads the claim file")
@@ -765,10 +745,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=MODULE_ROOT)
     parser.add_argument("--assignment", type=Path, default=None)
     parser.add_argument(
+        "--stack-root",
+        type=Path,
+        default=None,
+        help="agent-stack-train checkout (default: the one this script is in)",
+    )
+    parser.add_argument(
         "--cgm-root",
         type=Path,
         default=None,
-        help="Path to content-generation-modules checkout (else CGM_ROOT / discovery)",
+        help="CGM at the stack commit (else CGM_ROOT, else the stack checkout's cgm/)",
     )
     parser.add_argument(
         "--adopter-root",
@@ -809,6 +795,7 @@ def main(argv: list[str] | None = None) -> int:
         dev_root=args.dev_root,
         check_dev_root=not args.no_dev_root_check,
         strict_dev_root=strict,
+        stack_root=args.stack_root,
     )
 
 

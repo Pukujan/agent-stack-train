@@ -11,7 +11,7 @@ on:
   workflow_call:
     inputs:
       oio_ref:
-        description: Git ref of Pukujan/observational-issue-ops that supplies oio_close_refs.py.
+        description: Git ref of Pukujan/agent-stack-train that supplies oio/.github/scripts/oio_close_refs.py.
         required: true
         type: string
       apply:
@@ -38,12 +38,13 @@ jobs:
   sweep:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out OIO at the caller-pinned ref
+      - name: Check out OIO's scripts at the caller-pinned stack ref
         uses: actions/checkout@v4
         with:
-          repository: Pukujan/observational-issue-ops
+          repository: Pukujan/agent-stack-train
           ref: ${{ inputs.oio_ref }}
           path: .oio-src
+          sparse-checkout: oio/.github/scripts
 
       - uses: actions/setup-python@v5
         with:
@@ -60,4 +61,4 @@ jobs:
           if [ "$APPLY" = "true" ]; then
             args+=(--write)
           fi
-          python .oio-src/.github/scripts/oio_close_refs.py "${args[@]}"
+          python .oio-src/oio/.github/scripts/oio_close_refs.py "${args[@]}"

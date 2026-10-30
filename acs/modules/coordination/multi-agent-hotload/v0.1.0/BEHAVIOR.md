@@ -6,7 +6,7 @@ Owning issue: [#11](https://github.com/Pukujan/agent-custom-setup/issues/11).
 
 ## Quad wire (required — full stacks)
 
-When told to load the agent hot-loader into a working repo, wire **all four** as **complete** stacks (slim subsets fail closed). Versions come from the release train through `stack-mesh.json`; the adopter's `stack-manifest.json` follows the train with empty pins ([SPEC.md](SPEC.md) §1) — do not copy commits into this file.
+When told to load the agent hot-loader into a working repo, wire **all four** as **complete** stacks (slim subsets fail closed). Every component comes from the same agent-stack-train checkout, at one commit; the adopter's `stack-manifest.json` follows the train with an empty `agent-stack-train` pin ([SPEC.md](SPEC.md) §1) — do not copy commits into this file.
 
 1. **FULL PCM** — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
 2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.

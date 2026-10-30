@@ -26,7 +26,7 @@
     "pins": {
       "type": "object",
       "minProperties": 1,
-      "description": "One entry per certified component the adopter consumes, keyed by component name. An empty entry follows the train. A copied version or commit must equal the train.",
+      "description": "Either agent-stack-train alone, for an adopter installed from one agent-stack-train checkout (that checkout provides every component), or one entry per certified component, the shape from before the components moved into agent-stack-train. An empty entry follows the train. A copied version or commit must equal the train.",
       "additionalProperties": {
         "type": "object",
         "minProperties": 0,

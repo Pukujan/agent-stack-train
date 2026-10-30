@@ -50,7 +50,7 @@ make decisions on the agents' behalf.
   belong to OIO (Observational Issue Ops). ACS *runs* tickets; it does not file them.
   ACS does carry an *installed* OIO intake surface — the issue form, the triage
   workflow, the ontology, and the schemas under `.oio/` — placed by OIO's own
-  installer from the `stack-mesh.json` commit for `observational-issue-ops`. Those
+  installer from the agent-stack-train checkout ACS ships in. Those
   files are OIO-managed and are never hand-edited or hand-copied; updating them
   means rerunning the pinned installer (see `README.md`, Operational Boundaries).
 - **Not decision-making.** Adjudication / tie-breaking between agents is JEV's

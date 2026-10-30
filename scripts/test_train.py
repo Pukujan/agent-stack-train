@@ -142,6 +142,40 @@ class CheckTests(unittest.TestCase):
         errors = check_manifest.check(manifest, self.train(), "train")
         self.assertTrue(any("observational-issue-ops" in error for error in errors))
 
+    def test_an_uncertified_pin_disagrees(self) -> None:
+        manifest = self.manifest()
+        manifest["pins"]["not-a-component"] = {}
+        errors = check_manifest.check(manifest, self.train(), "train")
+        self.assertTrue(any("'not-a-component', which the train does not certify" in e for e in errors))
+
+    def stack_train(self) -> dict:
+        train = self.train()
+        train["certified"][check_manifest.STACK] = {"version": "1.0.0", "commit": "5" * 40, "role": "stack"}
+        return train
+
+    def test_a_stack_pin_alone_follows_the_train(self) -> None:
+        manifest = self.manifest(pins={check_manifest.STACK: {}})
+        self.assertEqual(check_manifest.check(manifest, self.stack_train(), "train"), [])
+
+    def test_component_pins_still_agree_once_the_stack_is_certified(self) -> None:
+        self.assertEqual(check_manifest.check(self.manifest(), self.stack_train(), "train"), [])
+
+    def test_a_stack_pin_fails_until_the_train_certifies_it(self) -> None:
+        manifest = self.manifest(pins={check_manifest.STACK: {}})
+        errors = check_manifest.check(manifest, self.train(), "train")
+        self.assertEqual(errors, ["manifest pins 'agent-stack-train', which the train does not certify"])
+
+    def test_a_stack_pin_is_not_mixed_with_component_pins(self) -> None:
+        pins = {check_manifest.STACK: {}, "project-continuity-modules": {}}
+        errors = check_manifest.check(self.manifest(pins=pins), self.stack_train(), "train")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("pin it alone", errors[0])
+
+    def test_a_copied_old_stack_commit_disagrees(self) -> None:
+        manifest = self.manifest(pins={check_manifest.STACK: {"commit": "6" * 40}})
+        errors = check_manifest.check(manifest, self.stack_train(), "train")
+        self.assertTrue(any("agent-stack-train: pinned commit" in error for error in errors))
+
 
 class CertifiableShaTests(unittest.TestCase):
     """A mesh rewrite must not move the certified commit.
