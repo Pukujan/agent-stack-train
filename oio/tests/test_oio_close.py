@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / ".github/scripts"))
 import oio_installer  # noqa: E402
 import oio_close_refs  # noqa: E402
 from oio_installer import InstallError  # noqa: E402
-from oio_close_refs import closing_refs, drift_findings, resolve_lifecycle  # noqa: E402
+from oio_close_refs import closing_refs, drift_findings, resolve_lifecycle, rollup_ready, sweep_candidates  # noqa: E402
 from oio_triage import classify_issue  # noqa: E402
 
 NEW_FIELDS = [
@@ -255,6 +255,98 @@ class DriftTests(unittest.TestCase):
         self.assertEqual(drift_findings([self.issue("CLOSED", "type:observational"), self.issue("OPEN")]), [])
 
 
+class SweepSelectionTests(unittest.TestCase):
+    def pr(self, url, body, merged_at):
+        return {"url": url, "body": body, "mergedAt": merged_at}
+
+    def test_candidates_keep_the_latest_merge_and_join_spellings_of_one_issue(self):
+        prs = [
+            self.pr("pr/2", "Closes Pukujan/demo#5", "2026-10-20T00:00:00Z"),
+            self.pr("pr/1", "Fixes #5\nRefs #6", "2026-10-10T00:00:00Z"),
+            self.pr("pr/3", "Resolves Pukujan/other#5", "2026-10-15T00:00:00Z"),
+        ]
+        found = {(target, number): pr["url"] for target, number, pr in sweep_candidates("Pukujan/demo", prs)}
+        self.assertEqual(found, {("Pukujan/demo", 5): "pr/2", ("Pukujan/other", 5): "pr/3"})
+
+    def test_rollup_needs_every_sub_issue_closed_and_no_keep_open_label(self):
+        issues = [
+            {"number": 1, "labels": [], "subIssuesSummary": {"total": 3, "completed": 3}},
+            {"number": 2, "labels": [], "subIssuesSummary": {"total": 3, "completed": 2}},
+            {"number": 3, "labels": [], "subIssuesSummary": {"total": 0, "completed": 0}},
+            {"number": 4, "labels": ["oio:keep-open"], "subIssuesSummary": {"total": 1, "completed": 1}},
+        ]
+        self.assertEqual([issue["number"] for issue in rollup_ready(issues)], [1])
+
+
+class SweepBehaviourTests(unittest.TestCase):
+    """The sweep against a fake repository: #5 bot-merged and open, #6 reopened
+    after its merge, #7 marked keep-open, #8 already closed, #20 a finished parent,
+    #21 a parent labelled ready that gained an open sub-issue."""
+
+    MERGED = "2026-10-20T00:00:00Z"
+
+    def gh_json(self, *args):
+        if args[:2] == ("repo", "view"):
+            return {"defaultBranchRef": {"name": "main"}}
+        if args[:2] == ("pr", "list"):
+            return [{"url": "pr/9", "body": "Closes #5\nCloses #6\nCloses #7\nCloses #8", "mergedAt": self.MERGED}]
+        if args[:2] == ("issue", "view"):
+            number = int(args[2])
+            labels = [{"name": "oio:keep-open"}] if number == 7 else [{"name": "status:open"}]
+            return {"state": "OPEN", "body": "### Lifecycle Status\nopen\n", "labels": labels}
+        raise AssertionError(f"unexpected gh call {args}")
+
+    def run_sweep(self, write, rollup="label"):
+        open_issues = [
+            {"number": n, "labels": [], "subIssuesSummary": {"total": 0, "completed": 0}} for n in (5, 6, 7)
+        ] + [
+            {"number": 20, "labels": [], "subIssuesSummary": {"total": 2, "completed": 2}},
+            {"number": 21, "labels": ["oio:ready-to-close"], "subIssuesSummary": {"total": 2, "completed": 1}},
+        ]
+        reopens = {6: ["2026-10-21T00:00:00Z"]}
+        with (
+            mock.patch("oio_close_refs._open_issues", return_value=open_issues),
+            mock.patch("oio_close_refs._gh_json", side_effect=self.gh_json),
+            mock.patch("oio_close_refs._reopen_times", side_effect=lambda repo, n: reopens.get(n, [])),
+            mock.patch("oio_close_refs._ensure_label"),
+            mock.patch("oio_close_refs._settle", return_value=0) as settle,
+            mock.patch("oio_close_refs._set_label") as set_label,
+            mock.patch("oio_close_refs._comment_once") as comment,
+            contextlib.redirect_stdout(io.StringIO()) as out,
+        ):
+            code = oio_close_refs.sweep_repo("o/r", write=write, rollup=rollup)
+        return code, out.getvalue(), settle, set_label, comment
+
+    def test_report_only_changes_nothing_and_names_what_it_would_do(self):
+        code, out, settle, set_label, comment = self.run_sweep(write=False)
+        self.assertEqual(code, 0)
+        settle.assert_not_called()
+        set_label.assert_not_called()
+        comment.assert_not_called()
+        self.assertIn("would close o/r#5: named by pr/9", out)
+        self.assertIn("skip o/r#6: reopened after pr/9 merged", out)
+        self.assertIn("skip o/r#7: labelled oio:keep-open", out)
+        self.assertNotIn("#8", out)
+        self.assertIn("would label o/r#20 oio:ready-to-close", out)
+        self.assertIn("would remove oio:ready-to-close from o/r#21", out)
+
+    def test_write_closes_only_the_unfinished_merge_and_labels_the_parent(self):
+        code, _, settle, set_label, comment = self.run_sweep(write=True)
+        self.assertEqual(code, 0)
+        self.assertEqual([call.args[2] for call in settle.call_args_list], [5])
+        self.assertIn("pr/9", settle.call_args.args[4])
+        set_label.assert_has_calls(
+            [mock.call("o/r", 20, "oio:ready-to-close", add=True), mock.call("o/r", 21, "oio:ready-to-close", add=False)]
+        )
+        self.assertEqual(comment.call_args.kwargs["marker"], oio_close_refs.ROLLUP_COMMENT_MARKER)
+
+    def test_rollup_close_mode_closes_the_finished_parent(self):
+        code, _, settle, set_label, _ = self.run_sweep(write=True, rollup="close")
+        self.assertEqual(code, 0)
+        self.assertEqual([call.args[2] for call in settle.call_args_list], [5, 20])
+        set_label.assert_called_once_with("o/r", 21, "oio:ready-to-close", add=False)
+
+
 class TemplateTests(unittest.TestCase):
     def template(self):
         return yaml.safe_load((ROOT / ".github/ISSUE_TEMPLATE/observational-issue.yml").read_text(encoding="utf-8"))
@@ -395,6 +487,26 @@ class WorkflowContractTests(unittest.TestCase):
     def test_close_caller_guards_on_merged(self):
         workflow = self.workflow("close-on-merge-caller.yml")
         self.assertEqual(workflow["jobs"]["close"]["if"], "github.event.pull_request.merged == true")
+
+    def test_sweep_workflow_is_reusable_and_reports_unless_told_to_apply(self):
+        workflow = self.workflow("close-sweep.yml")
+        inputs = self.triggers(workflow)["workflow_call"]["inputs"]
+        self.assertIs(inputs["apply"]["default"], False)
+        self.assertEqual(inputs["rollup"]["default"], "label")
+        self.assertEqual(
+            workflow["permissions"],
+            {"contents": "read", "issues": "write", "pull-requests": "read"},
+        )
+
+    def test_sweep_caller_runs_on_a_schedule_and_applies_only_when_told(self):
+        workflow = self.workflow("close-sweep-caller.yml")
+        triggers = self.triggers(workflow)
+        self.assertIn("schedule", triggers)
+        self.assertIs(triggers["workflow_dispatch"]["inputs"]["apply"]["default"], False)
+        job = workflow["jobs"]["sweep"]
+        self.assertEqual(job["uses"], "./.github/workflows/close-sweep.yml")
+        self.assertEqual(job["with"]["oio_ref"], "${{ github.event.repository.default_branch }}")
+        self.assertEqual(job["with"]["apply"], "${{ inputs.apply == true || vars.OIO_CLOSE_SWEEP_APPLY == 'true' }}")
 
 
 class InstallerVersionAndTemplateTests(unittest.TestCase):

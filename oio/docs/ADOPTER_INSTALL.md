@@ -27,30 +27,28 @@ For an upgrade, rerun the installer from a newer pinned OIO checkout against the
 
 ## Closing issues when a pull request merges
 
-The installer does not add pull-request workflows to the adopter; add a caller that points at the pinned OIO ref. The reusable workflow runs only for a merged pull request and reads the pull-request body:
+The installer adds two caller workflows, pinned to the OIO commit it ran from, so a rerun from a newer checkout moves the pin. Edit neither by hand: an edited managed file blocks the next upgrade.
 
-```yaml
-# .github/workflows/close-on-merge-caller.yml
-on:
-  pull_request:
-    types: [closed]
+- `.github/workflows/oio-close-on-merge.yml` calls `close-on-merge.yml` when a pull request merges.
+- `.github/workflows/oio-close-sweep.yml` calls `close-sweep.yml` every day.
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: read
+When another workflow in the repository already calls one of those reusable workflows, the installer leaves that caller in place, adds none of its own, and says so. The commit is the OIO checkout's `HEAD`, recorded as `oio_ref` in `.oio/install-manifest.json`, so install from a commit that exists on GitHub, such as the one the train certifies.
 
-jobs:
-  close:
-    if: github.event.pull_request.merged == true
-    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@<pinned-ref>
-    with:
-      oio_ref: <pinned-ref>
-    secrets:
-      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
+`Closes #12`, `Fixes #12`, and `Resolves #12` close the named log; `owner/repo#12` reaches another repository. `Refs #12` closes nothing. For each log the workflow closes with reason `completed`, adds `status:resolved`, removes other `status:*` labels, rewrites the body's Lifecycle Status to `resolved`, and posts one marker-guarded comment naming the pull request. An already-closed issue is not closed a second time; its lifecycle fields are still synced. Same-repository references use `github.token`; cross-repository references use `CROSS_REPO_TOKEN`, and a missing token or a 403/404 prints a warning and continues instead of failing the merge.
+
+## Closing what merges left open, and finished parents
+
+Two cases never reach the close-on-merge workflow. A merge carried out with a workflow's own token, for example auto-merge armed by a bot, closes nothing and starts no other workflow, so the caller never runs. And GitHub never closes a parent issue when its last sub-issue closes. The close sweep handles both.
+
+The sweep reads the last 100 pull requests merged into the default branch. Each open log one of them names with `Closes`, `Fixes` or `Resolves` is settled the same way as a merge-time close, with one exception. A log reopened after that merge is left open, because reopening says the merge did not finish it. Then it looks at every open parent whose sub-issues are all closed. By default it adds `oio:ready-to-close` and comments once, and removes the label again if the parent gains an open sub-issue. With the repository variable `OIO_CLOSE_SWEEP_ROLLUP` set to `close`, it closes the parent like a merged log.
+
+Until the repository variable `OIO_CLOSE_SWEEP_APPLY` is `true`, the sweep only prints what it would do. Read the first run's log and add `oio:keep-open` to any log or parent that must stay open. A PR that said "Closes #12 partially" still closes #12 by GitHub's rule, so it shows up here. Then turn it on:
+
+```bash
+gh variable set OIO_CLOSE_SWEEP_APPLY --body true --repo OWNER/REPOSITORY
 ```
 
-`Closes #12`, `Fixes #12`, and `Resolves #12` close the named log; `owner/repo#12` reaches another repository. `Refs #12` closes nothing. For each log the workflow closes with reason `completed`, adds `status:resolved`, removes other `status:*` labels, rewrites the body's Lifecycle Status to `resolved`, and posts one marker-guarded comment naming the pull request. An already-closed issue is not closed a second time; its lifecycle fields are still synced. Same-repository references use `github.token`; cross-repository references use `CROSS_REPO_TOKEN`, and a missing token or a 403/404 prints a warning and continues instead of failing the merge. Pass the pinned OIO ref, not a moving branch, so an adopter's close behaviour changes only when it deliberately upgrades.
+The sweep never touches a log labelled `oio:keep-open`. Triage does not manage the `oio:` labels, so it leaves them alone.
 
 ## Lifecycle drift audit
 

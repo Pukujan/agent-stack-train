@@ -99,7 +99,7 @@ class InstallerTests(unittest.TestCase):
         install(str(self.target))
         after_first = self.tree()
         added = set(after_first) - before
-        allowed = set(__import__("oio_installer").PACKAGE_FILES) | {
+        allowed = set(oio_installer.PACKAGE_FILES) | set(oio_installer.CALLER_FILES) | {
             "AGENTS.md", ".oio/ontology/project.json", ".oio/install-manifest.json"
         }
         self.assertEqual(added, allowed - before)
@@ -126,6 +126,37 @@ class InstallerTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(script), "--target", str(self.target), "--check"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("VALID: OIO package", result.stdout)
+
+    def test_close_callers_pin_the_installing_commit(self):
+        head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+        install(str(self.target))
+        manifest = json.loads((self.target / ".oio/install-manifest.json").read_text())
+        self.assertEqual(manifest["oio_ref"], head)
+        for relative, (reusable, _) in oio_installer.CALLER_FILES.items():
+            with self.subTest(relative=relative):
+                text = (self.target / relative).read_text()
+                self.assertIn(f"observational-issue-ops/.github/workflows/{reusable}@{head}\n", text)
+                self.assertIn(f"oio_ref: {head}\n", text)
+                self.assertIn(relative, manifest["managed_files"])
+        sweep = (self.target / ".github/workflows/oio-close-sweep.yml").read_text()
+        self.assertIn("apply: ${{ vars.OIO_CLOSE_SWEEP_APPLY == 'true' }}", sweep)
+
+    def test_existing_close_caller_is_left_alone(self):
+        own = self.target / ".github/workflows/close-on-merge-caller.yml"
+        own.parent.mkdir(parents=True)
+        own.write_text("jobs:\n  close:\n    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@abc\n")
+        messages = " ".join(install(str(self.target)))
+        self.assertIn(".github/workflows/close-on-merge-caller.yml already calls OIO's close-on-merge.yml", messages)
+        self.assertFalse((self.target / ".github/workflows/oio-close-on-merge.yml").exists())
+        self.assertTrue((self.target / ".github/workflows/oio-close-sweep.yml").exists())
+        self.assertIn("VALID", " ".join(install(str(self.target), check_only=True)))
+
+    def test_edited_close_caller_blocks_the_upgrade(self):
+        install(str(self.target))
+        caller = self.target / ".github/workflows/oio-close-sweep.yml"
+        caller.write_text(caller.read_text().replace("== 'true'", "!= 'false'"))
+        with self.assertRaisesRegex(InstallError, "managed file changed"):
+            install(str(self.target))
 
     def test_digit_starting_owner_gets_valid_project_namespace(self):
         target = Path(self.temp.name) / "numeric-owner"
