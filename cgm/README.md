@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.12` (`v0.5.12`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
+**Current helper version: `0.5.13` (`v0.5.13`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -38,6 +38,7 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 | Situation | Load | Notes |
 | --- | --- | --- |
 | README / product entry | `writing-direction` (+ brand / context as needed) | **MUST load.** Keep scan-first selective bold |
+| Marketing intro / sales site / technical demo page | `writing-direction` and `human-sounding-writing`, plus visual direction, brand foundation, and html-demo | **MUST load all of them** (route `marketing_intro_site`, 0.5.13+). Not the README exception. Brand feeling chooses the words and the pictures |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ context as needed) | **MUST load.** Reader-facing explanation, not a manuscript; story order, evidence/status/boundaries, next action. A paper or raw data writeup stays on **hsw** |
 | PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose; one plain sentence per title |
 | Receipts (push, checkpoint, release) | `human-sounding-writing` (**hsw**) | **MUST load.** A receipt headline is one human sentence |
@@ -54,7 +55,7 @@ Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](doc
 
 **Filename before/after (0.5.5+):** `song_food-p0-00e86d.mp3` (and rejected robot draft `song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`. Defaults omitted; optional safe twin `song-food--up-8.mp3`. Per-feature legends live under [`docs/filename-legends/`](docs/filename-legends/). Hash stays an asset field (or suffix after human labels), never the basename.
 
-**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy.
+**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy. A marketing intro site is a different row: it loads writing-direction and hsw together.
 
 ## Why this exists
 
@@ -135,7 +136,7 @@ Adapter layout in the target repository:
 
 In `system-version.json` (or your ACS pin config):
 
-- set helper `version` to **`0.5.12`** (or pin an exact commit SHA of this repo);
+- set helper `version` to **`0.5.13`** (or pin an exact commit SHA of this repo);
 - list module ids from the catalog (for writing: usually `writing-direction` and/or `human-sounding-writing`);
 - point agents at this README and the `modules/<id>/SKILL.md` files under the pinned tree.
 
@@ -223,7 +224,7 @@ The cross-repository adoption record is [Project Continuity Modules task PCM-000
 
 **The smallest useful path is one target adapter and one reviewed README.**
 
-1. Pin helper **`0.5.12`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
+1. Pin helper **`0.5.13`** (or a commit SHA) — see [Pin this helper](#pin-this-helper-for-adapters-and-acs).
 2. Add the `.content-system/` adapter files in the target repo.
 3. Load modules from the [catalog](#module-catalog); for writing, follow the [router](#writing-router).
 4. Fill v2 claim records from repository evidence; run the scan test; run the validator.

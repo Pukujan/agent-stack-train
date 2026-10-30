@@ -154,6 +154,11 @@ def check_always_on_contract(root: Path) -> list[str]:
                 errors.append(f"acs_prompt_inject.system_block must mention {needle}")
         if "compare" not in lowered and "html report" not in lowered:
             errors.append("acs_prompt_inject.system_block must mention HTML/compare surfaces")
+        if "marketing intro" not in lowered:
+            errors.append(
+                "acs_prompt_inject.system_block must say a marketing intro site "
+                "is not the README exception"
+            )
 
     instruction = str(inject.get("instruction") or "")
     if "MUST load" not in instruction:

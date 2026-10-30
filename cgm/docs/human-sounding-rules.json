@@ -1,6 +1,6 @@
 {
   "name": "content-generation-modules.human-sounding-writing",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "generated": "2026-09-24",
   "notes": "Severity: error = must fix; warn = fix or justify in a comment; info = density signal only. Regexes are ECMAScript/Python-compatible (no lookbehind). 'scope' tells the linter what unit to test. Contrast rules are warn, not error: pickles.news argues banning 'not X but Y' at generation time can remove real reasoning, so apply them in an edit pass after drafting. Vendored into content-generation-modules for the human-sounding-writing module. Owned by CGM; original research corpus retained.",
   "sources": {
@@ -2538,6 +2538,6 @@
   "source": {
     "adapted_from": "shared writing-guide rules.json (Eval Lab writing lint corpus)",
     "module": "human-sounding-writing",
-    "helper_version": "0.5.12"
+    "helper_version": "0.5.13"
   }
 }

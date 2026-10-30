@@ -79,6 +79,7 @@ ADAPTER_FILENAME_LEGEND_DIR = ".content-system/filename-legends"
 REQUIRED_ROUTER_ROUTE_IDS = (
     "readme_product_entry",
     "reader_facing_explanations",
+    "marketing_intro_site",
     "github_and_docs_prose",
     "generated_artifact_filenames",
 )
@@ -879,6 +880,53 @@ def check_writing_contract(root: Path) -> list[str]:
             f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations needs a review_checklist "
             "with at least 3 checks"
         )
+    marketing_route = by_id.get("marketing_intro_site") or {}
+    if marketing_route.get("load") != "writing-direction":
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site must load writing-direction"
+        )
+    if marketing_route.get("required_load") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site required_load must be true"
+        )
+    marketing_surfaces = {str(item).lower() for item in marketing_route.get("surfaces", [])}
+    for needle in ("marketing", "demo", "intro"):
+        if not any(needle in surface for surface in marketing_surfaces):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site surfaces must mention {needle}"
+            )
+    if "human-sounding-writing" not in str(marketing_route.get("notes", "")).lower():
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site notes must require "
+            "human-sounding-writing alongside writing-direction"
+        )
+    also_required = {str(item).lower() for item in marketing_route.get("also_load_required", [])}
+    for needle in (
+        "human-sounding-writing",
+        "visual-direction",
+        "brand-foundation",
+        "html-demo",
+    ):
+        if needle not in also_required:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site also_load_required "
+                f"must include {needle}"
+            )
+    marketing_checklist = marketing_route.get("review_checklist")
+    if not isinstance(marketing_checklist, list) or len(marketing_checklist) < 6:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site needs a review_checklist "
+            "with at least 6 checks"
+        )
+        marketing_joined = ""
+    else:
+        marketing_joined = " ".join(str(item).lower() for item in marketing_checklist)
+    for needle in ("problem", "market", "component", "approximation", "demo", "feeling"):
+        if needle not in marketing_joined:
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site review_checklist "
+                f"must mention {needle}"
+            )
     prose_route = by_id.get("github_and_docs_prose") or {}
     if prose_route.get("load") != "human-sounding-writing":
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")
@@ -1085,6 +1133,11 @@ def check_writing_contract(root: Path) -> list[str]:
             if "html" not in lowered_block:
                 errors.append(
                     f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must mention HTML surfaces"
+                )
+            if "marketing intro" not in lowered_block:
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must say "
+                    "a marketing intro site is not the README exception"
                 )
         if "system_block" not in (fields or []):
             errors.append(

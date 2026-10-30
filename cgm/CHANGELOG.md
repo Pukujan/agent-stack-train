@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.13 — draft
+
+- **Marketing intro sites load writing-direction and human-sounding writing together (issue #64):** new `marketing_intro_site` route in `docs/writing-routing.json` for front marketing pages, sales sites, and technical demo pages. Primary load is `writing-direction`. `also_load_required` is `human-sounding-writing`, `visual-direction`, `brand-foundation`, and `html-demo`. The route is not an exception to the human-facing default, so the README exception can no longer drop HSW on this surface.
+- The review checklist is the sales arc: a very short intro, the problem, market impact in money and developer time and external research, the product, each component, a labeled approximation, the technical definition and comparison, then a demo page that opens with a short video. The brand feeling chooses the words and the pictures.
+- The always-on `system_block` and instruction say this surface is not the README exception. `docs/WRITING_ROUTING.md`, the README router table, and both skill entry points say the same thing.
+- Validator: `marketing_intro_site` joins `REQUIRED_ROUTER_ROUTE_IDS`. `check_writing_contract` fails closed without the route, its loads, its surfaces, its checklist needles, or the system-block sentence. `verify_hsw_applied` requires the same sentence.
+- Version bump to 0.5.13 across `system-version.json`, README, CHANGELOG, and the writing rules file. The certified `stack-mesh.json` pin stays on the train's 0.5.12 commit.
+
 ## 0.5.12 — draft
 
 - **Filename-legend path check (issue #52):** `check_filename_legends` resolved `scripts.human_filename` inside a bare `except Exception: continue`, so under the default CLI form (`python scripts/validate_content_system.py`) the path-vs-helper comparison was silently skipped and any filename validated; the helper now resolves under either invocation and a missing helper surfaces instead of being swallowed, with a regression test pinning the default-invocation path;

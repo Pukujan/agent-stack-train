@@ -9,7 +9,9 @@ description: >-
   HTML that must sound human and avoid AI tells. Official short name: hsw
   (also HSW); canonical module id remains human-sounding-writing. Do not use
   for README or product-entry copy — load writing-direction and
-  docs/WRITING_ROUTING.md instead. Not optional / not per-report.
+  docs/WRITING_ROUTING.md instead. Marketing intro sites load this module
+  together with writing-direction (route marketing_intro_site). Not optional
+  / not per-report.
 ---
 
 # Human-sounding writing
@@ -38,6 +40,12 @@ and follow [`docs/WRITING_ROUTING.md`](../../docs/WRITING_ROUTING.md) instead.
 Do **not** apply this module’s bold restraints to READMEs. README scanability
 and selective bold anchors stay under `writing-direction` and the README
 scanability contract.
+
+A **marketing intro site, sales site, or technical demo page** is not that
+stop. Route `marketing_intro_site` loads this module together with
+`writing-direction`. Keep one short writing-direction scan anchor. The tell
+scrub and the verified-number rule in this module still apply. The brand
+feeling chooses the words and the pictures.
 
 ## Durable references (in this repository)
 

@@ -651,6 +651,51 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_writing_contract(staging)
             self.assertTrue(any("reader_facing_explanations" in e for e in errors), errors)
 
+    def test_writing_router_routes_marketing_intro_sites_to_both_modules(self):
+        import json
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        by_id = {route["id"]: route for route in contract["routes"]}
+        route = by_id.get("marketing_intro_site")
+        self.assertIsNotNone(route, "writing-routing.json must declare marketing_intro_site")
+        self.assertEqual(route["load"], "writing-direction")
+        self.assertIs(route["required_load"], True)
+        surfaces = {str(item).lower() for item in route["surfaces"]}
+        self.assertTrue(any("marketing" in item for item in surfaces), surfaces)
+        self.assertTrue(any("demo" in item for item in surfaces), surfaces)
+        self.assertTrue(any("intro" in item for item in surfaces), surfaces)
+        self.assertIn("human-sounding-writing", str(route.get("notes", "")).lower())
+        also = {str(item).lower() for item in route.get("also_load_required", [])}
+        for needle in ("human-sounding-writing", "visual-direction", "brand-foundation", "html-demo"):
+            self.assertIn(needle, also)
+        self.assertGreaterEqual(len(route["review_checklist"]), 6)
+        joined = " ".join(str(item).lower() for item in route["review_checklist"])
+        for needle in ("problem", "market", "component", "approximation", "demo", "feeling"):
+            self.assertIn(needle, joined)
+        block = contract["acs_prompt_inject"]["system_block"].lower()
+        self.assertIn("marketing intro", block)
+        self.assertNotIn("marketing_intro_site", contract["human_facing_default"]["exceptions"])
+
+    def test_writing_contract_rejects_missing_marketing_intro_route(self):
+        import json
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            staging = Path(directory) / "cgm"
+            shutil.copytree(
+                ROOT,
+                staging,
+                ignore=shutil.ignore_patterns(".git", "tests", "__pycache__"),
+            )
+            contract_path = staging / "docs" / "writing-routing.json"
+            contract = json.loads(contract_path.read_text(encoding="utf-8"))
+            contract["routes"] = [
+                route for route in contract["routes"] if route.get("id") != "marketing_intro_site"
+            ]
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_writing_contract(staging)
+            self.assertTrue(any("marketing_intro_site" in e for e in errors), errors)
+
     def test_writing_router_requires_always_on_inject(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
