@@ -1,0 +1,1 @@
+GitHub issue #53 is closed ('Make GitHub authority and checkpoint evidence real'), but CURRENT.md marks status open with Leaf #53 owning the work. Next action: Execute the hosted two-user acceptance on the parent issue.

@@ -1,0 +1,3 @@
+Closes #99: post closeout receipt
+
+Post the closeout receipt for issue #99 as the next step in this checkpoint increment. The receipt documents the resolution status and completes the requirements associated with the issue, allowing it to be closed via GitHub's issue-closing keywords in the commit message.

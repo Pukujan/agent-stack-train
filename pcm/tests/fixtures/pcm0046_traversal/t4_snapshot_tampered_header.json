@@ -1,0 +1,8 @@
+{
+ "files": {
+  ".continuity/documents.json": "{\n \"documents\": [\n  {\n   \"id\": \"alpha-guide\",\n   \"path\": \"docs/ALPHA.md\",\n   \"sha256\": \"bac413ce8c68c3192170cc2cf999e1e4b433e2d50cd240520e88b6ea79e31273\"\n  },\n  {\n   \"id\": \"beta-notes\",\n   \"path\": \"docs/BETA.md\",\n   \"sha256\": \"9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464\"\n  }\n ]\n}\n",
+  "docs/CONTINUITY_INDEX.md": "# Continuity Document Index\n\n<!-- pcm:index {\"catalog_sha256\": \"0000000000000000000000000000000000000000000000000000000000000000\"} -->\n\n## alpha-guide\n- Path: docs/ALPHA.md\n- Current: sha256=bac413ce8c68c3192170cc2cf999e1e4b433e2d50cd240520e88b6ea79e31273\n\n## beta-notes\n- Path: docs/BETA.md\n- Current: sha256=9de2137d3267c3a2c18c845e8ccbe331a97d98a553a006d0b59e2aa03ed3f464\n",
+  "docs/ALPHA.md": "# Alpha Guide\n\nAdoption steps for the alpha module.\n",
+  "docs/BETA.md": "# Beta Notes\n\nOperational notes for beta.\n"
+ }
+}

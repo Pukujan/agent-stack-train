@@ -1,0 +1,1 @@
+The commit message subject and body below should be used for the checkpoint that posts the closeout receipt on issue #99.

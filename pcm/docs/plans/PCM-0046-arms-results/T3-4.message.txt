@@ -1,0 +1,1 @@
+The commit message follows the conventional format where the subject describes the action and the footer contains the issue-closing keyword. Based on the GUIDANCE.md references to GitHub issue-closing keywords in commit messages, the format includes 'closes #99' to automatically close issue #99 when the commit is merged.

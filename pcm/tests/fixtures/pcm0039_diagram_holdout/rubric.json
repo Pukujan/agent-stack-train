@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "diagram_present",
+    "direction_ok",
+    "size_ok",
+    "text_alternative",
+    "details_when_wide",
+    "no_renderer_link",
+    "syntax_shape_ok"
+  ],
+  "pass_rule": "all applicable checks pass",
+  "notes": "hidden from participants"
+}

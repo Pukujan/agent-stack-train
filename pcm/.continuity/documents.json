@@ -1,0 +1,654 @@
+{
+  "documents": [
+    {
+      "id": "agent-lifecycle",
+      "keywords": [
+        "agent",
+        "cleanup",
+        "lifecycle"
+      ],
+      "path": "docs/AGENT_LIFECYCLE.md",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "b223423603ffaa0534c936754c4dedcd97f81955963b64b4912585f9b54f7eb3",
+      "summary": "Capture results and close completed helper agents while retaining useful history.",
+      "tasks": [],
+      "title": "Agent lifecycle policy"
+    },
+    {
+      "id": "architecture-guide",
+      "keywords": [
+        "architecture",
+        "checkpoint",
+        "doc-system",
+        "ownership",
+        "resume"
+      ],
+      "path": "docs/ARCHITECTURE.md",
+      "related": [
+        "continuity-records-policy",
+        "issue-log-format"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "ae83b9b6ba84dcc02963c6a467adbc52e3448dc08860cdae1f82c8c3ce1a96e3",
+      "summary": "How PCM works: ownership of issues/history/projections, checkpoints, resume, self vs adopter, doc versioning.",
+      "tasks": [
+        "PCM-0043"
+      ],
+      "title": "PCM architecture guide"
+    },
+    {
+      "id": "checkpoint-schema",
+      "keywords": [
+        "checkpoint",
+        "schema",
+        "validation"
+      ],
+      "path": "schemas/v1/checkpoint.schema.json",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "3bd75a9bf81a7cf4738ddb49e358e7a79b59cd07caa2be76684fd4cbc74bf755",
+      "summary": "Machine-readable checkpoint fields and validation contract.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Checkpoint schema"
+    },
+    {
+      "id": "context-pack-schema",
+      "keywords": [
+        "context pack",
+        "provenance",
+        "schema"
+      ],
+      "path": "schemas/v1/context-pack.schema.json",
+      "related": [],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "74092c2ef616a8b641862dcc7e9af12661aa4e0bada81997eb61b7196271c88d",
+      "summary": "Machine-readable provenance fields for a task-specific context pack.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Context-pack schema"
+    },
+    {
+      "id": "continuity-records-policy",
+      "keywords": [
+        "GitHub authority",
+        "issue logs",
+        "lineage",
+        "provenance",
+        "receipts",
+        "records"
+      ],
+      "path": "docs/CONTINUITY_RECORDS_POLICY.md",
+      "related": [
+        "pcm-0015-research"
+      ],
+      "reviewed_commit": "b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2",
+      "reviewed_sha256": "c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2",
+      "summary": "Human-readable and machine-verifiable issue, task, checkpoint and handoff records.",
+      "tasks": [
+        "PCM-0018",
+        "PCM-0025",
+        "PCM-0026"
+      ],
+      "title": "Continuity records policy"
+    },
+    {
+      "id": "contributor-mode",
+      "keywords": [
+        "contributor",
+        "foreign checkout",
+        "leak guard",
+        "sidecar"
+      ],
+      "path": "docs/CONTRIBUTOR_MODE.md",
+      "related": [
+        "observational-issue-delegation"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "afd45aed85393af9859e6d1d16660bcecf8a48a94569489146cf5f99fd63cbc3",
+      "summary": "Work on a repository you do not administer with zero writes into it: the leak guard and the task descriptor.",
+      "tasks": [],
+      "title": "Contributor mode"
+    },
+    {
+      "id": "github-progression-spec",
+      "keywords": [
+        "GitHub authority",
+        "lineage",
+        "receipts"
+      ],
+      "path": "SPEC.md",
+      "related": [
+        "continuity-records-policy",
+        "testing-policy"
+      ],
+      "reviewed_commit": "b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2",
+      "reviewed_sha256": "b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527",
+      "summary": "Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.",
+      "tasks": [
+        "PCM-0025",
+        "PCM-0026"
+      ],
+      "title": "GitHub authority and finite progression"
+    },
+    {
+      "id": "issue-log-format",
+      "keywords": [
+        "PR",
+        "format",
+        "issue",
+        "log",
+        "readability"
+      ],
+      "path": "docs/ISSUE_LOG_FORMAT.md",
+      "related": [
+        "continuity-records-policy"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b",
+      "summary": "PCM's prose rules for issue logs, updates and PRs; the canonical issue-log shape defers to OIO's ontology and form.",
+      "tasks": [],
+      "title": "Issue log format"
+    },
+    {
+      "id": "observational-issue-delegation",
+      "keywords": [
+        "boundary",
+        "delegation",
+        "observational issue",
+        "oio",
+        "release train",
+        "stack-releases"
+      ],
+      "path": "docs/OBSERVATIONAL_ISSUE_DELEGATION.md",
+      "related": [
+        "architecture-guide",
+        "github-progression-spec",
+        "issue-log-format"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "eb156ef4b290439d1a00895b85dfb9630cce6c8e8e41e9d9ff045aea1ef8e2f9",
+      "summary": "PCM delegates the human observational-issue protocol and its triage to observational-issue-ops (OIO) and records its pinned role in the stack release train.",
+      "tasks": [],
+      "title": "Observational issue delegation and release-train pin"
+    },
+    {
+      "id": "pcm-0015-plan",
+      "keywords": [
+        "epistemic context",
+        "handoff planning",
+        "knowledge discovery"
+      ],
+      "path": "docs/plans/PCM-0015-implementation-plan.md",
+      "related": [
+        "pcm-0015-research",
+        "testing-policy"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "92cac86f4a5443c7652d359378e77b75bee83bd83b530df652bcc0e55edebe8a",
+      "summary": "Prior bounded plan for provenance-backed continuity, focused context and long-running project work.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "PCM-0015 implementation plan"
+    },
+    {
+      "id": "pcm-0015-research",
+      "keywords": [
+        "epistemic",
+        "provenance",
+        "research"
+      ],
+      "path": "docs/research/PCM-0015-epistemic-context.md",
+      "related": [
+        "continuity-records-policy",
+        "pcm-0015-plan"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "fee42b083be2e5740f6945844ec4a7aa5c530c2eb293eb8e7b28a30236c18ed7",
+      "summary": "Research notes and provenance about reliable evidence, decision records and future-session discovery.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "PCM-0015 epistemic context research"
+    },
+    {
+      "id": "pcm-0024-github-authority",
+      "keywords": [
+        "GitHub authority",
+        "automatic merge",
+        "fresh session",
+        "issue lifecycle",
+        "large repository"
+      ],
+      "path": "tasks/TASK-PCM-0024-github-authority.md",
+      "related": [
+        "continuity-records-policy",
+        "testing-policy"
+      ],
+      "reviewed_commit": "b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2",
+      "reviewed_sha256": "403f918b19f35de27139d3fb820d78ae001a15feef6209bbfceaac7af559147c",
+      "summary": "Parent GitHub-authority task; current correction removes the second-account requirement and links policy and receipt children.",
+      "tasks": [
+        "PCM-0018",
+        "PCM-0024",
+        "PCM-0025"
+      ],
+      "title": "PCM-0024 GitHub authority"
+    },
+    {
+      "id": "pcm-0024-stress-profile",
+      "keywords": [
+        "benchmark",
+        "context-pack",
+        "stress"
+      ],
+      "path": "docs/benchmarks/PCM-0024-stress-profile.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "be206563b7b93bc0bee48300ee3707c234a6bdc93ae1cf95be6fa1d5af474ed8",
+      "summary": "Reproducible synthetic benchmark for lookup, checkpoint append, context-pack latency, storage, and Python-traced memory.",
+      "tasks": [
+        "PCM-0024"
+      ],
+      "title": "PCM-0024 large-repository stress profile"
+    },
+    {
+      "id": "pcm-0028-versioned-modules-design",
+      "keywords": [
+        "issue-log-format",
+        "modules",
+        "registry",
+        "upgrade",
+        "versioning"
+      ],
+      "path": "docs/plans/PCM-0028-versioned-modules-design.md",
+      "related": [
+        "continuity-records-policy"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "8c600a5b9054b947e86698cfe128e668812feb44b4c2b991f88388bf3bd231e3",
+      "summary": "Proposal for independently versioned PCM guidance modules: inventory, stamps, registry, pins, upgrade command and phased rollout. Not implemented.",
+      "tasks": [],
+      "title": "PCM-0028 versioned modules design"
+    },
+    {
+      "id": "pcm-0046-arm-plan",
+      "keywords": [
+        "arms",
+        "holdout",
+        "scoring",
+        "traversal"
+      ],
+      "path": "docs/plans/PCM-0046-arm-plan.md",
+      "related": [
+        "pcm-0050-research"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "381b052e0b0cf4ac835391a923b8d248a936a4a753d68a4e6cabedac9ccca113",
+      "summary": "Pre-registered 20-arm hidden holdout protocol: verbatim prompts, scoring, baseline delta, idempotency.",
+      "tasks": [
+        "PCM-0046"
+      ],
+      "title": "PCM-0046 holdout arm runner plan"
+    },
+    {
+      "id": "pcm-0048-task",
+      "keywords": [
+        "PCM-0048",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0048-deployed-environment.md",
+      "related": [],
+      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
+      "reviewed_sha256": "cc2baa046a4a1b3408d7843b3a1f37186fab235d69ce4539fbd426adb9508a9e",
+      "summary": "Decision-slice projection for PCM-0048.",
+      "tasks": [
+        "PCM-0048"
+      ],
+      "title": "PCM-0048 task projection"
+    },
+    {
+      "id": "pcm-0049-task",
+      "keywords": [
+        "PCM-0049",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0049-adopter-issue-filing.md",
+      "related": [],
+      "reviewed_commit": "1d3671d62ad8872b9798415da5b46d9ab7cffbe7",
+      "reviewed_sha256": "19fb393e3d724bfcdd79beb17bcda5e08e5190b0c5a52125e6164aaf13aa3762",
+      "summary": "Decision-slice projection for PCM-0049.",
+      "tasks": [
+        "PCM-0049"
+      ],
+      "title": "PCM-0049 task projection"
+    },
+    {
+      "id": "pcm-0050-research",
+      "keywords": [
+        "adopter-feedback",
+        "bitemporal",
+        "claim",
+        "epistemic",
+        "provenance",
+        "supersession"
+      ],
+      "path": "docs/research/PCM-0050-epistemic-bitemporal-records.md",
+      "related": [
+        "continuity-records-policy",
+        "issue-log-format",
+        "pcm-0015-plan",
+        "pcm-0015-research"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4f591713d8ebbfda17111fecef6e533b4207f6410310974787b58a95ba60b91b",
+      "summary": "Bitemporal/PROV prior art, PCM-0015 S9 delta analysis, options O1-O4 for claim provenance, adopter ticket placement, and record aging.",
+      "tasks": [
+        "PCM-0050"
+      ],
+      "title": "PCM-0050 epistemic bitemporal records research"
+    },
+    {
+      "id": "pcm-0050-task",
+      "keywords": [
+        "PCM-0050",
+        "decision",
+        "projection"
+      ],
+      "path": "tasks/TASK-PCM-0050-epistemic-records.md",
+      "related": [],
+      "reviewed_commit": "dad5280aed7f238781d17c42523e76f9b17663ee",
+      "reviewed_sha256": "97273dc6db7e5ad68635c555f61c7f5358c43ad0b04cb6600368534ea9fb5179",
+      "summary": "Decision-slice projection for PCM-0050.",
+      "tasks": [
+        "PCM-0050"
+      ],
+      "title": "PCM-0050 task projection"
+    },
+    {
+      "id": "pcm-0051-task",
+      "keywords": [
+        "PCM-0051",
+        "closing-keyword",
+        "sanitizer"
+      ],
+      "path": "tasks/TASK-PCM-0051-sanitizer-forms.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "9877b229ca916c0926aa4ffaff3357f9423225133a46dabd96e148f324356b6c",
+      "summary": "Active task: widen checkpoint sanitizer to colon and cross-repo closing forms.",
+      "tasks": [
+        "PCM-0051"
+      ],
+      "title": "PCM-0051 sanitizer forms task projection"
+    },
+    {
+      "id": "pcm-0052-incident",
+      "keywords": [
+        "closing-keyword",
+        "incident",
+        "sanitizer-bypass",
+        "stale-cli",
+        "version-drift"
+      ],
+      "path": "tasks/TASK-PCM-0052-stale-cli-incident.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "6171aed26136ab97a7d4ccaefa689ded092a606e6f3cdeaacadc83bb0608fe0a",
+      "summary": "Incident: PR #161 checkpoint composed by uv-tool CLI 0.4.0 (pre-sanitizer) carried a raw closing keyword; squash merge auto-closed active issue #139; reopened with correction; version-drift gate decision open on #162.",
+      "tasks": [
+        "PCM-0052"
+      ],
+      "title": "PCM-0052 stale installed CLI bypassed the checkpoint sanitizer (incident record)"
+    },
+    {
+      "id": "pcm-0053-guard-plan",
+      "keywords": [
+        "authoritative-remote",
+        "checkpoint-guard",
+        "publish-path",
+        "stale-base"
+      ],
+      "path": "tasks/TASK-PCM-0053-stale-base-guard.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "00b2e8bc91952312d8d9d8e5f009f9ae54273f2a09e35b29f5dd57276209e3bb",
+      "summary": "Design decision + red-first evidence for the publish-path guard against silently reverting accepted history from a stale local base; incident provenance on #166/#162.",
+      "tasks": [
+        "PCM-0053"
+      ],
+      "title": "PCM-0053 stale-base guard: checkpoint refuses overlapping upstream edits"
+    },
+    {
+      "id": "pcm-0054-durability-receipt-audit",
+      "keywords": [],
+      "path": "tasks/TASK-PCM-0054-durability-receipt-audit.md",
+      "related": [],
+      "reviewed_commit": "0fb5aca9d0e2f363a45244095313ba01d7510a74",
+      "reviewed_sha256": "1cdd94b473b812508c76de2a43d218e36aa48dc62d30f3a61dcb18cddc4dff22",
+      "summary": "What publish_checkpoint enforces vs convention at 690b7f8; three backfilled merge receipts; detector proposal (Refs #169).",
+      "tasks": [
+        "PCM-0054"
+      ],
+      "title": "PCM-0054 durable-publication enforcement matrix + receipt-gap audit proposal"
+    },
+    {
+      "id": "pcm-0055-receipt-json",
+      "keywords": [],
+      "path": "tasks/TASK-PCM-0055-receipt-json-encoding.md",
+      "related": [
+        "pcm-0054-durability-receipt-audit"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "b9969f3754738546f287b988cb8f4f7a666dae74858dee344f52f2e723eb8646",
+      "summary": "gh api --input - needs JSON request parameters; red-first fix + shim test; checkpoint dogfoods the opt-in flags (Refs #171).",
+      "tasks": [
+        "PCM-0055"
+      ],
+      "title": "PCM-0055 receipt JSON wire-format fix"
+    },
+    {
+      "id": "pcm-0056-merge-window",
+      "keywords": [
+        "auto-merge",
+        "guidance",
+        "merge-window"
+      ],
+      "path": "tasks/TASK-PCM-0056-merge-window-guidance.md",
+      "related": [
+        "pcm-0053-guard-plan"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f2261f6600bfda57ebba2b477887977ca567b895bf4e5f66a7c6acfd11d9c635",
+      "summary": "Arm auto-merge only after the final push: one sentence in all 9 guidance copies + policy-test pin; parent decision #166 5842002451 (Refs #175).",
+      "tasks": [
+        "PCM-0056"
+      ],
+      "title": "PCM-0056 merge-window guidance fold"
+    },
+    {
+      "id": "pcm-0057-version-note",
+      "keywords": [
+        "checkpoint",
+        "observability",
+        "version-drift"
+      ],
+      "path": "tasks/TASK-PCM-0057-version-drift-note.md",
+      "related": [
+        "pcm-0052-incident"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0e9f11baff9f3ee77d2c6a869212b76a40cfa5597a2ab919339d61ef7e0224ed",
+      "summary": "Checkpoint publishing prints installed-vs-checkout version mismatch (owner decision B, #162 5842002582); 0.5.0->0.6.0 so the PCM-0055 wire change is distinguishable (Refs #177).",
+      "tasks": [
+        "PCM-0057"
+      ],
+      "title": "PCM-0057 version-drift NOTE + 0.6.0 bump"
+    },
+    {
+      "id": "pcm-0058-readability",
+      "keywords": [
+        "issue-log-format",
+        "readability",
+        "records"
+      ],
+      "path": "tasks/TASK-PCM-0058-readability-rules.md",
+      "related": [
+        "pcm-0057-version-note"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f95ffb23ad984d439b5d3dc339b6ea657ff799474b7b1fa18efeabd4d3a910f1",
+      "summary": "issue-log-format 1.2.0: plain-word meaning before identifiers, claim-first evidence, no bare acronyms; generator+copies+doc+red pins (Refs #180).",
+      "tasks": [
+        "PCM-0058"
+      ],
+      "title": "PCM-0058 readability rules for tool-composed records"
+    },
+    {
+      "id": "pcm-0059-decision",
+      "keywords": [
+        "59",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0059-distributed-runtime-promotion.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0ae22e2400ec984045ea2ffd224444ba1ba60bd2eeedc174dd2466b6a939d2c6",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0059"
+      ],
+      "title": "PCM-0059 decision projection"
+    },
+    {
+      "id": "pcm-0060-decision",
+      "keywords": [
+        "60",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0060-host-capability-honesty.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0060"
+      ],
+      "title": "PCM-0060 decision projection"
+    },
+    {
+      "id": "pcm-0061-status-refresh",
+      "keywords": [
+        "lifecycle",
+        "readme",
+        "status"
+      ],
+      "path": "tasks/TASK-PCM-0061-status-refresh.md",
+      "related": [
+        "pcm-0058-readability"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "7ee1d641b07afeae34b34be783b32feb17923191ee50d5c8dce6d3352940619c",
+      "summary": "README evidence table re-pinned to d46e0b7, normative 1.2.0 refs, close-outs for #175/#177/#180 + superseded PRs #93/#111 (Refs #184).",
+      "tasks": [
+        "PCM-0061"
+      ],
+      "title": "PCM-0061 status refresh and lifecycle hygiene"
+    },
+    {
+      "id": "pcm-0062-decision",
+      "keywords": [
+        "62",
+        "decision"
+      ],
+      "path": "tasks/TASK-PCM-0062-agent-labeling-convention.md",
+      "related": [],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "dcc2d7a26d153e5cf213b697469f7263ff7e6c7cd283c3339c0f6153bd272d66",
+      "summary": "Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).",
+      "tasks": [
+        "PCM-0062"
+      ],
+      "title": "PCM-0062 decision projection"
+    },
+    {
+      "id": "pcm-0063-decision",
+      "keywords": [
+        "63",
+        "decision",
+        "staleness"
+      ],
+      "path": "tasks/TASK-PCM-0063-t2-staleness-guidance-decision.md",
+      "related": [
+        "pcm-0046-arm-plan"
+      ],
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "9259295f9a37c5b40f64c687b1b930dc29590272165362d5040040a880510a57",
+      "summary": "Decision task for the read-time staleness-reconciliation rule: PCM-0046 measured T2 at 0/5 (agents follow the stale projection over the closed live issue); owner picks A/B/C on #189 before any guidance slice.",
+      "tasks": [
+        "PCM-0063"
+      ],
+      "title": "PCM-0063 \u2014 T2 staleness read-rule decision (leaf #189)"
+    },
+    {
+      "id": "pcm-0064-decision",
+      "keywords": [
+        "64",
+        "decision",
+        "keyword"
+      ],
+      "path": "tasks/TASK-PCM-0064-keyword-warning-rephrase-experiment.md",
+      "related": [],
+      "reviewed_commit": "82f1e90413c2d45238cc9fb7b6b8a9cc17611e10",
+      "reviewed_sha256": "ca7dadc381511260056b914faf7442d895a4b01235bf8f893ac3199dfbd54029",
+      "summary": "Decision task: the candidate keyword-warning sentence showed no measured benefit (T3 3/4 smuggled vs T3b 0/3); owner selects variants to pre-register on #190 before a re-measure ships any text.",
+      "tasks": [
+        "PCM-0064"
+      ],
+      "title": "PCM-0064 \u2014 Closing-keyword warning rephrase experiment (leaf #190)"
+    },
+    {
+      "id": "pcm-0065-decision",
+      "keywords": [
+        "65",
+        "decision",
+        "isolation"
+      ],
+      "path": "tasks/TASK-PCM-0065-holdout-isolation-gates.md",
+      "related": [],
+      "reviewed_commit": "82f1e90413c2d45238cc9fb7b6b8a9cc17611e10",
+      "reviewed_sha256": "49431b88781c6d600d3728eb2de1a50d0889041dfc5db65eab1e0d8722c3e152",
+      "summary": "Decision task: PCM-0046's own harness let arms reach the grader's repository and enumerate sibling bundles; owner picks gate set A/B/C on #191 for future holdouts.",
+      "tasks": [
+        "PCM-0065"
+      ],
+      "title": "PCM-0065 \u2014 Hidden-arm holdout isolation gates (leaf #191)"
+    },
+    {
+      "id": "testing-policy",
+      "keywords": [
+        "blind",
+        "oracle",
+        "testing"
+      ],
+      "path": "docs/TESTING_POLICY.md",
+      "related": [
+        "pcm-0015-plan"
+      ],
+      "reviewed_commit": "85f13464c466ff277ce319850ce8124c4bc95c52",
+      "reviewed_sha256": "ca5186385c1a4f4f4c18f2400fb6e2d11b15323b9428b50c6e75b9ab3e238611",
+      "summary": "How PCM selects deterministic, blind and other evidence-producing tests without turning governance into the task.",
+      "tasks": [
+        "PCM-0018"
+      ],
+      "title": "Testing policy"
+    }
+  ],
+  "schema": "project-continuity.documents.v1"
+}
