@@ -17,7 +17,7 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote
 
 from . import __version__
@@ -219,6 +219,9 @@ BUILTIN_SCHEMAS = {
         "additionalProperties": False,
         "properties": {
             "agent": {"minLength": 1, "type": "string"},
+            "evidence_class": {"enum": ["observed", "inferred"], "type": "string"},
+            "supersedes": {"minLength": 1, "type": "string"},
+            "as_of": {"minLength": 1, "type": "string"},
             "blocked": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
             "changed": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
             "completed": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
@@ -426,6 +429,13 @@ def load_schema(root: Path, kind: str) -> dict[str, Any]:
     path = schema_dir(root) / SCHEMA_FILES[kind]
     if path.exists():
         schema = load_json(path)
+        if kind == "checkpoint":
+            # Adopt new optional fields in existing v1 repos without requiring a schema migration.
+            properties = schema.setdefault("properties", {})
+            if isinstance(properties, dict):
+                builtin_checkpoint = cast(dict[str, Any], BUILTIN_SCHEMAS["checkpoint"])
+                for name in ("evidence_class", "supersedes", "as_of"):
+                    properties.setdefault(name, builtin_checkpoint["properties"][name])
         if kind == "config":
             # Existing v1 repositories can retain their checked-in schema and
             # still adopt this optional, backward-compatible policy field.
@@ -2044,8 +2054,18 @@ def checkpoint_metadata(
     changed: list[str],
     blocked: list[str],
     next_action: str,
+    *,
+    evidence_class: str | None = None,
+    supersedes: str | None = None,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
-    return {
+    if evidence_class is not None and evidence_class not in ("observed", "inferred"):
+        raise ContinuityError("checkpoint evidence_class must be observed or inferred")
+    if supersedes is not None and not supersedes.strip():
+        raise ContinuityError("checkpoint supersedes must refer to a prior request ID")
+    if as_of is not None and not as_of.strip():
+        raise ContinuityError("checkpoint as_of must be non-empty")
+    result = {
         "schema": "project-continuity.checkpoint.v1",
         "protocol_version": config["protocol_version"],
         "task_id": task_id,
@@ -2058,6 +2078,13 @@ def checkpoint_metadata(
         "blocked": blocked,
         "next_action": next_action,
     }
+    if evidence_class is not None:
+        result["evidence_class"] = evidence_class
+    if supersedes is not None:
+        result["supersedes"] = supersedes
+    if as_of is not None:
+        result["as_of"] = as_of
+    return result
 
 
 def checkpoint_payload_sha256(meta: dict[str, Any]) -> str:
@@ -2074,7 +2101,11 @@ def checkpoint_payload_sha256(meta: dict[str, Any]) -> str:
             "changed",
             "blocked",
             "next_action",
+            "evidence_class",
+            "supersedes",
+            "as_of",
         )
+        if key in meta
     }
     return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
@@ -2165,6 +2196,10 @@ def write_recovery_checkpoint(
     next_action: str,
     canonical_task: str,
     request_id: str,
+    *,
+    evidence_class: str | None = None,
+    supersedes: str | None = None,
+    as_of: str | None = None,
 ) -> Path:
     recovery_root = recovery_root.resolve()
     canonical_root = canonical_root.resolve()
@@ -2182,6 +2217,9 @@ def write_recovery_checkpoint(
         changed,
         blocked,
         next_action,
+        evidence_class=evidence_class,
+        supersedes=supersedes,
+        as_of=as_of,
     )
     operation = checkpoint_operation_metadata(checkpoint, request_id)
     checkpoint["request_id"] = operation["request_id"]
@@ -2242,6 +2280,10 @@ def checkpoint_task(
     next_action: str,
     recovery_root: Path | None = None,
     request_id: str | None = None,
+    *,
+    evidence_class: str | None = None,
+    supersedes: str | None = None,
+    as_of: str | None = None,
 ) -> Path:
     if request_id is None:
         request_id = uuid.uuid4().hex
@@ -2268,6 +2310,9 @@ def checkpoint_task(
             changed,
             blocked,
             next_action,
+            evidence_class=evidence_class,
+            supersedes=supersedes,
+            as_of=as_of,
         )
         operation = checkpoint_operation_metadata(meta, request_id)
         for prior_meta, prior_operation in checkpoint_records(original):
@@ -2309,6 +2354,9 @@ def checkpoint_task(
             next_action,
             canonical_task,
             request_id,
+            evidence_class=evidence_class,
+            supersedes=supersedes,
+            as_of=as_of,
         )
 
 
@@ -2348,6 +2396,9 @@ def reconcile_recovery(root: Path, receipt_path: Path) -> Path:
         checkpoint["blocked"],
         checkpoint["next_action"],
         request_id=request_id if isinstance(request_id, str) else None,
+        evidence_class=checkpoint.get("evidence_class"),
+        supersedes=checkpoint.get("supersedes"),
+        as_of=checkpoint.get("as_of"),
     )
     if receipt.get("status") == "reconciled":
         return output
@@ -3955,6 +4006,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_checkpoint.add_argument("--changed", action="append", default=[])
     p_checkpoint.add_argument("--blocked", action="append", default=[])
     p_checkpoint.add_argument("--next", dest="next_action", required=True)
+    p_checkpoint.add_argument("--evidence-class", choices=["observed", "inferred"], default=None)
+    p_checkpoint.add_argument("--supersedes", default=None, help="prior checkpoint request ID being corrected")
+    p_checkpoint.add_argument("--as-of", default=None, help="time to which the checkpoint observation applies")
     p_checkpoint.add_argument(
         "--recovery-root",
         default=None,
@@ -4188,6 +4242,9 @@ def main(argv: list[str] | None = None) -> int:
                 args.next_action,
                 recovery_root,
                 request_id,
+                evidence_class=args.evidence_class,
+                supersedes=args.supersedes,
+                as_of=args.as_of,
             )
             if recovery_root is not None and path.is_relative_to(recovery_root / ".continuity" / "recovery"):
                 commit = publish_checkpoint(

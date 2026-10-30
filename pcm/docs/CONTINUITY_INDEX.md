@@ -32,10 +32,10 @@
 ## Checkpoint schema (`checkpoint-schema`)
 
 - File: [`schemas/v1/checkpoint.schema.json`](../schemas/v1/checkpoint.schema.json)
-- Local content status: **CURRENT**
+- Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `85f13464c466ff277ce319850ce8124c4bc95c52`
 - Reviewed SHA-256: `3bd75a9bf81a7cf4738ddb49e358e7a79b59cd07caa2be76684fd4cbc74bf755`
-- Current SHA-256: `3bd75a9bf81a7cf4738ddb49e358e7a79b59cd07caa2be76684fd4cbc74bf755`
+- Current SHA-256: `f6bbe95c0fa3581203dbfa89087ea16bb027dc2a87b741ad32e78d6007c78f30`
 - Summary: Machine-readable checkpoint fields and validation contract.
 - Search terms: `checkpoint`, `schema`, `validation`
 - Neighboring records: none

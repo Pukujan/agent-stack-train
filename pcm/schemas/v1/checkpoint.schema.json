@@ -64,6 +64,24 @@
     "timestamp": {
       "minLength": 1,
       "type": "string"
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "observed",
+        "inferred"
+      ],
+      "description": "Claim provenance class for this checkpoint; not automatic truth validation"
+    },
+    "supersedes": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Request ID of earlier checkpoint being corrected, not a deletion"
+    },
+    "as_of": {
+      "type": "string",
+      "minLength": 1,
+      "description": "When assertion applied or was observed, when distinct from checkpoint transaction time"
     }
   },
   "required": [
