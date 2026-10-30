@@ -12,7 +12,8 @@
   "task_prefix": "PCM",
   "trackers": {
     "beads": false,
-    "github": true
+    "github": true,
+    "github_repository": "Pukujan/project-continuity-modules"
   },
   "workspace": {
     "mode": "managed-worktrees"

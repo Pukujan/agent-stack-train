@@ -133,7 +133,11 @@ BUILTIN_SCHEMAS = {
             "task_prefix": {"pattern": "^[A-Z][A-Z0-9]*$", "type": "string"},
             "trackers": {
                 "additionalProperties": False,
-                "properties": {"beads": {"type": "boolean"}, "github": {"type": "boolean"}},
+                "properties": {
+                    "beads": {"type": "boolean"},
+                    "github": {"type": "boolean"},
+                    "github_repository": {"pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", "type": "string"},
+                },
                 "required": ["github", "beads"],
                 "type": "object",
             },
@@ -442,6 +446,12 @@ def load_schema(root: Path, kind: str) -> dict[str, Any]:
             properties = schema.setdefault("properties", {})
             if isinstance(properties, dict) and "workspace" not in properties:
                 properties["workspace"] = WORKSPACE_SCHEMA
+            trackers = properties.get("trackers") if isinstance(properties, dict) else None
+            if isinstance(trackers, dict):
+                builtin_trackers = cast(dict[str, Any], BUILTIN_SCHEMAS["config"])["properties"]["trackers"]
+                trackers.setdefault("properties", {}).setdefault(
+                    "github_repository", builtin_trackers["properties"]["github_repository"]
+                )
         return schema
     return BUILTIN_SCHEMAS[kind]
 
@@ -866,7 +876,9 @@ def task_new(root: Path, slug: str, goal: str, why: str, owner: str, priority: s
         raise ContinuityError("GitHub-authoritative repositories require --issue URL when creating a task")
     if issue_url:
         issue_repo, _ = validate_github_issue_url(issue_url)
-        origin = github_repository(git_value(root, ["remote", "get-url", "origin"], fallback=""))
+        origin, _ = tracked_repository(
+            config, github_repository(git_value(root, ["remote", "get-url", "origin"], fallback=""))
+        )
         if origin and origin.casefold() != issue_repo.casefold():
             raise ContinuityError(f"issue belongs to {issue_repo}, but this checkout is {origin}")
     task_id = next_task_id(root, config)
@@ -1732,6 +1744,7 @@ def validate_repo(root: Path) -> list[str]:
     origin_repository = github_repository(remote)
     if origin_repository and not config.get("trackers", {}).get("github"):
         errors.append(f"{config_path}: GitHub repositories must set trackers.github=true to enable issue authority")
+    issue_repository, issue_authority = tracked_repository(config, origin_repository)
 
     canonical = config.get("canonical", {})
     project_path = root / canonical.get("project", "PROJECT.md")
@@ -1811,8 +1824,10 @@ def validate_repo(root: Path) -> list[str]:
         if config.get("trackers", {}).get("github") and isinstance(issue_url, str):
             try:
                 issue_repo, _ = validate_github_issue_url(issue_url)
-                if origin_repository and origin_repository.casefold() != issue_repo.casefold():
-                    errors.append(f"{path}: issue_url repository {issue_repo} does not match origin {origin_repository}")
+                if issue_repository and issue_repository.casefold() != issue_repo.casefold():
+                    errors.append(
+                        f"{path}: issue_url repository {issue_repo} does not match {issue_authority} {issue_repository}"
+                    )
             except ContinuityError as exc:
                 errors.append(f"{path}: {exc}")
         errors.extend(validate_checkpoint_structure(root, path, text))
@@ -2677,6 +2692,18 @@ def github_repository(remote: str) -> str | None:
     return match.group(1) if match else None
 
 
+def tracked_repository(config: dict[str, Any], origin: str | None) -> tuple[str | None, str]:
+    """The repository whose issues this root's tasks link to, and what named it.
+
+    A continuity root inside a larger repository can track another repository's
+    issues: ``trackers.github_repository`` says which. Without it, origin decides.
+    """
+    declared = config.get("trackers", {}).get("github_repository")
+    if isinstance(declared, str) and declared:
+        return declared, "trackers.github_repository"
+    return origin, "origin"
+
+
 def validate_github_issue_url(url: str) -> tuple[str, str]:
     match = re.fullmatch(r"https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/issues/([1-9][0-9]*)", url)
     if not match:
@@ -2692,7 +2719,7 @@ def verify_task_issue(root: Path, task_id: str) -> dict[str, str]:
         raise ContinuityError(f"task {task_id} has no authoritative GitHub issue URL: {task_path}")
     repository, number = validate_github_issue_url(issue_url)
     remote = git_value(root, ["remote", "get-url", "origin"])
-    expected_repo = github_repository(remote)
+    expected_repo, _ = tracked_repository(config, github_repository(remote))
     if expected_repo and expected_repo.casefold() != repository.casefold():
         raise ContinuityError(f"task issue belongs to {repository}, but this checkout is {expected_repo}")
     result = run_external(["gh", "issue", "view", number, "--repo", repository, "--json", "number,title,state,url"], root)

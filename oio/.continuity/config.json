@@ -12,7 +12,8 @@
   "task_prefix": "OIO",
   "trackers": {
     "beads": false,
-    "github": true
+    "github": true,
+    "github_repository": "Pukujan/observational-issue-ops"
   },
   "workspace": {
     "mode": "managed-worktrees"

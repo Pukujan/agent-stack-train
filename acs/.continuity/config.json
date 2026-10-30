@@ -12,7 +12,8 @@
   "task_prefix": "ACS",
   "trackers": {
     "beads": false,
-    "github": true
+    "github": true,
+    "github_repository": "Pukujan/agent-custom-setup"
   },
   "workspace": {
     "mode": "managed-worktrees"

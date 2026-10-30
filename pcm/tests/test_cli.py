@@ -173,6 +173,46 @@ class ContinuityTests(unittest.TestCase):
             errors,
         )
 
+    def test_declared_tracker_repository_replaces_origin_for_issue_links(self) -> None:
+        # A continuity root inside a larger repository can keep tracking the
+        # issues of the repository it came from.
+        root = Path(tempfile.mkdtemp(prefix="continuity-declared-tracker-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        init_repo(root, "minimal", "Example", "APP", github_authority=True)
+        subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["git", "remote", "add", "origin", "https://github.com/example/combined.git"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        config_path = root / ".continuity" / "config.json"
+        config = load_json(config_path)
+        config["trackers"]["github_repository"] = "example/component"
+        config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ContinuityError, "this checkout is example/component"):
+            task_new(root, "wrong", "Do work", "Why", "owner", "P1", "https://github.com/example/combined/issues/3")
+        task = task_new(root, "moved", "Do work", "Why", "owner", "P1", "https://github.com/example/component/issues/7")
+        self.assertEqual([], validate_repo(root))
+
+        task.write_text(
+            task.read_text(encoding="utf-8").replace(
+                "https://github.com/example/component/issues/7", "https://github.com/example/combined/issues/7"
+            ),
+            encoding="utf-8",
+        )
+        self.assertIn(
+            f"{task}: issue_url repository example/combined does not match "
+            "trackers.github_repository example/component",
+            validate_repo(root),
+        )
+
+        config["trackers"]["github_repository"] = "not a repository"
+        config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+        self.assertTrue(any("github_repository" in error for error in validate_repo(root)))
+
     def test_missing_document_inventory_is_validate_warning_not_error(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="continuity-docs-inventory-"))
         self.addCleanup(shutil.rmtree, root, True)
