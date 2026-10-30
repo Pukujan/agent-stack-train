@@ -1,0 +1,86 @@
+{
+  "schema_version": "content-generation.issue-log.v1",
+  "name": "cgm-operational-issue-intake",
+  "audience": "every_cgm_adopter",
+  "applies_when": [
+    "Alex (or an agent forwarding his ask) logs an operational failure against CGM",
+    "An adopter reports that pinning CGM did not automatically enforce a documented MUST / default",
+    "Install or hotload succeeded but human-facing outputs still skipped a writing or naming module"
+  ],
+  "forbidden_ticket_shapes": [
+    "ACS-only ticket for a class of failure that any CGM pin can hit",
+    "Single-adopter ticket when the defect is missing pin/contract/validate automation in CGM",
+    "Docs-only acknowledgment without reproduce + contract/validate fix"
+  ],
+  "intake_steps": [
+    {
+      "id": "reproduce_first",
+      "required": true,
+      "summary": "Reproduce first; do not believe the report alone.",
+      "actions": [
+        "Pin the reported CGM SHA/version",
+        "Re-run the failing adopter path or minimal fixture",
+        "Record what actually happened vs what the contract claims"
+      ]
+    },
+    {
+      "id": "classify_product_defect_all_adopters",
+      "required": true,
+      "summary": "Classify as a product defect for EVERY CGM adopter, not one consumer.",
+      "actions": [
+        "Name the missing always-on / pin / contract / validate gap in CGM terms",
+        "State that any repo pinning CGM can hit the same failure mode",
+        "Refuse ACS-only or single-adopter framing for that class"
+      ]
+    },
+    {
+      "id": "fix_pin_contract_validate",
+      "required": true,
+      "summary": "Fix pin/contract/validate so automation lands for all adopters.",
+      "actions": [
+        "Update writing-routing or related machine contracts",
+        "Add or strengthen validator needles / verify scripts",
+        "Update adopter-facing docs (ACS_VERIFY may show one consumer; contract is universal)",
+        "Bump helper patch/minor as appropriate; never commit straight to main"
+      ]
+    },
+    {
+      "id": "never_single_adopter_ticket",
+      "required": true,
+      "summary": "Never open ACS-only or single-adopter tickets for that class of failure.",
+      "actions": [
+        "Title and body speak to every CGM adopter",
+        "ACS or another adopter may be cited as the failure case only",
+        "Acceptance criteria require all-adopter automation, not one repo wiring note"
+      ]
+    }
+  ],
+  "required_issue_sections": [
+    "Goal",
+    "Problem",
+    "Scope",
+    "Acceptance / done when"
+  ],
+  "done_when": [
+    "Reproduce notes are in the issue or linked PR",
+    "Fix is framed for every CGM adopter",
+    "Machine contract keys exist and validate_content_system fails closed without them",
+    "Adopter-facing docs state the automation rule",
+    "PR Refs the tracking issue; CI green; left for owner merge unless asked to merge"
+  ],
+  "done_when_must_include": [
+    "validate_needles",
+    "adopter_facing_docs"
+  ],
+  "validate_needles": [
+    "schema_version",
+    "audience",
+    "intake_steps",
+    "forbidden_ticket_shapes",
+    "done_when",
+    "done_when_must_include"
+  ],
+  "human_doc": "docs/ISSUE_LOG.md",
+  "agents_section": "Operational issue intake",
+  "notes": "Soft for prose quality; hard for process. Operational = pin/install/hotload/automation gaps, not ordinary feature asks. HSW always-on (0.5.7+) is the reference example: ACS was the failure case; the fix belongs in universal writing-routing + verify."
+}

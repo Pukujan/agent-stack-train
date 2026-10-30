@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "content-generation.project-brief.v1",
+  "type": "object",
+  "required": ["schema_version", "project", "audience", "problem", "solution", "evidence", "boundaries"],
+  "properties": {
+    "schema_version": {"const": "content-generation.project-brief.v1"},
+    "project": {"type": "string", "minLength": 1},
+    "audience": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "problem": {"type": "string", "minLength": 1},
+    "solution": {"type": "string", "minLength": 1},
+    "mechanism": {"type": "array", "items": {"type": "string"}},
+    "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
+    "boundaries": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "terminology": {"type": "object"}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": ["claim", "source"],
+      "properties": {
+        "claim": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "status": {"enum": ["shipped", "experimentally_supported", "planned", "unknown"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

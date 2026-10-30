@@ -1,0 +1,14 @@
+{
+  "schema_version": "content-generation.image-brief.v1",
+  "asset_role": "",
+  "message": "",
+  "subject": "",
+  "relationship": "",
+  "setting": "",
+  "composition": "",
+  "visual_treatment": "",
+  "dimensions": "",
+  "text_policy": "required short title + subtitle for narrative raster assets; none for icons, SVGs, logos, or tiny helper graphics",
+  "negative_constraints": [],
+  "reference_assets": []
+}
