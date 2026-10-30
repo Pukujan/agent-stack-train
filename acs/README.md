@@ -185,9 +185,9 @@ python3 -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
 ## License
 
-ACS is licensed under the **Functional Source License, Version 1.1, ALv2 Future
-License** (FSL-1.1-ALv2): use it freely, including in production internally, but
-do not offer a competing product or service. Each version becomes available
-under the Apache License, Version 2.0 on the second anniversary of its release.
-See [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), and [`TRADEMARK.md`](TRADEMARK.md).
-The pinned modules ACS depends on carry their own licenses; see `NOTICE`.
+ACS, like the whole stack, is licensed under the **Functional Source License,
+Version 1.1, ALv2 Future License** (FSL-1.1-ALv2): use it freely, including in
+production internally, but do not offer a competing product or service. Each
+version becomes available under the Apache License, Version 2.0 on the second
+anniversary of its release. See the repository's [`LICENSE`](../LICENSE) and
+[`NOTICE`](../NOTICE), and this folder's [`TRADEMARK.md`](TRADEMARK.md).

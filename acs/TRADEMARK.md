@@ -2,8 +2,8 @@
 
 "Agent Custom Setup" and "ACS" name this project. The FSL-1.1-ALv2 license grants
 you rights to the **source code**; it does not grant rights to the project's
-trademarks, trade names, or product names (see the Trademarks clause in
-`LICENSE`).
+trademarks, trade names, or product names (see the Trademarks clause in the
+repository's `LICENSE`).
 
 You may:
 

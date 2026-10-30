@@ -1,61 +1,65 @@
-# Agent Stack Train
+# Agent Stack
 
-> **One certified version set for the agent stack.** Every adopter pins the train once and reads compatible component versions from here, instead of hand-copying a pin into many files.
+> **One repository for the agent stack.** Continuity, narrative, the install surface, and the issue log ship together, so they live together and move as one version.
 
-The stack is a set of repositories that ship together: a continuity system, a narrative system, an install surface, and an issue-log ticketing system. This repository holds the **certified version set** — the single answer to "which component versions are compatible with each other".
+The stack is four components that have always had to move together. Each used to live in its own repository and pin the other three, and most pull requests only moved those pins. The components now sit side by side in this repository, with their history. The plan of record is [#21](https://github.com/Pukujan/agent-stack-train/issues/21).
 
-## Why this is its own repository
+## What is here
 
-Two things went wrong when the certified set lived inside one of the components:
+| Folder | Component | Owns |
+| --- | --- | --- |
+| [`pcm/`](pcm/) | Project Continuity Modules | Execution continuity: tasks, checkpoints, push receipts, required PR gates, and the `continuity` CLI. |
+| [`cgm/`](cgm/) | Content Generation Modules | Narrative and style: writing routing, human-sounding writing, output naming, visual direction, image generation. |
+| [`acs/`](acs/) | Agent Custom Setup | The install surface: the hot-loader that wires PCM, CGM and OIO into a project, plus the coordination runtime. |
+| [`oio/`](oio/) | Observational Issue Ops | The issue log: the issue form, the filer stamp, triage, and the close workflows adopters call. |
+| root | Release train | [`stack-releases.json`](stack-releases.json), the certified version record adopters read today, and the checks in [`scripts/`](scripts/). |
 
-1. **A product certified its own siblings.** Every other repository had to trust a peer's file to learn what "compatible" meant.
-2. **The pin was copied, so it drifted.** Measured 2026-10-01: one version pin lived in thirteen files across three revisions.
+Each folder keeps its own README, AGENTS.md, tasks and tests. Read the folder's own files before you change it.
 
-Versions are a different kind of artifact from the products they describe, so they get their own home.
+## Where the move stands
 
-## The two documents
+1. **Freeze.** Done. The open pull requests in the four old repositories were merged or closed, and the mesh and train refresh workflows were turned off.
+2. **Combine.** This repository now holds all four components with their history. One `gates` check runs every component's tests.
+3. **Switch install.** Not done. ACS still installs PCM, CGM and OIO from their old repositories, and OIO's reusable workflows are still called from `Pukujan/observational-issue-ops`.
+4. **Release.** Not done. The first stack version will be 1.0.0. The old repositories are archived after it ships, never deleted.
+5. **Move adopters.** Not done. Old pins keep working until each adopter moves.
+
+Until step 3, the old repositories stay the source adopters install from. Any change merged there has to be carried into this repository by hand.
+
+## Run the checks
+
+[`ci.yml`](.github/workflows/ci.yml) runs these on every pull request and push to `main`. Each component's checks run from inside its folder.
+
+```bash
+(cd pcm && pip install -e ".[dev]" && PYTHONPATH=src python -m unittest discover -s tests)
+(cd cgm && python scripts/validate_content_system.py --root . && python -m unittest discover -s tests)
+(cd acs && python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q)
+(cd oio && pip install -r requirements.txt && python -m unittest discover -s tests)
+python scripts/check_manifest.py --self
+```
+
+## The release train
+
+Adopters still pin the stack through the train, as before the move.
 
 | Document | Lives in | Owns |
 | --- | --- | --- |
 | [`stack-releases.json`](stack-releases.json) | **this repository** | The certified versions: one entry per component, with version, commit, and role. |
 | `stack-manifest.json` | **each adopter** | That adopter's pins: which train it follows and which component versions it consumes. |
 
-The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.schema.json).
+The adopter manifest shape is [`stack-manifest.schema.json`](stack-manifest.schema.json). Versions are not copied into this README; [`stack-releases.json`](stack-releases.json) is the one answer. The train was last refreshed from the old repositories' default branches when they were frozen, and its refresh workflow is now off.
 
-## Certified components
+To check an adopter's pins in CI:
 
-The live train is `current`. Versions are not copied into this README, because a copied table is how the 2026-10-01 snapshot stayed on PCM 0.6.0 after 0.7.0 had shipped. The versions are [`stack-releases.json`](stack-releases.json). `scripts/refresh_train.py` rewrites that file from the default branch of each component listed in [`components.json`](components.json). [Refresh the release train](.github/workflows/refresh-train.yml) runs that script every hour and on demand.
-
-## How to adopt
-
-1. Add a `stack-manifest.json` to your repository, set `adopter` to your repository name, set `release_train` to `current`, and point `source` at this repository's `stack-releases.json`.
-2. Name every component. Leave each pin empty so you follow the mesh. The four stack repositories themselves carry `stack-mesh.json` and fail CI when it is behind.
-3. Run the check in CI:
-
-   ```bash
-   python scripts/check_manifest.py --manifest stack-manifest.json \
-     --train-url https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json
-   ```
+```bash
+python scripts/check_manifest.py --manifest stack-manifest.json \
+  --train-url https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json
+```
 
 The check fails closed: a missing component, a version or commit that disagrees with the train, or a manifest that pins a component the train does not certify all exit non-zero.
 
-## Validate
+**A stack document may not restate a current component version or commit.** It points at `stack-releases.json` instead. `scripts/check_prose_pins.py` fails this README, `AGENTS.md` or `PROJECT.md` when one states a pin the certified set does not name.
 
-```bash
-python scripts/check_manifest.py --self                 # this repository's train is well-formed
-python scripts/check_manifest.py --manifest <path>      # an adopter's pins agree with the train
-```
+## License
 
-## Boundaries
-
-- This repository owns **versions only** — no product code, no issue governance, no narrative, no execution continuity.
-- A certified entry is the default-branch head of that component, refreshed by `scripts/refresh_train.py`. The owner accepted this channel on 2026-10-05 after the frozen `2026-10-01` snapshot held PCM at 0.6.0.
-- One exception: a head that changed nothing but `stack-mesh.json` is skipped for the last commit that changed the component itself. Taking a sibling's version would otherwise move this component's certified commit, which forces every sibling to rewrite its mesh again — a loop the mesh could never settle.
-- A hand edit of a version in `stack-releases.json` is overwritten on the next refresh. Change `components.json` to change where a version is read from.
-- **A stack document may not restate a current component version or commit.** It points at `stack-mesh.json` or `stack-releases.json` instead. `scripts/check_prose_pins.py` fails a document that states a component pin the certified set does not name; run it from any checkout with `--train <path to stack-releases.json>`. A hand-refreshed pin was correct for eleven hours on 2026-10-10 (OIO PR #44), so refreshing is the same debt with a new timestamp, not a fix.
-
-## Ownership
-
-- **This repository** owns the certified version set.
-- **Each adopter** owns its own `stack-manifest.json`.
-- No repository owns another repository's pins.
+Everything in this repository is licensed under the Functional Source License, Version 1.1, ALv2 Future License (FSL-1.1-ALv2). Each version becomes available under the Apache License, Version 2.0 two years after it is published. FSL is source-available, not OSI open source. Commits published under the Apache License, Version 2.0 before the move stay available under it. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
