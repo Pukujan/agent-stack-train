@@ -1,0 +1,9 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {"id": "clarity", "question": "Can a newcomer explain what a non-binding observational issue is and where it is filed?"},
+    {"id": "evidence", "question": "Are shipped/planned claims distinguished and linked to repository evidence?"},
+    {"id": "scope", "question": "Does this change keep the protocol single-sourced without rewriting an adopter's issues?"}
+  ],
+  "decision_rule": "human review plus deterministic repository gates"
+}

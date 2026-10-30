@@ -1,0 +1,30 @@
+name: Close sweep
+
+# Same-repo caller for the reusable close sweep. It only reports unless the
+# repository variable OIO_CLOSE_SWEEP_APPLY is `true` or a manual dispatch sets
+# `apply`. OIO_CLOSE_SWEEP_ROLLUP set to `close` closes finished parents.
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Close and label issues instead of only reporting.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  sweep:
+    uses: ./.github/workflows/close-sweep.yml
+    with:
+      oio_ref: ${{ github.event.repository.default_branch }}
+      apply: ${{ inputs.apply == true || vars.OIO_CLOSE_SWEEP_APPLY == 'true' }}
+      rollup: ${{ vars.OIO_CLOSE_SWEEP_ROLLUP || 'label' }}
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

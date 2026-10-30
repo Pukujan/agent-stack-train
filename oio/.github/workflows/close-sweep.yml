@@ -1,0 +1,63 @@
+name: OIO close sweep
+
+# Reusable scheduled sweep. A merge carried out with the workflow token (for
+# example auto-merge armed by a bot) closes nothing and starts no close-on-merge
+# run, so this reads the recent merged pull requests into the default branch
+# and settles the open logs they name with a closing verb. It also labels (or
+# closes) open parents whose sub-issues are all closed. With `apply: false`,
+# the default, it only prints what it would do.
+
+on:
+  workflow_call:
+    inputs:
+      oio_ref:
+        description: Git ref of Pukujan/observational-issue-ops that supplies oio_close_refs.py.
+        required: true
+        type: string
+      apply:
+        description: Close and label issues. When false, only report what would change.
+        required: false
+        type: boolean
+        default: false
+      rollup:
+        description: For an open parent whose sub-issues are all closed, `label` it oio:ready-to-close or `close` it.
+        required: false
+        type: string
+        default: label
+    secrets:
+      CROSS_REPO_TOKEN:
+        description: Token with issues write on referenced repositories. Falls back to github.token.
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out OIO at the caller-pinned ref
+        uses: actions/checkout@v4
+        with:
+          repository: Pukujan/observational-issue-ops
+          ref: ${{ inputs.oio_ref }}
+          path: .oio-src
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Settle issues that merges left open, and roll up finished parents
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          APPLY: ${{ inputs.apply }}
+          ROLLUP: ${{ inputs.rollup }}
+        run: |
+          args=(--sweep --repo "$REPO" --rollup "$ROLLUP")
+          if [ "$APPLY" = "true" ]; then
+            args+=(--write)
+          fi
+          python .oio-src/.github/scripts/oio_close_refs.py "${args[@]}"

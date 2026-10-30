@@ -1,0 +1,44 @@
+name: OIO status drift audit
+
+# Reusable report-only audit. It reads every issue's status:* label and the
+# GitHub open/closed state, prints each contradiction, and exits non-zero when
+# any exist. It never edits an issue.
+
+on:
+  workflow_call:
+    inputs:
+      oio_ref:
+        description: Git ref of Pukujan/observational-issue-ops that supplies oio_close_refs.py.
+        required: true
+        type: string
+    secrets:
+      CROSS_REPO_TOKEN:
+        description: Token with issues read on referenced repositories. Falls back to github.token.
+        required: false
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out OIO at the caller-pinned ref
+        uses: actions/checkout@v4
+        with:
+          repository: Pukujan/observational-issue-ops
+          ref: ${{ inputs.oio_ref }}
+          path: .oio-src
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Report lifecycle status drift
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_TOKEN || github.token }}
+        run: |
+          python .oio-src/.github/scripts/oio_close_refs.py \
+            --audit \
+            --repo "${{ github.repository }}"

@@ -1,0 +1,51 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "Observational Issue Ops",
+  "audience": [
+    "the repository owner who reads and rates proposals",
+    "approved collaborators and agents filing observations on any repository in the stack",
+    "external contributors who need one understandable way to report what they saw"
+  ],
+  "problem": "The same issue-governance rule is hand-copied into several repositories, and the same version pins are written into many files. Copies drift, so a report filed in one repository does not match the trail in another and nobody can tell which copy is authoritative.",
+  "solution": "One repository holds the observational-issue protocol — a three-plane, non-binding proposal form and the triage that labels it — so every other repository consumes one source instead of maintaining its own copy. Each adopter pins the protocol and the rest of the stack in one place.",
+  "evidence": [
+    {
+      "claim": "The observational-issue form is a three-plane, non-binding proposal with required provenance, reproducibility, citations, and a priority rating.",
+      "source": "The issue template committed to this repository.",
+      "status": "shipped",
+      "supports": "The committed template file defines the exact fields a filed observation must carry.",
+      "limits": "The template defines the form only; it does not prove that any adopter has switched to consuming it.",
+      "recorded_at": "2026-10-01T22:18:07Z",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "OIO issue template",
+        "repository": "Pukujan/observational-issue-ops",
+        "commit": "5d5472abad62dcc07862e72c55d1f425f542f979",
+        "path": ".github/ISSUE_TEMPLATE/observational-issue.yml",
+        "locator": "name: Observational Issue Log",
+        "uri": "https://github.com/Pukujan/observational-issue-ops/blob/5d5472abad62dcc07862e72c55d1f425f542f979/.github/ISSUE_TEMPLATE/observational-issue.yml"
+      },
+      "cite_in_readme": false
+    },
+    {
+      "claim": "An accepted plan of record covers the duplication, the loose files, a target folder tree for each repository, and a phased adoption order.",
+      "source": "The cross-repository plan of record filed on the continuity repository.",
+      "status": "planned",
+      "supports": "The plan issue records the audit, the duplication map, the loose-file inventory, the target trees, and the owner decisions that gate adoption.",
+      "limits": "It is a non-binding proposal; no repository has been migrated to the shared source yet.",
+      "recorded_at": "2026-10-01T22:00:20Z",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "Plan of record issue #226",
+        "observed_at": "2026-10-01",
+        "uri": "https://github.com/Pukujan/project-continuity-modules/issues/226"
+      },
+      "cite_in_readme": false
+    }
+  ],
+  "boundaries": [
+    "Every observation filed under this protocol is a non-binding proposal, not a literal implementation mandate.",
+    "This repository owns the protocol and its triage; it does not own any adopter's product code or issues.",
+    "Adopters keep their own issue history; switching them to consume the shared source is a separate, owner-gated step."
+  ]
+}
