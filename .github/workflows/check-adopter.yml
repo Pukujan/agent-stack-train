@@ -25,7 +25,7 @@ on:
         type: string
         default: main
       claude:
-        description: 'Whether the adopter''s CLAUDE.md must import AGENTS.md so Claude Code loads the same rules as other agents: "warn" (the default) annotates the run, "require" fails it.'
+        description: 'Whether the adopter must carry the Claude Code bridge and guard: CLAUDE.md importing AGENTS.md, and the hooks in .claude/settings.json that enforce the rules. "warn" (the default) annotates the run, "require" fails it.'
         required: false
         type: string
         default: warn
@@ -72,3 +72,16 @@ jobs:
         run: |
           python .stack-train/acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/claude_bridge.py \
             --adopter-root . ${{ inputs.claude != 'require' && '--warn-only' || '' }}
+
+      # Every task starts from an issue log, so a pull request must name the
+      # issue it comes from (#37). Callers that want edits to the body rechecked
+      # add `edited` to their pull_request types.
+      - name: Pull request names its owning issue
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+          python .stack-train/oio/.github/scripts/oio_close_refs.py --require-link \
+            --repo "${{ github.repository }}" --body-file "$RUNNER_TEMP/pr-body.md"

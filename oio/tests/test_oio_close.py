@@ -587,5 +587,60 @@ class InstallerVersionAndTemplateTests(unittest.TestCase):
         self.assertEqual(oio_installer._lf_bytes(installed), oio_installer._lf_bytes(source))
 
 
+
+def _gh_replies(replies):
+    """A stand-in for ``_run`` that answers ``gh api repos/<repo>/issues/<n>``."""
+
+    def run(args, stdin=None):
+        code, out, err = replies.get(args[2], (1, "", "HTTP 404: Not Found"))
+        return subprocess.CompletedProcess(args, code, out, err)
+
+    return run
+
+
+class RequireLinkTests(unittest.TestCase):
+    """Every pull request must name the issue log it comes from (#37)."""
+
+    def check(self, replies, body):
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch("oio_close_refs._run", _gh_replies(replies)), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = oio_close_refs.require_link("o/r", body)
+        return code, out.getvalue(), err.getvalue()
+
+    def test_links_include_refs_and_skip_placeholders(self):
+        body = "Refs #37\nCloses Pukujan/agent-stack-train#34\nSee owner/repo#1\nRefs #37"
+        self.assertEqual(oio_close_refs.issue_links(body), [(None, 37), ("Pukujan/agent-stack-train", 34)])
+        self.assertEqual(oio_close_refs.closing_refs(body), [("Pukujan/agent-stack-train", 34)])
+
+    def test_fails_without_a_link(self):
+        code, _, err = self.check({}, "Small fix.")
+        self.assertEqual(code, 1)
+        self.assertIn("names no owning issue", err)
+
+    def test_needs_an_existing_issue_not_a_pull_request(self):
+        code, _, err = self.check({"repos/o/r/issues/5": (0, "true\n", "")}, "Refs #5 and Refs #6")
+        self.assertEqual(code, 1)
+        self.assertIn("none is an existing issue", err)
+        code, out, _ = self.check({"repos/o/r/issues/6": (0, "false\n", "")}, "Refs #5 and Refs #6")
+        self.assertEqual(code, 0)
+        self.assertIn("o/r#6", out)
+
+    def test_keeps_the_link_when_the_token_cannot_read_issues(self):
+        replies = {"repos/o/r/issues/7": (1, "", "HTTP 403: Resource not accessible by integration")}
+        code, out, _ = self.check(replies, "Refs #7")
+        self.assertEqual(code, 0)
+        self.assertIn("checked the link only", out)
+
+    def test_cli_reads_the_body_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            body = Path(tmp) / "body.md"
+            body.write_text("Refs #8\n", encoding="utf-8")
+            with mock.patch("oio_close_refs._run", _gh_replies({"repos/o/r/issues/8": (0, "false\n", "")})), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                code = oio_close_refs.main(["--require-link", "--repo", "o/r", "--body-file", str(body)])
+        self.assertEqual(code, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

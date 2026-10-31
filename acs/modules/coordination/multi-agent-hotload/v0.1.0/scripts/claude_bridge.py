@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -240,16 +241,123 @@ def check(adopter: Path, *, require_agents: bool = True) -> list[str]:
     return []
 
 
+# ---------------------------------------------------------------- guard hooks
+#
+# The region above is text, which Claude Code weighs against its own defaults.
+# The guard (claude_guard.py, installed as .claude/hooks/acs_guard.py) is run by
+# Claude Code itself and blocks what the rules forbid (#37).
+
+GUARD_SOURCE = Path(__file__).resolve().parent / "claude_guard.py"
+GUARD_REL = Path(".claude/hooks/acs_guard.py")
+SETTINGS_REL = Path(".claude/settings.json")
+GUARD_MARK = "acs_guard.py"
+PRE_TOOL_MATCHER = "Bash|EnterWorktree|Agent|Task|Edit|Write|MultiEdit"
+
+
+def _hook(sub: str) -> dict:
+    return {"type": "command", "command": f'python3 "$CLAUDE_PROJECT_DIR/{GUARD_REL.as_posix()}" {sub}', "timeout": 60}
+
+
+def guard_hooks() -> dict[str, list[dict]]:
+    """The settings.json hook entries the guard needs, by event."""
+    return {
+        "SessionStart": [{"hooks": [_hook("session-start")]}],
+        "PreToolUse": [{"matcher": PRE_TOOL_MATCHER, "hooks": [_hook("pre-tool")]}],
+        "Stop": [{"hooks": [_hook("stop")]}],
+    }
+
+
+def _is_guard_entry(entry: object) -> bool:
+    return isinstance(entry, dict) and any(
+        isinstance(h, dict) and GUARD_MARK in str(h.get("command") or "") for h in entry.get("hooks") or []
+    )
+
+
+def _load_settings(adopter: Path) -> dict:
+    path = adopter / SETTINGS_REL
+    if path.is_symlink() or (path.exists() and not path.is_file()):
+        raise BridgeError(f"{SETTINGS_REL}: not a regular file; refusing")
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BridgeError(f"{SETTINGS_REL}: unreadable JSON: {exc}") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("hooks", {}), dict):
+        raise BridgeError(f"{SETTINGS_REL}: expected an object with an object `hooks`; fix it by hand")
+    return data
+
+
+def plan_settings(adopter: Path) -> bytes | None:
+    """New ``.claude/settings.json`` bytes with the guard's hooks, or None when current.
+
+    The adopter's own settings and hooks are kept; only entries that run the
+    guard are replaced.
+    """
+    data = _load_settings(adopter)
+    before = json.dumps(data, sort_keys=True)
+    hooks = data.setdefault("hooks", {})
+    for event, entries in guard_hooks().items():
+        existing = hooks.get(event)
+        if existing is not None and not isinstance(existing, list):
+            raise BridgeError(f"{SETTINGS_REL}: hooks.{event} is not a list; fix it by hand")
+        hooks[event] = [e for e in existing or [] if not _is_guard_entry(e)] + entries
+    if json.dumps(data, sort_keys=True) == before:
+        return None
+    return (json.dumps(data, indent=2) + "\n").encode("utf-8")
+
+
+def plan_guard(adopter: Path) -> bytes | None:
+    """The guard script's bytes when the adopter's copy is missing or differs."""
+    want = GUARD_SOURCE.read_bytes()
+    path = adopter / GUARD_REL
+    if path.is_symlink() or (path.exists() and not path.is_file()):
+        raise BridgeError(f"{GUARD_REL}: not a regular file; refusing")
+    return None if path.is_file() and path.read_bytes() == want else want
+
+
+def guard_root(adopter: Path) -> Path:
+    """Where Claude Code reads the adopter's hooks: its git top level."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(adopter), "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, check=False,
+        ).stdout.strip()
+    except OSError:
+        out = ""
+    return Path(out).resolve() if out else adopter
+
+
+def check_guard(adopter: Path) -> list[str]:
+    """Problems that leave Claude Code without the stack's guard (empty = OK)."""
+    adopter = guard_root(adopter)
+    problems = []
+    path = adopter / GUARD_REL
+    if not path.is_file():
+        problems.append(f"{GUARD_REL} is missing, so nothing enforces the stack's rules in Claude Code; run acs_install.py")
+    elif path.read_bytes() != GUARD_SOURCE.read_bytes():
+        problems.append(f"{GUARD_REL} differs from the stack's claude_guard.py; run acs_install.py to refresh it")
+    try:
+        hooks = _load_settings(adopter).get("hooks", {})
+    except BridgeError as exc:
+        return problems + [str(exc)]
+    for event, entries in guard_hooks().items():
+        if not any(e == entries[0] for e in hooks.get(event) or []):
+            problems.append(f"{SETTINGS_REL} does not run the guard on {event}; run acs_install.py")
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Check that Claude Code loads the adopter's AGENTS.md.")
+    parser = argparse.ArgumentParser(description="Check that Claude Code loads the adopter's AGENTS.md and runs the guard.")
     parser.add_argument("--adopter-root", type=Path, default=Path("."))
     parser.add_argument(
         "--warn-only", action="store_true", help="Report problems as warnings and exit 0."
     )
     args = parser.parse_args(argv)
-    problems = check(args.adopter_root.resolve())
+    adopter = args.adopter_root.resolve()
+    problems = check(adopter) + check_guard(adopter)
     if not problems:
-        print("claude_bridge: OK (CLAUDE.md imports AGENTS.md)")
+        print("claude_bridge: OK (CLAUDE.md imports AGENTS.md; the guard hooks are installed)")
         return 0
     for item in problems:
         print(f"{'::warning::' if args.warn_only else ''}claude_bridge: {item}")

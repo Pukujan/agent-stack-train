@@ -33,6 +33,9 @@ What it does, in order:
                                   (CGM module list from ``pins.json``)
        .coord/hotload.lock.json   installed pack version + the stack commit + state
        stack-manifest.json        one empty pin -- the adopter follows the train
+       .claude/hooks/acs_guard.py the guard Claude Code runs to enforce the rules
+       .claude/settings.json      its SessionStart, PreToolUse and Stop hooks
+                                  (other settings and hooks are kept)
        CLAUDE.md                  the acs:claude-bridge region: imports AGENTS.md
                                   so Claude Code loads the same rules as every
                                   other agent, says GitHub is the authority, and
@@ -700,6 +703,21 @@ def run(args: argparse.Namespace) -> int:
         refusals.append(str(exc))
         problems.append(str(exc))
 
+    # Text loses to Claude Code's own defaults, so the installer also wires the
+    # guard hooks that enforce the rules (#37). Ours by their command, refreshed
+    # on every install; the adopter's other settings and hooks are kept.
+    guard_writes: list[tuple[Path, bytes]] = []
+    try:
+        for rel, data in (
+            (claude_bridge.GUARD_REL, claude_bridge.plan_guard(adopter)),
+            (claude_bridge.SETTINGS_REL, claude_bridge.plan_settings(adopter)),
+        ):
+            if data is not None:
+                guard_writes.append((adopter / rel, data))
+    except claude_bridge.BridgeError as exc:
+        refusals.append(str(exc))
+        problems.append(str(exc))
+
     # 7. Report the plan.
     say("acs_install: plan")
     say(f"  state={reported_state}")
@@ -719,6 +737,8 @@ def run(args: argparse.Namespace) -> int:
         say(f"  write {claude_bridge.CLAUDE_REL} (acs:claude-bridge region; Claude loads AGENTS.md)")
     elif not refusals:
         say(f"  keep  {claude_bridge.CLAUDE_REL} (bridge region current)")
+    for path, _ in guard_writes:
+        say(f"  write {path.relative_to(adopter)} (Claude Code guard hooks)")
     if oio_install == "pending":
         say("  oio   install the OIO issue-log surface (invoke the pinned installer)")
 
@@ -735,12 +755,18 @@ def run(args: argparse.Namespace) -> int:
         return 0
 
     # 8. Write, then validate the whole stack with the pack's own checker.
-    saved = snapshot([path for path, _ in to_write] + ([claude_path] if claude_bytes is not None else []))
+    saved = snapshot(
+        [path for path, _ in to_write]
+        + ([claude_path] if claude_bytes is not None else [])
+        + [path for path, _ in guard_writes]
+    )
     try:
         for path, data in to_write:
             write_json_atomic(path, data, root=adopter)
         if claude_bytes is not None:
             write_bytes_atomic(claude_path, claude_bytes, root=adopter)
+        for path, data in guard_writes:
+            write_bytes_atomic(path, data, root=adopter)
     except (ValueError, OSError) as exc:
         rollback(saved)
         say(f"acs_install: FAIL (rolled back)\n  - {exc}")

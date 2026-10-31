@@ -189,7 +189,20 @@ def _adopter_with_adapter(tmp_path: Path) -> Path:
     (adopter / "README.md").write_text("# Widget\n\nA small widget.\n", encoding="utf-8")
     (adopter / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
     (adopter / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
+    bridge = _load_bridge()
+    for rel, data in ((bridge.GUARD_REL, bridge.plan_guard(adopter)), (bridge.SETTINGS_REL, bridge.plan_settings(adopter))):
+        (adopter / rel).parent.mkdir(parents=True, exist_ok=True)
+        (adopter / rel).write_bytes(data)
     return adopter
+
+
+def _load_bridge():
+    from importlib.util import module_from_spec, spec_from_file_location
+
+    spec = spec_from_file_location("claude_bridge", MODULE_ROOT / "scripts" / "claude_bridge.py")
+    mod = module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def test_cli_ok(tmp_path: Path):

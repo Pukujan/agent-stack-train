@@ -9,6 +9,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 permissions:
@@ -242,10 +243,28 @@ jobs:
           fi
           echo "OK: no committed secrets"
 
+  owning-issue:
+    name: pull request names its owning issue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every task starts from an issue log (#37). A push to main has no body to
+      # check, so the job passes there and `gates` still sees a success.
+      - name: Pull request names its owning issue
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+          python3 oio/.github/scripts/oio_close_refs.py --require-link \
+            --repo "${{ github.repository }}" --body-file "$RUNNER_TEMP/pr-body.md"
+
   gates:
     name: gates
     if: always()
-    needs: [train, pcm-quality, pcm-test, cgm, acs, oio-windows, oio, secrets]
+    needs: [train, pcm-quality, pcm-test, cgm, acs, oio-windows, oio, secrets, owning-issue]
     runs-on: ubuntu-latest
     steps:
       - name: Require every component's jobs green

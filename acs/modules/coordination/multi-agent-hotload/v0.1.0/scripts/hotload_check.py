@@ -38,6 +38,7 @@ REQUIRED_FILES = (
     "scripts/dev_root_check.py",
     "scripts/stack_checkout.py",
     "scripts/claude_bridge.py",
+    "scripts/claude_guard.py",
     "workflow-stubs/watchdog.yml",
 )
 
@@ -683,6 +684,7 @@ def run(
     # Claude Code reads CLAUDE.md, not AGENTS.md: without the import, Claude
     # sessions run with none of the rules every other agent follows.
     problems.extend(claude_bridge.check(resolved_adopter, require_agents=False))
+    problems.extend(claude_bridge.check_guard(resolved_adopter))
     if skip_cgm_validate:
         # Explicit opt-out for isolated schema unit tests only — not a successful install.
         print("hotload_check: WARN skip_cgm_validate=1 (schema-only; install incomplete)")
@@ -714,7 +716,7 @@ def run(
     print(f"  stack_commit={cgm_req['commit']}")
     print(f"  install_surface=FULL PCM + FULL CGM {cgm_req['version']} + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
-    print("  claude_bridge=OK (CLAUDE.md imports AGENTS.md; boot rules ride in its region)")
+    print("  claude_bridge=OK (CLAUDE.md imports AGENTS.md; boot rules ride in its region; guard hooks installed)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads the claim file")
     for note in inject_notes:
