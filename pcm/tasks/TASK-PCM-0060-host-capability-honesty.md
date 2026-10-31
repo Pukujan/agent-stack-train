@@ -48,6 +48,33 @@ Leaf issue #182 records the current silent-degradation behavior; no host-capabil
 
 No checkpoints yet.
 
+### 2026-10-31 00:00:00 UTC — claude-opus-5.5
+
+<!-- continuity:checkpoint {"agent":"claude-opus-5.5","blocked":[],"changed":["pcm/src/continuity/cli.py","pcm/tests/test_host_capabilities.py","pcm/SPEC.md","pcm/docs/TARGET_ADOPTION.md","github-progression copies in pcm, acs and oio"],"completed":["Adopters on hosts other than GitHub were told nothing about which duties stop running; preflight now prints HOST and one CAPABILITY line per duty, warns when config claims GitHub issue authority the host lacks, init prints a NOTE on a non-GitHub origin, every github-progression copy states the Git-only durability fallback, and SPEC 8.3 documents the four-operation host adapter seam (no adapter built)."],"decisions":["Owner picked probe plus SPEC adapter seam on #182 (2026-10-31); install/onboarding page left out of this slice."],"evidence":["Nothing this change could break failed: PCM 340 tests with the same six local-machine worktree/drive failures as the 327-test baseline, plus 13 new host tests passing; ACS 358 passed; OIO suite OK; continuity validate VALID for pcm, acs and oio (product commit d3377f6)."],"next_action":"Open the reader-first PR on Pukujan/agent-stack-train, arm auto-merge, and post the receipt on #182.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0060","timestamp":"2026-10-31T00:00:00Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a714518f56ca15b194c3686bc15e6260b1d256eb11bd732ee6ce353e31802aa3","request_id":"pcm0060-probe-seam-1","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0060"} -->
+
+Completed:
+- Adopters on hosts other than GitHub were told nothing about which duties stop running; preflight now prints HOST and one CAPABILITY line per duty, warns when config claims GitHub issue authority the host lacks, init prints a NOTE on a non-GitHub origin, every github-progression copy states the Git-only durability fallback, and SPEC 8.3 documents the four-operation host adapter seam (no adapter built).
+
+Evidence:
+- Nothing this change could break failed: PCM 340 tests with the same six local-machine worktree/drive failures as the 327-test baseline, plus 13 new host tests passing; ACS 358 passed; OIO suite OK; continuity validate VALID for pcm, acs and oio (product commit d3377f6).
+
+Decisions:
+- Owner picked probe plus SPEC adapter seam on #182 (2026-10-31); install/onboarding page left out of this slice.
+
+Changed:
+- pcm/src/continuity/cli.py
+- pcm/tests/test_host_capabilities.py
+- pcm/SPEC.md
+- pcm/docs/TARGET_ADOPTION.md
+- github-progression copies in pcm, acs and oio
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open the reader-first PR on Pukujan/agent-stack-train, arm auto-merge, and post the receipt on #182.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
