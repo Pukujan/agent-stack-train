@@ -45,7 +45,22 @@ jobs:
           path: .oio-src
           sparse-checkout: oio/.github/scripts
 
-      - uses: actions/setup-python@v5
+      # Use the runner's own Python 3.10+ when it has one. setup-python cannot
+      # install on a self-hosted Mac: its macOS package writes to
+      # /Users/runner and runs `sudo installer`.
+      - name: Find Python on the runner
+        id: python
+        shell: bash
+        run: |
+          if command -v python3 >/dev/null && python3 -c 'import sys; sys.exit(sys.version_info < (3, 10))'; then
+            mkdir -p "$RUNNER_TEMP/python-bin"
+            ln -sf "$(command -v python3)" "$RUNNER_TEMP/python-bin/python"
+            echo "$RUNNER_TEMP/python-bin" >> "$GITHUB_PATH"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.python.outputs.found != 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
