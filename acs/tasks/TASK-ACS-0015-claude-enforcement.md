@@ -32,3 +32,26 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`, and weighs written rules against
 Arm auto-merge on PR #36, then certify the next train version so adopters get the guard.
 
 ## Checkpoint log
+
+### 2026-10-31 22:39:25 UTC — claude-code (claude-opus-5-5)
+
+<!-- continuity:checkpoint {"agent":"claude-code (claude-opus-5-5)","blocked":[],"changed":["acs hotload pack scripts and tests, oio close-refs script, ci.yml, check-adopter.yml, upgrade_adopters.py, root .claude/"],"completed":["Claude Code now loads and enforces the stack's rules: the installer writes a CLAUDE.md bridge and the acs_guard hooks, hotload_check and check-adopter fail without them, and CI fails a pull request with no owning issue."],"decisions":["no new decisions"],"evidence":["All PR #36 checks passed (gates, acs, oio, oio/windows, pcm, cgm, train, and the new 'pull request names its owning issue'); ACS 354 tests and OIO 99 tests pass locally."],"next_action":"Arm auto-merge on PR #36, then certify the next train version so the upgrade bot installs the guard in the three adopters.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0015","timestamp":"2026-10-31T22:39:25Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"0b87da43aaaed2d135d8f97b47c6fafe76d28d0cda519b2cc217103719cd75a3","request_id":"1e83a37a9c544b86aa40800b08305c22","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0015"} -->
+
+Completed:
+- Claude Code now loads and enforces the stack's rules: the installer writes a CLAUDE.md bridge and the acs_guard hooks, hotload_check and check-adopter fail without them, and CI fails a pull request with no owning issue.
+
+Evidence:
+- All PR #36 checks passed (gates, acs, oio, oio/windows, pcm, cgm, train, and the new 'pull request names its owning issue'); ACS 354 tests and OIO 99 tests pass locally.
+
+Decisions:
+- no new decisions
+
+Changed:
+- acs hotload pack scripts and tests, oio close-refs script, ci.yml, check-adopter.yml, upgrade_adopters.py, root .claude/
+
+Blocked/uncertain:
+- none
+
+Next:
+- Arm auto-merge on PR #36, then certify the next train version so the upgrade bot installs the guard in the three adopters.
