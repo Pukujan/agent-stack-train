@@ -66,6 +66,22 @@ class CurrentSizeTests(unittest.TestCase):
         self.assertIn("TASK-0079 merged.", archived)
         self.assertEqual(moved, 3)
 
+    def test_adopter_heading_names_for_the_present_are_kept(self) -> None:
+        # nyc-map-agent names its present-tense sections "In flight" and "Next" (#61).
+        done = "\n".join(f"- PR {n} merged." for n in range(80))
+        path = self.write(
+            f"# Current repository checkpoint\n\n{MARKER}\n\n"
+            "## Current projection\n\nWhere the work stands.\n\n"
+            f"## Completed recently\n\n{done}\n\n"
+            "## In flight\n\n- PR 7 is open.\n\n"
+            "## Next\n\nMerge PR 7.\n"
+        )
+        archive_current(path, date(2026, 10, 31))
+        kept = path.read_text(encoding="utf-8")
+        for heading in ("## Current projection", "## In flight", "## Next"):
+            self.assertIn(heading, kept)
+        self.assertNotIn("## Completed recently", kept)
+
     def test_a_second_archive_appends_and_keeps_one_link(self) -> None:
         path = self.write(long_current())
         archive_current(path, date(2026, 10, 31))

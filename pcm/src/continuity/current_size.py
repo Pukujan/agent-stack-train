@@ -16,16 +16,19 @@ from pathlib import Path
 CURRENT_MAX_LINES = 60
 CURRENT_MAX_BYTES = 8000
 # Sections that describe the present. Every other section (Completed, history,
-# superseded notes) is archived whole.
+# superseded notes) is archived whole. Adopters name these their own way
+# ("In flight", "Next"), so the list matches common wordings, not only PCM's (#61).
 KEEP_PREFIXES = (
-    "current projection",
+    "current",
     "program state",
     "main objective",
     "active",
+    "in flight",
+    "in progress",
+    "now",
     "queued",
     "blockers",
-    "next atomic action",
-    "next action",
+    "next",
 )
 HISTORY_LINK_RE = re.compile(r"^Older state: .*$", re.MULTILINE)
 
