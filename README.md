@@ -21,10 +21,8 @@ Each folder keeps its own README, AGENTS.md, tasks and tests. Read the folder's 
 1. **Freeze.** Done. The open pull requests in the four old repositories were merged or closed. The workflows that kept their pins in step (the mesh and the train refresh) were turned off and are now removed from this repository: one repository has one commit, so nothing needs syncing.
 2. **Combine.** This repository now holds all four components with their history. One `gates` check runs every component's tests.
 3. **Switch install.** Done. ACS's installer takes one checkout of this repository and installs PCM, CGM and OIO from its folders, all at that checkout's commit. OIO's reusable close workflows live in this repository's root [`.github/workflows/`](.github/workflows/), and the callers OIO installs name `Pukujan/agent-stack-train`.
-4. **Release.** Not done. The first stack version will be 1.0.0. Tagging it adds an `agent-stack-train` entry to the train, which manifests from the new install pin. The old repositories are archived after it ships, never deleted.
+4. **Release.** Partly done. Stack 1.0.0 is tagged [`v1.0.0`](https://github.com/Pukujan/agent-stack-train/releases/tag/v1.0.0), and the train certifies it as `agent-stack-train`, so a manifest from the new installer passes `check-adopter`. Still to do: move the old repositories' open issues here, and archive the old repositories (never delete them).
 5. **Move adopters.** Not done. Old pins keep working until each adopter moves.
-
-Until step 4 records the `agent-stack-train` entry, a manifest written by the new installer fails `check-adopter`, so no adopter moves before then.
 
 ## Run the checks
 

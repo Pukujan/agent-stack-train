@@ -2,7 +2,7 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-10-30T23:44:10Z",
+  "recorded_at": "2026-10-31T00:02:20Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
@@ -28,6 +28,11 @@
       "version": "0.3.0",
       "commit": "6a9a7cd67810debe0da76e847ac9897ebc281248",
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
+    },
+    "agent-stack-train": {
+      "version": "1.0.0",
+      "commit": "edfe418a5463332d4509771a068e9bc991b045d7",
+      "role": "The stack release: PCM, CGM, ACS and OIO at one commit of this repository. A one-checkout adopter installs from it and pins it alone."
     }
   },
   "adoption_rule": "This file records the certified versions of project-continuity-modules, content-generation-modules, agent-custom-setup, and observational-issue-ops. The four live in this one repository and move together at one commit, so none of them pins another. An adopter follows this file through its stack-manifest.json: a pin that copies an older version or commit than the one recorded here fails scripts/check_manifest.py.",
