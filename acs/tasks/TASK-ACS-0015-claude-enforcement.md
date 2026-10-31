@@ -55,3 +55,26 @@ Blocked/uncertain:
 
 Next:
 - Arm auto-merge on PR #36, then certify the next train version so the upgrade bot installs the guard in the three adopters.
+
+### 2026-10-31 23:07:00 UTC — claude-code (claude-opus-5-5)
+
+<!-- continuity:checkpoint {"agent":"claude-code (claude-opus-5-5)","blocked":[],"changed":["claude_guard.py, claude_bridge.py, test_claude_guard.py, root .claude/hooks/acs_guard.py"],"completed":["The guard now blocks changes made straight through GitHub (gh api writes, repo, variable, secret, release, label and workflow changes) unless the branch has an owning issue or the command names one with ACS_ISSUE=<owner/repo>#N; it also reads multi-line commands and unquoted '#' correctly."],"decisions":["no new decisions"],"evidence":["ACS tests pass (358, including four new guard tests); the installed copy runs under the Mac's Python 3.9."],"next_action":"Open the PR (Refs #41), arm auto-merge, then fold it into stack 1.0.3.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0015","timestamp":"2026-10-31T23:07:00Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a28537e0a31966de11e5243068030cf4839d852fe7caa7761c4a925603a9be5c","request_id":"14be794de3d04c3b86f52b0f0923f9da","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0015"} -->
+
+Completed:
+- The guard now blocks changes made straight through GitHub (gh api writes, repo, variable, secret, release, label and workflow changes) unless the branch has an owning issue or the command names one with ACS_ISSUE=<owner/repo>#N; it also reads multi-line commands and unquoted '#' correctly.
+
+Evidence:
+- ACS tests pass (358, including four new guard tests); the installed copy runs under the Mac's Python 3.9.
+
+Decisions:
+- no new decisions
+
+Changed:
+- claude_guard.py, claude_bridge.py, test_claude_guard.py, root .claude/hooks/acs_guard.py
+
+Blocked/uncertain:
+- none
+
+Next:
+- Open the PR (Refs #41), arm auto-merge, then fold it into stack 1.0.3.
