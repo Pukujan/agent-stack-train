@@ -347,7 +347,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
-- Current SHA-256: `e25af4367dd31b45f1e40812da1b250f639ad458d93c218d940a42217aceddd9`
+- Current SHA-256: `32b32f45bd4b7931fbea87bf820489a8e8f412194f1a00ec6b5ae0678b2251cd`
 - Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
 - Search terms: `60`, `decision`
 - Neighboring records: none

@@ -99,6 +99,29 @@ Blocked/uncertain:
 Next:
 - Wait for CI on Pukujan/agent-stack-train#51 and auto-merge, then post the merge receipt on #182.
 
+### 2026-10-31 23:34:31 UTC — claude-opus-5.5
+
+<!-- continuity:checkpoint {"agent":"claude-opus-5.5","blocked":[],"changed":["pcm/tasks/TASK-PCM-0060-host-capability-honesty.md"],"completed":["The PCM-0060 record still said active after its slice merged in agent-stack-train#51 (bad10a7); marked it completed, and the install page moved to PCM-0070 (#262) by owner direction."],"decisions":["no new decisions"],"evidence":["#182 closed with a link to #262; continuity validate VALID."],"next_action":"None for PCM-0060; PCM-0070 (#262) owns the install page.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0060","timestamp":"2026-10-31T23:34:31Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"240f7ad21b17238a56c50d65044eeb11fcc594293bab0e0e17adfe80698d2226","request_id":"pcm0060-closeout-1","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0060"} -->
+
+Completed:
+- The PCM-0060 record still said active after its slice merged in agent-stack-train#51 (bad10a7); marked it completed, and the install page moved to PCM-0070 (#262) by owner direction.
+
+Evidence:
+- #182 closed with a link to #262; continuity validate VALID.
+
+Decisions:
+- no new decisions
+
+Changed:
+- pcm/tasks/TASK-PCM-0060-host-capability-honesty.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- None for PCM-0060; PCM-0070 (#262) owns the install page.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
