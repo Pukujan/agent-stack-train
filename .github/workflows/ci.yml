@@ -35,6 +35,9 @@ jobs:
       - name: The upgrade script's tests pass
         run: python scripts/test_upgrade_adopters.py
 
+      - name: The Octo sync's tests pass
+        run: python scripts/test_octo_sync.py
+
       - name: The root pull-request template is PCM's
         run: python scripts/test_pr_template.py
 
