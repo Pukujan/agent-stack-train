@@ -115,11 +115,14 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         f"commit {at}, recorded in `.coord/hotload.lock.json`. Read a stack file there, "
         "not from a local copy or one of the four frozen component repositories.",
     ]
+    # The rule names example drive paths on purpose; the marker keeps adopters'
+    # absolute-path lints from flagging them.
+    dev_root = DEV_ROOT_RULE + " <!-- paths:allow -->"
     rule = writing_rule(cgm_root, commit) if cgm_root is not None else None
     if rule:
-        parts += ["", "### Boot rules", "", rule, "", DEV_ROOT_RULE]
+        parts += ["", "### Boot rules", "", rule, "", dev_root]
     else:
-        parts += ["", "### Boot rules", "", DEV_ROOT_RULE]
+        parts += ["", "### Boot rules", "", dev_root]
     parts.append(END_MARKER)
     return "\n".join(parts) + "\n"
 

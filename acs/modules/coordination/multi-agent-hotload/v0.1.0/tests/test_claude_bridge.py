@@ -51,6 +51,9 @@ def test_region_imports_agents_md_and_names_github_as_authority(bridge):
     assert "https://github.com/Pukujan/agent-stack-train" in region
     assert STACK_SHA[:12] in region
     assert bridge.DEV_ROOT_RULE in region
+    # Adopters' absolute-path lints accept a line that carries this marker.
+    dev_line = next(line for line in region.splitlines() if bridge.DEV_ROOT_RULE in line)
+    assert "paths:allow" in dev_line
 
 
 def test_region_links_the_writing_rule_skills_to_github_at_the_commit(bridge):
