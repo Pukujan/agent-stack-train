@@ -146,6 +146,7 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         "no subagent with worktree isolation). If the checkout is not in that layout, work "
         "sequentially in it or run `continuity worktree migrate`; do not improvise a path.",
         "- A one-off go-ahead (\"skip the PR this time\") covers that action only.",
+        "- A change made straight through GitHub (a repository transfer, a variable, secret, release or label, a `gh api` write) is a decision: record it on an issue log first and name that issue with an `ACS_ISSUE=<owner/repo>#N` prefix on the command. The guard blocks it otherwise.",
     ]
     # The rule names example drive paths on purpose; the marker keeps adopters'
     # absolute-path lints from flagging them.
