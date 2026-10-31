@@ -187,6 +187,8 @@ def _adopter_with_adapter(tmp_path: Path) -> Path:
     shutil.copytree(ACS_FOLDER / ".content-system", adopter / ".content-system")
     shutil.copytree(ACS_FOLDER / "assets", adopter / "assets")
     (adopter / "README.md").write_text("# Widget\n\nA small widget.\n", encoding="utf-8")
+    (adopter / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
+    (adopter / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
     return adopter
 
 

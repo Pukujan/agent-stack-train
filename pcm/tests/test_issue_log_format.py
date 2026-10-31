@@ -84,7 +84,12 @@ class IssueLogFormatModuleTests(unittest.TestCase):
         doc = (ROOT / "docs" / "ISSUE_LOG_FORMAT.md").read_text(encoding="utf-8")
         for name, text in (("guidance", g), ("doc", doc)):
             with self.subTest(source=name):
-                self.assertIn("observational-issue-ops", text)
+                # The shape lives in agent-stack-train's oio/ folder; the frozen
+                # observational-issue-ops repository is not where agents read it.
+                self.assertIn(
+                    "https://github.com/Pukujan/agent-stack-train/blob/main/oio/ontology/ISSUE_LOG_ONTOLOGY.md", text
+                )
+                self.assertNotIn("github.com/Pukujan/observational-issue-ops/blob", text)
                 self.assertIn("ontology/ISSUE_LOG_ONTOLOGY.md", text)
                 self.assertIn(".github/ISSUE_TEMPLATE/observational-issue.yml", text)
                 self.assertIn("does not define a competing form", text)

@@ -13,6 +13,8 @@ Install is complete only when all four are wired as **full stacks** (slim subset
 3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
 4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR. Checkable artifact: `scripts/seat_protocol.py` executes the seat state machine, and `python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests/test_coordination.py -q` passes
 
+Every harness must also load the rules. Codex, Cursor and Gemini read `AGENTS.md` by themselves; Claude Code reads `CLAUDE.md`, and loads `AGENTS.md` only through an optional fallback that a `CLAUDE.md` of the project's own turns off. So the installer writes a delimited `<!-- acs:claude-bridge:start/end -->` region into the adopter's `CLAUDE.md` (`scripts/claude_bridge.py`). The region imports `@AGENTS.md`, says live GitHub state wins over local copies, and carries the boot rules with their skill paths linked to GitHub at the stack commit, so Claude gets them without a manual paste. Text outside the region is never touched. `hotload_check` fails an adopter whose `CLAUDE.md` does not import `AGENTS.md`, and the reusable `check-adopter.yml` workflow reports it (`claude: require` fails the run).
+
 Missing any of the four, or substituting a thin PCM/CGM subset, is an **incomplete install** reported as such with a non-zero exit. [SPEC.md](SPEC.md) is the normative install contract — the state machine, the per-artifact gate, and the platform matrix.
 
 ## Working-repo scope (binding)

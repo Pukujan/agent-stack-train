@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: main
+      claude:
+        description: 'Whether the adopter''s CLAUDE.md must import AGENTS.md so Claude Code loads the same rules as other agents: "warn" (the default) annotates the run, "require" fails it.'
+        required: false
+        type: string
+        default: warn
       runs_on:
         description: 'Runner for the job, as JSON: "ubuntu-latest" (the default) or a label list such as ["self-hosted","org-pool"].'
         required: false
@@ -60,3 +65,10 @@ jobs:
             --manifest "${{ inputs.manifest }}" \
             --train .stack-train/stack-releases.json \
             --installed .oio/install-manifest.json
+
+      # Claude Code reads CLAUDE.md, not AGENTS.md. Without the import, Claude
+      # sessions in the adopter run with none of the stack's rules.
+      - name: Claude Code loads AGENTS.md
+        run: |
+          python .stack-train/acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/claude_bridge.py \
+            --adopter-root . ${{ inputs.claude != 'require' && '--warn-only' || '' }}
