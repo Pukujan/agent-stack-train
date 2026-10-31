@@ -1,0 +1,64 @@
+name: Upgrade adopters
+
+# Opens one upgrade pull request in each adopter in adopters.json whose
+# installed stack is behind the commit the train certifies. It runs when the
+# train changes, daily to retry, and by hand. Nothing merges here: each
+# adopter's own checks and merge rules decide.
+#
+# It needs the secret STACK_UPGRADE_TOKEN: a token with the `repo` and
+# `workflow` scopes on every adopter. GitHub refuses a push that edits
+# .github/workflows/ without `workflow`, and a pull request opened with this
+# workflow's own token would start no checks in the adopter. Without the
+# secret it only reports.
+
+on:
+  push:
+    branches: [main]
+    paths: [stack-releases.json, adopters.json]
+  schedule:
+    - cron: "29 7 * * *"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: One OWNER/REPOSITORY from adopters.json (empty for all)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upgrade-adopters
+  cancel-in-progress: false
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the installer's dependencies
+        run: python -m pip install pyyaml jsonschema ./pcm
+
+      - name: Upgrade adopters behind the train
+        env:
+          GH_TOKEN: ${{ secrets.STACK_UPGRADE_TOKEN }}
+          ONLY: ${{ inputs.only }}
+        run: |
+          args=()
+          if [ -n "$ONLY" ]; then args+=(--only "$ONLY"); fi
+          if [ -n "$GH_TOKEN" ]; then
+            gh auth setup-git
+            args+=(--apply)
+          else
+            echo "::warning title=No upgrade token::STACK_UPGRADE_TOKEN is not set, so this run only reports."
+            export GH_TOKEN="${{ github.token }}"
+          fi
+          python scripts/upgrade_adopters.py "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"

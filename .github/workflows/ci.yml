@@ -31,6 +31,9 @@ jobs:
       - name: The train's own tests pass
         run: python scripts/test_train.py
 
+      - name: The upgrade script's tests pass
+        run: python scripts/test_upgrade_adopters.py
+
       - name: The manifest schema is valid JSON
         run: python -c "import json; json.load(open('stack-manifest.schema.json'))"
 

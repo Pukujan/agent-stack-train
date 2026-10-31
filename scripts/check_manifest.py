@@ -16,6 +16,11 @@ Usage:
     python scripts/check_manifest.py --manifest ../stack-manifest.json
     python scripts/check_manifest.py --manifest m.json --train-url https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json
 
+With ``--installed .oio/install-manifest.json`` it also warns, without
+failing, when the stack the adopter has installed is not the certified one. A
+manifest with an empty pin follows the train, so only the installed files show
+an adopter that was never upgraded.
+
 Exit codes: 0 agreement, 1 disagreement or unreadable input.
 """
 from __future__ import annotations
@@ -130,6 +135,21 @@ def check(manifest: dict, train: dict, train_label: str) -> list[str]:
 TRAIN_SCHEMA = "agent-stack-train.stack-releases.v1"
 
 
+def installed_warning(manifest: dict, installed: dict, train: dict) -> str | None:
+    """Say when a one-checkout adopter's installed stack is not the certified commit."""
+    if set(manifest.get("pins", {})) != {STACK}:
+        return None
+    certified = train.get("certified", {}).get(STACK, {})
+    commit, ref = certified.get("commit"), installed.get("oio_ref")
+    if not commit or ref == commit:
+        return None
+    return (
+        f"installed stack is {str(ref or 'unknown')[:7]}, but the train certifies "
+        f"{STACK} {certified.get('version')} at {commit[:7]}; rerun the installer "
+        "from that commit, or merge the upgrade pull request"
+    )
+
+
 def check_train(train: dict, label: str) -> list[str]:
     """Validate the train document alone (no adopter manifest needed)."""
     errors: list[str] = []
@@ -166,6 +186,10 @@ def main() -> int:
     )
     parser.add_argument("--train-url", help="fetch the train from a URL instead of --train")
     parser.add_argument(
+        "--installed",
+        help="the adopter's .oio/install-manifest.json; warn when it is not the certified stack",
+    )
+    parser.add_argument(
         "--self",
         action="store_true",
         help="validate the train document alone; no adopter manifest required",
@@ -197,6 +221,11 @@ def main() -> int:
         for error in errors:
             print(f"  - {error}")
         return 1
+
+    if args.installed and Path(args.installed).is_file():
+        warning = installed_warning(manifest, load_path(Path(args.installed)), train)
+        if warning:
+            print(f"::warning title=Agent stack is behind::{warning}")
 
     print(
         f"OK: {manifest.get('adopter')} agrees with release train "
