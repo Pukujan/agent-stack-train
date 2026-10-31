@@ -114,6 +114,59 @@ def test_build_assignment_repins_from_pins(installer):
     assert data["boss_failover"]["claim_queue"] == []
 
 
+def test_build_assignment_names_the_stack_repository(installer):
+    # The revisions are agent-stack-train commits, so the repo must be agent-stack-train.
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x")
+    assert data["pins"]["pcm"]["repo"] == f"https://github.com/{REPOSITORY}"
+    assert data["pins"]["cgm"]["repo"] == f"https://github.com/{REPOSITORY}"
+
+
+def _seated_assignment(installer) -> dict:
+    """An assignment an adopter has lived with: its own seat, issue and failover."""
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x")
+    data["agents"].append(
+        {"agent_id": "bot-tiles@box", "role_seed": "coder", "harness": "grok-bot",
+         "machine_label": "box", "may_implement": True, "notes": "Tile lane."}
+    )
+    bf = data["boss_failover"]
+    bf["check_in"]["issue_url"] = "https://github.com/Pukujan-lab/adopter-x/issues/156"
+    bf["claim_queue"] = ["agent-c@laptop"]
+    bf["who_is_boss_now"] = "agent-b@workstation"
+    bf["as_of_history"].append(
+        {"as_of": "2026-10-25T00:00:00+00:00", "boss_agent_id": "agent-b@workstation",
+         "ended_at": None, "notes": "Failover."}
+    )
+    data["pins"]["pcm"]["revision"] = "a" * 40
+    data["pins"]["cgm"]["revision"] = "a" * 40
+    return data
+
+
+def test_build_assignment_keeps_an_adopters_seats_on_upgrade(installer):
+    existing = _seated_assignment(installer)
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x", existing)
+    # The pins move to the checkout...
+    assert data["pins"]["pcm"]["revision"] == STACK_SHA
+    assert data["pins"]["cgm"]["revision"] == STACK_SHA
+    assert data["pins"]["cgm"]["version"] == VERSIONS["content-generation-modules"]
+    # ...and everything the adopter set is kept, history included.
+    for key in ("agents", "boss_failover"):
+        assert data[key] == existing[key]
+    assert existing["pins"]["pcm"]["revision"] == "a" * 40  # the input is not mutated
+
+
+def test_upgraded_assignment_passes_pack_validator(installer, tmp_path: Path):
+    check = _load_hotload_check()
+    existing = _seated_assignment(installer)
+    data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x", existing)
+    out = tmp_path / "assignment.json"
+    out.write_text(json.dumps(data), encoding="utf-8")
+    jsonschema = __import__("jsonschema", fromlist=["Draft202012Validator"])
+    schema = json.loads(
+        (MODULE_ROOT / "schema" / "assignment.schema.json").read_text(encoding="utf-8")
+    )
+    jsonschema.Draft202012Validator(schema).validate(data)
+
+
 def test_build_assignment_is_schema_valid(installer):
     jsonschema = __import__("jsonschema", fromlist=["Draft202012Validator"])
     schema = json.loads(
@@ -358,6 +411,34 @@ def test_run_force_overwrites(installer, make_stack, make_adopter, stub_external
     assert rc == 0
     data = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
     assert data["project"] == "adopter"
+
+
+def test_run_force_upgrade_keeps_seats_and_names(
+    installer, make_stack, make_adopter, stub_externals, run_args
+):
+    # An upgrade runs in a worktree whose folder name is not the project's name.
+    stub_externals()
+    adopter = make_adopter("adopter-upgrade-worktree")
+    coord = adopter / ".coord"
+    coord.mkdir()
+    existing = _seated_assignment(installer)
+    (coord / "assignment.json").write_text(json.dumps(existing), encoding="utf-8")
+    (adopter / "stack-manifest.json").write_text(
+        json.dumps({"schema_version": installer.MANIFEST_SCHEMA, "adopter": "adopter-x",
+                    "pins": {"project-continuity-modules": {}}}),
+        encoding="utf-8",
+    )
+
+    rc = installer.run(run_args(make_stack(), adopter, force=True))
+    assert rc == 0
+    data = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
+    assert data["project"] == "adopter-x"
+    assert data["agents"] == existing["agents"]
+    assert data["boss_failover"] == existing["boss_failover"]
+    assert data["pins"]["pcm"]["revision"] == STACK_SHA
+    manifest = json.loads((adopter / "stack-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["adopter"] == "adopter-x"
+    assert manifest["pins"] == {"agent-stack-train": {}}
 
 
 def test_run_fails_closed_when_hotload_check_fails(

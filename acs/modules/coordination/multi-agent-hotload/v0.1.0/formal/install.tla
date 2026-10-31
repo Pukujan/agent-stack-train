@@ -25,7 +25,7 @@ Kinds == {"absent", "ours_unchanged", "ours_edited",
           "foreign_identical", "foreign_different", "not_regular"}
 
 \* absent               -> create
-\* ours_*               -> keep (a --force run regenerates them)
+\* ours_*               -> keep (a --force run refreshes them)
 \* foreign_identical    -> adopt: byte-identical to what we would write
 \* foreign_different    -> refuse
 \* not_regular          -> refuse (symlink or directory)

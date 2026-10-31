@@ -78,7 +78,7 @@
   },
   "pins": {
     "pcm": {
-      "repo": "https://github.com/Pukujan/project-continuity-modules",
+      "repo": "https://github.com/Pukujan/agent-stack-train",
       "revision": "0000000000000000000000000000000000000000",
       "cli_version": "0.7.0",
       "protocol": "0.1.0-draft",
@@ -96,7 +96,7 @@
       "notes": "The pin revision is a RESERVED PLACEHOLDER (all-zero), and the cli_version is rebuilt with it from the stack checkout's pcm/ by acs_install.build_assignment; never pin a real commit here. Full PCM for adopters. Continuity/checkpoints yes; still NOT the proposal/ACCEPT layer (that stays GitHub + PROPOSALS.md). Pin commit SHA; do not silently follow moving main. Do not vendor PCM source into ACS."
     },
     "cgm": {
-      "repo": "https://github.com/Pukujan/content-generation-modules",
+      "repo": "https://github.com/Pukujan/agent-stack-train",
       "revision": "0000000000000000000000000000000000000000",
       "version": "0.5.13",
       "role": "full_stack",
