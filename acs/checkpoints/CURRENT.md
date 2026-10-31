@@ -4,18 +4,11 @@
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
+Older state: [`history/2026-10.md`](history/2026-10.md) and earlier months in `history/`.
+
 ## Program state
 
 Phase: ACS narrowed to **execution coordination only**. The JEV decision tooling, the oh-my-pi runtime, the reader/benchmark evals, and the [CC] setup have moved out to their own repos (`Pukujan/jev-dump`, `Pukujan/claude-code-launcher`). `registry.json` registers exactly one module (`multi-agent-hotload` @ 0.1.0); `PROJECT.md` carries the layer-ownership table; `POLICY.md`, the root `README.md`, and the pack docs describe the coordination product. CI enforcement live (required `gates` + protection). Open gaps are the coordination runtime implementation (#60) and the JEV/dump-side issues now living in their new repos.
-
-## Completed
-
-- continuity protocol initialized.
-- ACS-0001 (#3) oh-my-pi module — merged 7df54a1; #3 closed with verified closeout (owner-directed merge; hosted gates unverified, recorded).
-- ACS-0003 (#7) story-first README + CGM 0.4.0 adapter + omp reader-eval harness (suite PASS, holdout not_run) — merged f0d84fb; #7 closed with verified closeout.
-- ACS-0006 (leaf #19) pin sync + regenerated README visuals — PR #45 merged `main` @ `5bb85de`, `gates` SUCCESS (run 36805930988). Adapter + projections pinned CGM 0.5.7 @ `c069613` (eight modules) and PCM CLI 0.6.0 @ `4e23854` (ci.yml `PCM_PIN` bumped from 0.5.0-era `743d50e`); root README regenerated product-only; #19 closed. Receipts on #19/#44/#46/#11. Related merged PRs: #16→`3253b39` (#15 closed), #18→`57f6888` (#17 closed), #20→`6b02503`, #23→`e5c5cc3` (#22 reopened — module landed but the live ≥30-interaction Langfuse/SQLite receipt is unmet; stays open).
-- ACS-0006 follow-up (leaf #19) README raster refresh — PR #48 merged `main` @ `41ad617`, `gates` SUCCESS (run 36807670725): both README rasters re-rendered with the owner's new image model (`xai-oauth/grok-imagine-image`), manifest hashes + prompt records updated, validator helper+adapter VALID on the merged tree. Merge facts for #45/#47/#48: `gates` passed on each merged head; the required 1-approving-review gate was bypassed by the owner's `--admin` token (author self-approval is blocked) — recorded on #19 and each PR.
-- ACS-0007 (#55, parent #52) CGM 0.5.12 pin move — the release train re-certified CGM at 0.5.12 @ `6831f91e…`, so the pack's hard pin moved in place (module stays `v0.1.0`): `pins.json` `cgm.version` 0.5.12 with `0.5.7`/`c069613` under `superseded`, all 15 declared projections agree (`check_pins.py` OK), `PROMPT_INJECT.md` regenerated from 0.5.12's `docs/writing-routing.json`, four live surfaces outside the checker's scan moved. Task record `tasks/TASK-ACS-0007-cgm0512-pin.md`.
 
 ## Active
 

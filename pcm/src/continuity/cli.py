@@ -15,7 +15,7 @@ import uuid
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
 from urllib.parse import quote
@@ -28,6 +28,7 @@ from .contributor import (
     parse_contributor_descriptor,
     render_contributor_descriptor,
 )
+from .current_size import archive_current, current_size_errors
 from .pr_check import branch_issue, check_pr_body
 
 PROTOCOL_VERSION = "0.1.0-draft"
@@ -1783,6 +1784,10 @@ def validate_repo(root: Path) -> list[str]:
             continue
         if meta.get("protocol_version") != config.get("protocol_version"):
             errors.append(f"{path}: protocol_version does not match config")
+
+    if current_path.is_file():
+        with suppress(OSError, UnicodeDecodeError):
+            errors.extend(current_size_errors(current_path))
 
     current_meta = None
     if current_path.exists():
@@ -4006,6 +4011,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_preflight = sub.add_parser("preflight")
     p_preflight.add_argument("--root", required=True)
 
+    p_current = sub.add_parser("current", help="keep checkpoints/CURRENT.md short")
+    current_sub = p_current.add_subparsers(dest="current_command", required=True)
+    p_current_archive = current_sub.add_parser("archive", help="move superseded state into checkpoints/history/")
+    p_current_archive.add_argument("--root", default=".")
+    p_current_archive.add_argument("--date", help=argparse.SUPPRESS)
+
     p_pr_check = sub.add_parser("pr-check", help="check a pull-request description against the reader-first shape")
     p_pr_check.add_argument("--body-file", required=True, help="the description, or - for standard input")
     p_pr_check.add_argument("--branch", default="", help="head branch; its issue number is the owning issue")
@@ -4209,6 +4220,20 @@ def main(argv: list[str] | None = None) -> int:
                 return 1
             print("VALID")
             return 0
+
+        if args.command == "current" and args.current_command == "archive":
+            root = Path(args.root).resolve()
+            current_path = root / load_config(root).get("canonical", {}).get("current", "checkpoints/CURRENT.md")
+            today = date.fromisoformat(args.date) if args.date else datetime.now(UTC).date()
+            history, moved = archive_current(current_path, today)
+            if history is None:
+                print(f"NOTHING TO ARCHIVE: {current_path}")
+            else:
+                print(f"ARCHIVED: {moved} section(s) to {history}")
+            remaining = current_size_errors(current_path)
+            for error in remaining:
+                print(f"ERROR: {error}")
+            return 1 if remaining else 0
 
         if args.command == "pr-check":
             body = sys.stdin.read() if args.body_file == "-" else Path(args.body_file).read_text(encoding="utf-8")

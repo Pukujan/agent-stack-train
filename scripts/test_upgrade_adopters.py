@@ -70,6 +70,13 @@ class DecideTests(unittest.TestCase):
         self.assertIn("`.github/workflows/gates.yml`", body)
         self.assertIn("Next action:", body)
 
+    def test_the_body_says_when_current_was_archived(self) -> None:
+        self.assertNotIn("checkpoints/history/", up.pr_body("1.0.3", NEW, OLD, [], "ok"))
+        body = up.pr_body("1.0.3", NEW, OLD, [], "ok", current=(True, False))
+        self.assertIn("checkpoints/history/", body)
+        self.assertNotIn("still over", body)
+        self.assertIn("still over", up.pr_body("1.0.3", NEW, OLD, [], "ok", current=(True, True)))
+
     def test_workflow_pins_move_to_the_new_commit(self) -> None:
         import tempfile
         from pathlib import Path
