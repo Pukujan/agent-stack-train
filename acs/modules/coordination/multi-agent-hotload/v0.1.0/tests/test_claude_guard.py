@@ -101,7 +101,7 @@ def test_commit_on_the_default_branch_is_blocked(guard, repo):
 
 def test_work_on_a_branch_without_an_owning_issue_is_blocked(guard, repo):
     git("checkout", "-qb", "feat/no-issue", cwd=repo)
-    for command in ("git commit -m x", "git push -u origin feat/no-issue", "cd . && git commit -am x"):
+    for command in ("git commit -m x", "git push -u origin feat/no-issue", "cd . && git commit -am x", "cd .\ngit commit -am x"):
         assert "no owning issue" in bash(guard, repo, command), command
 
 
@@ -175,6 +175,57 @@ def test_pull_requests_must_name_their_owning_issue(guard, repo):
     assert "Refs #N" in bash(guard, repo, "gh pr create --fill")
     assert "Refs #N" in bash(guard, repo, "gh pr create --title t --body 'no issue here'")
     assert bash(guard, repo, "gh pr create --title t --body 'Refs #37'") is None
+
+
+def test_github_side_changes_need_an_owning_issue(guard, repo):
+    for command in (
+        "gh api -X POST repos/o/r/transfer -f new_owner=lab",
+        "gh api repos/o/r/actions/variables -f name=X -f value=y",
+        "gh api --method DELETE repos/o/r/branches/main/protection",
+        "gh api graphql -f query='mutation { x }'",
+        "gh repo edit o/r --visibility public",
+        "gh variable set X --body y",
+        "gh secret delete X",
+        "gh release create v1 --notes x",
+        "gh label delete bug --yes",
+        "gh workflow disable ci.yml",
+    ):
+        assert "needs an issue log" in bash(guard, repo, command), command
+
+
+def test_github_reads_and_decision_records_pass(guard, repo):
+    for command in (
+        "gh issue comment 37 --body 'line one\nline two; gh variable set X'",
+        "gh api repos/o/r/branches/main/protection",
+        "gh api --paginate repos/o/r/issues --jq '.[].number'",
+        "gh api -X GET repos/o/r/actions/variables -f per_page=100",
+        "gh api graphql -f query='{ viewer { login } }'",
+        "gh api repos/o/r/issues/29/comments -f body=receipt",
+        "gh api -X PATCH repos/o/r/issues/comments/5 -f body=fix",
+        "gh variable list",
+        "gh release view v1",
+        "gh issue comment 37 --body done",
+        "gh pr merge 36 --squash",
+    ):
+        assert bash(guard, repo, command) is None, command
+
+
+def test_a_github_change_can_name_its_issue_or_use_the_branchs(guard, repo):
+    command = "gh variable set X --body y"
+    assert bash(guard, repo, f"ACS_ISSUE=o/r#37 {command}") is None
+    assert "needs an issue log" in bash(guard, repo, f"ACS_ISSUE=o/r#99 {command}")
+    assert "needs an issue log" in bash(guard, repo, f"echo x # note\n{command}")
+    git("checkout", "-qb", "fix/37-enforce", cwd=repo)
+    assert bash(guard, repo, command) is None
+
+
+def test_github_changes_from_outside_a_checkout_use_the_project(guard, repo, tmp_path, monkeypatch):
+    elsewhere = tmp_path / "scratch"
+    elsewhere.mkdir()
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+    assert "needs an issue log" in bash(guard, elsewhere, "gh variable set X --body y")
+    monkeypatch.delenv("CLAUDE_PROJECT_DIR")
+    assert bash(guard, elsewhere, "gh variable set X --body y") is None
 
 
 def test_edits_that_remove_the_guard_are_blocked(guard, repo):
