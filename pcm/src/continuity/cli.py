@@ -3735,11 +3735,16 @@ def publish_checkpoint(
     root = root.resolve()
     checkpoint_path = checkpoint_path.resolve()
     try:
-        relative = checkpoint_path.relative_to(root).as_posix()
+        local = checkpoint_path.relative_to(root).as_posix()
     except ValueError as exc:
         raise ContinuityError(f"checkpoint is outside the publishing repository: {checkpoint_path}") from exc
 
-    git_run(root, ["rev-parse", "--show-toplevel"])
+    # The PCM root can be a folder inside the repository (one repository holding
+    # several components). Git reports and reads paths from the repository top,
+    # so every Git path below is relative to the top; only the document catalog,
+    # which lives under the PCM root, uses the root-relative path.
+    top = Path(git_value(root, ["rev-parse", "--show-toplevel"])).resolve()
+    relative = checkpoint_path.relative_to(top).as_posix()
     branch = git_value(root, ["rev-parse", "--abbrev-ref", "HEAD"])
     if branch == "HEAD":
         raise ContinuityError("checkpoint publishing requires an attached task branch")
@@ -3767,9 +3772,9 @@ def publish_checkpoint(
                 "or pass --allow-stale-base to publish anyway"
             )
 
-    git_run(root, ["add", "--", relative])
-    if refresh_index_for_cataloged_change(root, relative):
-        print(f"NOTE: regenerated {DOCUMENT_INDEX_PATH} for cataloged change: {relative}")
+    git_run(top, ["add", "--", relative])
+    if refresh_index_for_cataloged_change(root, local):
+        print(f"NOTE: regenerated {DOCUMENT_INDEX_PATH} for cataloged change: {local}")
     staged = git_run(root, ["diff", "--cached", "--name-only"]).stdout.splitlines()
     if relative in staged:
         kind = "recovery receipt" if recovery else "checkpoint"
