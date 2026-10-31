@@ -15,7 +15,7 @@
     {
       "id": "multi-agent-hotload",
       "name": "Multi-agent hotload coordination",
-      "purpose": "Install surface: hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue, agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
+      "purpose": "Install surface: hot-load the FULL stack (PCM + CGM + OIO) + coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue, agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
       "harness": "coordination",
       "created": "2026-09-27",
       "updated": "2026-10-05",
@@ -36,7 +36,7 @@
         "end": null
       },
       "status": "active",
-      "summary": "FULL PCM + FULL CGM 0.5.12 + OIO + coordination runtime (join-order, 30m lease, claim-file claim_queue, agent-less watchdog). The adopter follows the release train via stack-manifest.json (empty pins). Slim subsets are incomplete installs; an uninstallable component (e.g. OIO) is reported PARTIAL, never as success.",
+      "summary": "FULL PCM + FULL CGM + OIO + coordination runtime (join-order, 30m lease, claim-file claim_queue, agent-less watchdog). The adopter follows the release train via stack-manifest.json (empty pins). Slim subsets are incomplete installs; an uninstallable component (e.g. OIO) is reported PARTIAL, never as success.",
       "dependencies": [
         "PCM from the agent-stack-train checkout's pcm/ folder (full stack)",
         "CGM from the agent-stack-train checkout's cgm/ folder (full eight modules incl. human-output-naming)",

@@ -3,7 +3,7 @@
 **Install surface** for agents told to load the agent hot-loader into a working repo. This ACS module does **not** replace PCM, CGM, or OIO. It hot-loads **all four** together:
 
 1. **FULL PCM** — continuity/checkpoints **plus** PR-only workflow, required CI gates, branch-protection + auto-merge preference, fail-closed gates, issue receipts
-2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` (not HSW + writing-direction only)
+2. **FULL CGM** — all eight modules + `human_output_contract` (not HSW + writing-direction only)
 3. **OIO** — the observational issue-log surface (ontology, issue form, triage workflow, `AGENTS.md` guidance block)
 4. **This runtime** — join-order roles, boss lease (**minutes**, default 30), claim-file FIFO claim queue, agent-less watchdog (~10m), proposals, claim → PR (executed by `scripts/seat_protocol.py`)
 
@@ -21,7 +21,7 @@ ACS is the source of truth for this pack. Desktop paths are deploy mirrors only 
 An agent that was told to load this hot-loader into a working repo has finished only when **all** of the following are true:
 
 - [ ] **FULL PCM** from the stack checkout's `pcm/`, used for continuity/checkpoints **and** GitHub governance (PR-only, required CI, protection/auto-merge preference, fail-closed) per [`docs/adopter-enforcement.md`](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md). Still not the proposal layer.
-- [ ] **FULL CGM 0.5.12** from the stack checkout's `cgm/`, with **all eight** module ids + human_output_contract docs. Route README via writing-direction; human-facing prose/HTML/compare/appendable via hsw (default ON); basenames via hon. Not a two-module subset.
+- [ ] **FULL CGM** from the stack checkout's `cgm/`, with **all eight** module ids + human_output_contract docs. Route README via writing-direction; human-facing prose/HTML/compare/appendable via hsw (default ON); basenames via hon. Not a two-module subset.
 - [ ] **OIO** from the stack checkout's `oio/`, installed into the adopter (issue-log surface + `AGENTS.md` guidance block). A component that cannot run is reported **PARTIAL**, never OK.
 - [ ] The adopter's `stack-manifest.json` is written with an **empty `agent-stack-train` pin** (follows the train) and a `check_manifest.py` CI step is added.
 - [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [BEHAVIOR.md](BEHAVIOR.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** (minutes + `claim_queue`) + **watchdog** (agent-less) + full `pins.pcm` / `pins.cgm`.
@@ -89,7 +89,7 @@ Then:
 2. Point the agent (or session brief) at this module path.
 3. On start, follow **[HOTLOAD.md](HOTLOAD.md)** (PCM → CGM → OIO → this pack).
 4. Confirm join order / lease / queue / watchdog config in `.coord/assignment.json` (edit the `agents` seed list and `check_in` to match your seats and issue).
-5. Ensure the adopter has `.content-system/` listing all eight modules. CGM (0.5.12) is the stack checkout's own `cgm/`.
+5. Ensure the adopter has `.content-system/` listing all eight modules. CGM is the stack checkout's own `cgm/`.
 6. Re-run the validator any time:
 
 ```bash
@@ -108,7 +108,7 @@ python acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check
 4. After vacancy: **FIFO `claim_queue`** on the claim file; front takes boss; returning boss joins at **end**.
 5. **Zombie:** re-read the claim file on wake; reject boss actions if not named; worker or re-queue; optional issue comment; no DM.
 6. **Watchdog is agent-less** (cron/Action/script, ~10m); agents only emit stamps.
-7. Reuse **FULL PCM** and **FULL CGM 0.5.12** as pins — never vendor their trees; never ship a slim subset.
+7. Reuse **FULL PCM** and **FULL CGM** as pins — never vendor their trees; never ship a slim subset.
 8. Human-readable titles under the CGM stack (README → writing-direction; other prose → hsw).
 9. Ticket parent/child notes only — no DAG engine.
 10. Never commit secrets; never force-push; never commit straight to `main`.
@@ -159,4 +159,4 @@ See [SPEC.md](SPEC.md) §1.
 
 ## Adopter root README (product-only)
 
-Hotload may pin CGM for install. The **working-repo root README** stays product story only (audience, problem, features, evidence). No CGM methodology theater; no image-generation README section (provenance in `.content-system/asset-manifest.json`). CGM 0.5.12 / #25; see [README_PLAYBOOK.md](https://github.com/Pukujan/content-generation-modules/blob/main/docs/README_PLAYBOOK.md).
+Hotload may pin CGM for install. The **working-repo root README** stays product story only (audience, problem, features, evidence). No CGM methodology theater; no image-generation README section (provenance in `.content-system/asset-manifest.json`). CGM / #25; see [README_PLAYBOOK.md](https://github.com/Pukujan/content-generation-modules/blob/main/docs/README_PLAYBOOK.md).

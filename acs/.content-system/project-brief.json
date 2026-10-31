@@ -7,7 +7,7 @@
     "teams that want coordination rules pinned as documents and a validator, not an agent that decides on their behalf"
   ],
   "problem": "Put more than one agent on a single repository and the hard problem stops being the code. Two agents claim the same task, a seat goes quiet and nobody notices for an hour, an agent drafts a change nobody approved, or a returning agent acts on a lease it no longer holds. The work itself is fine; the coordination is not. There is no shared, written answer to who is boss, how a seat fails over, or how a proposed change earns a PR.",
-  "solution": "ACS ships the multi-agent hotloader: a versioned coordination pack that, dropped into any working repo, wires join-order roles, a decision boss on a minute-scale lease with FIFO failover, a claim queue, an agent-less watchdog, and a propose -> boss ACCEPT/REJECT -> claim -> PR path, on top of the full Project Continuity Modules (PCM) and full Content Generation Modules (CGM 0.5.12) contracts, without vendoring either helper's source.",
+  "solution": "ACS ships the multi-agent hotloader: a versioned coordination pack that, dropped into any working repo, wires join-order roles, a decision boss on a minute-scale lease with FIFO failover, a claim queue, an agent-less watchdog, and a propose -> boss ACCEPT/REJECT -> claim -> PR path, on top of the full Project Continuity Modules (PCM) and full Content Generation Modules (CGM) contracts, without vendoring either helper's source.",
   "mechanism": [
     "join/continue order fills roles (first continuer = decision boss, next = coder1, ...); the assignment seed is a hint only and tool identity is irrelevant",
     "the decision boss holds a lease measured in minutes (default 30, range 15-120); after the TTL the seat is vacant, claimants form a FIFO claim queue, and the front takes boss; a returning old boss rejoins at the end with no automatic reclaim",
@@ -18,10 +18,10 @@
   ],
   "evidence": [
     {
-      "claim": "The multi-agent hotloader is the install surface and fails closed on a partial install: FULL PCM + FULL CGM 0.5.12 + this runtime, with a thin subset rejected on purpose.",
+      "claim": "The multi-agent hotloader is the install surface and fails closed on a partial install: FULL PCM + FULL CGM + this runtime, with a thin subset rejected on purpose.",
       "source": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
       "status": "shipped",
-      "supports": "The pack's entry document states the three full-stack install requirements, the load order, and that hotload_check.py fails the install unless the assignment pins, the helper checkout revision, and the adapter validation all pass.",
+      "supports": "The pack's entry document states the three full-stack install requirements, the load order, and that hotload_check.py fails the install unless the assignment pins, the stack commit, and the adapter validation all pass.",
       "limits": "A specification and a validator do not guarantee adopter agents honor every rule; enforcement depends on the adopter enabling branch protection and required checks.",
       "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,
@@ -90,10 +90,10 @@
       }
     },
     {
-      "claim": "The adapter pins the full content-generation contract at 0.5.12 (eight modules including human-output-naming) and the pack pins PCM CLI 0.6.0, both fail-closed.",
+      "claim": "The adapter pins the full content-generation contract at 0.5.12 (eight modules including human-output-naming) and the pack installs FULL PCM and FULL CGM from one agent-stack-train checkout, both fail-closed.",
       "source": ".content-system/system-version.json",
       "status": "shipped",
-      "supports": "system-version.json pins helper 0.5.12 @ 6831f91e165b62d719c05eb492f7375fa932b560 with the eight-module list; the pack's pins.json independently pins PCM CLI 0.6.0 @ 4e2385474b4af9249ca009cbdcb38c4498932475, and check_pins.py holds both.",
+      "supports": "system-version.json pins helper 0.5.12 @ 6831f91e165b62d719c05eb492f7375fa932b560 with the eight-module list; the pack's acs_install.py reads each component's version from the checkout's own version file at its one commit, and check_pins.py holds the module shape.",
       "limits": "The pins are exact and fail-closed; they do not claim the adopter's prose meets the writing contract, only that the correct modules are loaded.",
       "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,

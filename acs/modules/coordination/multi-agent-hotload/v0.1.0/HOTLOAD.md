@@ -9,7 +9,7 @@ Component versions are **not** written down in this file. This pack ships in [Pu
 Install is complete only when all four are wired as **full stacks** (slim subsets fail):
 
 1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
-2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
+2. **FULL CGM** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
 3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
 4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR. Checkable artifact: `scripts/seat_protocol.py` executes the seat state machine, and `python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests/test_coordination.py -q` passes
 
@@ -82,7 +82,7 @@ Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](.
 
 **Still not PCM's job:** proposals, ACCEPT/REJECT, or work locks — those live in [PROPOSALS.md](PROPOSALS.md) and GitHub issues.
 
-### 3. FULL CGM 0.5.12 (all modules + contracts)
+### 3. FULL CGM (all modules + contracts)
 
 CGM is the stack checkout's `cgm/` folder, at the same commit as this pack. `hotload_check` validates against it unless `--cgm-root` or `CGM_ROOT` names another checkout, which must then sit at the stack commit.
 
@@ -173,9 +173,9 @@ python acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check
 
 `hotload_check` fails the install unless **all** of the following succeed:
 
-1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.12 (eight modules; slim HSW+WD-only fails).
+1. Assignment pins declare **FULL** PCM + **FULL** CGM (eight modules; slim HSW+WD-only fails).
 2. `boss_failover` / `watchdog` / `claim_queue` rules validate (lease **15–120** minutes, default 30).
-3. The CGM it validates against is at the stack commit: the stack checkout's own `cgm/` (0.5.12), or a `--cgm-root` / `CGM_ROOT` override at that commit.
+3. The CGM it validates against is at the stack commit: the stack checkout's own `cgm/`, or a `--cgm-root` / `CGM_ROOT` override at that commit.
 4. It runs `python "$CGM_ROOT/scripts/validate_content_system.py" --root "$CGM_ROOT" --adapter "$ADOPTER_ROOT/.content-system" --project-root "$ADOPTER_ROOT"` and the stdout **starts with `VALID`** (exit 0). There is **no** separate HSW-only script. On OK, `hotload_check` writes `PROMPT_INJECT.md` from `acs_prompt_inject` and prints the instruction (primary done-when remains full adapter VALID; `--mode writing` is optional secondary only).
 
 ### 9. After validate — MUST load writing modules + acs_prompt_inject
@@ -198,7 +198,7 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 
 
 
-**Product-only adopter README (CGM 0.5.12 / #25):** Hotload docs may pin/reference CGM for install. The adopter/ACS **root README** must cover only the target product (audience, problem, features, evidence for their claims). Do **not** defend/cite CGM as methodology theater in the README body; do **not** add an image-generation section (image provenance stays in `.content-system/asset-manifest.json`). See CGM `docs/README_PLAYBOOK.md`.
+**Product-only adopter README (CGM / #25):** Hotload docs may pin/reference CGM for install. The adopter/ACS **root README** must cover only the target product (audience, problem, features, evidence for their claims). Do **not** defend/cite CGM as methodology theater in the README body; do **not** add an image-generation section (image provenance stays in `.content-system/asset-manifest.json`). See CGM `docs/README_PLAYBOOK.md`.
 
 Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/writing-routing.json).
 
@@ -236,7 +236,7 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
 - [ ] One agent-stack-train checkout at the approved stack commit; PCM, CGM and OIO come from its folders
 - [ ] FULL PCM wired — continuity **and** PR-only + required gates + protection/auto-merge preference
-- [ ] FULL CGM 0.5.12 wired — all eight modules + human_output_contract (not HSW+WD only)
+- [ ] FULL CGM wired — all eight modules + human_output_contract (not HSW+WD only)
 - [ ] OIO installed; a component that cannot run is reported PARTIAL, not OK
 - [ ] Adopter `stack-manifest.json` written with an empty `agent-stack-train` pin (follows the train); a `check_manifest.py` CI step added
 - [ ] Join order understood; I know boss / coderN for this session

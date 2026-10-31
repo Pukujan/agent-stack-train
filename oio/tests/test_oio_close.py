@@ -462,9 +462,18 @@ class TriageOptionalFieldTests(unittest.TestCase):
 class WorkflowContractTests(unittest.TestCase):
     REUSABLE = ("close-on-merge.yml", "close-sweep.yml", "oio-status-drift.yml")
 
+    CALLERS = ("close-on-merge-caller.yml", "close-sweep-caller.yml", "status-drift-caller.yml")
+
     def workflow(self, name: str) -> dict:
-        folder = STACK_ROOT if name in self.REUSABLE else ROOT
-        return yaml.safe_load((folder / ".github/workflows" / name).read_text(encoding="utf-8"))
+        # GitHub runs workflows only from the repository root, so the reusable
+        # workflows and this repository's own callers both live there.
+        return yaml.safe_load((STACK_ROOT / ".github/workflows" / name).read_text(encoding="utf-8"))
+
+    def test_own_callers_live_at_the_stack_root(self):
+        for name in self.CALLERS:
+            with self.subTest(name=name):
+                self.assertTrue((STACK_ROOT / ".github/workflows" / name).is_file())
+                self.assertFalse((ROOT / ".github/workflows" / name).exists())
 
     @staticmethod
     def triggers(workflow: dict) -> dict:

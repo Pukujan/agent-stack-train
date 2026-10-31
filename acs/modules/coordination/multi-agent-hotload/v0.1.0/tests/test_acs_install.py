@@ -103,9 +103,9 @@ def test_build_assignment_repins_from_pins(installer):
     data = installer.build_assignment(_example(), pins_at_stack(), "adopter-x")
     assert data["project"] == "adopter-x"
     assert data["pins"]["pcm"]["revision"] == STACK_SHA
-    assert data["pins"]["pcm"]["cli_version"] == "0.6.0"
+    assert data["pins"]["pcm"]["cli_version"] == VERSIONS["project-continuity-modules"]
     assert data["pins"]["cgm"]["revision"] == STACK_SHA
-    assert data["pins"]["cgm"]["version"] == "0.5.12"
+    assert data["pins"]["cgm"]["version"] == VERSIONS["content-generation-modules"]
     assert data["pins"]["cgm"]["modules"] == CGM_MODULES
     # No foreign repo's issue URL leaks into the adopter assignment.
     check_in = data["boss_failover"]["check_in"]
@@ -132,9 +132,9 @@ def test_generated_assignment_passes_pack_validator(installer, tmp_path: Path):
     pcm = requires["project-continuity-modules"]
     cgm = requires["content-generation-modules"]
     real_pins = installer.load_json(MODULE_ROOT / "pins.json")["pins"]
-    real_pins["pcm"]["commit"] = pcm["commit"]
+    real_pins.setdefault("pcm", {})["commit"] = pcm["commit"]
     real_pins["pcm"]["cli_version"] = pcm["version"]
-    real_pins["cgm"]["commit"] = cgm["commit"]
+    real_pins.setdefault("cgm", {})["commit"] = cgm["commit"]
     real_pins["cgm"]["version"] = cgm["version"]
     generated = installer.build_assignment(_example(), real_pins, "adopter-x")
     out = tmp_path / "assignment.json"
@@ -455,7 +455,7 @@ def test_oio_platform_probe_defers_when_the_installer_cannot_answer(installer, t
 
 
 def test_module_has_no_hardcoded_pins():
-    """The installer must read pins.json, never bake pin literals (drift surface)."""
+    """The installer must read the stack checkout, never bake pin literals (drift surface)."""
     text = SCRIPT.read_text(encoding="utf-8")
     assert "0.5.12" not in text
     assert "6831f91e" not in text

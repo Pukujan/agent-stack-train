@@ -132,6 +132,15 @@ jobs:
       - name: Hotloader pin drift check (fail closed on stale pins)
         run: python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
 
+      - name: Validate the content adapter and README against CGM in this checkout
+        run: |
+          python ../cgm/scripts/validate_content_system.py \
+            --root ../cgm \
+            --adapter .content-system \
+            --project-root . \
+            --check-adopter-readme \
+            --check-adopter-docs
+
       - name: Hotloader pack tests
         run: python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
@@ -190,12 +199,14 @@ jobs:
       - name: Installer and triage regression suite
         run: python -m unittest discover -s tests -v
 
-      - name: Validate the content adapter against CGM in this checkout
+      - name: Validate the content adapter and README against CGM in this checkout
         run: |
           python ../cgm/scripts/validate_content_system.py \
             --root ../cgm \
             --adapter .content-system \
-            --project-root .
+            --project-root . \
+            --check-adopter-readme \
+            --check-adopter-docs
 
       - name: Stack manifest agrees with the release train
         run: python ../scripts/check_manifest.py --manifest stack-manifest.json --train ../stack-releases.json
@@ -205,8 +216,8 @@ jobs:
           python - <<'PY'
           import glob, yaml
           files = sorted(glob.glob(".github/ISSUE_TEMPLATE/*.yml")) + sorted(glob.glob(".github/workflows/*.yml"))
-          # OIO's reusable close workflows live at the stack root.
-          files += [f"../.github/workflows/{name}" for name in ("close-on-merge.yml", "close-sweep.yml", "oio-status-drift.yml")]
+          # OIO's close workflows and this repository's callers of them live at the stack root.
+          files += sorted(glob.glob("../.github/workflows/*.yml"))
           for f in files:
               with open(f, encoding="utf-8") as fh:
                   yaml.safe_load(fh)

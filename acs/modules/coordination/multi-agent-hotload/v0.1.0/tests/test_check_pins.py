@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -11,6 +12,26 @@ from pathlib import Path
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = MODULE_ROOT.parents[3]
 SCRIPT = MODULE_ROOT / "scripts" / "check_pins.py"
+
+# The pack's prose, registry and error strings. None may name a CGM version: the
+# CGM in the stack checkout's cgm/ is the only source of it.
+VERSION_FREE_FILES = [
+    REPO_ROOT / "AGENTS.md",
+    REPO_ROOT / "registry.json",
+    *(
+        MODULE_ROOT / name
+        for name in (
+            "README.md",
+            "HOTLOAD.md",
+            "BEHAVIOR.md",
+            "NOTES.md",
+            "ROLES.md",
+            "module.json",
+            "scripts/hotload_check.py",
+        )
+    ),
+]
+CGM_VERSION_RE = re.compile(r"CGM\s+\(?\d+\.\d+\.\d+")
 
 
 def _run(root: Path) -> subprocess.CompletedProcess:
@@ -98,3 +119,28 @@ def test_check_pins_fails_on_missing_projection_file(tmp_path: Path):
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout
     assert "registry.json" in proc.stdout
+
+
+def test_pins_manifest_carries_no_component_versions():
+    """Component versions come from the stack checkout; a copy here only drifts."""
+    manifest = json.loads((MODULE_ROOT / "pins.json").read_text(encoding="utf-8"))
+    assert "pcm" not in manifest["pins"]
+    assert "version" not in manifest["pins"]["cgm"]
+    assert "cgm.version" not in manifest["superseded"]
+
+
+def _shipped_text(path: Path) -> str:
+    """The file's text; for a script, without comments (they cite older CGM behaviour)."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if path.suffix == ".py":
+        lines = [line for line in lines if not line.lstrip().startswith("#")]
+    return "\n".join(lines)
+
+
+def test_pack_prose_names_no_cgm_version():
+    offenders = [
+        f"{path.relative_to(REPO_ROOT).as_posix()}: {match.group(0)}"
+        for path in VERSION_FREE_FILES
+        for match in CGM_VERSION_RE.finditer(_shipped_text(path))
+    ]
+    assert offenders == []

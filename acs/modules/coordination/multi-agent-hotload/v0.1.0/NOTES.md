@@ -4,7 +4,7 @@
 
 - **ACS is source of truth** for this module. Desktop (or other) paths are deploy mirrors only.
 - Sync direction after merge: **ACS → mirrors**.
-- This pack is an **install surface**: agents loading the hot-loader must wire **FULL PCM + FULL CGM 0.5.12 + OIO + this runtime**. ACS does not replace PCM, CGM, or OIO and must not vendor their source trees.
+- This pack is an **install surface**: agents loading the hot-loader must wire **FULL PCM + FULL CGM + OIO + this runtime**. ACS does not replace PCM, CGM, or OIO and must not vendor their source trees.
 - **Binding:** ACS and all agent-hotloader adopters use the **complete** PCM, CGM, and OIO stacks — not a slim subset (not HSW+writing-direction only, not hotload-only, not continuity-only PCM).
 
 ## Version source (no copied pins)

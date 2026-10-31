@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
+  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-10-05",
@@ -191,5 +191,5 @@
     "agent-stack-train stack-releases.json — the certified version set the adopter's stack-manifest.json follows (empty pins)",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Every component comes from one agent-stack-train checkout, at one commit; the adopter's stack-manifest.json carries an empty agent-stack-train pin and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). claim-file claim_queue after vacancy (scripts/seat_protocol.py executes the seat state machine); returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
+  "summary": "Hot-load the FULL stack (PCM + CGM + OIO) + this runtime. Every component comes from one agent-stack-train checkout, at one commit; the adopter's stack-manifest.json carries an empty agent-stack-train pin and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). claim-file claim_queue after vacancy (scripts/seat_protocol.py executes the seat state machine); returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
 }

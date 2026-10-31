@@ -514,7 +514,7 @@ def validate_pins(
 
     cgm = pins.get("cgm")
     if not isinstance(cgm, dict):
-        errors.append("pins.cgm: required (FULL CGM 0.5.12 stack)")
+        errors.append("pins.cgm: required (FULL CGM stack)")
     else:
         if against_stack:
             cgm_req = stack_component("content-generation-modules", stack_root)
