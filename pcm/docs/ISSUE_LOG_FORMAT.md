@@ -92,6 +92,10 @@ Pull requests open reader-first: open with the problem and consequence, then wha
 
 Reference issues with `Refs #<number>` for progress-only work. Use a native closing keyword — `Closes #<number>`, `Fixes #<number>`, or `Resolves #<number>` — only when the merge resolves the issue; GitHub recognizes closing keywords even inside a negated sentence, so never mention one in a sentence that says the work does not close it. OIO's reusable close workflow owns the transition on merge: it closes the referenced log and marks its Lifecycle Status `resolved`. Checkpoint commit messages are sanitized — `continuity checkpoint` rewrites closing directives to `Refs` unless `--allow-closing-keywords` is passed — so a checkpoint commit cannot close an issue. After every merge, verify the live issue status before reconciling task lifecycle.
 
+The pull request that finishes a leaf issue says `Closes #<number>`; `Refs` is for partial progress, and an issue whose finishing pull request said `Refs` stays open after the work is done.
+
+`continuity pr-check --body-file <file> --branch <head branch>` checks a description against this shape: it fails one that opens with a heading or an issue reference, lacks a template section (Human outcome, Before and after, Change and scope, What stays unchanged, Verification), still holds the template's prompts, or names no issue. It warns when the branch's issue (the number in a name like `fix/47-pr-shape`) is named only with `Refs`, and when a diagram is wide, has more than 8 nodes, or is not inside `<details>`. It checks structure, not prose quality.
+
 ## Exemplar
 
 The reference exemplar for this format is [inference-recommendation-engine issue 40 ("IRE-40")](https://github.com/Pukujan/inference-recommendation-engine/issues/40): it explains the problem in plain language first, lists what was actually seen, labels each explanation as unverified with what would confirm or refute it, ties evidence to its source including evidence that points the other way, and marks the proposal as a proposal.

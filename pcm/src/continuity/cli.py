@@ -28,6 +28,7 @@ from .contributor import (
     parse_contributor_descriptor,
     render_contributor_descriptor,
 )
+from .pr_check import branch_issue, check_pr_body
 
 PROTOCOL_VERSION = "0.1.0-draft"
 CONTRIBUTOR_DESCRIPTOR_FILENAME = "contributor.json"
@@ -717,11 +718,19 @@ This template records context; it does not automatically synchronize this issue 
 
 
 def github_pr_template() -> str:
-    return f"""{GITHUB_ISSUE_LIFECYCLE_GUIDANCE}
+    return f"""<!-- Start with one problem sentence a newcomer can follow: what was wrong, and what it cost. Keep it above every heading; `continuity pr-check` fails a description that opens with a heading or an issue reference. -->
+
+<!-- {GITHUB_ISSUE_LIFECYCLE_GUIDANCE} The pull request that finishes a leaf issue says `Closes #<number>`; `Refs #<number>` is for partial progress. -->
 
 ## Human outcome
 
 What changed for the person or project?
+
+## Before and after
+
+**Before:** what happened, step by step. **After:** what happens now.
+
+When the flow has 4 or more steps or 2 or more branches, add a mermaid diagram inside `<details>` next to this text: `graph TD`, at most 8 nodes, labels of 6 words or fewer.
 
 ## Change and scope
 
@@ -4079,6 +4088,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_preflight = sub.add_parser("preflight")
     p_preflight.add_argument("--root", required=True)
 
+    p_pr_check = sub.add_parser("pr-check", help="check a pull-request description against the reader-first shape")
+    p_pr_check.add_argument("--body-file", required=True, help="the description, or - for standard input")
+    p_pr_check.add_argument("--branch", default="", help="head branch; its issue number is the owning issue")
+    p_pr_check.add_argument("--issue", type=int, help="owning issue number (overrides the branch's)")
+
     p_task = sub.add_parser("task")
     task_sub = p_task.add_subparsers(dest="task_command", required=True)
     p_task_new = task_sub.add_parser("new")
@@ -4285,6 +4299,19 @@ def main(argv: list[str] | None = None) -> int:
             print("VALID")
             return 0
 
+        if args.command == "pr-check":
+            body = sys.stdin.read() if args.body_file == "-" else Path(args.body_file).read_text(encoding="utf-8")
+            owning = args.issue if args.issue is not None else branch_issue(args.branch)
+            errors, warnings = check_pr_body(body, owning)
+            for warning in warnings:
+                print(f"WARNING: {warning}")
+            for error in errors:
+                print(f"ERROR: {error}")
+            if errors:
+                print("See the pull-request template (.github/pull_request_template.md) for the shape.")
+                return 1
+            print("PR SHAPE OK")
+            return 0
         if args.command == "preflight":
             root = Path(args.root).resolve()
             mode, errors = preflight_repo(root)

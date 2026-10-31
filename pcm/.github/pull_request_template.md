@@ -1,8 +1,16 @@
-When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+<!-- Start with one problem sentence a newcomer can follow: what was wrong, and what it cost. Keep it above every heading; `continuity pr-check` fails a description that opens with a heading or an issue reference. -->
+
+<!-- When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue). The pull request that finishes a leaf issue says `Closes #<number>`; `Refs #<number>` is for partial progress. -->
 
 ## Human outcome
 
 What changed for the person or project?
+
+## Before and after
+
+**Before:** what happened, step by step. **After:** what happens now.
+
+When the flow has 4 or more steps or 2 or more branches, add a mermaid diagram inside `<details>` next to this text: `graph TD`, at most 8 nodes, labels of 6 words or fewer.
 
 ## Change and scope
 
