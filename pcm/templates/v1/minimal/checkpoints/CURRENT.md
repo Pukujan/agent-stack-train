@@ -2,7 +2,7 @@
 
 <!-- continuity:current {"active_task":null,"active_task_file":null,"protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
-This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
+This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work as `#N` instead of copying their state, and replace this snapshot as work moves: append-only applies to task logs and `history/`, not to CURRENT.
 
 ## Program state
 

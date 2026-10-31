@@ -559,7 +559,7 @@ def current_template(prefix: str) -> str:
     return (
         "# Current Repository Checkpoint\n\n"
         f"{marker('current', meta)}\n\n"
-        "This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.\n\n"
+        "This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work as `#N` instead of copying their state, and replace this snapshot as work moves: append-only applies to task logs and `history/`, not to CURRENT.\n\n"
         "## Program state\n\nPhase: bootstrap.\n\n"
         "## Completed\n\n- continuity protocol initialized.\n\n"
         "## Active\n\n- none.\n\n"
@@ -3817,6 +3817,28 @@ def _stale_base_overlap(root: Path, remote: str, extra_paths: list[str]) -> tupl
     return base_ref, overlap
 
 
+def archive_oversized_current(root: Path, top: Path) -> list[str]:
+    """Keep CURRENT under its cap as part of publishing a checkpoint (#58).
+
+    Returns the repository-top-relative paths that changed, to commit with the checkpoint.
+    """
+    try:
+        canonical = load_config(root).get("canonical", {})
+    except ContinuityError:
+        return []
+    current = (root / canonical.get("current", "checkpoints/CURRENT.md")).resolve()
+    if not current.is_file() or not current_size_errors(current):
+        return []
+    history, moved = archive_current(current, datetime.now(UTC).date())
+    if history is None:
+        print(f"WARNING: {current.relative_to(root)} is over its cap and has nothing left to archive; shorten it by hand")
+        return []
+    print(f"NOTE: CURRENT was over its cap; moved {moved} section(s) to {history.relative_to(root).as_posix()}")
+    if current_size_errors(current):
+        print("WARNING: CURRENT is still over its cap after archiving; shorten it by hand")
+    return [path.resolve().relative_to(top).as_posix() for path in (current, history)]
+
+
 def publish_checkpoint(
     root: Path,
     checkpoint_path: Path,
@@ -3868,7 +3890,8 @@ def publish_checkpoint(
                 "or pass --allow-stale-base to publish anyway"
             )
 
-    git_run(top, ["add", "--", relative])
+    archived = [] if recovery else archive_oversized_current(root, top)
+    git_run(top, ["add", "--", relative, *archived])
     if refresh_index_for_cataloged_change(root, local):
         print(f"NOTE: regenerated {DOCUMENT_INDEX_PATH} for cataloged change: {local}")
     staged = git_run(root, ["diff", "--cached", "--name-only"]).stdout.splitlines()

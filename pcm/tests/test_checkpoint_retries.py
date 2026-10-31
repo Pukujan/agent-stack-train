@@ -50,6 +50,29 @@ class CheckpointRetryTests(unittest.TestCase):
             request_id=request_id,
         )
 
+    def test_publishing_archives_an_oversized_current_in_the_same_commit(self) -> None:
+        # Publishing keeps CURRENT under its cap, so nobody has to remember to archive (#58).
+        root, remote = self.make_repo()
+        current = root / "checkpoints" / "CURRENT.md"
+        superseded = "".join(f"- superseded step {n}\n" for n in range(80))
+        current.write_text(current.read_text(encoding="utf-8") + "\n## Completed\n\n" + superseded, encoding="utf-8")
+        git_run(root, ["commit", "-qam", "grow CURRENT"])
+        task = self.add_checkpoint(root)
+
+        publish_checkpoint(root, task, "PCM-0001", "run the full suite", allow_stale_base=True)
+
+        self.assertLessEqual(len(current.read_text(encoding="utf-8").splitlines()), 60)
+        self.assertEqual(git_run(root, ["status", "--porcelain"]).stdout, "")
+        pushed = subprocess.run(
+            ["git", "--git-dir", remote, "show", "--name-only", "--format=", "task/PCM-0001-retry"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+        self.assertIn("checkpoints/CURRENT.md", pushed)
+        self.assertTrue(any(path.startswith("checkpoints/history/") for path in pushed), pushed)
+        self.assertIn(task.resolve().relative_to(root.resolve()).as_posix(), pushed)
+
     def test_a_root_inside_the_repository_publishes_its_checkpoint(self) -> None:
         # One repository can hold several components, each a PCM root in its own folder.
         top = Path(tempfile.mkdtemp(prefix="continuity-checkpoint-monorepo-"))
