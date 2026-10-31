@@ -109,7 +109,7 @@ layers, because two kinds of file exist.
 | Existing path | Action |
 | --- | --- |
 | absent | **create** |
-| ours — under `.coord/`, or carrying our `schema_version` | **keep** — never clobber; `--force` regenerates |
+| ours — under `.coord/`, or carrying our `schema_version` | **keep** — never clobber; `--force` refreshes it |
 | foreign, byte-identical to what we would write | **adopt** — treat as ours |
 | foreign, different | **refuse** — zero writes, exit non-zero, name the path |
 | symlink or not a regular file | **refuse** (fail closed) |
@@ -118,7 +118,12 @@ layers, because two kinds of file exist.
 edit the `agents` list and `check_in` to match their seats and issue. So an
 edited `.coord/` file is **kept** and the install still succeeds — it is not a
 conflict, and the rerun stays idempotent. `--force` is the explicit operator
-choice to regenerate it.
+choice to refresh it. The lock and `stack-manifest.json` are rebuilt. The
+assignment's pins move to the new checkout, but its `agents`, `check_in`, boss
+record and `as_of_history` stay as the adopter set them, because an upgrade
+must not drop a seat or rewrite the append-only history. The project and
+adopter names already recorded are kept too, unless `--project-name` is
+given. To start the seats over, delete `assignment.json` and re-run.
 
 **Layer B — shared, human-owned files** (`AGENTS.md`, `README.md`, `PROJECT.md`,
 `HANDOFF.md`, `.github/workflows/*`). No component owns these wholesale; each

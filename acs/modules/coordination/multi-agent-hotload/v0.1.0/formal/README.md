@@ -31,7 +31,7 @@ write only when nothing is unresolved.
 | `Idempotent` | A clean state has written only what a clean plan writes, so re-applying adds nothing. |
 
 The kinds are exactly SPEC.md section 4 Layer A: `absent` (create), `ours_*`
-(keep; `--force` regenerates), `foreign_identical` (adopt), `foreign_different`
+(keep; `--force` refreshes), `foreign_identical` (adopt), `foreign_different`
 (refuse), `not_regular` (refuse — symlink or directory). An **edited** owned
 file (`ours_edited`) is *kept*, not refused — the assignment is designed to be
 edited — so it is in the writable set, never the refused set.
