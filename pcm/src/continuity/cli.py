@@ -65,6 +65,8 @@ Label observed results, repository/external evidence, agent reports and inferenc
 Before every push, synchronize relevant docs and task/checkpoint projections, CURRENT/HANDOFF when affected, and reviewed catalog/generated index. Record leaf/parent/dependency links, source issue/comment revision, as-of status, evidence, blockers and next action. Commit product/docs first; `continuity checkpoint` then commits and synchronously pushes the checkpoint with a stable request ID. After every successful push, manually publish a leaf issue receipt keyed by request ID and exact pushed SHA, linking changed docs/checkpoint, PR, tests and pending gates; add a linked parent progression update. Retry a missing receipt without another checkpoint/push; inspect for the same key before posting. --receipt-repo and --receipt-issue are opt-in and still require a proven lookup; omit them and the receipt stays manual. Automatic issue-comment synchronization is not implemented; issue #67 is CLOSED (owner freeze decision 2026-09-25) and its unmet guaranteed-completion acceptance transferred to #110.
 
 Required CI and GitHub auto-merge are mandatory. Arm auto-merge only after the increment's final push: a later push races the merge window and strands outside accepted history. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
+
+On a host other than GitHub (GitLab, Gitea or Forgejo, a plain Git server) or without a signed-in `gh`, issue verification, receipts and verified worktree cleanup do not run: continuity keeps Git-only durability (checkpoint commits pushed to origin), a human records scope and progress on that host by hand, and `continuity preflight --root <root>` prints which duties the host carries. SPEC section 8.3 names the four operations a host adapter must provide; only the GitHub adapter exists.
 <!-- pcm:github-progression:end -->"""
 
 PATH_NAMING_GUIDANCE = """## Continuity path naming
@@ -2692,6 +2694,86 @@ def github_repository(remote: str) -> str | None:
     return match.group(1) if match else None
 
 
+def classify_host(remote: str) -> tuple[str, str | None]:
+    """The kind of host an origin URL points at, and its hostname (PCM-0060).
+
+    Kinds: github, gitlab, gitea-forgejo, other, local (a path or file://) and none.
+    """
+    remote = remote.strip()
+    if not remote:
+        return "none", None
+    if github_repository(remote):
+        return "github", "github.com"
+    url = re.match(r"[A-Za-z][A-Za-z0-9+.-]*://(?:[^@/]*@)?([^/:]*)", remote)
+    scp = re.match(r"(?:[^@/]+@)?([^/:]+):(?!//)", remote)
+    if url:
+        host = url.group(1).lower() or None
+    elif scp and not re.match(r"[A-Za-z]:[\\/]", remote):
+        host = scp.group(1).lower()
+    else:
+        host = None
+    if host is None:
+        return "local", None
+    if "gitlab" in host:
+        return "gitlab", host
+    if host == "codeberg.org" or "gitea" in host or "forgejo" in host:
+        return "gitea-forgejo", host
+    return "other", host
+
+
+def host_capabilities(remote: str, config: dict[str, Any]) -> list[tuple[str, str]]:
+    """Which continuity duties this origin can carry, for preflight to print.
+
+    Only GitHub has an adapter today (SPEC 8.3); every other host keeps Git-only
+    durability and loses the issue-authority half.
+    """
+    kind, host = classify_host(remote)
+    where = f"{kind} origin" if host is None else f"{kind} origin ({host})"
+    declared = config.get("trackers", {}).get("github_repository")
+    issues = kind == "github" or (isinstance(declared, str) and bool(declared))
+    if kind == "none":
+        durability = "local only (no origin; checkpoints are commits nobody else can fetch)"
+    else:
+        durability = "yes (checkpoints are commits pushed to origin)"
+    if issues:
+        authority = "yes (GitHub issues, checked with gh when it is signed in)"
+        receipts = "yes (posted to GitHub issues, by hand or with --receipt-repo)"
+    else:
+        authority = f"unsupported on a {where}: issues are not verified; record scope on the host by hand"
+        receipts = f"unsupported on a {where}: post progress records by hand"
+    if kind == "github":
+        cleanup = "yes (worktree remove verifies the merged GitHub pull request)"
+    else:
+        cleanup = "refused (worktree remove needs a GitHub origin; trees stay in place)"
+    return [
+        ("git durability", durability),
+        ("issue authority", authority),
+        ("issue receipts", receipts),
+        ("verified worktree cleanup", cleanup),
+    ]
+
+
+def host_report(root: Path) -> list[str]:
+    """Preflight's HOST, CAPABILITY and WARNING lines for an adopted root."""
+    remote = git_value(root, ["remote", "get-url", "origin"], fallback="")
+    try:
+        config = json.loads((root / ".continuity" / "config.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        config = {}
+    if not isinstance(config, dict):
+        config = {}
+    kind, host = classify_host(remote)
+    lines = [f"HOST: {kind}" + (f" ({host})" if host else "")]
+    capabilities = host_capabilities(remote, config)
+    lines += [f"CAPABILITY: {duty}: {text}" for duty, text in capabilities]
+    if config.get("trackers", {}).get("github") is True and dict(capabilities)["issue authority"].startswith("unsupported"):
+        lines.append(
+            "WARNING: .continuity/config.json turns on GitHub issue authority, but origin is "
+            f"{kind}; the GitHub progression guidance describes issue checks and receipts that do not run here"
+        )
+    return lines
+
+
 def tracked_repository(config: dict[str, Any], origin: str | None) -> tuple[str | None, str]:
     """The repository whose issues this root's tasks link to, and what named it.
 
@@ -4177,6 +4259,13 @@ def main(argv: list[str] | None = None) -> int:
             )
             for line in results:
                 print(line)
+            kind, host = classify_host(git_value(root, ["remote", "get-url", "origin"], fallback=""))
+            if kind != "github":
+                print(
+                    f"NOTE: origin is {kind}" + (f" ({host})" if host else "")
+                    + "; issue authority, receipts and verified worktree cleanup need a GitHub origin, "
+                    "so continuity keeps Git-only durability here. Run `continuity preflight --root .` to see each duty."
+                )
             return 0
 
         if args.command == "validate":
@@ -4201,6 +4290,9 @@ def main(argv: list[str] | None = None) -> int:
             mode, errors = preflight_repo(root)
             print(f"ROOT: {root}")
             print(f"MODE: {mode}")
+            if mode in {"TARGET_VALID", "INVALID_TARGET", "DEGRADED_TARGET"}:
+                for line in host_report(root):
+                    print(line)
             if mode == "TARGET_VALID":
                 print("VALID")
                 return 0

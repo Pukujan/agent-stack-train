@@ -166,6 +166,21 @@ A local path registry may contain absolute paths only on that device; shared iss
 
 Issue lifecycle language in PR descriptions and commit messages is operational: GitHub recognizes supported closing keywords followed by an issue reference and may close the issue when the commit or PR merges to the default branch. Negation does not cancel the keyword. Use such a keyword only when the issue is ready to complete; for progress-only PRs, use `Refs #<number>` or a manual sidebar link. Verify the live issue after each merge before marking its task complete. See [GitHub's linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
+### 8.3 Host adapter seam
+
+PCM's authority rules assume a host that owns issues, pull requests and checks. Only GitHub has an adapter today. Every other origin keeps Git-only durability: checkpoints are still commits pushed to origin, but the issue-authority half does not run there. `continuity preflight` prints the host it found and which duties it carries, and `continuity init` prints a NOTE when origin is not GitHub. Nothing else changes: GitHub paths stay fail-closed, and no host is guessed to support more than it does.
+
+A host adapter is the four operations below. A future adapter for GitLab, Gitea/Forgejo or another host must provide all four, with the same fail-closed results, before any guidance may claim issue authority for that host. No such adapter exists, and none is planned until an adopter on that host needs one.
+
+| Operation | What it must answer | GitHub implementation today |
+|---|---|---|
+| Resolve the default branch | Which branch accepted history lives on, as the host reports it, not as the local clone guesses | `remote_default_branch` |
+| Verify issue identity | That a task's linked issue exists, is open, and is the issue the task names | `verify_task_issue` (`continuity issue verify`) |
+| Post a keyed receipt | One progress record per request ID and pushed SHA, found again before any retry so it is never posted twice | `publish_issue_receipt` (opt-in `--receipt-repo`/`--receipt-issue`) |
+| Confirm a merge | That the task's pull request merged into the default branch with its required checks passing, before completion or cleanup | `verify_merged_task` (used by `continuity worktree remove`) |
+
+Until an adapter exists for a host, a human performs these four on that host by hand, and the task records say so.
+
 ## 9. Evidence semantics
 
 Label observed command/test results, repository state, external artifacts, agent/model reports and inference separately. Claims MUST identify source/revision and relevant conditions; confidence is bounded by that evidence, not the fluency or repetition of prose. Contradictory evidence remains preserved and the affected conclusion is disputed or unknown until compared or reproduced. Record which claim a correction supersedes and why; invalidate dependent conclusions under section 8.1. An unknown result blocks only a dependent claim or gate. Validators check structure and references, not semantic truth; a valid schema, green local suite or unsupported numeric confidence cannot resolve factual contradictions.

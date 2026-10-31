@@ -83,7 +83,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `93fbedde03b9bcc375bbb1c652186b500f0d767a6ee6ea34528d7d2f6ec1d725`
+- Current SHA-256: `097d0fa9e6204ca90de24390032693733c3b9af0e6f9d88f222faf09c2fe1ee8`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`
@@ -347,7 +347,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `4b3b7777b71a284744ea5fcd3c2c19241aedf7ad92e6d060e52611a105038eb6`
-- Current SHA-256: `2691ff90ac4624e1edfe50d24c801571e17c47b430ea4d37d1d175900709f816`
+- Current SHA-256: `b6cb0defa1ce534255c21e92efd2ea93a53d70e55e5af6748dfdc3c67c7f3cfb`
 - Summary: Decision-record task projection linked to its leaf issue; owner scope gate pending (Refs #181, #182, #185).
 - Search terms: `60`, `decision`
 - Neighboring records: none

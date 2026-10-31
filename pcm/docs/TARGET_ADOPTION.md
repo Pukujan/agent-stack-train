@@ -110,6 +110,10 @@ Carry [SPEC section 8](../SPEC.md#8-authority) into existing guidance without ov
 
 Before every push synchronize applicable docs/checkpoint/catalog/index and record as-of/pending status; after the synchronous checkpoint push publish the request-ID/SHA leaf receipt and linked parent update. Required CI and GitHub auto-merge are mandatory; missing, failed or unverified gates prohibit completion/cleanup. Verify exact candidate checks and merge, fetch and reconcile live issue status. Material doc corrections require another gated increment; receipt-only transitions need no recursive doc commit. Templates are optional installation aids, not an exemption from these requirements. `--receipt-repo` and `--receipt-issue` are opt-in; omit them and the primary writer posts receipts manually. Automatic issue-comment synchronization is not implemented.
 
+## Hosts other than GitHub
+
+Run `continuity preflight --root <target>` after adoption. Besides the mode, it prints `HOST:` (github, gitlab, gitea-forgejo, other, local or none) and one `CAPABILITY:` line per duty: Git durability, issue authority, issue receipts and verified worktree cleanup. On GitHub all four run. On any other host only Git durability runs: checkpoints are still pushed commits, but issues are not verified, receipts are posted by hand, and `continuity worktree remove` leaves trees in place. If `.continuity/config.json` turns on GitHub issue authority on such a host, preflight prints a WARNING, because the generated guidance would describe checks that do not run. A root inside a larger repository can keep issue authority on another host's origin by declaring `trackers.github_repository`. The four operations a future adapter must provide are in [SPEC section 8.3](../SPEC.md#83-host-adapter-seam).
+
 ## Mandatory GitHub enforcement (every adopter)
 
 **PR-only to `main`, required status check `gates`, and prefer auto-merge-when-green are mandatory for every PCM adopter.** See [`docs/adopter-enforcement.md`](adopter-enforcement.md) for the exact ruleset/CI shape, apply steps, and verify checklist. Missing or unverified gates fail closed.
