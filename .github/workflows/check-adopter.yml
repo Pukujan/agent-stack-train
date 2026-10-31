@@ -48,6 +48,12 @@ jobs:
           ref: ${{ inputs.train-ref }}
           path: .stack-train
 
+      # A self-hosted runner may have no `python` on PATH; set one up so the
+      # check runs the same on every runner the caller picks.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Validate the manifest against the certified train
         run: |
           python .stack-train/scripts/check_manifest.py \

@@ -128,6 +128,12 @@ class CheckAdopterWorkflowTests(unittest.TestCase):
         self.assertIn("""        default: '"ubuntu-latest"'\n""", text)
         self.assertIn("    runs-on: ${{ fromJSON(inputs.runs_on) }}\n", text)
 
+    def test_python_is_set_up_before_the_check_runs(self) -> None:
+        # Self-hosted runners need not have python on PATH (Pukujan-lab/cross-repo-repairer#20).
+        text = (Path(__file__).resolve().parents[1] / ".github/workflows/check-adopter.yml").read_text(encoding="utf-8")
+        self.assertIn("uses: actions/setup-python@", text)
+        self.assertLess(text.index("uses: actions/setup-python@"), text.index("check_manifest.py"))
+
 
 if __name__ == "__main__":
     unittest.main()
