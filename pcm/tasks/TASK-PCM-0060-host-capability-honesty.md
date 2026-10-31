@@ -75,6 +75,30 @@ Blocked/uncertain:
 Next:
 - Open the reader-first PR on Pukujan/agent-stack-train, arm auto-merge, and post the receipt on #182.
 
+### 2026-10-31 23:26:51 UTC — claude-opus-5.5
+
+<!-- continuity:checkpoint {"agent":"claude-opus-5.5","blocked":[],"changed":["pcm/tests/test_host_capabilities.py",".github/pull_request_template.md"],"completed":["CI's ruff check failed on an unused json import in the new host tests; removed it. Merged current main (#50 added a root pull request template carrying the GitHub progression block) and gave that copy the Git-only durability sentence."],"decisions":["no new decisions"],"evidence":["ruff passes; PCM 350 tests with the same six local-machine failures as baseline; continuity validate VALID; the PR body passes continuity pr-check."],"next_action":"Wait for CI on Pukujan/agent-stack-train#51 and auto-merge, then post the merge receipt on #182.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"PCM-0060","timestamp":"2026-10-31T23:26:51Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"2d5f975f6dde325b8ea7a44916d31bdcdb9d0f47869e64905ac1c3307c97c856","request_id":"pcm0060-probe-seam-2","schema":"project-continuity.checkpoint-operation.v1","task_id":"PCM-0060"} -->
+
+Completed:
+- CI's ruff check failed on an unused json import in the new host tests; removed it. Merged current main (#50 added a root pull request template carrying the GitHub progression block) and gave that copy the Git-only durability sentence.
+
+Evidence:
+- ruff passes; PCM 350 tests with the same six local-machine failures as baseline; continuity validate VALID; the PR body passes continuity pr-check.
+
+Decisions:
+- no new decisions
+
+Changed:
+- pcm/tests/test_host_capabilities.py
+- .github/pull_request_template.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Wait for CI on Pukujan/agent-stack-train#51 and auto-merge, then post the merge receipt on #182.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
