@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"ACS-0009","active_task_file":"tasks/TASK-ACS-0009-licensing.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"ACS-0015","active_task_file":"tasks/TASK-ACS-0015-claude-enforcement.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
@@ -19,6 +19,7 @@ Phase: ACS narrowed to **execution coordination only**. The JEV decision tooling
 
 ## Active
 
+- ACS-0015 (agent-stack-train#37, refs #34) load and enforce the stack's rules in Claude Code — the installer writes a `CLAUDE.md` bridge and a guard (`.claude/hooks/acs_guard.py`, wired as Claude Code hooks) that blocks commits with no owning issue, pushes to the default branch, worktrees outside `<project>/worktrees/<TASK-ID>`, off-shape issue logs, and stopping with unpushed or uncheckpointed work; `hotload_check` and `check-adopter` fail an adopter without them; CI fails a pull request with no owning issue. PR #36, all checks green. Task record `tasks/TASK-ACS-0015-claude-enforcement.md`; branch `fix/claude-loads-the-stack`.
 - ACS-0014 (#71) dev root hygiene — `HOTLOAD.md` / `BEHAVIOR.md` / `PROMPT_INJECT.md` state that the dev root holds one main checkout per repo; new `scripts/dev_root_check.py` flags everything else and can move it into the ACS cache; `hotload_check` warns on findings and refuses dependency checkouts inside the dev root. Task record `tasks/TASK-ACS-0014-dev-root-hygiene.md`; branch `task/ACS-dev-root-hygiene`.
 - ACS-0009 (#69) license the stack — stamp ACS with FSL-1.1-ALv2 (`LICENSE`, `NOTICE`, `TRADEMARK.md`, README section) so a third party may use it freely but not compete; stamp the pinned module repos (PCM, CGM, OIO, agent-stack-train) with Apache-2.0; make `jev-dump` private. Cross-repo observation OIO #24. Task record `tasks/TASK-ACS-0009-licensing.md`; branch `task/ACS-licensing`.
 - ACS-0008 (#44, supersedes direction on #52/#63) narrow to coordination — moved the JEV decision tooling (`jev-oss-compare`, `jev-ambiguity-gate`, `jev-research-gate`, `jev-gate-pin`, `jev-shared`, `ops-db`, `session-ops-capture`) and the oh-my-pi runtime + evals out to `Pukujan/jev-dump`; moved the [CC] setup out to `Pukujan/claude-code-launcher`. Rewrote `registry.json` to a single module, filled `PROJECT.md` with the layer-ownership table, rewrote `POLICY.md` and the root `README.md`, `.content-system/project-brief.json`, the pack docs, and the image provenance to the coordination product. Removed the two CI steps that only exercised deleted paths (config-template parse, TypeScript syntax check) rather than leave silent false-passes. Merged `main` @ `e1d7732` (PR #68). Task record `tasks/TASK-ACS-0008-narrow-to-coordination.md`; branch `task/ACS-narrow-to-coordination`. Evidence: `check_pins.py` OK (15 projections agree), hotloader pack tests pass.
