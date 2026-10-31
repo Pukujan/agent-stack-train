@@ -58,6 +58,30 @@ class DecideTests(unittest.TestCase):
         self.assertIn(f"Refs {up.UPGRADE_ISSUE}", body)
 
 
+    def test_the_body_follows_the_pull_request_standard(self) -> None:
+        body = up.pr_body("1.0.2", NEW, OLD, [], "ok", [".github/workflows/gates.yml"])
+        self.assertTrue(body.startswith("This repository runs agent stack"))
+        for heading in ("## Change and scope", "## What stays unchanged", "## Verification", "## Evidence and provenance"):
+            self.assertIn(heading, body)
+        self.assertIn("`.github/workflows/gates.yml`", body)
+        self.assertIn("Next action:", body)
+
+    def test_workflow_pins_move_to_the_new_commit(self) -> None:
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = Path(tmp)
+            flows = clone / ".github" / "workflows"
+            flows.mkdir(parents=True)
+            (flows / "gates.yml").write_text(f"run: git checkout {OLD}\nshort: {OLD[:7]}\n", encoding="utf-8")
+            (flows / "other.yml").write_text("run: true\n", encoding="utf-8")
+            (clone / "NOTES.md").write_text(OLD, encoding="utf-8")
+            self.assertEqual(up.bump_workflows(clone, OLD, NEW), [".github/workflows/gates.yml"])
+            text = (flows / "gates.yml").read_text(encoding="utf-8")
+            self.assertIn(NEW, text)
+            self.assertIn(OLD[:7], text)  # short forms are listed, not guessed at
+            self.assertEqual((clone / "NOTES.md").read_text(encoding="utf-8"), OLD)
+
 class InstalledWarningTests(unittest.TestCase):
     TRAIN = {"certified": {"agent-stack-train": {"version": "1.0.1", "commit": NEW}}}
 
