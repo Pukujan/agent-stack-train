@@ -380,3 +380,33 @@ def test_prompt_inject_render_carries_dev_root_rule():
     assert hc.DEV_ROOT_RULE in committed
     for doc in ("HOTLOAD.md", "BEHAVIOR.md"):
         assert "Dev root hygiene (binding)" in (MODULE_ROOT / doc).read_text(encoding="utf-8")
+
+
+def test_pcm_project_folder_with_task_worktrees_is_clean(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    repo = clone(remote, root / "widget" / "main")
+    git("worktree", "add", "-b", "task-1", str(root / "widget" / "worktrees" / "TASK-1"), cwd=repo)
+    mod = _load("dev_root_check")
+    report = mod.scan(root)
+    assert report["ok"] is True, report
+    assert report["primary_checkouts"] == ["widget"]
+
+
+def test_pcm_project_folder_still_flags_worktrees_elsewhere_and_extras(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    repo = clone(remote, root / "widget" / "main")
+    git("worktree", "add", "-b", "nested", str(repo / ".claude" / "worktrees" / "x"), cwd=repo)
+    (root / "widget" / "scratch").mkdir()
+    mod = _load("dev_root_check")
+    report = mod.scan(root)
+    assert sorted(f["kind"] for f in report["findings"]) == ["project_folder_extra", "registered_worktree"]
+
+
+def test_pcm_project_folder_and_flat_clone_are_duplicates(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    clone(remote, root / "widget" / "main")
+    clone(remote, root / "widget-copy")
+    mod = _load("dev_root_check")
+    report = mod.scan(root)
+    assert kinds(report) == {"widget-copy": "duplicate_clone"}
+    assert report["primary_checkouts"] == ["widget"]

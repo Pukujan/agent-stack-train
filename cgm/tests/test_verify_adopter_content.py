@@ -211,6 +211,19 @@ class VerifyAdopterContentTests(unittest.TestCase):
             self.assertTrue(any("agent/tool-dump tell" in e for e in errors))
             self.assertTrue(any("testament" in e or "groundbreaking" in e for e in errors))
 
+    def test_docs_hsw_tells_skips_agent_instruction_files(self):
+        # AGENTS.md and Claude Code's CLAUDE.md are contracts for agents; they
+        # name skill paths on purpose. A human doc with the same text is flagged.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project = Path(tmpdir)
+            text = "# Rules\n\nLoad modules/human-sounding-writing/SKILL.md before you write.\n"
+            for name in ("AGENTS.md", "CLAUDE.md"):
+                (project / name).write_text(text, encoding="utf-8")
+            self.assertEqual(check_docs_hsw_tells(project), [])
+            (project / "GUIDE.md").write_text(text, encoding="utf-8")
+            errors = check_docs_hsw_tells(project)
+            self.assertTrue(any("GUIDE.md" in e for e in errors), errors)
+
     def test_check_adopter_content_integration_clean(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             project = Path(tmpdir)

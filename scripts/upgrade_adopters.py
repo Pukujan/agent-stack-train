@@ -119,6 +119,10 @@ def git_is_ancestor(stack_root: Path):
     return is_ancestor
 
 
+# The issue that owns adopter upgrades: the one-repo move and its release train.
+UPGRADE_ISSUE = "Pukujan/agent-stack-train#21"
+
+
 def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail: str) -> str:
     lines = [
         f"Upgrades this repository to agent stack {version}: [`{commit[:7]}`](https://github.com/Pukujan/agent-stack-train/commit/{commit}), "
@@ -128,6 +132,9 @@ def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail:
         f"`.coord/assignment.json` and moves the pins from `{old[:7]}`. OIO's managed files and close callers move with it.",
         "",
         "Opened by agent-stack-train's `upgrade-adopters` workflow. It never merges: this repository's own checks and merge rules decide.",
+        "",
+        # Every pull request names its owning issue, and OIO's check fails one that does not (#37).
+        f"Refs {UPGRADE_ISSUE}",
     ]
     if leftovers:
         lines += ["", f"These tracked files still name the old commit `{old[:7]}`, which the installer does not rewrite. Check them before merging:", ""]

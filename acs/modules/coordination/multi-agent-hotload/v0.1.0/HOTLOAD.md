@@ -13,6 +13,8 @@ Install is complete only when all four are wired as **full stacks** (slim subset
 3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
 4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR. Checkable artifact: `scripts/seat_protocol.py` executes the seat state machine, and `python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests/test_coordination.py -q` passes
 
+Every harness must also load the rules. Codex, Cursor and Gemini read `AGENTS.md` by themselves; Claude Code reads `CLAUDE.md`, and loads `AGENTS.md` only through an optional fallback that a `CLAUDE.md` of the project's own turns off. So the installer writes a delimited `<!-- acs:claude-bridge:start/end -->` region into the adopter's `CLAUDE.md` (`scripts/claude_bridge.py`). The region imports `@AGENTS.md`, says live GitHub state wins over local copies, and carries the boot rules with their skill paths linked to GitHub at the stack commit, so Claude gets them without a manual paste. Text outside the region is never touched. `hotload_check` fails an adopter whose `CLAUDE.md` does not import `AGENTS.md`, and the reusable `check-adopter.yml` workflow reports it (`claude: require` fails the run).
+
 Missing any of the four, or substituting a thin PCM/CGM subset, is an **incomplete install** reported as such with a non-zero exit. [SPEC.md](SPEC.md) is the normative install contract — the state machine, the per-artifact gate, and the platform matrix.
 
 ## Working-repo scope (binding)
@@ -28,15 +30,15 @@ See [BEHAVIOR.md](BEHAVIOR.md) — Working-repo scope.
 
 The dev root is where the operator keeps the main checkout of each repo. It defaults to `D:\development` on Windows and `~/development` on macOS and Linux, and can be changed with the `ACS_DEV_ROOT` environment variable or `--dev-root`.
 
-- **MUST** keep exactly one main checkout per repo directly under the dev root, and nothing else.
-- **MUST NOT** create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or tool caches inside the dev root.
-- **MUST** put them under the ACS cache instead (override with `ACS_CACHE_DIR`):
+- **MUST** keep one entry per repo directly under the dev root: its main checkout, or a PCM project folder holding the checkout at `<project>/main` and task worktrees at `<project>/worktrees/<TASK-ID>` (made with `continuity worktree`), and nothing else.
+- **MUST NOT** create any other git worktree (inside a checkout, beside it, or in the dev root), or dependency or sibling clones, pinned copies, scratch folders, or tool caches inside the dev root.
+- **MUST** put them where this table says (the ACS cache, overridden with `ACS_CACHE_DIR`, except task worktrees):
 
 | Kind | Windows | macOS / Linux |
 | --- | --- | --- |
 | Pinned dependency clones (PCM, CGM, ...) | `%LOCALAPPDATA%\acs\deps\<name>` | `~/.cache/acs/deps/<name>` |
 | Scratch, probes, throwaway copies | `%LOCALAPPDATA%\acs\scratch\<name>` | `~/.cache/acs/scratch/<name>` |
-| Linked worktrees (`git worktree add`) | `%LOCALAPPDATA%\acs\worktrees\<repo>-<branch>` | `~/.cache/acs/worktrees/<repo>-<branch>` |
+| Task worktrees | `<project>\worktrees\<TASK-ID>` in the PCM project folder | `<project>/worktrees/<TASK-ID>` in the PCM project folder |
 
 `hotload_check` validates against the stack checkout's own `cgm/` folder. It refuses a `--cgm-root` or `CGM_ROOT` override that sits inside the dev root unless it is one of the main checkouts there. It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
 
@@ -249,6 +251,6 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)
 - [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
-- [ ] Dev root hygiene: one main checkout per repo in the dev root; worktrees, deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
+- [ ] Dev root hygiene: one entry per repo in the dev root (a checkout, or a PCM project folder with `main/` and `worktrees/`); deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
 - [ ] External research gate: see BEHAVIOR.md (MUST on first use / bump / failure; MUST NOT for trivial known-pattern edits)
 - [ ] No secrets in commits, logs, or comments

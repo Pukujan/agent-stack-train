@@ -95,7 +95,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `uncommitted`
 - Reviewed SHA-256: `7f3a0315a2bcfdd04ecac004bae277ce3b2a39efc1778d441666d2eadbd52f5b`
-- Current SHA-256: `5ab76a8e7b0dba0b06f8e2aa3e1f754179f9e7017425a22e78f092a89ab63210`
+- Current SHA-256: `5b6f00118cd159a741a6fe581a471872997ea5d42f68891691e3f22b2de18b23`
 - Summary: PCM's prose rules for issue logs, updates and PRs; the canonical issue-log shape defers to OIO's ontology and form.
 - Search terms: `PR`, `format`, `issue`, `log`, `readability`
 - Neighboring records: `continuity-records-policy`

@@ -55,6 +55,7 @@ class DecideTests(unittest.TestCase):
         body = up.pr_body("1.0.2", NEW, OLD, ["AGENTS.md"], "acs_install: OK (state=READY)")
         self.assertIn("- `AGENTS.md`", body)
         self.assertIn("never merges", body)
+        self.assertIn(f"Refs {up.UPGRADE_ISSUE}", body)
 
 
 class InstalledWarningTests(unittest.TestCase):

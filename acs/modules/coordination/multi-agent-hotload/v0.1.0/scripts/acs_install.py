@@ -33,6 +33,13 @@ What it does, in order:
                                   (CGM module list from ``pins.json``)
        .coord/hotload.lock.json   installed pack version + the stack commit + state
        stack-manifest.json        one empty pin -- the adopter follows the train
+       .claude/hooks/acs_guard.py the guard Claude Code runs to enforce the rules
+       .claude/settings.json      its SessionStart, PreToolUse and Stop hooks
+                                  (other settings and hooks are kept)
+       CLAUDE.md                  the acs:claude-bridge region: imports AGENTS.md
+                                  so Claude Code loads the same rules as every
+                                  other agent, says GitHub is the authority, and
+                                  carries the boot rules (``claude_bridge.py``)
 
 4. Writes them atomically, keeping existing files unless ``--force``, refusing to
    write outside the adopter root, and refusing to overwrite a hand-written
@@ -72,6 +79,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import claude_bridge  # noqa: E402  (sibling script; stdlib only)
 import stack_checkout  # noqa: E402  (sibling script; stdlib only)
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
@@ -452,11 +460,20 @@ def write_json_atomic(path: Path, data: object, *, root: Path) -> None:
         target_r = path.resolve()
         if target_r != root_r and root_r not in target_r.parents:
             raise ValueError(f"refusing to write outside adopter root: {path}")
-    text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+    write_bytes_atomic(path, render_json_bytes(data), root=root)
+
+
+def write_bytes_atomic(path: Path, data: bytes, *, root: Path) -> None:
+    """``write_json_atomic`` for bytes that are already rendered."""
+    root_r = root.resolve()
+    parent_r = path.parent.resolve()
+    if parent_r != root_r and root_r not in parent_r.parents:
+        raise ValueError(f"refusing to write outside adopter root: {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(prefix=path.name + ".", dir=str(path.parent))
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            fh.write(text)
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
         os.replace(tmp, path)
     except BaseException:
         try:
@@ -671,6 +688,36 @@ def run(args: argparse.Namespace) -> int:
     to_write, kept, refusals = gate_plan(targets, adopter, force=args.force)
     problems.extend(refusals)
 
+    # Claude Code reads CLAUDE.md, not AGENTS.md. The bridge region is ours by its
+    # markers, so it is refreshed on every install; text outside it is kept.
+    claude_path = adopter / claude_bridge.CLAUDE_REL
+    claude_bytes: bytes | None = None
+    try:
+        claude_bytes = claude_bridge.plan(
+            adopter,
+            claude_bridge.render_region(
+                commit=stack_commit, cgm_root=stack_checkout.folder(stack_root, "content-generation-modules")
+            ),
+        )
+    except claude_bridge.BridgeError as exc:
+        refusals.append(str(exc))
+        problems.append(str(exc))
+
+    # Text loses to Claude Code's own defaults, so the installer also wires the
+    # guard hooks that enforce the rules (#37). Ours by their command, refreshed
+    # on every install; the adopter's other settings and hooks are kept.
+    guard_writes: list[tuple[Path, bytes]] = []
+    try:
+        for rel, data in (
+            (claude_bridge.GUARD_REL, claude_bridge.plan_guard(adopter)),
+            (claude_bridge.SETTINGS_REL, claude_bridge.plan_settings(adopter)),
+        ):
+            if data is not None:
+                guard_writes.append((adopter / rel, data))
+    except claude_bridge.BridgeError as exc:
+        refusals.append(str(exc))
+        problems.append(str(exc))
+
     # 7. Report the plan.
     say("acs_install: plan")
     say(f"  state={reported_state}")
@@ -686,6 +733,12 @@ def run(args: argparse.Namespace) -> int:
         say(f"  write {path.relative_to(adopter)}")
     for path, _ in kept:
         say(f"  keep  {path.relative_to(adopter)} (exists; --force to overwrite)")
+    if claude_bytes is not None:
+        say(f"  write {claude_bridge.CLAUDE_REL} (acs:claude-bridge region; Claude loads AGENTS.md)")
+    elif not refusals:
+        say(f"  keep  {claude_bridge.CLAUDE_REL} (bridge region current)")
+    for path, _ in guard_writes:
+        say(f"  write {path.relative_to(adopter)} (Claude Code guard hooks)")
     if oio_install == "pending":
         say("  oio   install the OIO issue-log surface (invoke the pinned installer)")
 
@@ -702,14 +755,22 @@ def run(args: argparse.Namespace) -> int:
         return 0
 
     # 8. Write, then validate the whole stack with the pack's own checker.
-    saved = snapshot([path for path, _ in to_write])
-    for path, data in to_write:
-        try:
+    saved = snapshot(
+        [path for path, _ in to_write]
+        + ([claude_path] if claude_bytes is not None else [])
+        + [path for path, _ in guard_writes]
+    )
+    try:
+        for path, data in to_write:
             write_json_atomic(path, data, root=adopter)
-        except (ValueError, OSError) as exc:
-            rollback(saved)
-            say(f"acs_install: FAIL (rolled back)\n  - {exc}")
-            return 1
+        if claude_bytes is not None:
+            write_bytes_atomic(claude_path, claude_bytes, root=adopter)
+        for path, data in guard_writes:
+            write_bytes_atomic(path, data, root=adopter)
+    except (ValueError, OSError) as exc:
+        rollback(saved)
+        say(f"acs_install: FAIL (rolled back)\n  - {exc}")
+        return 1
 
     check_argv = [
         sys.executable,
@@ -765,7 +826,10 @@ def run(args: argparse.Namespace) -> int:
         return 1
 
     say(f"acs_install: OK (state={final_state})")
-    say(f"  wrote {ASSIGNMENT_REL.as_posix()}, {LOCK_REL.as_posix()} and {MANIFEST_REL.as_posix()}")
+    say(
+        f"  wrote {ASSIGNMENT_REL.as_posix()}, {LOCK_REL.as_posix()}, {MANIFEST_REL.as_posix()} "
+        f"and the {claude_bridge.CLAUDE_REL} bridge"
+    )
     say("  next: EDIT the assignment's agents list + check_in to match your seats/issue.")
     say("  next: add the train check to CI:")
     say("        uses: Pukujan/agent-stack-train/.github/workflows/check-adopter.yml@main")

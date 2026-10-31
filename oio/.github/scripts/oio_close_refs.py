@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+from pathlib import Path
 from typing import Iterable
 
 CLOSE_COMMENT_MARKER = "<!-- oio:close-on-merge -->"
@@ -41,6 +42,12 @@ PLACEHOLDER_OWNERS = {"owner", "org", "your-org", "your_org"}
 PLACEHOLDER_REPOS = {"repo", "repository", "name", "your-repo", "your_repo"}
 CLOSING_PATTERN = re.compile(
     r"\b(?:closes|fixes|resolves)\b\s*:?\s*"
+    r"(?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?\s*#([0-9]+)\b",
+    re.IGNORECASE,
+)
+# Any owning-issue link: a progress link (`Refs #12`) or a native closing verb.
+ISSUE_LINK_PATTERN = re.compile(
+    r"\b(?:refs|closes|fixes|resolves)\b\s*:?\s*"
     r"(?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?\s*#([0-9]+)\b",
     re.IGNORECASE,
 )
@@ -73,6 +80,58 @@ def closing_refs(body: str) -> list[tuple[str | None, int]]:
         seen.add(key)
         refs.append((repo, int(match.group(2))))
     return refs
+
+
+def issue_links(body: str) -> list[tuple[str | None, int]]:
+    """Every owning-issue link in a body, ``Refs`` included, placeholders skipped."""
+    refs: list[tuple[str | None, int]] = []
+    for match in ISSUE_LINK_PATTERN.finditer(body or ""):
+        repo = match.group(1)
+        if repo is not None and _is_placeholder(repo):
+            continue
+        ref = (repo, int(match.group(2)))
+        if ref not in refs:
+            refs.append(ref)
+    return refs
+
+
+def require_link(repo: str, body: str) -> int:
+    """Fail a pull request whose body names no existing owning issue.
+
+    Every task starts from an issue log, so every pull request must link one
+    (#37). The body comes from the event payload; existence is checked with the
+    caller's token, and a token that cannot read issues only skips that part.
+    """
+    links = issue_links(body)
+    if not links:
+        print(
+            "OIO: this pull request names no owning issue. Add `Refs #N` to its body "
+            "(or `Closes #N` when the merge resolves the issue). File the issue log first.",
+            file=sys.stderr,
+        )
+        return 1
+    found = []
+    for target, number in links:
+        target = target or repo
+        proc = _run(["gh", "api", f"repos/{target}/issues/{number}", "--jq", ".pull_request != null"])
+        lowered = proc.stderr.lower()
+        if proc.returncode == 0:
+            if proc.stdout.strip() == "false":  # an issue, not a pull request
+                found.append(f"{target}#{number}")
+        elif "http 404" in lowered or "not found" in lowered:
+            continue
+        else:  # a token without issue access, or GitHub unreachable: keep the link
+            print(f"::warning::OIO: could not read {target}#{number}; checked the link only")
+            found.append(f"{target}#{number} (unchecked)")
+    if not found:
+        print(
+            f"OIO: the pull request links {', '.join(f'{t or repo}#{n}' for t, n in links)}, "
+            "but none is an existing issue. Link the issue log this work comes from.",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"OIO: owning issue {', '.join(found)}")
+    return 0
 
 
 def resolve_lifecycle(body: str) -> str:
@@ -446,12 +505,18 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--apply", action="store_true", help="close issues named by a merged pull request")
     mode.add_argument("--audit", action="store_true", help="report lifecycle-status drift and exit non-zero on findings")
     mode.add_argument(
+        "--require-link",
+        action="store_true",
+        help="fail unless the pull-request body (--body-file) names an existing owning issue",
+    )
+    mode.add_argument(
         "--sweep",
         action="store_true",
         help="find open issues that merged pull requests name, and parents whose sub-issues are all closed",
     )
     parser.add_argument("--repo", required=True, help="OWNER/REPOSITORY that owns the pull request")
     parser.add_argument("--pr", help="pull-request URL; required with --apply")
+    parser.add_argument("--body-file", help="with --require-link, a file holding the pull-request body")
     parser.add_argument("--write", action="store_true", help="with --sweep, make the changes instead of only reporting them")
     parser.add_argument(
         "--rollup",
@@ -462,7 +527,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.apply and not args.pr:
         parser.error("--pr is required with --apply")
+    if args.require_link and not args.body_file:
+        parser.error("--body-file is required with --require-link")
     try:
+        if args.require_link:
+            return require_link(args.repo, Path(args.body_file).read_text(encoding="utf-8"))
         if args.audit:
             return audit_repo(args.repo)
         if args.sweep:

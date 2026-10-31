@@ -147,6 +147,12 @@ def strip_markdown_code_and_comments(text: str) -> str:
     return cleaned
 
 
+# Instruction files agents load: contracts for agents, not human-facing docs.
+# CLAUDE.md is Claude Code's name for AGENTS.md, and ACS's installer writes its
+# claude-bridge region (skill paths and all) there.
+AGENT_CONTRACT_NAMES = {"AGENTS.md", "CLAUDE.md"}
+
+
 def collect_project_markdown_files(
     project_root: Path,
     docs_dir: Path | None = None,
@@ -162,14 +168,14 @@ def collect_project_markdown_files(
     if docs.is_dir():
         for path in sorted(docs.rglob("*.md")):
             if not any(part in EXCLUDED_DIR_NAMES for part in path.parts):
-                if exclude_agent_contracts and (path.name == "AGENTS.md" or ".agent" in path.parts):
+                if exclude_agent_contracts and (path.name in AGENT_CONTRACT_NAMES or ".agent" in path.parts):
                     continue
                 if path not in md_files:
                     md_files.append(path)
 
     for path in sorted(project_root.glob("*.md")):
         if path.is_file():
-            if exclude_agent_contracts and (path.name == "AGENTS.md" or ".agent" in path.parts):
+            if exclude_agent_contracts and (path.name in AGENT_CONTRACT_NAMES or ".agent" in path.parts):
                 continue
             if path not in md_files:
                 md_files.append(path)
