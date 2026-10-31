@@ -147,6 +147,12 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         "sequentially in it or run `continuity worktree migrate`; do not improvise a path.",
         "- A one-off go-ahead (\"skip the PR this time\") covers that action only.",
         "- A change made straight through GitHub (a repository transfer, a variable, secret, release or label, a `gh api` write) is a decision: record it on an issue log first and name that issue with an `ACS_ISSUE=<owner/repo>#N` prefix on the command. The guard blocks it otherwise.",
+        "- A pull request opens with one problem sentence, then the template's sections, including Before and after. "
+        "The one that finishes an issue says `Closes #N`, so the issue closes on merge; `Refs #N` is only for partial "
+        "progress. CI runs `continuity pr-check` on the description.",
+        "- Link a child issue to its parent with GitHub's sub-issue link (`gh api -X POST "
+        "repos/<owner>/<repo>/issues/<parent>/sub_issues -F sub_issue_id=<child's id>`), not only a line of text, so "
+        "the parent closes when its children do.",
     ]
     # The rule names example drive paths on purpose; the marker keeps adopters'
     # absolute-path lints from flagging them.
