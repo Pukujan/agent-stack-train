@@ -146,6 +146,15 @@ def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail:
         f"([`{commit[:7]}`]({stack}/commit/{commit})), so its checks and Claude Code hooks enforce an older set of rules "
         f"than the stack promises. See the [release notes]({stack}/releases/tag/v{version}) for what changed.",
         "",
+        "## Human outcome",
+        "",
+        f"After merge, this repository's checks and agent hooks enforce stack {version}, the same rules every other adopter gets.",
+        "",
+        "## Before and after",
+        "",
+        f"**Before:** the stack's files here are pinned to `{old[:7]}`. **After:** they are pinned to `{commit[:7]}`, "
+        "and nothing else in the repository changes.",
+        "",
         "## Change and scope",
         "",
         "- Reruns ACS's installer from that commit with `--force`, as a person would. It keeps the seats and boss history in "

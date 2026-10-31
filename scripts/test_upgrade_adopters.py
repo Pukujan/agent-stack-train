@@ -61,8 +61,12 @@ class DecideTests(unittest.TestCase):
     def test_the_body_follows_the_pull_request_standard(self) -> None:
         body = up.pr_body("1.0.2", NEW, OLD, [], "ok", [".github/workflows/gates.yml"])
         self.assertTrue(body.startswith("This repository runs agent stack"))
-        for heading in ("## Change and scope", "## What stays unchanged", "## Verification", "## Evidence and provenance"):
-            self.assertIn(heading, body)
+        # The same check this repository's pull requests must pass (#47).
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pcm" / "src"))
+        from continuity.pr_check import check_pr_body
+
+        self.assertEqual(check_pr_body(body), ([], []))
+        self.assertIn("## Evidence and provenance", body)
         self.assertIn("`.github/workflows/gates.yml`", body)
         self.assertIn("Next action:", body)
 

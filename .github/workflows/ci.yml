@@ -35,6 +35,9 @@ jobs:
       - name: The upgrade script's tests pass
         run: python scripts/test_upgrade_adopters.py
 
+      - name: The root pull-request template is PCM's
+        run: python scripts/test_pr_template.py
+
       - name: The manifest schema is valid JSON
         run: python -c "import json; json.load(open('stack-manifest.schema.json'))"
 
@@ -261,10 +264,32 @@ jobs:
           python3 oio/.github/scripts/oio_close_refs.py --require-link \
             --repo "${{ github.repository }}" --body-file "$RUNNER_TEMP/pr-body.md"
 
+  pr-shape:
+    name: pull request opens reader-first
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # One problem sentence, the template's sections, a before-and-after
+      # picture and the issue it belongs to (#47). Editing the description
+      # reruns it; a push to main has no body, so the job passes there.
+      - name: The description follows the pull-request template
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+          PYTHONPATH=pcm/src python -m continuity pr-check --body-file "$RUNNER_TEMP/pr-body.md" --branch "$BRANCH"
+
   gates:
     name: gates
     if: always()
-    needs: [train, pcm-quality, pcm-test, cgm, acs, oio-windows, oio, secrets, owning-issue]
+    needs: [train, pcm-quality, pcm-test, cgm, acs, oio-windows, oio, secrets, owning-issue, pr-shape]
     runs-on: ubuntu-latest
     steps:
       - name: Require every component's jobs green
