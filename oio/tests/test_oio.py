@@ -137,6 +137,7 @@ class InstallerTests(unittest.TestCase):
                 text = (self.target / relative).read_text()
                 self.assertIn(f"uses: Pukujan/agent-stack-train/.github/workflows/{reusable}@{head}\n", text)
                 self.assertIn(f"oio_ref: {head}\n", text)
+                self.assertIn("""runs_on: ${{ vars.OIO_RUNS_ON || '"ubuntu-latest"' }}\n""", text)
                 self.assertIn(relative, manifest["managed_files"])
         sweep = (self.target / ".github/workflows/oio-close-sweep.yml").read_text()
         self.assertIn("apply: ${{ vars.OIO_CLOSE_SWEEP_APPLY == 'true' }}", sweep)

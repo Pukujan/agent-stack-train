@@ -490,6 +490,26 @@ class WorkflowContractTests(unittest.TestCase):
                 self.assertEqual(checkout["ref"], "${{ inputs.oio_ref }}")
                 self.assertIn(f"python {checkout['path']}/{script.as_posix()}", steps[-1]["run"])
 
+    def test_reusable_workflows_take_the_runner_from_the_caller(self):
+        # A private adopter runs these on its own runners; the default keeps
+        # every other caller on GitHub's hosted runner.
+        for name in self.REUSABLE:
+            with self.subTest(name=name):
+                workflow = self.workflow(name)
+                runner = self.triggers(workflow)["workflow_call"]["inputs"]["runs_on"]
+                self.assertIs(runner["required"], False)
+                self.assertEqual(json.loads(runner["default"]), "ubuntu-latest")
+                job = next(iter(workflow["jobs"].values()))
+                self.assertEqual(job["runs-on"], "${{ fromJSON(inputs.runs_on) }}")
+
+    def test_triage_takes_the_runner_from_a_repository_variable(self):
+        # Triage is a managed file, so the runner is a variable, not an edit.
+        workflow = yaml.safe_load((ROOT / ".github/workflows/issue-triage.yml").read_text(encoding="utf-8"))
+        self.assertEqual(
+            workflow["jobs"]["triage"]["runs-on"],
+            """${{ fromJSON(vars.OIO_RUNS_ON || '"ubuntu-latest"') }}""",
+        )
+
     def test_close_workflow_is_reusable_and_merged_only(self):
         workflow = self.workflow("close-on-merge.yml")
         self.assertIn("workflow_call", self.triggers(workflow))
