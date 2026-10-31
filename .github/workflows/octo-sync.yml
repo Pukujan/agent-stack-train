@@ -1,0 +1,52 @@
+name: Octo sync
+
+# Copies the stack's memory files (CURRENT.md, the checkpoint archive, task
+# files, PROJECT.md and research notes) from main into the stack's Octo
+# workspace, so agents can search history without loading it at startup (#52,
+# #60). Git stays the record: an unchanged file is skipped, a changed one
+# becomes a new version, and a file removed from git is removed from Octo.
+#
+# It needs the secret OCTO_STACK_WS_KEY, a key for that workspace. Without it
+# the sync reports a skip and passes. Octo indexes slowly (about 30 seconds a
+# file), so the first full sync takes most of an hour; later ones send only
+# what changed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/checkpoints/CURRENT.md"
+      - "**/checkpoints/history/*.md"
+      - "**/tasks/TASK-*.md"
+      - "**/PROJECT.md"
+      - "**/docs/research/*.md"
+      - scripts/octo_sync.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: octo-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync memory files to Octo
+        env:
+          OCTO_STACK_WS_KEY: ${{ secrets.OCTO_STACK_WS_KEY }}
+        run: |
+          set -o pipefail
+          if [ -z "$OCTO_STACK_WS_KEY" ]; then
+            echo "::warning::OCTO_STACK_WS_KEY is not set, so nothing was synced to Octo."
+          fi
+          python scripts/octo_sync.py | tee -a "$GITHUB_STEP_SUMMARY"
