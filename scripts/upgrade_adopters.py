@@ -123,23 +123,64 @@ def git_is_ancestor(stack_root: Path):
 UPGRADE_ISSUE = "Pukujan/agent-stack-train#21"
 
 
-def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail: str) -> str:
+def bump_workflows(clone: Path, old: str, new: str) -> list[str]:
+    """Move the old installed commit to the new one in the adopter's own workflows (#42).
+
+    The installer rewrites the files it owns; an adopter's hand-written workflow
+    that checks the stack out at a fixed commit would otherwise validate the old
+    stack. Only the full 40-character commit is replaced, so no other text matches.
+    """
+    changed = []
+    for path in sorted((clone / ".github" / "workflows").glob("*.y*ml")):
+        text = path.read_text(encoding="utf-8")
+        if old in text:
+            path.write_text(text.replace(old, new), encoding="utf-8")
+            changed.append(path.relative_to(clone).as_posix())
+    return changed
+
+
+def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail: str, bumped: list[str] | None = None) -> str:
+    stack = "https://github.com/Pukujan/agent-stack-train"
     lines = [
-        f"Upgrades this repository to agent stack {version}: [`{commit[:7]}`](https://github.com/Pukujan/agent-stack-train/commit/{commit}), "
-        "the commit the [release train](https://github.com/Pukujan/agent-stack-train/blob/main/stack-releases.json) certifies.",
+        f"This repository runs agent stack `{old[:7]}`, but the release train now certifies {version} "
+        f"([`{commit[:7]}`]({stack}/commit/{commit})), so its checks and Claude Code hooks enforce an older set of rules "
+        f"than the stack promises. See the [release notes]({stack}/releases/tag/v{version}) for what changed.",
         "",
-        f"It reruns ACS's installer from that commit with `--force`, as a person would. The installer keeps the seats and boss history in "
-        f"`.coord/assignment.json` and moves the pins from `{old[:7]}`. OIO's managed files and close callers move with it.",
+        "## Change and scope",
         "",
-        "Opened by agent-stack-train's `upgrade-adopters` workflow. It never merges: this repository's own checks and merge rules decide.",
+        "- Reruns ACS's installer from that commit with `--force`, as a person would. It keeps the seats and boss history in "
+        "`.coord/assignment.json`, moves the pins, and refreshes OIO's managed files, the close callers, `CLAUDE.md`'s stack "
+        "region and the guard hooks in `.claude/`.",
+    ]
+    if bumped:
+        lines.append("- Moves the old commit to the new one in this repository's own workflows, which the installer does not own: "
+                     + ", ".join(f"`{p}`" for p in bumped) + ".")
+    lines += [
+        "",
+        "## What stays unchanged",
+        "",
+        "Product code, this repository's own text in `CLAUDE.md` and `AGENTS.md` outside the stack's marked regions, its own hooks "
+        "in `.claude/settings.json`, and its merge rules. This pull request never merges itself: this repository's checks decide.",
+        "",
+        "## Verification",
+        "",
+        "This pull request's checks validate the installed files against the certified commit. The installer's own output is below.",
+    ]
+    if leftovers:
+        lines += ["", f"These tracked files still name the old commit `{old[:7]}` and were not rewritten. Check them before merging:", ""]
+        lines += [f"- `{path}`" for path in leftovers]
+    lines += [
+        "",
+        "<details><summary>Installer output</summary>", "", "```", log_tail, "```", "", "</details>",
+        "",
+        "## Evidence and provenance",
+        "",
+        f"- Opened by agent-stack-train's `upgrade-adopters` workflow from `{commit[:7]}`. Parent: {UPGRADE_ISSUE}.",
+        "- Next action: merge when the checks pass; the bot reopens it if the train moves again first.",
         "",
         # Every pull request names its owning issue, and OIO's check fails one that does not (#37).
         f"Refs {UPGRADE_ISSUE}",
     ]
-    if leftovers:
-        lines += ["", f"These tracked files still name the old commit `{old[:7]}`, which the installer does not rewrite. Check them before merging:", ""]
-        lines += [f"- `{path}`" for path in leftovers]
-    lines += ["", "<details><summary>Installer output</summary>", "", "```", log_tail, "```", "", "</details>"]
     return "\n".join(lines) + "\n"
 
 
@@ -161,6 +202,7 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
         raise RuntimeError(f"installer failed:\n{log_tail}")
     if not run(["git", "status", "--porcelain"], cwd=clone).stdout.strip():
         return "installer changed nothing"
+    bumped = bump_workflows(clone, old, commit)
     leftovers = sorted(set(run(["git", "grep", "-l", "-I", "-e", old, "-e", old[:7]], cwd=clone, check=False).stdout.split()))
     name = os.environ.get("STACK_UPGRADE_GIT_NAME", "agent-stack-train upgrader")
     email = os.environ.get("STACK_UPGRADE_GIT_EMAIL", "noreply@github.com")
@@ -170,7 +212,7 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
          f"{title}\n\nRerun ACS's installer from Pukujan/agent-stack-train at {commit}."], cwd=clone)
     run(["git", "push", "-q", "--force", "origin", BRANCH], cwd=clone)
     body = workdir / f"{clone.name}.md"
-    body.write_text(pr_body(version, commit, old, leftovers, log_tail), encoding="utf-8")
+    body.write_text(pr_body(version, commit, old, leftovers, log_tail, bumped), encoding="utf-8")
     existing = gh_json("pr", "list", "-R", repository, "--head", BRANCH, "--state", "open", "--json", "url") or []
     if existing:
         run(["gh", "pr", "edit", existing[0]["url"], "--title", title, "--body-file", str(body)])
