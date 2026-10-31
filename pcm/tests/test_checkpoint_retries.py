@@ -50,6 +50,40 @@ class CheckpointRetryTests(unittest.TestCase):
             request_id=request_id,
         )
 
+    def test_a_root_inside_the_repository_publishes_its_checkpoint(self) -> None:
+        # One repository can hold several components, each a PCM root in its own folder.
+        top = Path(tempfile.mkdtemp(prefix="continuity-checkpoint-monorepo-"))
+        self.addCleanup(shutil.rmtree, top, True)
+        root = top / "component"
+        shutil.copytree(FIXTURE, root)
+        remote = Path(tempfile.mkdtemp(prefix="continuity-checkpoint-remote-"))
+        self.addCleanup(shutil.rmtree, remote, True)
+        subprocess.run(["git", "init", "-q", "--bare", remote], check=True)
+        subprocess.run(["git", "init", "-q", "-b", "task/PCM-0001-subfolder"], cwd=top, check=True)
+        subprocess.run(["git", "-C", top, "config", "user.email", "fixture@example.invalid"], check=True)
+        subprocess.run(["git", "-C", top, "config", "user.name", "Fixture"], check=True)
+        subprocess.run(["git", "-C", top, "add", "."], check=True)
+        subprocess.run(["git", "-C", top, "commit", "-qm", "fixture"], check=True)
+        subprocess.run(["git", "-C", top, "remote", "add", "origin", str(remote)], check=True)
+        subprocess.run(["git", "-C", top, "push", "-q", "--set-upstream", "origin", "HEAD"], check=True)
+        task = self.add_checkpoint(root)
+
+        commit = publish_checkpoint(root, task, "PCM-0001", "run the full suite", allow_stale_base=True)
+
+        relative = f"component/{task.resolve().relative_to(root.resolve()).as_posix()}"
+        status = subprocess.run(["git", "-C", top, "status", "--porcelain"], check=True, capture_output=True, text=True)
+        self.assertEqual(status.stdout, "")
+        pushed = subprocess.run(
+            ["git", "--git-dir", remote, "show", "--name-only", "--format=%s", "task/PCM-0001-subfolder"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        self.assertIn("PCM checkpoint PCM-0001: run the full suite", pushed)
+        self.assertIn(relative, pushed)
+        head = subprocess.run(["git", "-C", top, "rev-parse", "HEAD"], check=True, capture_output=True, text=True)
+        self.assertEqual(commit, head.stdout.strip())
+
     def test_same_request_and_payload_are_a_byte_identical_noop(self) -> None:
         root, _ = self.make_repo()
         task = self.add_checkpoint(root)
