@@ -56,6 +56,15 @@ def test_region_imports_agents_md_and_names_github_as_authority(bridge):
     assert "paths:allow" in dev_line
 
 
+def test_region_says_which_rules_beat_claude_code_defaults(bridge):
+    region = _region(bridge)
+    assert "beat Claude Code's defaults" in region
+    assert "standing instruction" in region
+    assert ".claude/worktrees/" in region
+    assert "<project>/worktrees/<TASK-ID>" in region
+    assert "git fetch" in region
+
+
 def test_region_links_the_writing_rule_skills_to_github_at_the_commit(bridge):
     region = _region(bridge, STACK_ROOT / "cgm")
     url = f"https://github.com/Pukujan/agent-stack-train/blob/{STACK_SHA}/cgm/modules/human-sounding-writing/SKILL.md"
