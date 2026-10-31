@@ -59,7 +59,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
-- Current SHA-256: `c1eeff6be08de111a69044402379c789e61ed04e3e4988229673f791b018817d`
+- Current SHA-256: `e05d904897624a7032edda25d695d01e1257ee9006407e2f269ba3f95d9f61cf`
 - Summary: Human-readable and machine-verifiable issue, task, checkpoint and handoff records.
 - Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`

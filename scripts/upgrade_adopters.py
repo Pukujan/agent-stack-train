@@ -139,7 +139,8 @@ def bump_workflows(clone: Path, old: str, new: str) -> list[str]:
     return changed
 
 
-def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail: str, bumped: list[str] | None = None) -> str:
+def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail: str, bumped: list[str] | None = None,
+            current: tuple[bool, bool] = (False, False)) -> str:
     stack = "https://github.com/Pukujan/agent-stack-train"
     lines = [
         f"This repository runs agent stack `{old[:7]}`, but the release train now certifies {version} "
@@ -153,7 +154,7 @@ def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail:
         "## Before and after",
         "",
         f"**Before:** the stack's files here are pinned to `{old[:7]}`. **After:** they are pinned to `{commit[:7]}`, "
-        "and nothing else in the repository changes.",
+        "and nothing else changes apart from what the list below names.",
         "",
         "## Change and scope",
         "",
@@ -164,6 +165,12 @@ def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail:
     if bumped:
         lines.append("- Moves the old commit to the new one in this repository's own workflows, which the installer does not own: "
                      + ", ".join(f"`{p}`" for p in bumped) + ".")
+    if current[0]:
+        lines.append("- Moves superseded state out of `checkpoints/CURRENT.md` into `checkpoints/history/`, because PCM now "
+                     "limits CURRENT to 60 lines and 8,000 bytes: every new session reads it. Nothing is deleted.")
+    if current[1]:
+        lines.append("- `checkpoints/CURRENT.md` is still over PCM's limit after archiving, so validation fails until "
+                     "someone shortens what is left by hand.")
     lines += [
         "",
         "## What stays unchanged",
@@ -193,6 +200,19 @@ def pr_body(version: str, commit: str, old: str, leftovers: list[str], log_tail:
     return "\n".join(lines) + "\n"
 
 
+def archive_current(clone: Path, stack: Path) -> tuple[bool, bool]:
+    """Archive superseded CURRENT.md state with the new commit's PCM, so validation passes (#48).
+
+    Returns (archived anything, still over the limit).
+    """
+    if not (clone / ".continuity" / "config.json").is_file():
+        return False, False
+    env = {**os.environ, "PYTHONPATH": str(stack / "pcm" / "src")}
+    proc = subprocess.run([sys.executable, "-m", "continuity", "current", "archive", "--root", str(clone)],
+                          capture_output=True, text=True, env=env, check=False)
+    return proc.stdout.startswith("ARCHIVED"), proc.returncode != 0
+
+
 def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: str, workdir: Path) -> str:
     """Install the certified commit into a fresh clone and open or update the pull request."""
     stack = workdir / "stack"
@@ -212,6 +232,7 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
     if not run(["git", "status", "--porcelain"], cwd=clone).stdout.strip():
         return "installer changed nothing"
     bumped = bump_workflows(clone, old, commit)
+    archived, over = archive_current(clone, stack)
     leftovers = sorted(set(run(["git", "grep", "-l", "-I", "-e", old, "-e", old[:7]], cwd=clone, check=False).stdout.split()))
     name = os.environ.get("STACK_UPGRADE_GIT_NAME", "agent-stack-train upgrader")
     email = os.environ.get("STACK_UPGRADE_GIT_EMAIL", "noreply@github.com")
@@ -221,7 +242,7 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
          f"{title}\n\nRerun ACS's installer from Pukujan/agent-stack-train at {commit}."], cwd=clone)
     run(["git", "push", "-q", "--force", "origin", BRANCH], cwd=clone)
     body = workdir / f"{clone.name}.md"
-    body.write_text(pr_body(version, commit, old, leftovers, log_tail, bumped), encoding="utf-8")
+    body.write_text(pr_body(version, commit, old, leftovers, log_tail, bumped, (archived, over)), encoding="utf-8")
     existing = gh_json("pr", "list", "-R", repository, "--head", BRANCH, "--state", "open", "--json", "url") or []
     if existing:
         run(["gh", "pr", "edit", existing[0]["url"], "--title", title, "--body-file", str(body)])
