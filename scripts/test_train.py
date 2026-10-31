@@ -119,5 +119,15 @@ class CheckTests(unittest.TestCase):
         self.assertTrue(any("agent-stack-train: pinned commit" in error for error in errors))
 
 
+
+class CheckAdopterWorkflowTests(unittest.TestCase):
+    def test_the_caller_picks_the_runner(self) -> None:
+        # A private adopter on its own runners passes them; the rest keep the hosted default.
+        text = (Path(__file__).resolve().parents[1] / ".github/workflows/check-adopter.yml").read_text(encoding="utf-8")
+        self.assertIn("      runs_on:\n", text)
+        self.assertIn("""        default: '"ubuntu-latest"'\n""", text)
+        self.assertIn("    runs-on: ${{ fromJSON(inputs.runs_on) }}\n", text)
+
+
 if __name__ == "__main__":
     unittest.main()

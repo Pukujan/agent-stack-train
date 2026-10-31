@@ -54,6 +54,16 @@ gh variable set OIO_CLOSE_SWEEP_APPLY --body true --repo OWNER/REPOSITORY
 
 The sweep never touches a log labelled `oio:keep-open`. Triage does not manage the `oio:` labels, so it leaves them alone.
 
+## Running on your own runners
+
+Triage and both close callers run on `ubuntu-latest`. A private repository that uses its own runners sets the repository variable `OIO_RUNS_ON` to the runner as JSON, and all three follow it:
+
+```bash
+gh variable set OIO_RUNS_ON --body '["self-hosted","org-pool"]' --repo OWNER/REPOSITORY
+```
+
+Set the variable; don't edit `runs-on` in the installed files. An edited managed file blocks the next upgrade. The reusable workflows, `check-adopter.yml` among them, take the same JSON as their `runs_on` input, so a workflow you wrote yourself passes `runs_on: ${{ vars.OIO_RUNS_ON || '"ubuntu-latest"' }}`.
+
 ## Lifecycle drift audit
 
 The same package supplies a report-only audit. Schedule it in the adopter repository:

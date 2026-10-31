@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: label
+      runs_on:
+        description: 'Runner for the job, as JSON: "ubuntu-latest" (the default) or a label list such as ["self-hosted","org-pool"].'
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
     secrets:
       CROSS_REPO_TOKEN:
         description: Token with issues write on referenced repositories. Falls back to github.token.
@@ -36,7 +41,7 @@ permissions:
 
 jobs:
   sweep:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
     steps:
       - name: Check out OIO's scripts at the caller-pinned stack ref
         uses: actions/checkout@v4
