@@ -64,13 +64,13 @@ Cross-repo help stays at the ticket/proposal layer until that foreign project's 
 
 ## Dev root hygiene (binding)
 
-The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/development` elsewhere) holds one main checkout per repo and nothing else. Same strength as Working-repo scope.
+The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/development` elsewhere) holds one entry per repo and nothing else: its main checkout, or a PCM project folder with the checkout at `<project>/main` and task worktrees at `<project>/worktrees/<TASK-ID>`. Same strength as Working-repo scope.
 
 | Rule | Binding |
 | --- | --- |
-| **MUST** | Keep a single main checkout of each repo directly under the dev root |
-| **MUST NOT** | Create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or caches inside the dev root |
-| **MUST** | Put those under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch,worktrees}` on Windows, `~/.cache/acs/{deps,scratch,worktrees}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
+| **MUST** | Keep a single main checkout of each repo directly under the dev root, or in its PCM project folder at `<project>/main` |
+| **MUST NOT** | Create a git worktree anywhere but `<project>/worktrees/<TASK-ID>` (made with `continuity worktree`), or dependency or sibling clones, pinned copies, scratch folders, or caches inside the dev root |
+| **MUST** | Put clones, scratch and caches under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch}` on Windows, `~/.cache/acs/{deps,scratch}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
 | **MUST** | Before ending a session, remove the worktrees and scratch you created, after pushing any real work to a branch |
 | **MUST NOT** | Delete or move a checkout that has uncommitted, unpushed, or stashed work in order to tidy up |
 

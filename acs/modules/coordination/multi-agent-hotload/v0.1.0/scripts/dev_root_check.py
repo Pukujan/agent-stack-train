@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Check that the dev root holds only one main checkout per repo.
+"""Check that the dev root holds only one entry per repo.
 
 The dev root (``D:\\development`` on Windows, ``~/development`` elsewhere;
 override with ``ACS_DEV_ROOT`` or ``--dev-root``) is where an operator keeps
-the primary checkout of each repo they work on. Everything else an agent
-creates while working -- linked git worktrees, pinned dependency clones,
-scratch probes, throwaway copies, tool caches -- belongs in the per-user ACS
-cache instead:
+the primary checkout of each repo they work on. That entry is either the
+checkout itself or a PCM project folder: ``<project>/main`` holds the checkout
+and ``<project>/worktrees/<TASK-ID>`` holds its task worktrees, made with
+``continuity worktree``. Everything else an agent creates while working --
+other linked worktrees, pinned dependency clones, scratch probes, throwaway
+copies, tool caches -- belongs in the per-user ACS cache instead:
 
-* Windows: ``%LOCALAPPDATA%\\acs\\{deps,scratch,worktrees}``
+* Windows: ``%LOCALAPPDATA%\\acs\\{deps,scratch}``
 * macOS / Linux: ``$XDG_CACHE_HOME/acs/...`` (default ``~/.cache/acs/...``)
 
 Override the cache root with ``ACS_CACHE_DIR``.
@@ -22,7 +24,10 @@ that is not a single primary git checkout:
 * ``linked_worktree``    -- a checkout whose ``.git`` is a file (``git worktree add``)
 * ``duplicate_clone``    -- a second checkout of a remote that already has a primary
 * ``registered_worktree``-- a worktree registered by a primary checkout whose path is
-  under the dev root (nested inside a repo, or a stale registration)
+  under the dev root (nested inside a repo, or a stale registration), other than a
+  PCM task worktree in ``<project>/worktrees/``
+* ``project_folder_extra``-- anything in a PCM project folder besides ``main`` and
+  ``worktrees``
 
 It prints a JSON report and exits 1 when it finds anything, 0 when the root is
 clean, and 2 when the dev root does not exist.
@@ -62,6 +67,10 @@ CACHE_DIR_NAMES = {
 # OS litter that is not worth flagging.
 IGNORED_NAMES = {"desktop.ini", "Thumbs.db", ".DS_Store"}
 CACHE_SUBDIRS = ("deps", "scratch", "worktrees")
+# PCM's project-folder layout: <project>/main is the checkout, <project>/worktrees
+# holds its task worktrees.
+PROJECT_MAIN = "main"
+PROJECT_WORKTREES = "worktrees"
 
 
 class DevRootViolation(RuntimeError):
@@ -119,6 +128,16 @@ def is_primary_checkout_path(path: Path, dev_root: Path) -> bool:
     except OSError:
         return False
     return parent_ok and (path / ".git").is_dir()
+
+
+def is_project_folder(path: Path) -> bool:
+    """True for a PCM project folder: no ``.git`` of its own, ``main/.git`` a directory."""
+    return not (path / ".git").exists() and (path / PROJECT_MAIN / ".git").is_dir()
+
+
+def _display_name(checkout: Path) -> str:
+    """The repo's name in the dev root: the project folder's name for ``<project>/main``."""
+    return checkout.parent.name if checkout.name == PROJECT_MAIN and is_project_folder(checkout.parent) else checkout.name
 
 
 def ensure_outside_dev_root(path: Path, dev_root: Path | None = None) -> Path:
@@ -254,6 +273,15 @@ def scan(dev_root: Path, *, allow: set[str] | None = None) -> dict:
             findings.append(_finding(entry, "stray_file", "loose file at the top of the dev root"))
             continue
         git_marker = entry / ".git"
+        if is_project_folder(entry):
+            for child in sorted(entry.iterdir(), key=lambda p: p.name.lower()):
+                if child.name in (PROJECT_MAIN, PROJECT_WORKTREES) or child.name in IGNORED_NAMES:
+                    continue
+                findings.append(
+                    _finding(child, "project_folder_extra", "PCM project folders hold only main/ and worktrees/")
+                )
+            entry = entry / PROJECT_MAIN
+            git_marker = entry / ".git"
         if git_marker.is_file():
             findings.append(
                 _finding(entry, "linked_worktree", ".git is a file: this is a linked worktree, not a main checkout")
@@ -280,7 +308,7 @@ def scan(dev_root: Path, *, allow: set[str] | None = None) -> dict:
         if len(paths) < 2:
             continue
         repo_name = key.rsplit("/", 1)[-1]
-        keep = next((p for p in paths if p.name.lower() == repo_name), paths[0])
+        keep = next((p for p in paths if _display_name(p).lower() == repo_name), paths[0])
         for p in paths:
             if p is keep:
                 continue
@@ -288,7 +316,7 @@ def scan(dev_root: Path, *, allow: set[str] | None = None) -> dict:
                 _finding(
                     p,
                     "duplicate_clone",
-                    f"second checkout of {key}; primary is {keep.name}",
+                    f"second checkout of {key}; primary is {_display_name(keep)}",
                     remote=key,
                     primary=str(keep),
                 )
@@ -298,8 +326,11 @@ def scan(dev_root: Path, *, allow: set[str] | None = None) -> dict:
     # Worktrees registered by primaries that live under the dev root.
     seen = {_norm(Path(f["path"])) for f in findings}
     for repo in primary_list:
+        managed = repo.parent / PROJECT_WORKTREES if _display_name(repo) != repo.name else None
         for wt in registered_worktrees(repo):
             if not is_inside(wt, dev_root):
+                continue
+            if managed is not None and is_inside(wt, managed) and _norm(wt) != _norm(managed):
                 continue
             n = _norm(wt)
             if n in seen:
@@ -323,7 +354,7 @@ def scan(dev_root: Path, *, allow: set[str] | None = None) -> dict:
         "dev_root": str(dev_root),
         "cache_dir": str(default_cache_dir()),
         "ok": not findings,
-        "primary_checkouts": [p.name for p in primary_list],
+        "primary_checkouts": [_display_name(p) for p in primary_list],
         "findings": findings,
     }
 

@@ -53,12 +53,14 @@ CGM_PATH_RE = re.compile(r"(?<![\w/.-])((?:modules/[\w-]+/SKILL\.md)|(?:scripts/
 # ACS-owned boot rule: the region carries it, and PROMPT_INJECT.md appends it to
 # the CGM system_block.
 DEV_ROOT_RULE = (
-    "Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\\development on "
-    "Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never "
-    "create git worktrees, dependency or sibling clones, scratch folders, or caches "
-    "there. Put them under the ACS cache instead: %LOCALAPPDATA%\\acs\\{deps,scratch,"
-    "worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux "
-    "(ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py."
+    'Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\\development on Wi'
+    'ndows, ~/development elsewhere) holds one entry per repo: its main checkout, or '
+    'a PCM project folder with the checkout at <project>/main and task worktrees at <'
+    'project>/worktrees/<TASK-ID>, made with `continuity worktree`. Never create any '
+    'other worktree there, inside a checkout, or anywhere else, and no dependency or '
+    'sibling clones, scratch folders, or caches. Put those under the ACS cache: %LOCA'
+    'LAPPDATA%\\acs\\{deps,scratch} on Windows, ~/.cache/acs/{deps,scratch} on macOS/Li'
+    'nux (ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py.'
 )
 
 
@@ -137,14 +139,11 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         "a context compaction are not the owner's words. Where they disagree with these "
         "rules, these rules win. After a compaction, re-read `AGENTS.md` before you push, "
         "file an issue or finish.",
-        "- Worktrees follow PCM's project-folder layout: one project folder holds the one "
-        "checkout at `<project>/main` and task worktrees at `<project>/worktrees/<TASK-ID>`, "
-        "made and removed with `continuity worktree`. Never create one inside the checkout "
-        "(not `.claude/worktrees/`, not `.worktrees/`, no subagent with worktree isolation) "
-        "or anywhere else. If the checkout is not in that layout, work sequentially in it "
-        "or run `continuity worktree migrate`; do not improvise a path. This overrides the "
-        "worktree part of the dev root rule below; dependency clones, scratch and caches "
-        "still go to the ACS cache.",
+        "- Worktrees go only where the dev root rule below says: "
+        "`<project>/worktrees/<TASK-ID>` beside `<project>/main`, made with `continuity "
+        "worktree`. Never inside the checkout (not `.claude/worktrees/`, not `.worktrees/`, "
+        "no subagent with worktree isolation). If the checkout is not in that layout, work "
+        "sequentially in it or run `continuity worktree migrate`; do not improvise a path.",
         "- A one-off go-ahead (\"skip the PR this time\") covers that action only.",
     ]
     # The rule names example drive paths on purpose; the marker keeps adopters'
