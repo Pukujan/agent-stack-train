@@ -1,8 +1,8 @@
 # TASK-PCM-0060 — Host Capability Honesty
 
-<!-- continuity:task {"acceptance": ["Owner picks scope on #182 (probe-only / probe+SPEC adapter-seam / defer); decision comment cited in the task record.", "Chosen slice lands red-first: capability classification of origin host in preflight (or doctor) with a printed matrix, template honesty sentence in all guidance copies + init output, SPEC interface note if approved; full suite at baseline; six contexts + receipt on #182."], "depends_on": [], "goal": "Decide and implement non-GitHub host honesty: capability probe (preflight/doctor), template text that states which duties degrade without GitHub, documented 4-operation adapter seam in SPEC, and an install/onboarding page (#182).", "id": "PCM-0060", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/182", "next_action": "Merge the probe + adapter-seam PR on Pukujan/agent-stack-train, post the merge receipt on #182, then decide whether the install/onboarding page is a separate task.", "owner": "owner/Claude (agent-stack-train session)", "priority": "P3", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "Today a GitLab adopter silently loses the issue-authority half while generated guidance promises it (cli.py:2256 github-only parse; nine gh call sites)."} -->
+<!-- continuity:task {"acceptance": ["Owner picks scope on #182 (probe-only / probe+SPEC adapter-seam / defer); decision comment cited in the task record.", "Chosen slice lands red-first: capability classification of origin host in preflight (or doctor) with a printed matrix, template honesty sentence in all guidance copies + init output, SPEC interface note if approved; full suite at baseline; six contexts + receipt on #182."], "depends_on": [], "goal": "Decide and implement non-GitHub host honesty: capability probe (preflight/doctor), template text that states which duties degrade without GitHub, documented 4-operation adapter seam in SPEC, and an install/onboarding page (#182).", "id": "PCM-0060", "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/182", "next_action": "None for PCM-0060. The install and onboarding page continues as PCM-0070 (#262).", "owner": "owner/Claude (agent-stack-train session)", "priority": "P3", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "Today a GitLab adopter silently loses the issue-authority half while generated guidance promises it (cli.py:2256 github-only parse; nine gh call sites)."} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Claude (agent-stack-train session)
 - Priority: P3
 - Depends on: none
@@ -27,12 +27,12 @@ Adopters on non-GitHub hosts learn, before being surprised, exactly which contin
 
 - In scope: the decision record + any slice the owner approves on the leaf issue.
 - Out of scope: everything the leaf issue's boundaries section excludes.
-- Dependencies/uncertainty: none; the owner picked the scope on 2026-10-31. The install/onboarding page from the proposal is not in this slice.
+- Dependencies/uncertainty: none; the owner picked the scope on 2026-10-31. The install/onboarding page from the proposal moved to PCM-0070 (#262) by owner direction on 2026-10-31; #182 is closed.
 
 ## Acceptance criteria
 
 - [x] Owner picks scope on #182 (probe-only / probe+SPEC adapter-seam / defer); decision comment cited in the task record.
-- [ ] Chosen slice lands red-first: capability classification of origin host in preflight (or doctor) with a printed matrix, template honesty sentence in all guidance copies + init output, SPEC interface note if approved; full suite at baseline; six contexts + receipt on #182.
+- [x] Chosen slice lands red-first: capability classification of origin host in preflight (or doctor) with a printed matrix, template honesty sentence in all guidance copies + init output, SPEC interface note if approved; full suite at baseline; six contexts + receipt on #182.
 
 ## Evidence and sources
 
