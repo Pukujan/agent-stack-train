@@ -31,8 +31,8 @@ Use this sequence unless the format has a strong reason not to:
 
 When the router says `marketing_intro_site`, that route's review checklist
 is the story order. The seven steps above are the wrong order for a sales
-site or a technical demo page. Load `human-sounding-writing` alongside this
-module, plus `visual-direction`, `brand-foundation`, and `html-demo`. Keep
+site or a technical demo page. Load `visual-direction`, `brand-foundation`,
+and `html-demo` alongside this module. Keep
 one short bold anchor per section. Scrub AI tells, verify every number, and
 let the brand feeling choose the words and the pictures. A caption names the
 feeling. It does not narrate how the picture was made.

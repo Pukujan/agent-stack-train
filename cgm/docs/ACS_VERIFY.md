@@ -75,10 +75,11 @@ Non-zero exit + `CGM_VERIFY ... status=FAIL` means the pin is incomplete.
 ## Human-facing default (0.5.6+)
 
 After verify, ACS must treat **hsw** as default ON for every human-facing
-deliverable: GitHub prose, docs, posts, papers, **HTML reports**, **compare
-HTML / compare UIs**, appendable HTML, and other agent-produced human-readable
-HTML. Do not gate HSW behind a per-report flag. Exceptions remain
-README/product entry (`writing-direction`) and filename-only surfaces (**hon**).
+prose deliverable: GitHub prose, docs, posts and papers. Do not gate HSW
+behind a per-task flag. Exceptions remain README/product entry
+(`writing-direction`) and filename-only surfaces (**hon**). HTML pages (HTML
+reports, compare HTML/UIs, appendable HTML) need no writing module: they are
+in `not_routed` as `html_pages` (retired for HTML in agent-stack-train#81).
 
 ## Confirm HSW automation (0.5.7+ — every CGM adopter)
 
@@ -89,7 +90,7 @@ still never load the skill. **0.5.7** forces automation with:
    [`writing-routing.json`](writing-routing.json) (`always_on: true`,
    `opt_in_forbidden: true`, `audience: every_cgm_adopter`).
 2. Fail-closed contract validate (needles for those keys).
-3. Optional HTML tell scan (conservative denylist — not full NLP quality CI).
+3. (Retired in agent-stack-train#81: the optional HTML tell scan, `--mode acs-html`, was removed with the HTML requirement.)
 
 ### Steps (any adopter; ACS example)
 
@@ -101,16 +102,12 @@ python scripts/validate_content_system.py --root /path/to/content-generation-mod
 
 # 3) Confirm HSW always-on contract (fail closed if inject incomplete)
 python scripts/verify_hsw_applied.py --root /path/to/content-generation-modules
-
-# 4) Before publishing human-facing HTML / compare Pages, scan the artifact
-python scripts/verify_hsw_applied.py --root /path/to/content-generation-modules \
-  --mode acs-html --html /path/to/compare.html
 ```
 
 | Result | Meaning |
 | --- | --- |
-| `HSW_VERIFY ... status=OK` + `VALID` | Always-on inject + `human_facing_default` present; if `--html` given, no denylist jargon/tool-dump hits. |
-| Non-zero + `status=FAIL` | Hotload/inject contract incomplete, **or** given HTML still has known AI-jargon / tool-dump tells. |
+| `HSW_VERIFY ... status=OK` + `VALID` | Always-on inject + `human_facing_default` present, and HTML pages kept off the prose route. |
+| Non-zero + `status=FAIL` | Hotload/inject contract incomplete. |
 
 Honest limit: pass does **not** prove the prose "sounds human." It proves the
 automation gates ran. Soft still means no full NLP CI on every prose file.
@@ -119,8 +116,7 @@ automation gates ran. Soft still means no full NLP CI on every prose file.
 
 1. At **agent boot**, paste `acs_prompt_inject.system_block` into the system
    prompt (not per-report).
-2. Run `verify_hsw_applied.py` (contract mode on install; `--html` before
-   publishing compare / human-facing HTML).
+2. Run `verify_hsw_applied.py` (contract mode) on install.
 3. Keep the eight-module pin on **0.5.9+**.
 4. Run `verify_adopter_content.py` (or `--check-adopter-docs`) in CI to enforce
    README freshness, asset references, and HON/HSW doc compliance.
@@ -232,15 +228,17 @@ After verify passes, agents **MUST load** modules per
 - README / product entry → `writing-direction` (`required_load: true`)
 - PR titles/bodies, issue titles/bodies, issue-log titles, **commit messages /
   commit subjects**, non-README docs, changelog prose, posts/blogs/social/
-  general prose/papers, **HTML reports / compare HTML / compare UIs / appendable
-  HTML / agent human-readable HTML** → `human-sounding-writing` (**hsw**)
+  general prose/papers → `human-sounding-writing` (**hsw**)
   (`required_load: true`, `default_on: true`)
+- HTML reports / compare HTML / compare UIs / appendable HTML / agent
+  human-readable HTML → no writing module (`not_routed` `html_pages`,
+  agent-stack-train#81)
 - Generated artifact filenames, asset-manifest paths, committed media basenames, filename legends
   → `human-output-naming` (**hon**) (`required_load: true`; speakable + per-feature legend)
 
-**Human-facing default (0.5.6+):** HSW is ON for every human-facing task/output
-unless the surface is README/product entry or filename-only. No per-report
-opt-in. Soft = no NLP grader; still APPLY / default_on for agents.
+**Human-facing default (0.5.6+):** HSW is ON for every human-facing prose task
+unless the surface is README/product entry or filename-only. HTML pages need no
+writing module (agent-stack-train#81). No per-task opt-in. Soft = no NLP grader; still APPLY / default_on for agents.
 
 ## ACS prompt inject (required for application)
 
@@ -260,10 +258,11 @@ agent system or task prompt so adopters actually apply the modules.
 > any listed surface. README and product entry pages → `writing-direction`.
 > Pull request titles/bodies, issue titles/bodies, issue-log titles, commit
 > messages, commit subjects, non-README docs, changelog prose,
-> posts/blogs/social/general prose, papers/data writeups, HTML reports, compare
-> HTML, compare UIs, appendable HTML reports, and other agent-produced
-> human-readable HTML → `human-sounding-writing` (hsw). Do NOT treat HSW as
-> optional, per-report, or only-when-writing-posts. Soft enforcement means no
+> posts/blogs/social/general prose, and papers/data writeups →
+> `human-sounding-writing` (hsw). HTML pages (HTML reports, compare HTML/UIs,
+> appendable HTML, other agent-produced HTML) need no writing module
+> (`not_routed` `html_pages`, agent-stack-train#81). Do NOT treat HSW as
+> optional or only-when-writing-posts for prose. Soft enforcement means no
 > NLP CI grade of prose; the contract language is MUST/APPLY/default_on, not
 > prefer. Follow `apply_checklist` and `human_facing_default` in this file.
 
@@ -283,6 +282,4 @@ Suggested ACS wiring:
    hotload checks (fail install if non-zero).
 3. Paste `acs_prompt_inject.system_block` into the agent system prompt at
    **boot** (every adopter — not ACS-only, not per-report).
-4. Before publishing compare / human-facing HTML, run
-   `verify_hsw_applied.py --mode acs-html --html <path>`.
-5. Keep adapter `system-version.json` on the full eight-module **0.5.7+** set.
+4. Keep adapter `system-version.json` on the full eight-module **0.5.7+** set.

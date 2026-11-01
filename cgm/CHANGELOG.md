@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **HTML pages no longer need a writing module (agent-stack-train#81):** the rule that agents load `human-sounding-writing` (**hsw**) before any HTML is retired. HTML reports, compare HTML and UIs, appendable HTML and other agent-produced HTML move to a new `not_routed` entry, `html_pages`, and `human_facing_default` lists it as an exception. HSW stays required for pull request, issue and commit prose, issue-log titles, docs, changelog, posts and papers.
+- The `marketing_intro_site` route drops hsw from `also_load_required`. It now loads `writing-direction` with `visual-direction`, `brand-foundation` and `html-demo`.
+- The always-on `system_block`, the instruction text, `apply_checklist`, the README and AGENTS router tables, `WRITING_ROUTING.md`, `ACS_VERIFY.md` and both skill entry points say the same thing.
+- `verify_hsw_applied.py` loses its `--mode acs-html` / `--html` denylist scan; contract mode now also fails if an HTML surface returns to the prose route. The validator fails closed the same way and requires the `html_pages` entry.
+
 ## 0.5.13 — draft
 
 - **Marketing intro sites load writing-direction and human-sounding writing together (issue #64):** new `marketing_intro_site` route in `docs/writing-routing.json` for front marketing pages, sales sites, and technical demo pages. Primary load is `writing-direction`. `also_load_required` is `human-sounding-writing`, `visual-direction`, `brand-foundation`, and `html-demo`. The route is not an exception to the human-facing default, so the README exception can no longer drop HSW on this surface.

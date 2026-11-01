@@ -83,6 +83,8 @@ do not rename the folder or replace the id with `hsw`.
 
 ## HSW default for human-facing HTML (0.5.6+)
 
+> **Retired for HTML (agent-stack-train#81).** HTML pages no longer need any writing module; see `not_routed` `html_pages` in `docs/writing-routing.json`. HSW stays required for prose. The steps below are history.
+
 - **HSW is ON by default** for every human-facing deliverable: GitHub prose, docs, posts, papers, **HTML reports**, **compare HTML / compare UIs**, appendable HTML, and other agent-produced human-readable HTML.
 - `docs/writing-routing.json` adds `human_facing_default` and expands HSW surfaces; `acs_prompt_inject` forbids per-report / optional skip.
 - Exceptions remain README/product entry (`writing-direction`) and filename-only surfaces (`human-output-naming` / **hon** for basenames).
@@ -104,10 +106,10 @@ do not rename the folder or replace the id with `hsw`.
   1. Pin helper **0.5.7+** (version and commit).
   2. Paste `acs_prompt_inject.system_block` into the agent system prompt at boot.
   3. Run `python scripts/validate_content_system.py --root <cgm> --mode writing`.
-  4. Run `python scripts/verify_hsw_applied.py --root <cgm>` (and `--html` before
-     publishing human-facing HTML / compare Pages).
+  4. Run `python scripts/verify_hsw_applied.py --root <cgm>`.
 - Soft still means no full NLP prose CI — automation = always-on inject +
-  contract validate + optional HTML tell scan.
+  contract validate. (The optional HTML tell scan was removed in
+  agent-stack-train#81.)
 - Operational tickets for similar gaps: follow [`ISSUE_LOG.md`](ISSUE_LOG.md) /
   [`issue-log-contract.json`](issue-log-contract.json) (reproduce first; every
   adopter; never ACS-only).

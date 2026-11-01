@@ -895,14 +895,13 @@ def check_writing_contract(root: Path) -> list[str]:
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} marketing_intro_site surfaces must mention {needle}"
             )
-    if "human-sounding-writing" not in str(marketing_route.get("notes", "")).lower():
-        errors.append(
-            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site notes must require "
-            "human-sounding-writing alongside writing-direction"
-        )
     also_required = {str(item).lower() for item in marketing_route.get("also_load_required", [])}
+    if "human-sounding-writing" in also_required:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site must not require "
+            "human-sounding-writing: hsw is not required for HTML pages (agent-stack-train#81)"
+        )
     for needle in (
-        "human-sounding-writing",
         "visual-direction",
         "brand-foundation",
         "html-demo",
@@ -958,15 +957,25 @@ def check_writing_contract(root: Path) -> list[str]:
         "commit subject",
         "non-readme",
         "changelog",
-        "html report",
-        "compare html",
-        "compare ui",
-        "human-readable html",
     ):
         if not any(needle in surface for surface in surfaces):
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose surfaces must mention {needle}"
             )
+    # hsw is not required for HTML pages (agent-stack-train#81): no route that loads it may list one.
+    for route in routes:
+        if not isinstance(route, dict):
+            continue
+        loads = {str(route.get("load") or "").lower()} | {
+            str(item).lower() for item in route.get("also_load_required", [])
+        }
+        if "human-sounding-writing" in loads:
+            for surface in route.get("surfaces", []):
+                if "html" in str(surface).lower() or "compare" in str(surface).lower():
+                    errors.append(
+                        f"{WRITING_ROUTER_CONTRACT} route {route.get('id')} must not route the HTML "
+                        f"surface {surface!r} to human-sounding-writing (agent-stack-train#81)"
+                    )
     if prose_route.get("default_on") is not True:
         errors.append(
             f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose default_on must be true"
@@ -1025,11 +1034,15 @@ def check_writing_contract(root: Path) -> list[str]:
                 f"{WRITING_ROUTER_CONTRACT} human_facing_default.default_on must be true"
             )
         covers = {str(c).lower() for c in human_default.get("covers", [])}
-        for needle in ("every human-facing", "html report", "compare"):
+        for needle in ("every human-facing", "github and docs prose"):
             if not any(needle in cover for cover in covers):
                 errors.append(
                     f"{WRITING_ROUTER_CONTRACT} human_facing_default.covers must mention {needle}"
                 )
+        if "html_pages" not in human_default.get("exceptions", []):
+            errors.append(
+                f"{WRITING_ROUTER_CONTRACT} human_facing_default.exceptions must include html_pages"
+            )
 
     if contract.get("application") != "must_load":
         errors.append(f"{WRITING_ROUTER_CONTRACT} application must be must_load")
@@ -1042,8 +1055,21 @@ def check_writing_contract(root: Path) -> list[str]:
     if not isinstance(not_routed, list):
         errors.append(f"{WRITING_ROUTER_CONTRACT} not_routed must be a list")
     else:
+        html_pages = next(
+            (item for item in not_routed if isinstance(item, dict) and item.get("id") == "html_pages"), None
+        )
+        html_surfaces = {str(s).lower() for s in (html_pages or {}).get("surfaces", [])}
+        for needle in ("html report", "compare html", "compare ui"):
+            if not any(needle in surface for surface in html_surfaces):
+                errors.append(
+                    f"{WRITING_ROUTER_CONTRACT} not_routed html_pages surfaces must mention {needle}"
+                )
         for item in not_routed:
-            surface = str((item or {}).get("surface", "")).lower() if isinstance(item, dict) else str(item).lower()
+            if isinstance(item, dict):
+                named = [item.get("surface", ""), *item.get("surfaces", [])]
+            else:
+                named = [item]
+            surface = " ".join(str(n) for n in named).lower()
             if "commit" in surface:
                 errors.append(
                     f"{WRITING_ROUTER_CONTRACT} commit surfaces must be routed to human-sounding-writing, not not_routed"
@@ -1075,9 +1101,9 @@ def check_writing_contract(root: Path) -> list[str]:
             errors.append(
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention speakable names or filename legends"
             )
-        if "html report" not in lowered_instruction and "compare html" not in lowered_instruction:
+        if "html" not in lowered_instruction or "no writing module" not in lowered_instruction:
             errors.append(
-                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must mention HTML reports or compare HTML"
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.instruction must say HTML pages need no writing module"
             )
         if "every human-facing" not in lowered_instruction and "default" not in lowered_instruction:
             errors.append(
@@ -1095,9 +1121,9 @@ def check_writing_contract(root: Path) -> list[str]:
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.fields must include human_facing_default"
             )
         when = str(inject.get("when") or "").lower()
-        if "html" not in when and "compare" not in when:
+        if "prose" not in when:
             errors.append(
-                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.when must mention HTML or compare deliverables"
+                f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.when must mention human-facing prose"
             )
         if inject.get("always_on") is not True:
             errors.append(
@@ -1113,7 +1139,7 @@ def check_writing_contract(root: Path) -> list[str]:
                 f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.audience must name every CGM adopter"
             )
         inject_surfaces = {str(s).lower() for s in inject.get("surfaces", [])}
-        for needle in ("html report", "compare html", "compare ui"):
+        for needle in ("pull request", "commit"):
             if not any(needle in surface for surface in inject_surfaces):
                 errors.append(
                     f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.surfaces must mention {needle}"
@@ -1130,9 +1156,10 @@ def check_writing_contract(root: Path) -> list[str]:
                     errors.append(
                         f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must mention {needle}"
                     )
-            if "html" not in lowered_block:
+            if "html pages" not in lowered_block or "no writing module" not in lowered_block:
                 errors.append(
-                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must mention HTML surfaces"
+                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must say HTML pages "
+                    "need no writing module"
                 )
             if "marketing intro" not in lowered_block:
                 errors.append(

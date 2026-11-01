@@ -24,7 +24,8 @@ Three loads cover the work Antigravity does in an adopter repo:
 | Surface | Load | Why |
 | --- | --- | --- |
 | `README.md` / product entry | `writing-direction` | Human-first story and the README scanability contract. |
-| PR / issue / commit prose, docs, HTML reports, compare UIs | `human-sounding-writing` (**hsw**) | Human voice, AI-tell scrub, restrained bold. Default ON. |
+| PR / issue / commit prose, docs | `human-sounding-writing` (**hsw**) | Human voice, AI-tell scrub, restrained bold. Default ON. |
+| HTML reports, compare HTML/UIs | none required | No writing module. Retired for HTML in agent-stack-train#81. |
 | Generated filenames, asset-manifest paths, media basenames, legends | `human-output-naming` (**hon**) | Speakable basenames via `scripts/human_filename`, per-feature legend. |
 
 Load the module `SKILL.md` files from the pinned CGM checkout — do not read the

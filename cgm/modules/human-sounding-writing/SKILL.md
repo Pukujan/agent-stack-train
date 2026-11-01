@@ -1,17 +1,17 @@
 ---
 name: human-sounding-writing
 description: >-
-  Default MUST load for every human-facing deliverable except README/product
-  entry: pull request and issue titles/bodies, issue-log titles, commit
-  messages and commit subjects, non-README docs, changelog prose, posts, blogs,
-  social copy, general agent prose, papers or data writeups, HTML reports,
-  compare HTML/UIs, appendable HTML, and other agent-produced human-readable
-  HTML that must sound human and avoid AI tells. Official short name: hsw
+  Default MUST load for every human-facing prose deliverable except
+  README/product entry: pull request and issue titles/bodies, issue-log
+  titles, commit messages and commit subjects, non-README docs, changelog
+  prose, posts, blogs, social copy, general agent prose, and papers or data
+  writeups that must sound human and avoid AI tells. Not required for HTML
+  pages (HTML reports, compare HTML/UIs, appendable HTML). Official short name: hsw
   (also HSW); canonical module id remains human-sounding-writing. Do not use
   for README or product-entry copy — load writing-direction and
-  docs/WRITING_ROUTING.md instead. Marketing intro sites load this module
-  together with writing-direction (route marketing_intro_site). Not optional
-  / not per-report.
+  docs/WRITING_ROUTING.md instead. Marketing intro sites load
+  writing-direction (route marketing_intro_site), not this module. Not
+  optional for prose.
 ---
 
 # Human-sounding writing
@@ -29,9 +29,9 @@ Write so a careful reader hears a person with evidence, not a model averaging
 safe phrases. Specifics beat synonyms. This module is for pull request and issue
 titles/bodies, issue-log titles, **commit messages and commit subjects**,
 non-README docs, changelog prose, posts, blogs, social, general agent prose,
-papers or data writeups, **HTML reports**, **compare HTML / compare UIs**,
-appendable HTML, and other agent-produced human-readable HTML. It is **not** for
-README or product-entry pages.
+and papers or data writeups. It is **not** for README or product-entry pages,
+and HTML pages (HTML reports, compare HTML/UIs, appendable HTML) do not need it
+(retired for HTML in agent-stack-train#81).
 
 ## When not to use this module
 
