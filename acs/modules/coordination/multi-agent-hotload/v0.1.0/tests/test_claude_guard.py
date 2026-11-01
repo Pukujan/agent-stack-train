@@ -2,7 +2,9 @@
 
 Each rule runs against a real git repository with a bare ``origin``, so the
 guard sees the same branches, upstreams and commits it would in an adopter.
-GitHub lookups are stubbed: an issue exists when its number is in ``ISSUES``.
+GitHub lookups are stubbed: an issue exists when its number is in ``ISSUES``,
+and a branch's open pull requests come from ``guard.pulls`` (default: one with
+auto-merge armed; ``None`` means gh failed).
 """
 
 from __future__ import annotations
@@ -52,6 +54,18 @@ def guard(monkeypatch):
     mod = _load("claude_guard")
     monkeypatch.setattr(mod, "issue_exists", lambda top, repo, number: number in ISSUES)
     monkeypatch.delenv("ACS_GUARD", raising=False)
+    monkeypatch.delenv("CLAUDE_PROJECT_DIR", raising=False)
+    mod.pulls = {}
+    real_run = mod.run
+
+    def fake_run(args, cwd, timeout=15):
+        if args[:3] == ["gh", "pr", "list"]:
+            branch = args[args.index("--head") + 1]
+            pulls = mod.pulls.get(branch, [{"number": 7, "isDraft": False, "autoMergeRequest": {"mergeMethod": "SQUASH"}}])
+            return (1, "") if pulls is None else (0, json.dumps(pulls))
+        return real_run(args, cwd, timeout)
+
+    monkeypatch.setattr(mod, "run", fake_run)
     return mod
 
 
@@ -265,6 +279,99 @@ def test_stop_needs_a_pcm_checkpoint_after_the_last_change(guard, tmp_path):
     git("commit", "-q", "--allow-empty", "-m", "PCM checkpoint TASK-1: next", cwd=repo)
     git("push", "-q", cwd=repo)
     assert guard.stop({"cwd": str(repo)}) is None
+
+
+def transcript(tmp_path: Path, cwd: Path, *uses: tuple[str, dict]) -> str:
+    """A session transcript (JSONL) with these tool calls, plus a garbled line."""
+    path = tmp_path / "session.jsonl"
+    lines = [json.dumps({"type": "assistant", "cwd": str(cwd), "message": {"content": [
+        {"type": "tool_use", "name": name, "input": tool_input}]}}) for name, tool_input in uses]
+    path.write_text("\n".join(["{not json", *lines, ""]), encoding="utf-8")
+    return str(path)
+
+
+def _pushed_branch(repo: Path, branch: str = "fix/37-enforce") -> None:
+    git("checkout", "-qb", branch, cwd=repo)
+    (repo / "a.txt").write_text("a\n", encoding="utf-8")
+    git("add", "a.txt", cwd=repo)
+    git("commit", "-qm", "change", cwd=repo)
+    git("push", "-qu", "origin", branch, cwd=repo)
+
+
+def test_stop_reports_uncommitted_tracked_changes_on_a_branch_and_on_main(guard, repo):
+    (repo / "AGENTS.md").write_text("# Rules\n\nEdited.\n", encoding="utf-8")
+    reason = guard.stop({"cwd": str(repo)})
+    assert "uncommitted change(s) to tracked files on `main`" in reason and "task branch" in reason
+    assert "`AGENTS.md`" in reason and str(repo) in reason
+    git("checkout", "-qb", "fix/37-enforce", cwd=repo)
+    assert "tracked files on `fix/37-enforce`" in guard.stop({"cwd": str(repo)})
+    git("commit", "-qam", "edit", cwd=repo)
+    git("push", "-qu", "origin", "fix/37-enforce", cwd=repo)
+    assert guard.stop({"cwd": str(repo)}) is None
+
+
+def test_stop_reports_untracked_files_only_when_the_session_wrote_them(guard, repo, tmp_path):
+    (repo / "notes-i-keep.txt").write_text("mine\n", encoding="utf-8")
+    assert guard.stop({"cwd": str(repo)}) is None
+    (repo / "new.py").write_text("x = 1\n", encoding="utf-8")
+    event = {"cwd": str(repo), "transcript_path": transcript(tmp_path, repo, ("Write", {"file_path": "new.py", "content": "x"}))}
+    reason = guard.stop(event)
+    assert "this session wrote are not in git (`new.py`)" in reason
+    assert "notes-i-keep" not in reason
+
+
+def test_stop_checks_other_checkouts_the_session_worked_in(guard, repo, tmp_path):
+    (tmp_path / "second").mkdir()
+    (tmp_path / "third").mkdir()
+    other = _repo(tmp_path / "second", tmp_path / "second" / "worktree")
+    (other / "AGENTS.md").write_text("# Rules\n\nEdited elsewhere.\n", encoding="utf-8")
+    plain = _repo(tmp_path / "third", tmp_path / "third" / "plain", adopter=False)
+    (plain / "AGENTS.md").write_text("changed\n", encoding="utf-8")
+    event = {"cwd": str(repo), "transcript_path": transcript(
+        tmp_path, repo,
+        ("Bash", {"command": f"cd {other} && git status"}),
+        ("Bash", {"command": f"git -C {plain} commit -C HEAD"}),
+    )}
+    reason = guard.stop(event)
+    assert f"`{other}`" in reason and "tracked files on `main`" in reason
+    assert str(plain) not in reason
+    assert guard.stop({"cwd": str(repo)}) is None  # without the transcript only the project folder counts
+
+
+def test_stop_reads_a_missing_or_garbled_transcript_as_empty(guard, repo, tmp_path):
+    assert guard.stop({"cwd": str(repo), "transcript_path": str(tmp_path / "missing.jsonl")}) is None
+    junk = tmp_path / "junk.jsonl"
+    junk.write_bytes(b"\xff\xfe[1, 2]\n\"text\"\n{\"message\": \"x\"}\n")
+    assert guard.stop({"cwd": str(repo), "transcript_path": str(junk)}) is None
+
+
+def test_stop_needs_an_open_pull_request_with_auto_merge(guard, repo):
+    _pushed_branch(repo)
+    assert guard.stop({"cwd": str(repo)}) is None
+    guard.pulls["fix/37-enforce"] = []
+    assert "no open pull request" in guard.stop({"cwd": str(repo)})
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
+    assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": True, "autoMergeRequest": None}]
+    assert "draft" in guard.stop({"cwd": str(repo)})
+
+
+def test_stop_does_not_block_on_gh_being_offline_but_says_so(guard, repo):
+    _pushed_branch(repo)
+    guard.pulls["fix/37-enforce"] = None
+    assert guard.stop({"cwd": str(repo)}) is None
+    (repo / "a.txt").write_text("b\n", encoding="utf-8")
+    reason = guard.stop({"cwd": str(repo)})
+    assert "uncommitted" in reason and "Could not check" in reason
+
+
+def test_stop_main_exits_two_with_every_problem(guard, repo, monkeypatch, capsys):
+    import io
+
+    (repo / "AGENTS.md").write_text("edited\n", encoding="utf-8")
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"cwd": str(repo)})))
+    assert guard.main(["stop"]) == 2
+    assert "uncommitted" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------- session start
