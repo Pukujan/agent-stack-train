@@ -14,7 +14,7 @@ pull requests in the window are undercounted, and the table says so.
 
 Usage:
     python scripts/activity_meter.py                  # last 7 days, all adopters
-    python scripts/activity_meter.py --days 1 --only Pukujan-lab/nyc-map-agent
+    python scripts/activity_meter.py --days 1 --only pukujan-lab-2/nyc-map-agent
 """
 from __future__ import annotations
 
