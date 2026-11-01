@@ -134,7 +134,9 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         "the task; do not hold the work waiting for a go-ahead.",
         "- Do not ask the owner to merge, approve or mark a pull request ready when the "
         "rules say auto-merge does that; in a repository that turns auto-merge off, "
-        "say the pull request is ready for the owner's merge. End a turn with a question only for a decision "
+        "say the pull request is ready for the owner's merge. Never arm auto-merge on, or "
+        "merge, a pull request someone other than the owner or a trusted collaborator "
+        "opened; the guard blocks it and the owner reviews it. End a turn with a question only for a decision "
         "the rules leave to the owner.",
         "- Put the rules' required steps (checks, checkpoint, receipt, closing keyword) on "
         "the task list, not only the steps of the request.",

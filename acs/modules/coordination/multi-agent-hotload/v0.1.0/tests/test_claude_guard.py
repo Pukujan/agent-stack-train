@@ -58,6 +58,9 @@ def guard(monkeypatch):
     mod.pulls = {}
     mod.merged = {}
     mod.auto_merge = "true"
+    mod.authors = {}  # pull request selector -> author login; missing means the owner
+    mod.trusted_var = None  # AUTO_MERGE_AUTHORS value, None when unset
+    mod.permissions = {"owner": "admin"}
     real_run = mod.run
 
     def fake_run(args, cwd, timeout=15):
@@ -67,6 +70,14 @@ def guard(monkeypatch):
                 return 0, json.dumps(mod.merged.get(branch, []))
             pulls = mod.pulls.get(branch, [{"number": 7, "isDraft": False, "autoMergeRequest": {"mergeMethod": "SQUASH"}}])
             return (1, "") if pulls is None else (0, json.dumps(pulls))
+        if args[:3] == ["gh", "pr", "view"]:
+            selector = args[3] if not args[3].startswith("-") else "current"
+            login = mod.authors.get(selector, "owner")
+            return (1, "") if login is None else (0, f"{login} 7 https://github.com/o/r/pull/7")
+        if args[:3] == ["gh", "variable", "get"]:
+            return (1, "") if mod.trusted_var is None else (0, mod.trusted_var)
+        if args[:2] == ["gh", "api"] and "/collaborators/" in args[2]:
+            return 0, mod.permissions.get(args[2].split("/")[4], "read")
         if args[:3] == ["gh", "repo", "view"]:
             return (1, "") if mod.auto_merge is None else (0, mod.auto_merge + "\n")
         return real_run(args, cwd, timeout)
@@ -195,6 +206,27 @@ def test_pull_requests_must_name_their_owning_issue(guard, repo):
     assert "Refs #N" in bash(guard, repo, "gh pr create --fill")
     assert "Refs #N" in bash(guard, repo, "gh pr create --title t --body 'no issue here'")
     assert bash(guard, repo, "gh pr create --title t --body 'Refs #37'") is None
+
+
+def test_merging_needs_a_trusted_author(guard, repo):
+    assert bash(guard, repo, "gh pr merge 7 --auto --squash") is None  # the owner's (admin) pull request
+    assert bash(guard, repo, "gh pr merge --auto --squash") is None  # the current branch's
+    guard.authors["8"] = "stranger"
+    blocked = bash(guard, repo, "gh pr merge 8 --auto --squash")
+    assert "`stranger`" in blocked and "not trusted" in blocked
+    assert "not trusted" in bash(guard, repo, "gh pr merge --squash -R o/r 8")
+    guard.permissions["stranger"] = "write"  # write access alone is not trust
+    assert "not trusted" in bash(guard, repo, "gh pr merge 8 --squash")
+    guard.trusted_var = "alice, Stranger"
+    assert bash(guard, repo, "gh pr merge 8 --auto --squash") is None
+    guard.authors["9"] = None  # GitHub can't say: gh would fail on it too
+    assert bash(guard, repo, "gh pr merge 9 --auto") is None
+
+
+def test_merge_target_skips_flag_values():
+    mod = _load("claude_guard")
+    assert mod.merge_target(["gh", "pr", "merge", "-t", "x", "12", "--squash"]) == ("12", [])
+    assert mod.merge_target(["gh", "pr", "merge", "--auto", "-R", "o/r"]) == (None, ["-R", "o/r"])
 
 
 def test_github_side_changes_need_an_owning_issue(guard, repo):
