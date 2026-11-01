@@ -13,6 +13,7 @@ These rules apply everywhere in this repository. Each component folder has its o
 - **One folder per change** where you can. Keep each component's tests passing from inside its folder.
 - **No version pins in prose.** Point at `stack-releases.json`. `scripts/check_prose_pins.py` fails a root document that restates a current component version or commit.
 - **Issues follow OIO.** File with the form in [`oio/`](oio/). A filed issue is a proposal, not a mandate. Prepare a draft locally; submit it only when a human names the destination and the action.
+- **Sub-issues and milestones.** Link a child issue to its parent with GitHub's native sub-issue link, not only a line of text. There is one milestone per stack release, named by its version. File every issue, and open every pull request, in the open milestone for the next release (`--milestone <version>`). Certifying a release closes its milestone and opens the next one (#49).
 - **Pull requests only.** Nothing is pushed to `main` directly. The `gates` check must pass.
 - **The old repositories are frozen.** Don't open pull requests there. Adopters still pinned to them keep those pins until they move (step 5 of #21); a change that has to reach them sooner needs the owner's direction.
 - **License.** Everything here is FSL-1.1-ALv2. Don't add a per-folder license.
