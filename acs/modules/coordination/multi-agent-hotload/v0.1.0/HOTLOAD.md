@@ -240,6 +240,14 @@ identity with this session's `agent:<harness>/<session id>`. The guard names it 
 session start and blocks a stamp that names another harness or session, in every
 harness it runs in.
 
+**Seat and board files are local runtime state.** The claim file
+(`.coord/boss_claim.json`, or the assignment's `claim_file_path`), `.coord/board.json`
+and `.coord/board-events.jsonl` change whenever an agent takes the seat or a task.
+The guard's Stop hook does not count changes to them as unfinished work (#104), so
+a seat handover no longer needs its own pull request. An adopter may stop tracking
+them (`git rm --cached` plus a `.gitignore` line); the claim file's own
+`as_of_history` keeps the record of seat changes.
+
 **Verify (mock CI):**
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
