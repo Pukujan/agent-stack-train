@@ -20,8 +20,13 @@ Claude Code's own defaults and loses often enough to matter (#37).
                                  secret, release, label and workflow changes)
                                  that name no issue, and edits that remove
                                  this guard
-    acs_guard.py stop            Stop: block ending a turn with unpushed commits,
-                                 or pushed without a PCM checkpoint
+    acs_guard.py stop            Stop: block ending a turn while work is not on
+                                 GitHub, in every stack checkout the session
+                                 worked in (from its transcript): uncommitted
+                                 tracked changes, files it wrote that git does
+                                 not track, unpushed commits, a push without a
+                                 PCM checkpoint, or a pushed branch with no open
+                                 pull request or no auto-merge armed
     acs_guard.py link <N>        record issue N (or owner/repo#N) as the current
                                  branch's owning issue, after checking it exists
 
@@ -424,34 +429,204 @@ def pre_tool(event: dict) -> str | None:
     return None
 
 
-def stop(event: dict) -> str | None:
-    if event.get("stop_hook_active"):
-        return None
-    top = top_level(Path(os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or os.getcwd()))
-    if top is None or not is_adopter(top):
-        return None
+# Stop looks at every stack checkout the session worked in, found from its transcript (#69).
+TRANSCRIPT_TAIL = 4 * 1024 * 1024
+MAX_CHECKOUTS = 15
+MAX_LOOKUPS = 60
+EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
+
+
+def resolve(path: str, cwd: Path) -> Path:
+    p = Path(path).expanduser()
+    return p if p.is_absolute() else cwd / p
+
+
+def transcript_events(path: str) -> list[dict]:
+    """The transcript's last few MB as events; missing files and garbled lines are skipped."""
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            fh.seek(max(0, size - TRANSCRIPT_TAIL))
+            data = fh.read()
+    except (OSError, TypeError):
+        return []
+    lines = data.decode("utf-8", errors="replace").splitlines()
+    if size > TRANSCRIPT_TAIL:
+        lines = lines[1:]  # the first line was cut in half
+    events = []
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict):
+            events.append(event)
+    return events
+
+
+def session_paths(event: dict, cwd: Path) -> tuple[list[Path], list[Path]]:
+    """(directories the session worked in, files it wrote), from Edit/Write paths and `cd`/`git -C` targets."""
+    dirs: list[Path] = []
+    written: list[Path] = []
+    for entry in transcript_events(event.get("transcript_path") or ""):
+        here = Path(entry["cwd"]) if isinstance(entry.get("cwd"), str) else cwd
+        content = (entry.get("message") or {}).get("content") if isinstance(entry.get("message"), dict) else None
+        for item in content if isinstance(content, list) else []:
+            if not isinstance(item, dict) or item.get("type") != "tool_use":
+                continue
+            tool_input = item.get("input") if isinstance(item.get("input"), dict) else {}
+            if item.get("name") in EDIT_TOOLS:
+                path = tool_input.get("file_path") or tool_input.get("notebook_path")
+                if isinstance(path, str) and path:
+                    written.append(resolve(path, here))
+                    dirs.append(written[-1].parent)
+            elif item.get("name") == "Bash" and isinstance(tool_input.get("command"), str):
+                where = here
+                for args in segments(tool_input["command"]):
+                    if args[0] == "cd" and len(args) > 1 and args[1] != "-":
+                        where = resolve(args[1], where)
+                        dirs.append(where)
+                    elif Path(args[0]).name == "git":
+                        i = 1
+                        while i < len(args) and args[i].startswith("-"):  # only flags before the subcommand
+                            if args[i] == "-C" and i + 1 < len(args):
+                                dirs.append(resolve(args[i + 1], where))
+                            i += 2 if args[i] in ("-C", "-c", "--git-dir", "--work-tree") else 1
+    return dirs, written
+
+
+def within(path: Path, top: Path) -> bool:
+    try:
+        path.resolve().relative_to(top.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def session_checkouts(project: Path, event: dict) -> tuple[list[Path], list[Path]]:
+    """(stack checkouts to check, project folder first; files the session wrote)."""
+    dirs, written = session_paths(event, project)
+    tops: list[Path] = []
+    seen: list[Path] = []
+    lookups = 0
+    for d in [project, *dirs]:
+        if len(tops) >= MAX_CHECKOUTS or lookups >= MAX_LOOKUPS:
+            break
+        if any(within(d, s) for s in seen):
+            continue
+        lookups += 1
+        top = top_level(d)
+        if top is None or any(top.resolve() == s.resolve() for s in seen):
+            continue
+        seen.append(top)
+        if is_adopter(top):
+            tops.append(top)
+    return tops, written
+
+
+def names(paths: list[str], limit: int = 5) -> str:
+    return ", ".join(f"`{p}`" for p in paths[:limit]) + (" …" if len(paths) > limit else "")
+
+
+def pull_request_problem(top: Path, branch: str) -> tuple[str | None, str | None]:
+    """(problem, note) for the branch's open pull request: missing, a draft, or without auto-merge."""
+    code, out = run(
+        ["gh", "pr", "list", "--head", branch, "--state", "open", "--json", "number,isDraft,autoMergeRequest", "--limit", "1"],
+        top, timeout=10,
+    )
+    try:
+        pulls = json.loads(out) if code == 0 else None
+    except ValueError:
+        pulls = None
+    if not isinstance(pulls, list):
+        # gh is missing, signed out or offline: say so, but don't block on it.
+        return None, f"Could not check `{branch}`'s pull request on GitHub (gh failed or is offline); make sure it has an open pull request with auto-merge armed."
+    if not pulls:
+        return (
+            f"Branch `{branch}` is pushed but has no open pull request. Open one (`gh pr create` with `Refs #N`, "
+            "or `Closes #N` when the merge finishes the issue) and arm auto-merge (`gh pr merge <N> --auto --squash`).",
+            None,
+        )
+    pr = pulls[0]
+    number = pr.get("number")
+    if pr.get("isDraft"):
+        return f"Pull request #{number} for `{branch}` is a draft, so nothing will merge it. Mark it ready (`gh pr ready {number}`) and arm auto-merge.", None
+    if not pr.get("autoMergeRequest"):
+        return f"Pull request #{number} for `{branch}` has no auto-merge armed. Run `gh pr merge {number} --auto --squash`.", None
+    return None, None
+
+
+def checkout_problems(top: Path, written: list[Path]) -> tuple[list[str], list[str]]:
+    """(problems, notes) that keep one checkout's work off GitHub."""
+    problems: list[str] = []
+    notes: list[str] = []
     branch = current_branch(top)
     default = default_branch(top)
+    if branch is None:
+        where, fix = "a detached HEAD", "switch to a task branch (`git switch -c <type>/<N>-<slug>`), then commit and push them"
+    elif branch == default:
+        where, fix = f"`{default}`", "move them to a task branch (`git switch -c <type>/<N>-<slug>` keeps them), then commit, push and open a pull request"
+    else:
+        where, fix = f"`{branch}`", "commit, checkpoint and push them"
+    # `run` strips the output, so the first line may have lost its leading status column; split instead of slicing.
+    tracked = [line.split(None, 1)[-1] for line in (git(top, "status", "--porcelain", "--untracked-files=no") or "").splitlines() if line.strip()]
+    if tracked:
+        problems.append(f"{len(tracked)} uncommitted change(s) to tracked files on {where} ({names(tracked)}): {fix}.")
+    mine = [str(p.resolve().relative_to(top.resolve())) for p in written if within(p, top)]
+    if mine:
+        status = git(top, "status", "--porcelain", "--untracked-files=all", "--", *sorted(set(mine))) or ""
+        untracked = [line[3:] for line in status.splitlines() if line.startswith("?? ")]
+        if untracked:
+            problems.append(
+                f"{len(untracked)} file(s) this session wrote are not in git ({names(untracked)}): `git add` them, "
+                f"then {fix}; or delete them if they were scratch."
+            )
     if branch is None or branch == default:
-        return None
+        return problems, notes
     upstream = git(top, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
     base = upstream or f"origin/{default}"
     ahead = git(top, "rev-list", "--count", f"{base}..HEAD")
     if ahead and int(ahead) > 0:
-        return (
+        problems.append(
             f"Branch `{branch}` has {ahead} commit(s) that are not on GitHub. The rules say work is not "
-            "done while it exists only locally: checkpoint and push them (and open or update the pull request) before you stop."
+            "done while it exists only locally: checkpoint and push them (and open or update the pull request)."
         )
-    pcm = (top / "checkpoints" / "CURRENT.md").is_file()
+        return problems, notes
     on_branch = git(top, "rev-list", "--count", f"origin/{default}..HEAD")
-    if pcm and on_branch and int(on_branch) > 0:
-        subject = git(top, "log", "-1", "--format=%s") or ""
-        if not subject.startswith(CHECKPOINT_PREFIX):
-            return (
-                f"Branch `{branch}` was pushed without a PCM checkpoint after its last change. Run "
-                "`continuity checkpoint` (it commits and pushes the checkpoint) before you stop."
-            )
-    return None
+    if not (upstream and on_branch and int(on_branch) > 0):
+        return problems, notes
+    pcm = (top / "checkpoints" / "CURRENT.md").is_file()
+    subject = git(top, "log", "-1", "--format=%s") or ""
+    if pcm and not subject.startswith(CHECKPOINT_PREFIX):
+        problems.append(
+            f"Branch `{branch}` was pushed without a PCM checkpoint after its last change. Run "
+            "`continuity checkpoint` (it commits and pushes the checkpoint)."
+        )
+        return problems, notes
+    problem, note = pull_request_problem(top, branch)
+    problems += [problem] if problem else []
+    notes += [note] if note else []
+    return problems, notes
+
+
+def stop(event: dict) -> str | None:
+    if event.get("stop_hook_active"):
+        return None
+    project = Path(os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or os.getcwd())
+    tops, written = session_checkouts(project, event)
+    problems: list[str] = []
+    notes: list[str] = []
+    for top in tops:
+        found, noted = checkout_problems(top, written)
+        problems += [f"- `{top}`: {p}" for p in found]
+        notes += [f"- `{top}`: {n}" for n in noted]
+    if not problems:
+        return None  # a check gh couldn't make is not a reason to block
+    return "\n".join([
+        "Work is not done while it is not on GitHub with a pull request that will merge itself. Before you stop:",
+        *problems, *notes,
+    ])
 
 
 def session_start(event: dict) -> str | None:
