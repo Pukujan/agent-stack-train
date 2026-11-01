@@ -1,0 +1,21 @@
+{
+ "ran_gh": false,
+ "calls": [
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-1/repo && grep -rl \"PCM-0060\" . 2>/dev/null | head -20"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-1/repo && grep -rl \"PCM-0060\" . 2>/dev/null | head -20"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-1/repo && head -c 4000 tasks/TASK-PCM-0060-host-capability-honesty.md; grep -n \"PCM-0060\" checkpoints/CURRENT.md | head"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-1/repo && head -c 4000 tasks/TASK-PCM-0060-host-capability-honesty.md; grep -n \"PCM-0060\" checkpoints/CURRENT.md | head"
+  }
+ ]
+}

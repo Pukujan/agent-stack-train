@@ -1,0 +1,8 @@
+**PCM-0060 is closed. Its next action is none.** The checkout copy is stale.
+
+- **Local record** (`tasks/TASK-PCM-0060-host-capability-honesty.md`) still says `status: active` and asks for the owner's scope answer. That is out of date.
+- **GitHub issue #182** is CLOSED, closed 2026-10-31T23:34:13Z. The owner chose "probe + adapter seam." The slice merged as `Pukujan/agent-stack-train#51` at `bad10a7`. The owner closed the issue as "Close, split page."
+- **Closeout:** the issue's last comment says the PCM-0060 record was marked completed in `Pukujan/agent-stack-train#57`, merged at `edf0772`, and that there is no further action on the issue.
+- **Split out:** the install and onboarding page moved to #262 (PCM-0070).
+
+I did not check agent-stack-train#51 or #57 directly. The state above comes from the issue thread.

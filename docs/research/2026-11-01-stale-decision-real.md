@@ -70,7 +70,32 @@ The Haiku answers that passed pointed at the dates: the snapshot's newest entry 
 
 ## Proposed next step *(proposal)*
 
-None of this exists.
+Step 1 now exists (#68, below); step 2 is the rerun below.
 
 1. **Make the check happen without relying on the agent.** For example, a startup step that verifies the live state of any issue a recorded next action waits on, or a stamp on each recorded owner gate ("as of 2026-09-26; check #182 before acting").
 2. **Rerun the files and quiet setups after that change,** and compare against these numbers: files 5 of 10 passed, quiet 10 of 10 passed with 8 of 10 checking unasked.
+
+## Rerun with the startup check (#68)
+
+**With the guard's startup warning in front of the agent, the files setup went from 5 of 10 to 9 of 10 passing, and in the quiet setup every agent checked GitHub (10 of 10, up from 8).** The guard's session-start step now reads each active task record, asks GitHub about its issue, and warns when the issue closed or GitHub can't be reached. Two new setups put that warning, as the guard produced it for this snapshot, in front of the same prompt:
+
+- **files-hook:** the files setup, with the offline warning: "Could not reach GitHub to check the issues behind 10 active task record(s) … unverified and may be out of date: check the issue … before acting on one."
+- **quiet-hook:** the quiet setup, with the live warning, which names PCM-0060 and says #182 closed on 2026-10-31 and the recorded next action is out of date.
+
+| Model | Setup | Passed before | Passed with the check | Ran `gh` unasked |
+|---|---|---|---|---|
+| Haiku | files-hook | 4 of 5 | 5 of 5 | (not allowed) |
+| Sonnet | files-hook | 1 of 5 | 4 of 5 | (not allowed) |
+| Haiku | quiet-hook | 5 of 5 | 5 of 5 | 5 of 5 (was 5) |
+| Sonnet | quiet-hook | 5 of 5 | 5 of 5 | 5 of 5 (was 3) |
+
+The offline warning didn't change what the files agents said the next action was; it changed whether they said it might be stale. All ten repeated the recorded step, and nine said it was unverified and must be checked before acting. The one failure (Sonnet files-hook-3) said it "couldn't check issue #182 itself" but not that the record might be out of date; the judge marked it borderline.
+
+Data: [`2026-11-01-stale-decision-real/hook/`](2026-11-01-stale-decision-real/hook/) (each agent's `hook.txt`, `answer.txt` and `tools.json`). Traces: `4c1d503d…` (Haiku) and `c60bea06…` (Sonnet) in `acs-train-development`.
+
+Caveats for the rerun:
+
+- **The warning was put into the prompt,** because subagents don't run hooks. A real session also gets the guard's other startup notes; this rerun shows only the task-record note, to isolate it.
+- **The live warning nearly gives the answer away.** It says #182 closed, so "found the decision" partly comes from the warning. What it adds is that every agent then read the issue: all ten ran `gh` (from `tools.json`).
+- **The snapshot has no git history,** so the "commented since the record changed" notes can't appear here; only the closed-issue and offline notes were tested.
+- **Adopters get the check with the next stack release.** Until then it runs only in this repository.

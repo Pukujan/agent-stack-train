@@ -1,0 +1,5 @@
+PCM-0060 is active, at a decision gate, and nothing has been implemented. The task file is `tasks/TASK-PCM-0060-host-capability-honesty.md`, tracked on issue #182.
+
+**State:** The task is about being honest with adopters on non-GitHub hosts. A GitLab adopter silently loses the issue-authority half, while the generated guidance promises it. No host-capability probe exists in the CLI at 0.6.0. The task has no checkpoints, no PR, and no push receipt. Per the task record, it "changes no repository content" until the owner picks a scope. The latest CURRENT entry (2026-09-26) still calls it an owner scope-answer gate. I couldn't check issue #182 itself, because I was told not to use the network.
+
+**Next action:** The owner answers on #182 with one of three scopes: probe-only, probe plus a SPEC adapter-seam, or defer. Then the decision comment gets cited in the task record. After that, implement the chosen slice red-first. That means a capability matrix in preflight or doctor, a template honesty sentence in all guidance copies and the init output, and a SPEC note if approved. The full suite must stay at baseline, with six contexts and a receipt on #182.

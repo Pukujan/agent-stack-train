@@ -1,0 +1,7 @@
+PCM-0060 is active and blocked on a decision from the owner. As of its last record (2026-09-26), no code or repository content has changed, and no host-capability probe exists in the CLI at 0.6.0.
+
+The task is to make non-GitHub host limits explicit. Today a GitLab adopter silently loses the issue-authority half, while the generated guidance still promises it. The issue is #182, and the task is priority P3, owned by owner/Astra planning, with no dependencies. I couldn't check GitHub, so the record may be out of date.
+
+Next action: the owner answers on #182 with one of three scopes: probe-only, probe plus a SPEC adapter-seam, or defer. The decision comment should then be cited in the task record. After that, the chosen slice is implemented red-first, meaning the failing tests are written before the change.
+
+Source: <run-dir>/files-hook-1/repo/tasks/TASK-PCM-0060-host-capability-honesty.md

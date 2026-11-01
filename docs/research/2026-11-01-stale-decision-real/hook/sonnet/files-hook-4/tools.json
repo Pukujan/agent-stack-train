@@ -1,0 +1,21 @@
+{
+ "ran_gh": false,
+ "calls": [
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-4/repo && grep -rl \"PCM-0060\" . 2>/dev/null | head -20"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-4/repo && grep -rl \"PCM-0060\" . 2>/dev/null | head -20"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-4/repo && cat tasks/TASK-PCM-0060-host-capability-honesty.md | head -80; grep -n \"PCM-0060\" checkpoints/CURRENT.md docs/CONTINUITY_INDEX.md | head"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/files-hook-4/repo && cat tasks/TASK-PCM-0060-host-capability-honesty.md | head -80; grep -n \"PCM-0060\" checkpoints/CURRENT.md docs/CONTINUITY_INDEX.md | head"
+  }
+ ]
+}

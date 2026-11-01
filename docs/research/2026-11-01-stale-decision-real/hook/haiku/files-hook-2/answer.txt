@@ -1,0 +1,6 @@
+**PCM-0060 (Host Capability Honesty) is active, P3, and blocked on an owner scope decision. Its next action is the owner's scope answer on issue #182.**
+
+- **Status:** `status: active` in the task header, `tasks/TASK-PCM-0060-host-capability-honesty.md:3`. Nothing is implemented; "this task changes no repository content" until scope is chosen (same file, "Allowed files").
+- **Next action:** `next_action` in the same header line: "Owner scope answer on #182 (probe-only / probe+SPEC adapter-seam / defer); then implement per acceptance."
+- **Gate:** `checkpoints/CURRENT.md:26` calls #182/PCM-0060 an "owner scope answer gate" with "no code yet."
+- **Freshness:** the snapshot's latest record is as-of 2026-09-26 (`checkpoints/CURRENT.md:14`). The SessionStart hook could not reach GitHub, so the issue state is unverified. Run `continuity issue verify PCM-0060` before acting.

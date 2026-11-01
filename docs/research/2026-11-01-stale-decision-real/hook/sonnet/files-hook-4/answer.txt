@@ -1,0 +1,17 @@
+PCM-0060 is active and blocked on a decision from the owner. As of the snapshot's last update (2026-09-26 ~11:35Z), no work has started. The task record has no checkpoints, no PR or CI evidence, and no repository changes. I couldn't check issue #182 itself, so the record may be out of date.
+
+The task is about host-capability honesty for non-GitHub hosts. A GitLab adopter currently loses the issue-authority half silently, while the generated guidance promises it.
+
+Next action, from the task file: the owner answers on issue #182 with one of three scopes:
+- probe only
+- probe plus a SPEC adapter seam
+- defer
+
+Once that decision comment is cited in the task record, the chosen slice gets implemented red-first. The acceptance criteria require:
+- a preflight or doctor capability matrix
+- honesty text in all guidance copies and in the init output
+- a SPEC note, if approved
+- the full test suite at baseline
+- six contexts and a receipt on #182
+
+Evidence is in `tasks/TASK-PCM-0060-host-capability-honesty.md` and `checkpoints/CURRENT.md`.

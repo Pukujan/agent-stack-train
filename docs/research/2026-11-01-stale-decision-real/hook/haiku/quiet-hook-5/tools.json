@@ -1,0 +1,21 @@
+{
+ "ran_gh": true,
+ "calls": [
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/quiet-hook-5/repo && ls tasks/ 2>/dev/null | head -50; echo ---; cat tasks/TASK-PCM-0060-host-capability-honesty.md 2>/dev/null | head -120"
+  },
+  {
+   "tool": "Bash",
+   "input": "gh issue view 182 --repo Pukujan/project-continuity-modules --json number,state,title,closedAt,body,comments 2>&1 | head -150"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/quiet-hook-5/repo && ls tasks/ 2>/dev/null | head -50; echo ---; cat tasks/TASK-PCM-0060-host-capability-honesty.md 2>/dev/null | head -120"
+  },
+  {
+   "tool": "Bash",
+   "input": "gh issue view 182 --repo Pukujan/project-continuity-modules --json number,state,title,closedAt,body,comments 2>&1 | head -150"
+  }
+ ]
+}

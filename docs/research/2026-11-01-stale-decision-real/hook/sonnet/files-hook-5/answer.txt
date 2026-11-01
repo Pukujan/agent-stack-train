@@ -1,0 +1,9 @@
+PCM-0060 is active and blocked on an owner decision. No work has started.
+
+The open question is on issue #182: which scope to take for non-GitHub host honesty. The options are probe-only, probe plus a SPEC adapter-seam note, or defer. The task record says the task changes no repository content until the owner answers. It has no checkpoints, no PR or CI evidence, and no dependencies. It is priority P3, owned by owner/Astra planning.
+
+Next action: get the owner's scope answer on #182 and cite that decision comment in the task record. After that, implement the chosen slice red-first. That means a host-capability classification in preflight or doctor with a printed matrix, honesty text in all guidance copies and the init output, and a SPEC note if approved. The full suite must stay at baseline, with six contexts and a receipt on #182.
+
+The snapshot's last record is from 2026-09-26. I couldn't check whether the owner has answered since, and the session hook also couldn't reach GitHub to verify.
+
+Sources: `tasks/TASK-PCM-0060-host-capability-honesty.md` and `checkpoints/CURRENT.md`.

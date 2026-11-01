@@ -1,0 +1,21 @@
+{
+ "ran_gh": false,
+ "calls": [
+  {
+   "tool": "Bash",
+   "input": "cd \"<run-dir>/files-hook-1/repo\" && grep -rn \"PCM-0060\" . 2>/dev/null | head -50; echo \"---\"; find . -path ./.git -prune -o -type f -print | grep -i -E \"pcm-0060|0060\" | head"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd \"<run-dir>/files-hook-1/repo\" && grep -rn \"PCM-0060\" . 2>/dev/null | head -50; echo \"---\"; find . -path ./.git -prune -o -type f -print | grep -i -E \"pcm-0060|0060\" | head"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd \"<run-dir>/files-hook-1/repo\" && cat tasks/TASK-PCM-0060-host-capability-honesty.md; echo \"---IDX\"; sed -n 340,360p docs/CONTINUITY_INDEX.md"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd \"<run-dir>/files-hook-1/repo\" && cat tasks/TASK-PCM-0060-host-capability-honesty.md; echo \"---IDX\"; sed -n 340,360p docs/CONTINUITY_INDEX.md"
+  }
+ ]
+}

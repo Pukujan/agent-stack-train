@@ -1,0 +1,11 @@
+PCM-0060 is finished, so don't act on the recorded next action ("Owner scope answer on #182"). The snapshot's task file still says `status: active`, but GitHub issue #182 shows otherwise.
+
+- The owner chose the probe plus SPEC adapter-seam slice. It merged in `Pukujan/agent-stack-train#51` at `bad10a7`, with all 13 required checks passing.
+- The owner closed #182 on 2026-10-31 ("Close, split page").
+- The follow-up #57 merged at `edf0772` and marked the task record completed. That change isn't in your snapshot.
+- The install and onboarding page was not part of the slice. It moved to a new task, #262 (PCM-0070).
+- The last comment on #182 says: "No further action on this issue."
+
+Next action: none for PCM-0060. If you want the install page, pick up PCM-0070 (#262). New work lands in `Pukujan/agent-stack-train` under `pcm/`, not in this snapshot.
+
+Evidence: `gh issue view 182 -R Pukujan/project-continuity-modules --comments`, and the task file `tasks/TASK-PCM-0060-host-capability-honesty.md` in the snapshot.

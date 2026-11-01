@@ -74,6 +74,30 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(sdr.verdict("quiet", judged(knows_decided=True, claims_checked_live=True)), "pass")
         self.assertEqual(sdr.verdict("quiet", judged()), "fail")
 
+    def test_a_hook_arm_gets_the_guards_note_ahead_of_its_base_prompt(self) -> None:
+        (self.base / "quiet-hook-1" / "hook.txt").write_text("PCM-0060: its issue #182 closed.\n")
+        prompt = sdr.prompt_for(self.base, "quiet-hook-1")
+        self.assertTrue(prompt.startswith(sdr.HOOK_PREFIX + "PCM-0060: its issue #182 closed.\n\n"))
+        self.assertTrue(prompt.endswith(sdr.prompt_for(self.base, "quiet-1").replace("quiet-1", "quiet-hook-1")))
+        self.assertIn("do not use the network", sdr.prompt_for(self.base, "files-hook-1"))
+        self.assertNotIn(sdr.HOOK_PREFIX, sdr.prompt_for(self.base, "files-1"))
+
+    def test_hook_arms_are_graded_and_redacted_like_their_base(self) -> None:
+        self.assertEqual(sdr.condition_of("files-hook-3"), "files-hook")
+        self.assertEqual(sdr.verdict("files-hook", judged(flags_unverified=True)), "pass")
+        self.assertEqual(sdr.verdict("quiet-hook", judged()), "fail")
+        self.assertEqual(sdr.redact("see /x/quiet-hook-2/repo/a.md"), "see <snapshot file>")
+
+    def test_the_offline_hook_says_the_records_are_unverified(self) -> None:
+        tasks = self.base / "files-hook-1" / "repo" / "tasks"
+        tasks.mkdir()
+        marker = {"id": "PCM-0060", "status": "active", "next_action": "Owner scope answer on #182",
+                  "issue_url": "https://github.com/Pukujan/project-continuity-modules/issues/182"}
+        (tasks / "TASK-PCM-0060-x.md").write_text(f"<!-- continuity:task {json.dumps(marker)} -->\n")
+        text = sdr.hook_text(tasks.parent, online=False)
+        self.assertIn("Could not reach GitHub", text)
+        self.assertIn("PCM-0060", text)
+
     def test_scores_map_blind_ids_back_to_arms(self) -> None:
         (self.base / "files-1" / "answer.txt").write_text("Waiting on the owner; may be stale.")
         ids = {arm: jid for jid, arm in blind_ids(self.base).items()}

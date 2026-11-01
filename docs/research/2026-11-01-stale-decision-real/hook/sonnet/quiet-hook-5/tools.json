@@ -1,0 +1,13 @@
+{
+ "ran_gh": true,
+ "calls": [
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/quiet-hook-5/repo && cat tasks/TASK-PCM-0060-host-capability-honesty.md | head -60; gh issue view 182 -R Pukujan/project-continuity-modules --comments | tail -60"
+  },
+  {
+   "tool": "Bash",
+   "input": "cd <run-dir>/quiet-hook-5/repo && cat tasks/TASK-PCM-0060-host-capability-honesty.md | head -60; gh issue view 182 -R Pukujan/project-continuity-modules --comments | tail -60"
+  }
+ ]
+}

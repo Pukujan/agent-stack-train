@@ -1,0 +1,10 @@
+PCM-0060 is finished, so there is nothing left for you to pick up. The task record in your snapshot is stale: it still says `active` and lists the next action as "Owner scope answer on #182."
+
+GitHub issue #182 shows the owner chose the probe plus SPEC adapter-seam slice, and that slice is merged:
+- **Merge:** the host probe and the adapter seam landed in `Pukujan/agent-stack-train` PR #51 at `bad10a7`, with all 13 required checks passing.
+- **Close-out:** #182 was closed on 2026-10-31 on the owner's direction ("Close, split page"). PR #57, merged at `edf0772`, marks the PCM-0060 record completed.
+- **Remaining work:** the install and onboarding page was not in the chosen slice. It moved to a new task, #262 (PCM-0070).
+
+Do not edit `cli.py` for PCM-0060. If you want to continue, take PCM-0070 (#262), and read that issue first.
+
+I did not modify any file or anything on GitHub.

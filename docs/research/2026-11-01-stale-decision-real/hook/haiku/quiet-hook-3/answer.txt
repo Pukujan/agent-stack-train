@@ -1,0 +1,8 @@
+PCM-0060 is done, and it has no next action. The snapshot's task record is stale.
+
+- **Snapshot record:** `tasks/TASK-PCM-0060-host-capability-honesty.md` still says `"status": "active"` and the old next action, "Owner scope answer on #182". Its as-of date is 2026-09-26.
+- **Issue #182:** closed 2026-10-31T23:34:13Z. The owner chose "probe + adapter seam". That slice merged in Pukujan/agent-stack-train#51 at `bad10a7`, with receipts `pcm0060-probe-seam-1` and `-2`.
+- **Closeout:** agent-stack-train#57 merged at `edf0772` (checkpoint `pcm0060-closeout-1`). The comment says "No further action on this issue."
+- **Remaining work:** the install and onboarding page moved to its own task, PCM-0070 (#262).
+
+I changed nothing in the snapshot or on GitHub.

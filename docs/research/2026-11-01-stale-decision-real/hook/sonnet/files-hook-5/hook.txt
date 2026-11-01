@@ -1,0 +1,1 @@
+Could not reach GitHub to check the issues behind 10 active task record(s) (PCM-0050, PCM-0052, PCM-0059, PCM-0060, PCM-0061, PCM-0062, PCM-0063, PCM-0064, PCM-0065, PCM-0069). Their recorded status and next actions are unverified and may be out of date: check the issue (for example `continuity issue verify <TASK-ID>`) before acting on one.

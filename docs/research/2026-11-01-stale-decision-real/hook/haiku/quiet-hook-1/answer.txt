@@ -1,0 +1,7 @@
+PCM-0060 is done, and its recorded next action is stale. The local record (`tasks/TASK-PCM-0060-host-capability-honesty.md`, `status: active`) predates the work. The owner decided on #182 (2026-10-31) to build a host probe plus a SPEC adapter seam. That slice merged in Pukujan/agent-stack-train#51 at `bad10a7`. The PCM-0060 record was closed out in agent-stack-train#57 at `edf0772`, and #182 closed as COMPLETED at 23:34Z.
+
+The install and onboarding page was split out to #262 (PCM-0070), so that page is the only open piece.
+
+Next action for PCM-0060: none. If you want the install page, track it under PCM-0070 (#262), not here.
+
+Evidence: `gh issue view 182 --repo Pukujan/project-continuity-modules` comments dated 2026-10-31T23:16Z to 23:36Z. I made no changes.

@@ -290,6 +290,103 @@ def test_session_start_is_quiet_on_a_current_default_branch(guard, repo):
     assert guard.session_start({"cwd": str(repo), "source": "startup"}) is None
 
 
+# ---------------------------------------------------------------- task records vs GitHub (#68)
+
+GATE = "Owner scope answer on #182; then implement."
+
+
+def add_task(repo: Path, task_id: str = "PCM-0060", issue: int = 182, next_action: str = GATE,
+             status: str = "active") -> str:
+    meta = {"id": task_id, "issue_url": f"https://github.com/acme/widget/issues/{issue}",
+            "next_action": next_action, "status": status}
+    path = repo / "tasks" / f"TASK-{task_id}.md"
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(f"# TASK-{task_id}\n\n<!-- continuity:task {json.dumps(meta)} -->\n", encoding="utf-8")
+    git("add", "-A", cwd=repo)
+    git("commit", "-qm", f"record {task_id}", cwd=repo)
+    git("push", "-q", "origin", "main", cwd=repo)
+    return path.relative_to(repo).as_posix()
+
+
+def issue(state="OPEN", closed=None, comment_at=None, body="Owner: probe plus seam."):
+    last = {"createdAt": comment_at, "body": body, "author": {"login": "owner"}} if comment_at else None
+    return {"state": state, "closed_at": closed, "last_comment": last}
+
+
+def recorded_at(repo: Path, rel: str) -> str:
+    return git("log", "-1", "--format=%cI", "--", rel, cwd=repo)
+
+
+def later(repo: Path, rel: str, minutes: int) -> str:
+    from datetime import datetime, timedelta, timezone
+    stamp = datetime.fromisoformat(recorded_at(repo, rel)) + timedelta(minutes=minutes)
+    return stamp.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def stub_live(guard, monkeypatch, live):
+    seen = []
+    monkeypatch.setattr(guard, "live_issues", lambda top, refs: seen.append(refs) or live)
+    return seen
+
+
+def test_a_closed_issue_marks_its_record_out_of_date(guard, repo, monkeypatch):
+    rel = add_task(repo)
+    stub_live(guard, monkeypatch, {("acme/widget", 182): issue("CLOSED", "2026-10-31T23:34:13Z")})
+    context = guard.session_start({"cwd": str(repo), "source": "startup"})
+    assert "acme/widget#182 closed on 2026-10-31" in context
+    assert rel in context and GATE in context and "out of date" in context
+
+
+def test_an_issue_the_next_action_names_is_checked_too(guard, repo, monkeypatch):
+    add_task(repo, issue=200, next_action="Wait for acme/widget#182, then ship.")
+    seen = stub_live(guard, monkeypatch, {("acme/widget", 200): issue(),
+                                          ("acme/widget", 182): issue("CLOSED", "2026-10-31T00:00:00Z")})
+    context = guard.check_records(repo)
+    assert seen == [[("acme/widget", 200), ("acme/widget", 182)]]
+    assert "depends on acme/widget#182, which closed on 2026-10-31" in context
+
+
+def test_a_later_comment_is_news_but_a_receipt_or_same_session_note_is_not(guard, repo, monkeypatch):
+    rel = add_task(repo)
+    stub_live(guard, monkeypatch, {("acme/widget", 182): issue(comment_at=later(repo, rel, 90))})
+    assert "has a comment from owner" in guard.check_records(repo)
+    stub_live(guard, monkeypatch, {("acme/widget", 182): issue(comment_at=later(repo, rel, 5))})
+    assert guard.check_records(repo) is None
+    receipt = issue(comment_at=later(repo, rel, 90), body="<!-- pcm:receipt-v2 request-id=x --> done")
+    stub_live(guard, monkeypatch, {("acme/widget", 182): receipt})
+    assert guard.check_records(repo) is None
+
+
+def test_open_issues_with_nothing_new_stay_quiet(guard, repo, monkeypatch):
+    add_task(repo)
+    add_task(repo, task_id="PCM-0001", issue=1, status="done")
+    seen = stub_live(guard, monkeypatch, {("acme/widget", 182): issue()})
+    assert guard.session_start({"cwd": str(repo), "source": "startup"}) is None
+    assert seen == [[("acme/widget", 182)]]  # the finished task is not checked
+
+
+def test_when_github_cant_be_reached_the_records_are_marked_unverified(guard, repo, monkeypatch):
+    add_task(repo)
+    stub_live(guard, monkeypatch, None)
+    context = guard.check_records(repo)
+    assert "Could not reach GitHub" in context and "PCM-0060" in context and "unverified" in context
+
+
+def test_no_task_records_means_no_github_call(guard, repo, monkeypatch):
+    seen = stub_live(guard, monkeypatch, {})
+    assert guard.check_records(repo) is None and seen == []
+
+
+def test_the_query_reads_partial_answers_and_treats_no_answer_as_unreachable(guard, repo, monkeypatch):
+    refs = [("acme/widget", 182), ("acme/widget", 9)]
+    answer = {"data": {"i0": {"issueOrPullRequest": {"state": "CLOSED", "closedAt": "2026-10-31T00:00:00Z",
+                                                     "comments": {"nodes": []}}}, "i1": None}}
+    monkeypatch.setattr(guard, "run", lambda args, cwd, timeout=15: (1, json.dumps(answer)))
+    assert guard.live_issues(repo, refs) == {refs[0]: issue("CLOSED", "2026-10-31T00:00:00Z")}
+    monkeypatch.setattr(guard, "run", lambda args, cwd, timeout=15: (127, "timed out"))
+    assert guard.live_issues(repo, refs) is None
+
+
 # ---------------------------------------------------------------- scope and switch
 
 

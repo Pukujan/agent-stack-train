@@ -1,0 +1,18 @@
+PCM-0060 is active (P3) and blocked on a decision from the owner. The task file (as of 2026-09-26) says no scope has been chosen, and the task changes no repository content until one is.
+
+**Next action:** The owner answers on issue #182 with one of three scopes:
+- probe-only
+- probe plus a SPEC adapter seam
+- defer
+
+The decision comment then has to be cited in the task record. After that, the chosen slice is built red-first:
+- a capability matrix for the origin host in preflight or doctor
+- an honesty sentence in all guidance copies and in the init output
+- a SPEC interface note, if approved
+- the full suite at baseline, plus six required contexts and a receipt on #182
+
+**Why it matters:** GitLab adopters silently lose issue authority, while the generated guidance still promises it.
+
+**Caveat:** The session hook could not reach GitHub, so this status is unverified. I read it from the snapshot, not from issue #182.
+
+Files are in the snapshot's `tasks/` and `checkpoints/` directories: `TASK-PCM-0060-host-capability-honesty.md` and `CURRENT.md`.
