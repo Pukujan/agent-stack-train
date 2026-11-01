@@ -33,6 +33,10 @@ Claude Code's own defaults and loses often enough to matter (#37).
     acs_guard.py link <N>        record issue N (or owner/repo#N) as the current
                                  branch's owning issue, after checking it exists
 
+Other harnesses run the same checks with ``--harness codex|cursor|gemini``
+before the hook name (#83): their hook input is read into the event shape
+above, and the answer goes back in each harness's own form.
+
 A branch's owning issue is the one recorded by ``link`` or the number in its
 name (``fix/37-enforce-rules``); either is checked on GitHub once and cached in
 ``git config branch.<name>.acs-issue``. A GitHub-side change can instead name
@@ -910,33 +914,89 @@ def link(arg: str) -> int:
     return 0
 
 
+# ---------------------------------------------------------------- other harnesses (#83)
+
+HARNESSES = ("claude", "codex", "cursor", "gemini")
+# Gemini CLI's tool names, as the Claude Code tools the checks know.
+GEMINI_TOOLS = {"run_shell_command": "Bash", "write_file": "Write", "replace": "Edit"}
+
+
+def normalize(harness: str, hook: str, event: dict) -> dict:
+    """The harness's hook input in the shape pre_tool, stop and session_start take."""
+    if harness in ("claude", "codex"):  # Codex sends Claude Code's fields; its shell tool is `Bash`
+        return event
+    event = dict(event)
+    if harness == "cursor":
+        roots = event.get("workspace_roots") or []
+        if not event.get("cwd"):  # stop and sessionStart send no cwd
+            event["cwd"] = os.environ.get("CURSOR_PROJECT_DIR") or (roots[0] if roots else None)
+        if hook == "pre-tool" and "command" in event:  # beforeShellExecution
+            event.update(tool_name="Bash", tool_input={"command": event["command"]})
+        if hook == "stop":
+            event["stop_hook_active"] = bool(event.get("loop_count"))
+        event.setdefault("session_id", event.get("conversation_id"))
+    elif harness == "gemini" and event.get("tool_name") in GEMINI_TOOLS:
+        event["tool_name"] = GEMINI_TOOLS[event["tool_name"]]
+    return event
+
+
+def answer(harness: str, hook: str, text: str | None) -> int:
+    """Give the harness the guard's verdict (a reason to block, or context) in its own form."""
+    def out(data: dict) -> int:
+        print(json.dumps(data))
+        return 0
+
+    if hook == "session-start":
+        if not text:
+            return 0
+        if harness == "cursor":
+            return out({"additional_context": text})
+        return out({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": text}})
+    if harness == "cursor" and hook == "pre-tool":
+        # A permission hook must answer; empty output is not an allow.
+        if not text:
+            return out({"permission": "allow"})
+        return out({"permission": "deny", "agent_message": f"[stack guard] {text}", "user_message": f"[stack guard] {text}"})
+    if not text:
+        return 0
+    if harness == "cursor":
+        return out({"followup_message": f"[stack guard] {text}"})
+    if harness == "gemini":
+        return out({"decision": "deny", "reason": f"[stack guard] {text}"})
+    if harness == "codex" and hook == "stop":
+        return out({"decision": "block", "reason": f"[stack guard] {text}"})
+    print(f"[stack guard] {text}", file=sys.stderr)
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
-    argv = sys.argv[1:] if argv is None else argv
+    argv = list(sys.argv[1:] if argv is None else argv)
+    harness = "claude"
+    if "--harness" in argv:
+        i = argv.index("--harness")
+        harness = argv[i + 1] if i + 1 < len(argv) else ""
+        del argv[i:i + 2]
+        if harness not in HARNESSES:
+            print(f"unknown harness {harness!r}; one of {', '.join(HARNESSES)}", file=sys.stderr)
+            return 2
     if not argv:
         print(__doc__)
         return 2
     if argv[0] == "link":
         return link(argv[1] if len(argv) > 1 else "")
+    known = argv[0] in ("session-start", "pre-tool", "stop")
     if os.environ.get("ACS_GUARD", "").lower() == "off":
-        return 0
+        return answer(harness, argv[0], None) if known else 0
+    if not known:
+        print(f"unknown hook {argv[0]!r}", file=sys.stderr)
+        return 2
     try:
         event = json.load(sys.stdin)
     except ValueError:
         event = {}
-    if argv[0] == "session-start":
-        context = session_start(event)
-        if context:
-            print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}))
-        return 0
-    check = {"pre-tool": pre_tool, "stop": stop}.get(argv[0])
-    if check is None:
-        print(f"unknown hook {argv[0]!r}", file=sys.stderr)
-        return 2
-    reason = check(event)
-    if reason:
-        print(f"[stack guard] {reason}", file=sys.stderr)
-        return 2
-    return 0
+    event = normalize(harness, argv[0], event if isinstance(event, dict) else {})
+    check = {"session-start": session_start, "pre-tool": pre_tool, "stop": stop}[argv[0]]
+    return answer(harness, argv[0], check(event))
 
 
 if __name__ == "__main__":
