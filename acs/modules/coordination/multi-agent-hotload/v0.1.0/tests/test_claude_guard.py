@@ -385,6 +385,7 @@ def test_a_retried_stop_gives_up_after_the_cap(guard, repo, retry_dir, capsys):
 
 def test_a_retried_stop_skips_the_pull_request_checks(guard, repo, retry_dir):
     _pushed_branch(repo)
+    _due(repo)
     guard.pulls["fix/37-enforce"] = []
     assert "no open pull request" in guard.stop({"cwd": str(repo)})
     assert guard.stop({"cwd": str(repo), "stop_hook_active": True, "session_id": "s4"}) is None
@@ -411,6 +412,7 @@ def test_stop_checks_a_branch_the_session_committed_to_then_left(guard, repo, tm
 
 def test_stop_accepts_a_branch_whose_pull_request_merged_at_its_tip(guard, repo):
     _pushed_branch(repo)
+    _due(repo)
     guard.pulls["fix/37-enforce"] = []
     guard.merged["fix/37-enforce"] = [{"headRefOid": "0" * 40}]
     assert "no open pull request" in guard.stop({"cwd": str(repo)})
@@ -438,6 +440,12 @@ def transcript(tmp_path: Path, cwd: Path, *uses: tuple[str, dict]) -> str:
         {"type": "tool_use", "name": name, "input": tool_input}]}}) for name, tool_input in uses]
     path.write_text("\n".join(["{not json", *lines, ""]), encoding="utf-8")
     return str(path)
+
+
+def _due(repo: Path, **limits: int) -> None:
+    """Put the checkout past its pull-request cadence limit (#108): one commit is enough."""
+    (repo / ".coord").mkdir(exist_ok=True)
+    (repo / ".coord" / "cadence.json").write_text(json.dumps(limits or {"pr_after_commits": 1}), encoding="utf-8")
 
 
 def _pushed_branch(repo: Path, branch: str = "fix/37-enforce") -> None:
@@ -517,9 +525,11 @@ def test_stop_reads_a_missing_or_garbled_transcript_as_empty(guard, repo, tmp_pa
 
 def test_stop_needs_an_open_pull_request_with_auto_merge(guard, repo):
     _pushed_branch(repo)
+    _due(repo)
     assert guard.stop({"cwd": str(repo)}) is None
     guard.pulls["fix/37-enforce"] = []
-    assert "no open pull request" in guard.stop({"cwd": str(repo)})
+    reason = guard.stop({"cwd": str(repo)})
+    assert "no open pull request" in reason and "it has 1 commits (the limit is 1)" in reason
     guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
     assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
     guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": True, "autoMergeRequest": None}]
@@ -528,6 +538,7 @@ def test_stop_needs_an_open_pull_request_with_auto_merge(guard, repo):
 
 def test_stop_asks_for_auto_merge_only_where_the_repository_allows_it(guard, repo):
     _pushed_branch(repo)
+    _due(repo)
     guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
     guard.auto_merge = None  # gh could not tell: keep asking, as before
     assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
@@ -577,7 +588,8 @@ def test_session_start_hands_over_the_default_branchs_rules(guard, repo, tmp_pat
 
 
 def test_session_start_is_quiet_on_a_current_default_branch(guard, repo):
-    assert guard.session_start({"cwd": str(repo), "source": "startup"}) is None
+    # The cadence (#108) is the one thing every session is told.
+    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == guard.cadence_note(repo)
 
 
 # ---------------------------------------------------------------- task records vs GitHub (#68)
@@ -651,7 +663,7 @@ def test_open_issues_with_nothing_new_stay_quiet(guard, repo, monkeypatch):
     add_task(repo)
     add_task(repo, task_id="PCM-0001", issue=1, status="done")
     seen = stub_live(guard, monkeypatch, {("acme/widget", 182): issue()})
-    assert guard.session_start({"cwd": str(repo), "source": "startup"}) is None
+    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == guard.cadence_note(repo)
     assert seen == [[("acme/widget", 182)]]  # the finished task is not checked
 
 

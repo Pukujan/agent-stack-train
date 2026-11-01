@@ -59,7 +59,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `c212e2e143c318f47ab578d51d087a1f866f4db713afbb0bdde75e6112f6fbc2`
-- Current SHA-256: `42935123c965b6e77c5a862bebfa77994cdca7f4dabcf0842f11fda623410f13`
+- Current SHA-256: `cd2ae06b8d308c335389147dd5b664c4fc7f66e73833132d9d676b4dcbd5c8e9`
 - Summary: Human-readable and machine-verifiable issue, task, checkpoint and handoff records.
 - Search terms: `GitHub authority`, `issue logs`, `lineage`, `provenance`, `receipts`, `records`
 - Neighboring records: `pcm-0015-research`
@@ -83,7 +83,7 @@
 - Local content status: **NEEDS_REVIEW**
 - Last reviewed at commit: `b88ef1eba097d0927c55e9ef14ba3c76bbb2f5b2`
 - Reviewed SHA-256: `b2e589024208e4fe88e84adee7baa7d84a885b11d526f01eae2517dc2b62b527`
-- Current SHA-256: `097d0fa9e6204ca90de24390032693733c3b9af0e6f9d88f222faf09c2fe1ee8`
+- Current SHA-256: `31a9cbae0f59bde497498c7542527d14862587b975978f03ace2cba8b7a69797`
 - Summary: Normative field authority, lineage correction, synchronized docs and finite push/CI/merge receipts.
 - Search terms: `GitHub authority`, `lineage`, `receipts`
 - Neighboring records: `continuity-records-policy`, `testing-policy`

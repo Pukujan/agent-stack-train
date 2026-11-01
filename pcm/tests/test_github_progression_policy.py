@@ -28,7 +28,9 @@ REQUIRED = (
     "before every push",
     "reviewed catalog/generated index",
     "synchronously pushes",
-    "after every successful push",
+    "not after every push",
+    "cadence limit",
+    "every push stays traceable",
     "request id and exact pushed sha",
     "linked parent progression update",
     "without another checkpoint/push",
@@ -47,6 +49,8 @@ FORBIDDEN = (
     "checkpoint commits are pushed asynchronously",
     "github tracking is optional",
     "auto-merge is optional",
+    "after every successful push",
+    "after each successful push",
 )
 
 
@@ -117,7 +121,7 @@ class GitHubProgressionPolicyTests(unittest.TestCase):
                 for phrase in ("github", "required ci", "auto-merge", "leaf", "dependenc"):
                     self.assertIn(phrase, text)
         spec = (ROOT / "SPEC.md").read_text(encoding="utf-8").lower()
-        for phrase in ("before every push", "after each successful push", "after ci/merge",
+        for phrase in ("before every push", "at each receipt point", "not after every push", "after ci/merge",
                        "stop the receipt loop", "owner direction", "contradictory evidence",
                        "visited set", "issue prose and local locks are not distributed mutual exclusion"):
             self.assertIn(phrase, spec)

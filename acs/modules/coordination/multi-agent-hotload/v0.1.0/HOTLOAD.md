@@ -248,6 +248,19 @@ a seat handover no longer needs its own pull request. An adopter may stop tracki
 them (`git rm --cached` plus a `.gitignore` line); the claim file's own
 `as_of_history` keeps the record of seat changes.
 
+**GitHub cadence.** Work reaches GitHub at every stop, but not as a new pull
+request or comment each time (#108). The guard's Stop hook asks for a branch's
+pull request only once the branch passes a limit in `.coord/cadence.json`
+(defaults: `pr_after_commits` 10, `pr_after_lines` 400, `pr_after_hours` 24;
+checkpoint commits don't count), and blocks shell loops and watches that poll
+GitHub faster than `min_poll_seconds` (60). Open the pull request sooner when the
+issue's work is done; session start names pushed branches past a limit that have
+no pull request, so finished work isn't stranded. Issue receipts go out when the
+pull request opens, at a handoff or block, and after the merge, each naming every
+pushed SHA since the last one. A missing or malformed setting means its default.
+`scripts/activity_meter.py` in the stack repository counts each adopter's issues,
+pull requests and comments, and runs weekly.
+
 **Verify (mock CI):**
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
