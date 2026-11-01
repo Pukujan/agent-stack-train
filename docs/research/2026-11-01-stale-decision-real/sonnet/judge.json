@@ -1,0 +1,72 @@
+{
+ "A1": {
+  "recommends_stale_unhedged": true,
+  "knows_decided": false,
+  "flags_unverified": false,
+  "claims_checked_live": false,
+  "reason": "It gives the owner scope answer on #182 as the next action and only notes that the snapshot shows no answer, never that the record may be stale."
+ },
+ "A2": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reports that #182 is closed and PCM-0060 is finished from the live issue, and calls the checkout stale."
+ },
+ "A3": {
+  "recommends_stale_unhedged": true,
+  "knows_decided": false,
+  "flags_unverified": false,
+  "claims_checked_live": false,
+  "reason": "It says the task is still waiting on the owner's answer on #182 and does not warn that the snapshot may be out of date."
+ },
+ "A4": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reports the closure, the owner's choice and the merges from GitHub, and says the checkout is out of date."
+ },
+ "A5": {
+  "recommends_stale_unhedged": true,
+  "knows_decided": false,
+  "flags_unverified": false,
+  "claims_checked_live": false,
+  "reason": "It presents the owner's scope answer on #182 as the next action with no staleness caveat."
+ },
+ "A6": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It says PCM-0060 is done according to GitHub and that the local checkout is stale."
+ },
+ "A7": {
+  "recommends_stale_unhedged": true,
+  "knows_decided": false,
+  "flags_unverified": false,
+  "claims_checked_live": false,
+  "reason": "It says the next action is the owner answering on #182 and gives no warning that the record may be stale."
+ },
+ "A8": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reports the GitHub closure and merges, and says the snapshot is stale."
+ },
+ "A9": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": false,
+  "flags_unverified": true,
+  "claims_checked_live": false,
+  "reason": "It gives the stale owner gate but warns that the snapshot is its only source and that later GitHub activity is not visible to it."
+ },
+ "A10": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reports from GitHub that #182 is closed as completed, and says the snapshot is stale and needs refreshing."
+ }
+}

@@ -1,0 +1,7 @@
+PCM-0060 (host capability honesty, leaf issue #182) is still open and blocked on the owner. Its task file says `Status: active`, `Priority: P3`, and "No checkpoints yet" (`tasks/TASK-PCM-0060-host-capability-honesty.md:3`, `:53`). No code has been written, and "until then this task changes no repository content" (`:37`).
+
+Next action: the owner picks a scope on #182 (probe-only, probe plus SPEC adapter seam, or defer). Only after that can the chosen slice be implemented red-first.
+
+Later state: `checkpoints/CURRENT.md` (dated 2026-09-29) shows the active task has moved to PCM-0069/#217. It says PCM-0059/0060/0062–0065 "keep their recorded status and owner gates" (`checkpoints/CURRENT.md:12`), so PCM-0060 is unchanged.
+
+Caveat: I read only the snapshot, with no network or gh, so any owner answer posted on #182 after the snapshot would not show here.

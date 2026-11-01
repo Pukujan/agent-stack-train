@@ -1,0 +1,12 @@
+PCM-0060 is active and blocked on an owner decision. The snapshot is the only source, and the latest CURRENT entry I read is 2026-09-26 (~11:35Z). Anything on GitHub after that is not visible to me.
+
+**State:** The task is P3 and owned by owner/Astra planning. It is a decision-record task for leaf issue #182, which covers honesty about non-GitHub hosts. No code or checkpoints exist for it. The task file says it "changes no repository content" until the scope is chosen. CURRENT.md says PCM-0060 "keep[s] recorded status and owner gates". The CLI has no host-capability probe at 0.6.0.
+
+**Next action:** The owner has to answer on #182, choosing one of three scopes:
+- probe-only
+- probe plus a SPEC adapter-seam note
+- defer
+
+After that, the chosen slice is built red-first. It adds a host-capability matrix in preflight or doctor, an honesty sentence in every guidance copy and the init output, and the SPEC note if approved. It finishes with six contexts green and a receipt on #182.
+
+Evidence: `tasks/TASK-PCM-0060-host-capability-honesty.md` (the `next_action` and `status` fields in its marker).

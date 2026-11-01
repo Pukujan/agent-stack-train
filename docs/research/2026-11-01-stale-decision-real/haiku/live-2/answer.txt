@@ -1,0 +1,7 @@
+**PCM-0060 is done. Its next action is none on #182. The remaining install/onboarding page is now PCM-0070.**
+
+- **Snapshot is stale:** `tasks/TASK-PCM-0060-host-capability-honesty.md:3` still says `"status": "active"` and `"next_action": "Owner scope answer on #182..."`. The repo has no git history, so I can't tell whether that's a later change.
+- **GitHub says closed:** issue #182 is `CLOSED`. The owner chose "Close, split page" on 2026-10-31. The host probe and SPEC adapter seam merged as Pukujan/agent-stack-train#51 at `bad10a7`. The close-out merged as agent-stack-train#57 at `edf0772`, with receipt checkpoint `pcm0060-closeout-1`.
+- **Split-out work:** the install and onboarding page is tracked in #262 (PCM-0070).
+
+Note: `gh issue view 60` returned an unrelated merged PR (PCM-0024), so I used #182, the issue the task file names. I made no changes.

@@ -1,0 +1,9 @@
+**PCM-0060 (Host Capability Honesty) is active, P3, and blocked on the owner's scope decision.** Its next action is: get the owner's scope answer on issue #182 (probe-only, probe plus SPEC adapter seam, or defer), then implement per the acceptance criteria. No code has been written.
+
+Evidence:
+- `tasks/TASK-PCM-0060-host-capability-honesty.md:3` has `"status": "active"` and `"next_action": "Owner scope answer on #182 ..."`.
+- `tasks/TASK-PCM-0060-host-capability-honesty.md` "Checkpoint log" says "No checkpoints yet."
+- `checkpoints/CURRENT.md:14` and `:26` list #182/PCM-0060 as an "owner scope answer gate" with "no code yet."
+- `docs/CONTINUITY_INDEX.md:346-349` marks the projection NEEDS_REVIEW, and its reviewed and current SHA-256 values differ.
+
+The snapshot's latest state is from 2026-09-26, and today is 2026-10-31, so the owner may have answered on #182 since then. I could not check that offline.

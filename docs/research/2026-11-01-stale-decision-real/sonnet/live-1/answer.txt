@@ -1,0 +1,9 @@
+PCM-0060 is done. The checkout is stale, and GitHub is authoritative.
+
+- **Local snapshot:** `tasks/TASK-PCM-0060-host-capability-honesty.md` still says status "active". Its next action is "Owner scope answer on #182 (probe-only / probe+SPEC adapter-seam / defer)".
+- **GitHub:** issue #182 is CLOSED as completed, on 2026-10-31.
+- **What was chosen and merged:** the owner picked the host probe plus the SPEC adapter seam. That merged in Pukujan/agent-stack-train#51 at `bad10a7`, with all 13 required checks passing.
+- **Closeout:** agent-stack-train#57, merged at `edf0772`, marks the task record completed. The last comment on #182 says "No further action on this issue."
+- **Split-off work:** the install and onboarding page moved to #262 (PCM-0070), which is still OPEN.
+
+**Next action:** none for PCM-0060. The remaining work is PCM-0070 (#262). The local task file and `checkpoints/CURRENT.md` need a refresh from upstream, since they predate the closeout.

@@ -1,0 +1,14 @@
+PCM-0060 is active and waiting on a decision from the owner. Nothing has been implemented.
+
+The task is "Host Capability Honesty" (leaf issue #182, priority P3, owner/Astra planning). It would stop non-GitHub adopters, such as GitLab users, from silently losing the issue-authority half of continuity. Its checkpoint log is empty, and no CLI host-capability probe exists at 0.6.0. The task changes no repository content until the scope is decided.
+
+**Next action:** the owner answers on #182 with one of three scopes: probe-only, probe plus a SPEC adapter-seam, or defer.
+
+After that, the chosen slice is built red-first:
+- A capability classification of the origin host, with a printed matrix.
+- A honesty sentence in all guidance copies and in the init output.
+- A SPEC interface note, if approved.
+
+It must also keep the full suite at baseline, and the six required contexts and the receipt go on #182. The decision comment must be cited in the task record.
+
+Source: `tasks/TASK-PCM-0060-host-capability-honesty.md` in the snapshot. The status was last updated 2026-09-26.

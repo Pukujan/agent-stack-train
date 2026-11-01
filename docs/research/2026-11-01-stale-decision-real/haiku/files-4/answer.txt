@@ -1,0 +1,10 @@
+PCM-0060 (host capability honesty, leaf issue #182) is **active but blocked on an owner decision**. No implementation has started, and the task changes no repository content until scope is chosen.
+
+**Next action:** the owner picks a scope on #182 (probe-only, probe plus SPEC adapter seam, or defer). The decision comment is then cited in the task record, and the chosen slice is implemented red-first.
+
+Evidence:
+- `<run-dir>/files-4/repo/tasks/TASK-PCM-0060-host-capability-honesty.md`: `status: active`, `next_action` is the owner scope answer, and "Checkpoint log: No checkpoints yet."
+- The same file's Related records say "decision gate", and the Evidence section says no host-capability probe exists at 0.6.0.
+- `.../repo/checkpoints/CURRENT.md:14` lists PCM-0060 among the owner-gated records, and `:5`/`:12` make PCM-0069 (#217) the active task for the wave.
+
+Caveat: the snapshot's latest timestamp is 2026-09-26, so later progress on #182 would not appear here.

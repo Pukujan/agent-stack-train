@@ -1,0 +1,9 @@
+PCM-0060 is finished on GitHub, but this checkout's copy of the task is stale.
+
+**Live state:** Issue #182 (Pukujan/project-continuity-modules) is CLOSED as COMPLETED. It closed 2026-10-31T23:34Z. The last comment says the PCM-0060 record was closed out in Pukujan/agent-stack-train#57 (merged at `edf0772`, all required checks passing). The task record now reads completed. The install and onboarding page moved to a new task, PCM-0070 (#262), which is OPEN.
+
+**Stale snapshot:** `tasks/TASK-PCM-0060-host-capability-honesty.md` still says `status: active`. Its `next_action` is "Owner scope answer on #182". `checkpoints/CURRENT.md` (dated 2026-09-26) shows the same owner gate.
+
+**Next action:** Nothing remains on PCM-0060, so don't wait for an owner answer on #182. Resync this checkout from the merged state. Any follow-up work is PCM-0070/#262, the install page.
+
+I did not check the agent-stack-train PR itself. I relied on the comment in #182.
