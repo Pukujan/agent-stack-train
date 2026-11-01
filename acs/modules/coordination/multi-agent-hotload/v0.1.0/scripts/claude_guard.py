@@ -704,8 +704,12 @@ def pull_request_problem(top: Path, branch: str) -> tuple[str | None, str | None
 
 
 def auto_merge_allowed(top: Path) -> bool:
-    """False only when GitHub says the repository turns auto-merge off; unknown counts as allowed."""
-    code, out = run(["gh", "repo", "view", "--json", "autoMergeAllowed", "-q", ".autoMergeAllowed"], top, timeout=10)
+    """False only when GitHub says the repository turns auto-merge off; unknown counts as allowed.
+
+    The repository endpoint, not `gh repo view`: no `gh` release has an `autoMergeAllowed`
+    field there, so that lookup always failed and every repository read as allowed (#102).
+    """
+    code, out = run(["gh", "api", "repos/{owner}/{repo}", "-q", ".allow_auto_merge"], top, timeout=10)
     return not (code == 0 and out.strip() == "false")
 
 
