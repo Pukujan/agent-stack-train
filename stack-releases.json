@@ -2,7 +2,7 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-11-01T11:50:15Z",
+  "recorded_at": "2026-11-01T21:04:54Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
@@ -30,8 +30,8 @@
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
     },
     "agent-stack-train": {
-      "version": "1.0.8",
-      "commit": "a796c21e5a7ceb21e5dafcfdf29dd11d1d0f3dd3",
+      "version": "1.0.9",
+      "commit": "496bf33e0a8327345a8e3ba19e3dc40eae47164a",
       "role": "The stack release: PCM, CGM, ACS and OIO at one commit of this repository. A one-checkout adopter installs from it and pins it alone."
     }
   },
