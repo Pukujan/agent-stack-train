@@ -1,0 +1,46 @@
+name: Auto-merge
+
+# Arms squash auto-merge on every non-draft pull request into main from a
+# branch of this repository (#69), so it merges once `gates` passes with no
+# one remembering to arm it. Pull requests from forks are skipped.
+#
+# It needs the secret STACK_UPGRADE_TOKEN, a personal token with the `repo`
+# scope. A merge armed with this workflow's own token closes nothing and
+# starts no close-on-merge run (see close-sweep.yml); one armed with a
+# personal token is attributed to a user, so close-on-merge-caller.yml runs.
+# Without the secret it only warns.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  arm:
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Arm squash auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.STACK_UPGRADE_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning title=No auto-merge token::STACK_UPGRADE_TOKEN is not set, so auto-merge was not armed on #$PR."
+            exit 0
+          fi
+          armed=$(gh pr view "$PR" -R "$REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')
+          if [ "$armed" = "true" ]; then
+            echo "Auto-merge is already armed on #$PR."
+            exit 0
+          fi
+          gh pr merge "$PR" -R "$REPO" --auto --squash
+          echo "Armed squash auto-merge on #$PR."

@@ -26,7 +26,7 @@ Each folder keeps its own README, AGENTS.md, tasks and tests. Read the folder's 
 
 ## Run the checks
 
-[`ci.yml`](.github/workflows/ci.yml) runs these on every pull request and push to `main`. Each component's checks run from inside its folder.
+[`ci.yml`](.github/workflows/ci.yml) runs these on every pull request and push to `main`. Each component's checks run from inside its folder. Every pull request into `main` from a branch of this repository has squash auto-merge armed automatically by [`auto-merge.yml`](.github/workflows/auto-merge.yml), and merges once `gates` passes.
 
 ```bash
 (cd pcm && pip install -e ".[dev]" && PYTHONPATH=src python -m unittest discover -s tests)
