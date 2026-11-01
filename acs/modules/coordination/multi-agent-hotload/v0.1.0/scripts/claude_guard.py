@@ -464,7 +464,7 @@ def check_bash(command: str, cwd: Path) -> str | None:
             cwd = (cwd / args[1]).expanduser()
             continue
         call = git_call(args, cwd)
-        reason = check_git(*call) if call else check_gh(args, cwd, env)
+        reason = check_git(*call) if call else check_gh(args, cwd, env) or wrong_stamp(args)
         if reason:
             return reason
     return None
@@ -480,20 +480,49 @@ IDENTITY_RE = re.compile(r"^###\s+Content Author Account or Runtime Identity\s*\
 SESSION_ID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE)
 
 
+def identity(harness: str | None = None, session: str | None = None) -> str:
+    """This session's runtime identity, as issue logs, board claims and OIO records stamp it."""
+    return f"agent:{HARNESS_NAMES.get(harness or HARNESS, harness or HARNESS)}/{(SESSION if session is None else session) or '<session id>'}"
+
+
+def not_this_session(stamp: str, what: str, field: str) -> str | None:
+    """Why an `agent:` stamp names another harness or session than this one, or None."""
+    if not stamp.lower().startswith("agent:"):
+        return None  # a human filer, or no stamp: the form checks the rest
+    want = HARNESS_NAMES.get(HARNESS, HARNESS)
+    named = SESSION_ID_RE.findall(stamp)
+    if want not in stamp.lower() or (SESSION and named and SESSION.lower() not in (n.lower() for n in named)):
+        return (
+            f"{what}: it says it was filed by `{stamp}`, but this session is `{identity()}`. "
+            f"Stamp {field} with the agent that is running it, not one copied from another issue or session."
+        )
+    return None
+
+
 def wrong_filer(body: str) -> str | None:
     """Why the issue log's runtime identity is not this session's, or None."""
     match = IDENTITY_RE.search(body)
-    identity = match.group(1).strip() if match else ""
-    if not identity.lower().startswith("agent:"):
-        return None  # a human filer, or no stamp: the form checks the rest
-    want = HARNESS_NAMES.get(HARNESS, HARNESS)
-    named = SESSION_ID_RE.findall(identity)
-    if want not in identity.lower() or (SESSION and named and SESSION.lower() not in (n.lower() for n in named)):
-        return (
-            f"gh issue create: the issue log says it was filed by `{identity}`, but this session is "
-            f"`agent:{want}/{SESSION or '<session id>'}`. Stamp `Content Author Account or Runtime Identity` "
-            "(and the session reference) with the agent that is filing it, not one copied from another issue."
-        )
+    return not_this_session(
+        match.group(1).strip() if match else "",
+        "gh issue create: the issue log",
+        "`Content Author Account or Runtime Identity` (and the session reference)",
+    )
+
+
+# The stack's own writers that stamp an agent (#97, #98): the flag that carries the stamp.
+STAMPING_SCRIPTS = {"oio_record.py": "--filer", "board.py": "--agent"}
+
+
+def wrong_stamp(args: list[str]) -> str | None:
+    """Why an OIO record or board change names another session than this one, or None."""
+    script = next((Path(a).name for a in args[:3] if Path(a).name in STAMPING_SCRIPTS), None)
+    if script is None:
+        return None
+    flag = STAMPING_SCRIPTS[script]
+    for i, arg in enumerate(args):
+        value = args[i + 1] if arg == flag and i + 1 < len(args) else arg.partition("=")[2] if arg.startswith(flag + "=") else None
+        if value is not None:
+            return not_this_session(value, script, f"`{flag}`")
     return None
 
 
@@ -1018,6 +1047,12 @@ def session_start(event: dict) -> str | None:
     records = check_records(top)
     if records:
         notes.append(records)
+    if event.get("session_id"):
+        notes.append(
+            f"This session's runtime identity is `{identity(session=str(event['session_id']))}`. Stamp it on every issue log "
+            "you file (`Content Author Account or Runtime Identity`), board claim (`board.py --agent`) and OIO record "
+            "(`oio_record.py --filer`); never copy another issue's or session's stamp."
+        )
     if event.get("source") == "compact":
         notes.append(
             "Context was just compacted. Summaries and earlier briefs are not the owner's words; "

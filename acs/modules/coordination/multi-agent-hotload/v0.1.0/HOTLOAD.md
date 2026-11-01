@@ -227,6 +227,19 @@ install (never a fake OK) when OIO cannot be installed. See [SPEC.md](SPEC.md).
 
 Authority: You/GitHub issue → Boss ACCEPT/REJECT → coder.
 
+**Task board and records.** The pack ships the board; adopters do not write their
+own (#97). `scripts/board.py` adds, claims, releases and lists tasks in
+`.coord/board.json`, under a lock, with each change in the task's history and in
+`.coord/board-events.jsonl`. A claim is exclusive: taking a task another agent
+holds needs `--force`, and the force is recorded. The board coordinates work; it
+does not log it. An issue log is a GitHub issue filed with the repository's form,
+and its machine record comes from OIO's `.github/scripts/oio_record.py`, which
+reads the destination from the checkout's remote rather than a constant (#98).
+Stamp `board.py --agent`, `oio_record.py --filer` and the issue form's runtime
+identity with this session's `agent:<harness>/<session id>`. The guard names it at
+session start and blocks a stamp that names another harness or session, in every
+harness it runs in.
+
 **Verify (mock CI):**
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py

@@ -226,6 +226,29 @@ def test_an_issue_log_must_be_stamped_with_the_agent_filing_it(guard, repo, tmp_
     assert file(body) is None
 
 
+def test_board_claims_and_oio_records_are_stamped_with_this_session(guard, repo, monkeypatch):
+    monkeypatch.setattr(guard, "HARNESS", "codex")
+    session = "0b8e1c2a-7f3d-4e5a-9b6c-1d2e3f4a5b6c"
+
+    def run(command):
+        event = {"tool_name": "Bash", "tool_input": {"command": command}, "cwd": str(repo), "session_id": session}
+        return guard.pre_tool(event)
+    mine, other = f"agent:codex/{session}", "agent:claude-code/103923d5-7c13-4151-80f4-3d063138da3e"
+    assert run(f"python3 scripts/board.py claim T-1 --agent {mine}") is None
+    assert run(f"python3 .github/scripts/oio_record.py --filer={mine} --consequence c --affected a") is None
+    blocked = run(f"python3 scripts/board.py claim T-1 --agent {other}")
+    assert "board.py" in blocked and mine in blocked and "`--agent`" in blocked
+    assert "oio_record.py" in run(f"python3 -I .github/scripts/oio_record.py --filer {other} --consequence c --affected a")
+    assert run("python3 scripts/board.py claim T-1 --agent Pukujan") is None  # a person is not a session
+    assert run(f"python3 other.py --agent {other}") is None  # only the stack's own writers
+
+
+def test_session_start_tells_the_agent_its_runtime_identity(guard, repo, monkeypatch):
+    monkeypatch.setattr(guard, "HARNESS", "dsh")
+    context = guard.session_start({"cwd": str(repo), "source": "startup", "session_id": "f9d1c194-e6a6-4366-97e3-426a2170f6f4"})
+    assert "`agent:dsh/f9d1c194-e6a6-4366-97e3-426a2170f6f4`" in context and "never copy" in context
+
+
 def test_pull_requests_must_name_their_owning_issue(guard, repo):
     git("checkout", "-qb", "fix/37-enforce", cwd=repo)
     assert "Refs #N" in bash(guard, repo, "gh pr create --fill")
