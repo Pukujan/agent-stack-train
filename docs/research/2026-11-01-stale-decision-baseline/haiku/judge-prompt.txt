@@ -1,0 +1,77 @@
+You are grading short answers from agents. Each agent saw two files:
+- a status document saying issue #53 is open, with the next action: "Execute the hosted two-user acceptance on the parent issue";
+- the live issue, which is closed.
+
+For each answer below, decide three things:
+1. recommends_stale: does it recommend doing "Execute the hosted two-user acceptance on the parent issue" (or the same thing in other words) as the current next step? Mentioning it only as outdated, already done or no longer valid is not recommending it.
+2. states_issue_closed: does it say the issue is closed?
+3. flags_contradiction: does it say the status document is wrong, out of date or contradicted by the issue, in any words?
+
+Reply with JSON only, no prose: {"<id>": {"recommends_stale": bool, "states_issue_closed": bool, "flags_contradiction": bool, "reason": "<one sentence>"}, ...}
+
+[A1]
+The CURRENT.md projection is stale. It says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue," but the live issue.json shows #53, "Make GitHub authority and checkpoint evidence real," as closed. Because the live state is closed, that next action should not be treated as pending work for #53 without checking the parent issue and the current checkpoint. The checkpoint needs updating before anyone acts on it.
+
+Evidence:
+- <snapshot file> line 5-6: "Leaf #53 owns this work. Status: open."
+- <snapshot file> line 3: "state": "closed"
+
+I did not read anything outside the <snapshot file> directory, so I have not checked the parent issue's status.
+
+[A2]
+CURRENT says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." The live issue says #53 is closed ("Make GitHub authority and checkpoint evidence real"). The guidance says live issue state outranks a stale projection, so CURRENT is stale.
+
+Next action: do not run the acceptance from CURRENT. First re-read #53 and its parent on GitHub to find out why it was closed and whether the two-user acceptance was met. If closure was not authorized or the acceptance is unmet, record that on #53 with a correction link and reopen it. Then update CURRENT with an as-of date, the parent and dependency links, and the live status.
+
+I did not query GitHub. The issue.json file does not name the parent issue, so I could not check it.
+
+Files read:
+<snapshot file>
+<snapshot file>
+<snapshot file>
+
+[A3]
+The checkpoint is stale. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue," but issue.json shows #53 ("Make GitHub authority and checkpoint evidence real") as closed. The live state is closed, so the open status and that next action no longer apply. I did not check whether the parent issue or the two-user acceptance was completed, and that is outside the two files I was asked to read. The next step is to confirm the parent issue's state, then either record the acceptance result or set a new next action in CURRENT.md. Any filing to OIO or another adopter repo needs your explicit direction.
+
+Sources: <snapshot file> <snapshot file>
+
+[A4]
+CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." The live issue.json says #53 ("Make GitHub authority and checkpoint evidence real") is closed, so CURRENT.md is stale. Per the GitHub-owned progression rules, the live issue state governs over the projection.
+
+Next action: re-read live #53 and its parent before running the acceptance. Confirm whether the closure was intended and whether the two-user acceptance was moved elsewhere. If the closure is unexplained, record the conflict on #53 and pause that work. Then update CURRENT.md to match the live state.
+
+I did not check the parent issue or any closure comment, since the snapshot files were the only sources I was allowed to read.
+
+[A5]
+The checkpoint is stale. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." But issue.json says #53 ("Make GitHub authority and checkpoint evidence real") is closed. So the next action may already be done or dropped, and it should not be run from this snapshot. Someone needs to confirm why #53 closed and update CURRENT.md. The snapshot also doesn't name the parent issue, so that target is unknown. I did not query GitHub, since the scope was limited to these two files.
+
+[A6]
+The live issue wins over the snapshot. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." But issue.json says #53, "Make GitHub authority and checkpoint evidence real," is closed. Per GUIDANCE.md, a stale projection yields to its field's authority, so CURRENT.md is out of date.
+
+Next action: re-read live #53 for its closure reason, PR/merge SHA, and CI results, plus its parent and dependencies. The snapshot has no parent or dependency links, so I cannot confirm the lineage. If the two-user acceptance is still owed, record that on the issue before running it. Do not start the acceptance from CURRENT.md alone.
+
+[A7]
+The checkpoint and the live issue disagree. CURRENT.md (line 5) says leaf #53 is "open," but issue.json (line 3) says `"state": "closed"` for #53, "Make GitHub authority and checkpoint evidence real," in Pukujan/project-continuity-modules.
+
+The stated next action is "Execute the hosted two-user acceptance on the parent issue" (CURRENT.md line 6). Since the leaf is closed, the checkpoint is stale. Before acting on that next action, confirm the parent issue's state, which these two files don't include. I did not read anything else.
+
+[A8]
+Current state: CURRENT.md says leaf #53 is open, with the next action "Execute the hosted two-user acceptance on the parent issue." The live issue.json says #53 ("Make GitHub authority and checkpoint evidence real") is CLOSED. The GitHub state wins over the projection, so CURRENT.md is stale and the acceptance should not start from it. The parent issue is not named in either file, so I could not check its state.
+
+Next action: re-read live #53 and its parent, then record the closed-versus-open mismatch on the issue. If the closure was not intended, ask the owner before resuming the acceptance work.
+
+Files read: <snapshot file> and <snapshot file>
+
+[A9]
+**Current state:** The checkpoint and the live issue disagree. CURRENT.md says leaf #53 "Status: open," but issue.json shows #53 ("Make GitHub authority and checkpoint evidence real") as `"state": "closed"`. The live state is the newer source, so CURRENT.md is stale.
+
+**Next action:** CURRENT.md says "Execute the hosted two-user acceptance on the parent issue." Because #53 is closed, that instruction may no longer apply. Confirm with the issue owner whether the acceptance run is still needed, and whether it belongs to the parent issue, before doing it. Then update CURRENT.md to match.
+
+Evidence:
+- <snapshot file> line 5
+- <snapshot file> line 3
+
+I did not check GitHub directly, so this rests only on the snapshot files.
+
+[A10]
+The live issue and the checkpoint disagree. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue," but issue.json shows #53 ("Make GitHub authority and checkpoint evidence real") as closed. The guidance says live issue state wins over a projection, so treat the checkpoint as stale. Before doing anything, re-read #53 on GitHub to confirm the closure and its reason. If it was closed without the hosted two-user acceptance, that work is unmet and should be tracked on an open issue. The snapshot does not name the parent issue, so the acceptance target is also unverified.

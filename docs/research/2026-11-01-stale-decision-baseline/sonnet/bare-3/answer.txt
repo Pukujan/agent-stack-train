@@ -1,0 +1,5 @@
+CURRENT.md is stale. It says leaf #53 is open and the next action is to run the hosted two-user acceptance on the parent issue. The live issue state is closed: `issue.json` shows #53, "Make GitHub authority and checkpoint evidence real", as closed.
+
+The next action is to refresh CURRENT.md so it records #53 as closed. Before running the acceptance, check whether the closure already covered it. Only run the hosted two-user acceptance on the parent issue if it didn't. Also work out what replaces #53 as the open leaf.
+
+Evidence is in `CURRENT.md` lines 5-6 and `issue.json` line 3.

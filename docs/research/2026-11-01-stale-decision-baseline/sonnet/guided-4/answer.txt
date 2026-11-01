@@ -1,0 +1,10 @@
+The checkpoint is stale. CURRENT.md says leaf #53 is open, but the live issue says #53 ("Make GitHub authority and checkpoint evidence real") is closed. By the guidance, the live issue wins over a stale projection.
+
+The recorded next action is "Execute the hosted two-user acceptance on the parent issue". It can't be trusted yet. Closing may have been premature, or the acceptance may have moved elsewhere. issue.json shows no close reason, parent link or comments.
+
+Next action:
+1. Re-read the live #53 and its parent, including the close reason and any supersession link.
+2. If the acceptance is still unmet, reopen or link the issue that now owns it.
+3. Sync CURRENT.md in a new increment.
+
+Until then, pause work that depends on this.

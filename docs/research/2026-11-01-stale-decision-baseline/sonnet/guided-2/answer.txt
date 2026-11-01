@@ -1,0 +1,7 @@
+The CURRENT.md projection is stale. It says leaf #53 is open, but the live issue (`issue.json`) says #53 is closed.
+
+Under the GUIDANCE.md rule, a stale projection yields to the field's authority. GitHub owns lifecycle status, so #53 is closed and CURRENT.md's "open" is wrong.
+
+I can't tell from these files why it closed or whether the hosted two-user acceptance ran. CURRENT.md gives no parent issue, dependencies, or lineage, and the issue JSON has no close reason or comments.
+
+Next action: don't run the acceptance yet. Re-read the live issue #53 and its parent for the close reason. If the acceptance is still unmet, follow the supersession or transfer link. Then fix CURRENT.md in a new synchronized increment, and record the uncertainty on the issue until it's resolved.

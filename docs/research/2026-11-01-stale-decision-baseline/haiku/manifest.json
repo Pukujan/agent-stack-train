@@ -1,0 +1,26 @@
+{
+ "arms": [
+  "bare-1",
+  "bare-2",
+  "bare-3",
+  "bare-4",
+  "bare-5",
+  "guided-1",
+  "guided-2",
+  "guided-3",
+  "guided-4",
+  "guided-5"
+ ],
+ "issue": {
+  "number": 53,
+  "state": "closed",
+  "url": "https://github.com/Pukujan/project-continuity-modules/issues/53",
+  "title": "Make GitHub authority and checkpoint evidence real"
+ },
+ "projection": {
+  "source_issue": 53,
+  "issue_state_recorded": "open",
+  "next_action": "Execute the hosted two-user acceptance on the parent issue",
+  "file": "checkpoints/CURRENT.md"
+ }
+}

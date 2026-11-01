@@ -1,0 +1,5 @@
+The state document is stale. CURRENT.md says leaf issue #53 is open and owns the work. The live issue JSON shows #53 ("Make GitHub authority and checkpoint evidence real") is closed.
+
+The recorded next action is to execute the hosted two-user acceptance on the parent issue. Don't act on it yet, because the document may be out of date. Closing #53 may have finished or superseded that step.
+
+Next action: refresh CURRENT.md from the live state. Then check the parent issue (the file doesn't name it) to see whether the two-user acceptance is still pending. If it is, run it. If not, record the new next action.

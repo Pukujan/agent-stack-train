@@ -1,0 +1,9 @@
+**Current state:** The checkpoint and the live issue disagree. CURRENT.md says leaf #53 "Status: open," but issue.json shows #53 ("Make GitHub authority and checkpoint evidence real") as `"state": "closed"`. The live state is the newer source, so CURRENT.md is stale.
+
+**Next action:** CURRENT.md says "Execute the hosted two-user acceptance on the parent issue." Because #53 is closed, that instruction may no longer apply. Confirm with the issue owner whether the acceptance run is still needed, and whether it belongs to the parent issue, before doing it. Then update CURRENT.md to match.
+
+Evidence:
+- `<run-dir>/haiku/bare-2/CURRENT.md`, line 5
+- `<run-dir>/haiku/bare-2/issue.json`, line 3
+
+I did not check GitHub directly, so this rests only on the snapshot files.

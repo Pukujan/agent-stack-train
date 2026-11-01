@@ -1,0 +1,7 @@
+The CURRENT.md projection is stale. It says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue," but the live issue.json shows #53, "Make GitHub authority and checkpoint evidence real," as closed. Because the live state is closed, that next action should not be treated as pending work for #53 without checking the parent issue and the current checkpoint. The checkpoint needs updating before anyone acts on it.
+
+Evidence:
+- <run-dir>/haiku/bare-3/CURRENT.md, line 5-6: "Leaf #53 owns this work. Status: open."
+- <run-dir>/haiku/bare-3/issue.json, line 3: "state": "closed"
+
+I did not read anything outside the bare-3 directory, so I have not checked the parent issue's status.
