@@ -1,0 +1,10 @@
+PCM-0060 is closed. The snapshot is stale, and its next action no longer applies.
+
+- **Snapshot (as of 2026-09-26):** `<run-dir>/quiet-1/repo/tasks/TASK-PCM-0060-host-capability-honesty.md` says `status: active`, next action "Owner scope answer on #182." The index projection in `docs/CONTINUITY_INDEX.md` is NEEDS_REVIEW.
+- **Live (read-only `gh issue view 182`):** #182 is CLOSED, updated 2026-10-31T23:36:43Z.
+- **Owner decision (23:16:58Z):** "probe plus a SPEC adapter seam."
+- **Implementation:** merged in Pukujan/agent-stack-train#51 at `bad10a7` (13 required checks passed).
+- **Closeout:** Pukujan/agent-stack-train#57 merged at `edf0772`; checkpoint `pcm0060-closeout-1` at `f333ede`.
+- **Remaining work:** the install and onboarding page was split out to PCM-0070 (#262).
+
+Next action for PCM-0060: none. If anything is open, it is PCM-0070 / #262. I made no changes.

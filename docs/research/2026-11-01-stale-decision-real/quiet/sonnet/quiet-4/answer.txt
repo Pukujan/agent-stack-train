@@ -1,0 +1,7 @@
+PCM-0060 is finished. The snapshot is stale.
+
+- **Snapshot:** The task file at `tasks/TASK-PCM-0060-host-capability-honesty.md` says "active". Its next action is an owner scope answer on issue #182 (probe-only, probe plus adapter seam, or defer). `checkpoints/CURRENT.md` says the same, dated 2026-09-26.
+- **GitHub:** Issue #182 is CLOSED as COMPLETED, closed 2026-10-31T23:34Z. The last comment is a receipt. It says the PCM-0060 record was closed out in `Pukujan/agent-stack-train#57`, merged at `edf0772` with all required checks passing. Checkpoint `pcm0060-closeout-1` was pushed at `f333ede`. The task record is marked completed.
+- **Install and onboarding page:** It moved to PCM-0070 (#262), which is open.
+
+Next action: none for PCM-0060, since the issue says "No further action." Don't act on the stale owner-scope-answer step. Pick up PCM-0070 (#262) for the install page. The snapshot's task record and CURRENT projection still show the old state and need syncing from the accepted history. I made no changes.

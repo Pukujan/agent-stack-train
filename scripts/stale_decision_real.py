@@ -13,21 +13,25 @@ CURRENT.md lists #182 among issues awaiting the owner. Since then the owner
 chose "probe + adapter seam" on #182, the work merged (agent-stack-train #51
 and #57), and #182 closed on 2026-10-31.
 
-Two conditions, five arms each by default:
+Three conditions, five arms each by default:
 
 * ``live``: the agent is told it has a signed-in, read-only gh CLI;
-* ``files``: the agent must answer from the files alone, with no network.
+* ``files``: the agent must answer from the files alone, with no network;
+* ``quiet``: gh works, but the prompt says nothing about it, as when a real
+  session starts. This separates checking when reminded from checking unasked.
 
 A blinded judge records four facts per answer (see JUDGE_PROMPT). The verdict:
 
 * live: pass only if the answer knows the decision was made (it checked);
 * files: pass only if it says the record may be out of date and must be
   checked against #182 before anyone acts. It can't know the outcome.
+* quiet: graded like files, since it was never told it could check. Whether
+  it checked anyway is reported separately (claims_checked_live).
 
 Either condition fails an answer that presents the stale step as the settled
 current next action.
 
-    python scripts/stale_decision_real.py stage DIR [--arms 5]
+    python scripts/stale_decision_real.py stage DIR [--arms 5] [--conditions quiet]
     python scripts/stale_decision_real.py prompts DIR
     python scripts/stale_decision_real.py judge-prompt DIR   # save the judge's JSON to DIR/judge.json
     python scripts/stale_decision_real.py score DIR
@@ -48,7 +52,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stale_decision import ROOT, answer, arms, blind_ids  # noqa: E402
 
 SNAPSHOT = "d41dd55b614b745f5b331329e168128955c4e0bf"
-CONDITIONS = ("live", "files")
+CONDITIONS = ("live", "files", "quiet")
 # Images and the first holdout's own answers are left out: the first is noise, the second would prime the arm.
 SKIP = re.compile(r"\.(png|jpe?g|gif|webp|svg|pdf)$|docs/plans/PCM-0046-|tests/fixtures/pcm0046_traversal/|\.jpg\.json$")
 STALE = "Owner scope answer on #182 (probe-only / probe+SPEC adapter-seam / defer); then implement per acceptance."
@@ -65,6 +69,7 @@ BASE_PROMPT = (
 ACCESS = {
     "live": "You have a signed-in gh CLI you may use read-only.",
     "files": "Work only from the files in the snapshot; do not use the network or gh.",
+    "quiet": "",
 }
 
 JUDGE_PROMPT = """You are grading short answers from agents asked for task PCM-0060's current state and next action.
@@ -82,11 +87,11 @@ Reply with JSON only, no prose: {{"<id>": {{"recommends_stale_unhedged": bool, "
 {answers}"""
 
 
-def stage(base: Path, n: int) -> None:
+def stage(base: Path, n: int, conditions: tuple[str, ...] = CONDITIONS) -> None:
     archive = subprocess.run(["git", "-C", str(ROOT), "archive", SNAPSHOT, "pcm"], capture_output=True,
                              check=True).stdout
     names = []
-    for condition in CONDITIONS:
+    for condition in conditions:
         for i in range(1, n + 1):
             arm = f"{condition}-{i}"
             repo = base / arm / "repo"
@@ -110,11 +115,11 @@ def condition_of(arm: str) -> str:
 
 
 def prompt_for(base: Path, arm: str) -> str:
-    return BASE_PROMPT.format(d=base / arm, access=ACCESS[condition_of(arm)])
+    return re.sub(r"  +", " ", BASE_PROMPT.format(d=base / arm, access=ACCESS[condition_of(arm)]))
 
 
 def redact(text: str) -> str:
-    return re.sub(r"(?:\S*/)?(?:live|files)-\d+(?:/\S*)?", "<snapshot file>", text)
+    return re.sub(r"(?:\S*/)?(?:live|files|quiet)-\d+(?:/\S*)?", "<snapshot file>", text)
 
 
 def judge_prompt(base: Path) -> str:
@@ -147,6 +152,8 @@ def tallies(results: dict) -> dict:
     out = {}
     for condition in CONDITIONS:
         rows = [r for r in results.values() if r["condition"] == condition]
+        if not rows:
+            continue
         out[condition] = {"arms": len(rows),
                           "verdict": {v: sum(r["verdict"] == v for r in rows) for v in ("pass", "fail", "inconclusive")}}
         for key in ("recommends_stale_unhedged", "knows_decided", "flags_unverified", "claims_checked_live"):
@@ -185,12 +192,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=["stage", "prompts", "judge-prompt", "score", "send"])
     parser.add_argument("dir", type=Path)
     parser.add_argument("--arms", type=int, default=5, help="arms per condition (stage)")
+    parser.add_argument("--conditions", default=",".join(CONDITIONS), help="comma-separated conditions (stage)")
     parser.add_argument("--model", default="unknown", help="model the arms ran on (send)")
     args = parser.parse_args(argv)
     base = args.dir.resolve()
 
     if args.command == "stage":
-        stage(base, args.arms)
+        stage(base, args.arms, tuple(args.conditions.split(",")))
     elif args.command == "prompts":
         for arm in arms(base):
             print(f"=== {arm}\n{prompt_for(base, arm)}")

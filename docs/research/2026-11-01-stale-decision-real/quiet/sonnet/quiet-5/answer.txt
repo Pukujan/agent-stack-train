@@ -1,0 +1,9 @@
+PCM-0060 is finished, though the checkout still shows it as active.
+
+- **Snapshot:** `tasks/TASK-PCM-0060-host-capability-honesty.md` has `status: active` and the next action "Owner scope answer on #182". `checkpoints/CURRENT.md` says the same.
+- **Live GitHub:** issue #182 (Pukujan/project-continuity-modules) is CLOSED as COMPLETED, closed 2026-10-31T23:34Z. The last comment says the PCM-0060 record was closed out in Pukujan/agent-stack-train#57, merged at `edf0772` with all required checks passing. That comment also says checkpoint `pcm0060-closeout-1` was pushed at `f333ede` and the task record now says completed.
+- **Install page:** PCM-0070 (issue #262, still open) now owns the install and onboarding page.
+
+**Next action:** none for PCM-0060. Don't start the owner-scope-answer step. If you work in this checkout, refresh it from current history, because its task file and CURRENT projection are stale.
+
+I did not check the closeout PR itself or the repository's current files.

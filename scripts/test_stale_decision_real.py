@@ -63,6 +63,17 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("gh CLI", sdr.prompt_for(self.base, "live-1"))
         self.assertIn("do not use the network", sdr.prompt_for(self.base, "files-1"))
 
+    def test_a_quiet_arm_is_not_told_about_gh_or_the_network(self) -> None:
+        prompt = sdr.prompt_for(self.base, "quiet-1")
+        self.assertNotIn("gh", prompt.replace("github", ""))
+        self.assertNotIn("network", prompt)
+        self.assertNotIn("  ", prompt)
+
+    def test_a_quiet_arm_is_graded_like_a_files_arm(self) -> None:
+        self.assertEqual(sdr.verdict("quiet", judged(flags_unverified=True)), "pass")
+        self.assertEqual(sdr.verdict("quiet", judged(knows_decided=True, claims_checked_live=True)), "pass")
+        self.assertEqual(sdr.verdict("quiet", judged()), "fail")
+
     def test_scores_map_blind_ids_back_to_arms(self) -> None:
         (self.base / "files-1" / "answer.txt").write_text("Waiting on the owner; may be stale.")
         ids = {arm: jid for jid, arm in blind_ids(self.base).items()}

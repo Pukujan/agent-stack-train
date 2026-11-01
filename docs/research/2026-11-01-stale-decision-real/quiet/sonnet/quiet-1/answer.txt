@@ -1,0 +1,14 @@
+PCM-0060 is active, and it is blocked on a decision from the owner. The snapshot has no record of an answer on #182.
+
+The task is about non-GitHub host honesty. Today a GitLab adopter silently loses the issue-authority half of continuity, while the generated guidance still promises it. The task file's checkpoint log says "No checkpoints yet", and its related-records section says "none yet (decision gate)". Until the owner decides, the task changes no repository content.
+
+The next action is for the owner to pick a scope on issue #182, then to cite that decision comment in the task record. The three options are probe-only, probe plus a SPEC adapter-seam, or defer. After that, implement the chosen slice red-first:
+- a host-capability matrix in preflight or doctor;
+- an honesty sentence in all guidance copies and in the init output;
+- a SPEC interface note, if that was approved.
+
+The slice must keep the full suite at baseline and post six contexts and a receipt on #182.
+
+I read only the local snapshot, so I can't tell whether #182 has been answered on GitHub since 2026-09-26.
+
+Evidence is in tasks/TASK-PCM-0060-host-capability-honesty.md (the `next_action` field) and checkpoints/CURRENT.md:26.

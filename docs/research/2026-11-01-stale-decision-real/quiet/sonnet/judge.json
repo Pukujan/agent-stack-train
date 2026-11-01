@@ -1,0 +1,37 @@
+{
+ "A1": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It says #182 is closed and PCM-0060 is finished based on live GitHub, and it marks the checkout as stale."
+ },
+ "A2": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reads live issue #182, names the owner's scope choice and the merged PRs, and calls the snapshot stale."
+ },
+ "A3": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": false,
+  "flags_unverified": true,
+  "claims_checked_live": false,
+  "reason": "It gives the stale owner-scope step as the next action but warns that it can't tell whether #182 has been answered since the snapshot."
+ },
+ "A4": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": false,
+  "flags_unverified": true,
+  "claims_checked_live": false,
+  "reason": "It gives the stale owner-scope step but says it read only the local snapshot and can't tell whether #182 has been answered."
+ },
+ "A5": {
+  "recommends_stale_unhedged": false,
+  "knows_decided": true,
+  "flags_unverified": true,
+  "claims_checked_live": true,
+  "reason": "It reports #182 closed and PCM-0060 finished from GitHub, calls the snapshot stale, and points to PCM-0070."
+ }
+}

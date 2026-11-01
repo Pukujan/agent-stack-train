@@ -1,0 +1,7 @@
+PCM-0060 is closed on GitHub, so it has no next action of its own.
+
+The snapshot is stale. Its task record (`tasks/TASK-PCM-0060-host-capability-honesty.md`, status `active`) and `checkpoints/CURRENT.md` (dated 2026-09-26) say the next action is the owner's scope answer on #182.
+
+The live issue, `gh issue view 182 --repo Pukujan/project-continuity-modules`, shows state CLOSED, updated 2026-10-31T23:36:43Z. Its latest comment says the PCM-0060 record was closed out in Pukujan/agent-stack-train#57 (merged at `edf0772`) with checkpoint `pcm0060-closeout-1` at `f333ede`. It also says the install and onboarding page now belongs to PCM-0070 (#262). I read the comment but did not verify the merge or the checkpoint.
+
+Next action: none for PCM-0060. Any remaining onboarding work is tracked under #262.

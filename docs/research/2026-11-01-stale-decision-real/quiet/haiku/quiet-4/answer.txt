@@ -1,0 +1,7 @@
+PCM-0060 is closed, so the next action is none on #182. The snapshot is stale.
+
+- **Snapshot (stale):** `tasks/TASK-PCM-0060-host-capability-honesty.md` says `status: active` and `next_action: Owner scope answer on #182`. `docs/CONTINUITY_INDEX.md:344` marks it "owner scope gate pending" (NEEDS_REVIEW). `checkpoints/CURRENT.md` is dated 2026-09-26.
+- **Live (GitHub, read-only):** `gh issue view 182` shows `state: CLOSED`, updated 2026-10-31T23:36:43Z. The latest comment says the PCM-0060 record was closed out in Pukujan/agent-stack-train#57, merged at `edf0772`, with checkpoint `pcm0060-closeout-1` at `f333ede`. It says PCM-0070 (#262) now owns the install and onboarding page, and "No further action on this issue."
+- **Next action:** none for PCM-0060. Any remaining onboarding work belongs to PCM-0070 / #262.
+
+I did not modify any file or anything on GitHub.
