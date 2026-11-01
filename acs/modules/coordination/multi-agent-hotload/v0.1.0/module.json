@@ -93,6 +93,10 @@
       "role": "seat-runtime"
     },
     {
+      "path": "scripts/board.py",
+      "role": "task-board"
+    },
+    {
       "path": "scripts/dev_root_check.py",
       "role": "dev-root-hygiene-check"
     },
