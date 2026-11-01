@@ -29,7 +29,8 @@ Claude Code's own defaults and loses often enough to matter (#37).
                                  tracked changes, files it wrote that git does
                                  not track, unpushed commits, a push without a
                                  PCM checkpoint, or a pushed branch with no open
-                                 pull request or no auto-merge armed
+                                 pull request, or no auto-merge armed where the
+                                 repository allows auto-merge
     acs_guard.py link <N>        record issue N (or owner/repo#N) as the current
                                  branch's owning issue, after checking it exists
 
@@ -542,7 +543,12 @@ def names(paths: list[str], limit: int = 5) -> str:
 
 
 def pull_request_problem(top: Path, branch: str) -> tuple[str | None, str | None]:
-    """(problem, note) for the branch's open pull request: missing, a draft, or without auto-merge."""
+    """(problem, note) for the branch's open pull request: missing, a draft, or without auto-merge.
+
+    Auto-merge is only asked for when the repository allows it (#89); a
+    repository that turns it off merges by hand, so an open, ready pull
+    request is all an agent can do there.
+    """
     code, out = run(
         ["gh", "pr", "list", "--head", branch, "--state", "open", "--json", "number,isDraft,autoMergeRequest", "--limit", "1"],
         top, timeout=10,
@@ -567,8 +573,16 @@ def pull_request_problem(top: Path, branch: str) -> tuple[str | None, str | None
     if pr.get("isDraft"):
         return f"Pull request #{number} for `{branch}` is a draft, so nothing will merge it. Mark it ready (`gh pr ready {number}`) and arm auto-merge.", None
     if not pr.get("autoMergeRequest"):
+        if not auto_merge_allowed(top):
+            return None, f"This repository turns auto-merge off, so the owner merges pull request #{number} by hand; the work is not delivered until it merges."
         return f"Pull request #{number} for `{branch}` has no auto-merge armed. Run `gh pr merge {number} --auto --squash`.", None
     return None, None
+
+
+def auto_merge_allowed(top: Path) -> bool:
+    """False only when GitHub says the repository turns auto-merge off; unknown counts as allowed."""
+    code, out = run(["gh", "repo", "view", "--json", "autoMergeAllowed", "-q", ".autoMergeAllowed"], top, timeout=10)
+    return not (code == 0 and out.strip() == "false")
 
 
 def merged_at_tip(top: Path, branch: str) -> bool:

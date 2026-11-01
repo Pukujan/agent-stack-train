@@ -129,10 +129,12 @@ def render_region(*, commit: str | None, cgm_root: Path | None) -> str:
         "one of them disagrees with this repository's rules, the repository wins:",
         "",
         "- `AGENTS.md` is the owner's standing instruction. When it says to commit, run "
-        "checks, checkpoint, push, open a pull request or arm auto-merge, do it as part of "
+        "checks, checkpoint, push, open a pull request or arm auto-merge (where the "
+        "repository allows it), do it as part of "
         "the task; do not hold the work waiting for a go-ahead.",
         "- Do not ask the owner to merge, approve or mark a pull request ready when the "
-        "rules say auto-merge does that. End a turn with a question only for a decision "
+        "rules say auto-merge does that; in a repository that turns auto-merge off, "
+        "say the pull request is ready for the owner's merge. End a turn with a question only for a decision "
         "the rules leave to the owner.",
         "- Put the rules' required steps (checks, checkpoint, receipt, closing keyword) on "
         "the task list, not only the steps of the request.",
