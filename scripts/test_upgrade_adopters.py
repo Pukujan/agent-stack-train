@@ -93,6 +93,22 @@ class DecideTests(unittest.TestCase):
             self.assertIn(OLD[:7], text)  # short forms are listed, not guessed at
             self.assertEqual((clone / "NOTES.md").read_text(encoding="utf-8"), OLD)
 
+class GitHubShapeTests(unittest.TestCase):
+    def test_only_the_repositorys_own_branches_count(self) -> None:
+        pulls = [{"number": 87, "head": {"ref": up.BRANCH, "repo": {"full_name": "o/r"}}},
+                 {"number": 90, "head": {"ref": up.BRANCH, "repo": {"full_name": "fork/r"}}},
+                 {"number": 91, "head": {"ref": "x", "repo": None}}]
+        self.assertEqual(up.own_heads(pulls, "o/r"), {87: up.BRANCH})
+
+    def test_installer_reasons_survive_a_long_log(self) -> None:
+        log = "\n".join(["hotload_check: FAIL", "  - demo.json glossary must be a non-empty list", "acs_install: plan"]
+                        + [f"  write file{i}" for i in range(30)] + ["acs_install: FAIL (writes rolled back)"])
+        detail = up.failure_detail(log)
+        self.assertTrue(detail.startswith("hotload_check: FAIL\n  - demo.json glossary"))
+        self.assertIn("acs_install: FAIL (writes rolled back)", detail)
+        self.assertNotIn("file0", detail)
+
+
 class InstalledWarningTests(unittest.TestCase):
     TRAIN = {"certified": {"agent-stack-train": {"version": "1.0.1", "commit": NEW}}}
 
