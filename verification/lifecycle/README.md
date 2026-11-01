@@ -31,7 +31,8 @@ The three promises:
 | Configuration | What it sets | Expected and found | Distinct states |
 |---|---|---|---|
 | `Lifecycle.cfg` | the real design, bot-token variant included | (b) and (c) hold | 8,582 |
-| `StopReal.cfg` | the real Stop hook | **(a) broken: findings 1 and 2** | 32 |
+| `StopReal.cfg` | the real Stop hook since #79 | (a) holds | not yet run locally; CI's `lifecycle-model` job checks it |
+| `StopBefore.cfg` | the Stop hook before #79 | **(a) broken: findings 1 and 2** | 32 |
 | `StopRetryOnly.cfg` | only the `stop_hook_active` bypass left open | (a) broken by finding 1 alone | 40 |
 | `BranchSwitchOnly.cfg` | only the checked-out-branch gap left open | (a) broken by finding 2 alone | 45 |
 | `StopFixed.cfg` | the proposed guard (below) | (a), (b) and (c) hold | 7,511 |
@@ -40,20 +41,23 @@ The three promises:
 
 Each run takes about a second. The two negative controls show the model can fail: with the guard off the agent edits and stops at once; with the sweep off a pull request saying `Closes #N`, armed with the bot token, merges, nothing closes #N, and nothing ever will.
 
-## Findings: the real Stop hook does not keep (a)
+## Findings: the Stop hook before #79 did not keep (a)
 
-Hypothesis H1 in #73 (exhaustive checking finds a gap the unit tests miss) is **confirmed**. TLC found two separate ways the session ends with work only local while the guard is on.
+Hypothesis H1 in #73 (exhaustive checking finds a gap the unit tests miss) is **confirmed**. TLC found two separate ways the session ended with work only local while the guard is on.
 
 1. **The hook blocks only once.** `stop()` returns at once when Claude Code sets `stop_hook_active`, which it does when the agent is already continuing because a Stop hook blocked it. Counterexample (4 states): edit → try to stop (blocked) → try to stop again (allowed) → the session ends with uncommitted work.
 2. **The hook checks only the checked-out branch.** `checkout_problems()` counts unpushed commits only on the current branch, and nothing blocks `git switch`. Counterexample (5 states): edit → commit → switch to the default branch or a detached HEAD → stop (allowed) → the commit exists only locally. In the `<project>/worktrees/<TASK-ID>` layout `git switch main` fails because main is checked out elsewhere, but `git switch --detach` works.
 
 Closing (b) and (c) hold in the real design. The sweep is what closes an issue after a bot-token merge; this repository has `OIO_CLOSE_SWEEP_APPLY` set to `true` (seen in the repository's variables on 2026-10-31).
 
-Noted while modelling, not checked by a property: after a squash merge the branch's own commits are still not ancestors of main, so the Stop hook keeps reporting a pushed branch with no open pull request until the agent leaves the branch. Today finding 1 lets the agent stop anyway; the proposed guard keeps that once-only bypass for the pull-request checks, so the agent can still finish.
+Noted while modelling, not checked by a property: after a squash merge the branch's own commits are still not ancestors of main, so the Stop hook keeps reporting a pushed branch with no open pull request until the agent leaves the branch. Since #79 the guard looks for a merged pull request whose head is the branch's tip and reports nothing in that case.
 
-## Proposal *(proposal)*
+## The fix (#79)
 
-The guard described here does not exist; only its model does. `StopFixed.cfg` models a guard that (1) still blocks a retried stop (`stop_hook_active` set) while work is only local, keeping the once-only bypass for the checkpoint and pull-request checks an agent may not be able to fix, and (2) counts unpushed commits on every local branch (for example `git log --branches --not --remotes`), not only the checked-out one. TLC finds (a), (b) and (c) all hold for it. Changing `claude_guard.py` is follow-up work, not part of this change.
+`StopFixed.cfg` modelled a guard that (1) still blocks a retried stop (`stop_hook_active` set) while work is only local, keeping the once-only bypass for the checkpoint and pull-request checks an agent may not be able to fix, and (2) counts unpushed commits on every local branch (for example `git log --branches --not --remotes`), not only the checked-out one. TLC finds (a), (b) and (c) all hold for it. #79 changed `claude_guard.py` to match, and `StopReal.cfg` now sets the same switches. Two differences from the model, both deliberate:
+
+- **A cap on retries.** After 5 blocked retries in one session the guard lets the stop through and says so, so an agent that truly cannot push (offline, no permission) does not loop forever. The model has no cap, so it does not cover that case.
+- **Which branches count.** The guard checks the checked-out branch and every branch whose tip was committed during the session (from the transcript's first timestamp). Old local branches, such as squash-merged ones whose remote branch was deleted, are left alone so they don't block every session. The model's "every branch" matches this as long as the session's own commits are the only local work it makes.
 
 ## What it assumes about GitHub and Claude Code
 

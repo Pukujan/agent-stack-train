@@ -316,7 +316,7 @@ jobs:
 
       # Each configuration has an expected result (#73): the real design keeps
       # its closing promises, the guard-off and sweep-off controls must break,
-      # and the real Stop hook's known gap must still show until it is fixed.
+      # and the Stop hook from before #79 must still show its gap, so the model can still fail.
       - name: TLC finds what each configuration expects
         run: TLA2TOOLS="$RUNNER_TEMP/tla2tools.jar" verification/lifecycle/check.sh
 

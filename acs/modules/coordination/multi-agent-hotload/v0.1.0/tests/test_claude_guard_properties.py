@@ -456,8 +456,6 @@ def test_flag_value_reads_both_spellings(guard, args, value, flag, glued):
 # failures until the guard is fixed, so a fix shows up as an unexpected pass.
 
 
-@pytest.mark.xfail(strict=True, reason="Stop skips the unpushed-commit check on the default branch: local commits on "
-                   "`main` that are not on GitHub let the session end (#73).")
 def test_stop_blocks_unpushed_commits_on_the_default_branch(guard, templates, tmp_path):
     work = build_checkout(templates, {"adopter": True, "pcm": False, "task_branch": False, "commits": "none",
                                       "tracked_change": False, "session_file": False, "unrelated_file": False}, tmp_path / "c", 0)

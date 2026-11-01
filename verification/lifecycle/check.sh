@@ -13,7 +13,8 @@ jar=${TLA2TOOLS:?set TLA2TOOLS to the path of tla2tools.jar}
 # config            expected exit  meaning
 expectations=(
   "Lifecycle        0   real design: (b) closes and (c) never reopens hold"
-  "StopReal         12  real design: (a) is broken (finding, see README)"
+  "StopReal         0   real design since #79: (a) holds"
+  "StopBefore       12  the hook before #79: (a) is broken (finding, see README)"
   "StopRetryOnly    12  the stop_hook_active bypass alone breaks (a)"
   "BranchSwitchOnly 12  the checked-out-branch gap alone breaks (a)"
   "StopFixed        0   proposed guard: (a), (b) and (c) hold"

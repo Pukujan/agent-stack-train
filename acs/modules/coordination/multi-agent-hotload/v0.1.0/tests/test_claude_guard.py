@@ -4,7 +4,7 @@ Each rule runs against a real git repository with a bare ``origin``, so the
 guard sees the same branches, upstreams and commits it would in an adopter.
 GitHub lookups are stubbed: an issue exists when its number is in ``ISSUES``,
 and a branch's open pull requests come from ``guard.pulls`` (default: one with
-auto-merge armed; ``None`` means gh failed).
+auto-merge armed; ``None`` means gh failed), and its merged ones from ``guard.merged``.
 """
 
 from __future__ import annotations
@@ -56,11 +56,14 @@ def guard(monkeypatch):
     monkeypatch.delenv("ACS_GUARD", raising=False)
     monkeypatch.delenv("CLAUDE_PROJECT_DIR", raising=False)
     mod.pulls = {}
+    mod.merged = {}
     real_run = mod.run
 
     def fake_run(args, cwd, timeout=15):
         if args[:3] == ["gh", "pr", "list"]:
             branch = args[args.index("--head") + 1]
+            if args[args.index("--state") + 1] == "merged":
+                return 0, json.dumps(mod.merged.get(branch, []))
             pulls = mod.pulls.get(branch, [{"number": 7, "isDraft": False, "autoMergeRequest": {"mergeMethod": "SQUASH"}}])
             return (1, "") if pulls is None else (0, json.dumps(pulls))
         return real_run(args, cwd, timeout)
@@ -270,14 +273,65 @@ def test_edits_that_remove_the_guard_are_blocked(guard, repo):
 # ---------------------------------------------------------------- stop
 
 
-def test_stop_blocks_unpushed_commits_then_lets_the_retry_through(guard, repo):
+@pytest.fixture
+def retry_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr("tempfile.tempdir", str(tmp_path / "tmp"))
+    (tmp_path / "tmp").mkdir()
+
+
+def test_stop_blocks_unpushed_commits_even_on_a_retry(guard, repo, retry_dir):
     git("checkout", "-qb", "fix/37-enforce", cwd=repo)
     (repo / "a.txt").write_text("a\n", encoding="utf-8")
     git("add", "a.txt", cwd=repo)
     git("commit", "-qm", "change", cwd=repo)
     assert "not on GitHub" in guard.stop({"cwd": str(repo)})
-    assert guard.stop({"cwd": str(repo), "stop_hook_active": True}) is None
+    assert "not on GitHub" in guard.stop({"cwd": str(repo), "stop_hook_active": True, "session_id": "s1"})
     git("push", "-qu", "origin", "fix/37-enforce", cwd=repo)
+    assert guard.stop({"cwd": str(repo)}) is None
+
+
+def test_a_retried_stop_gives_up_after_the_cap(guard, repo, retry_dir, capsys):
+    (repo / "AGENTS.md").write_text("edited\n", encoding="utf-8")
+    retry = {"cwd": str(repo), "stop_hook_active": True, "session_id": "s2"}
+    for _ in range(guard.MAX_STOP_RETRIES):
+        assert "uncommitted" in guard.stop(retry)
+    assert guard.stop(retry) is None
+    assert "after 5 blocked retries" in capsys.readouterr().err
+    assert "uncommitted" in guard.stop({**retry, "session_id": "s3"})  # the cap is per session
+
+
+def test_a_retried_stop_skips_the_pull_request_checks(guard, repo, retry_dir):
+    _pushed_branch(repo)
+    guard.pulls["fix/37-enforce"] = []
+    assert "no open pull request" in guard.stop({"cwd": str(repo)})
+    assert guard.stop({"cwd": str(repo), "stop_hook_active": True, "session_id": "s4"}) is None
+
+
+def test_stop_checks_the_default_branch_for_unpushed_commits(guard, repo):
+    git("commit", "-q", "--allow-empty", "-m", "local only", cwd=repo)
+    reason = guard.stop({"cwd": str(repo)})
+    assert "Branch `main` has 1 commit(s)" in reason and "task branch" in reason
+
+
+def test_stop_checks_a_branch_the_session_committed_to_then_left(guard, repo, tmp_path):
+    started = {"type": "user", "timestamp": "2000-01-01T00:00:00.000Z", "cwd": str(repo)}
+    path = tmp_path / "session.jsonl"
+    path.write_text(json.dumps(started) + "\n", encoding="utf-8")
+    git("checkout", "-qb", "fix/37-enforce", cwd=repo)
+    git("commit", "-q", "--allow-empty", "-m", "work", cwd=repo)
+    git("switch", "-q", "--detach", "main", cwd=repo)
+    assert "Branch `fix/37-enforce` has 1 commit(s)" in guard.stop({"cwd": str(repo), "transcript_path": str(path)})
+    # A branch last committed before the session began is someone's old branch, not this session's work.
+    path.write_text(json.dumps({**started, "timestamp": "2999-01-01T00:00:00.000Z"}) + "\n", encoding="utf-8")
+    assert guard.stop({"cwd": str(repo), "transcript_path": str(path)}) is None
+
+
+def test_stop_accepts_a_branch_whose_pull_request_merged_at_its_tip(guard, repo):
+    _pushed_branch(repo)
+    guard.pulls["fix/37-enforce"] = []
+    guard.merged["fix/37-enforce"] = [{"headRefOid": "0" * 40}]
+    assert "no open pull request" in guard.stop({"cwd": str(repo)})
+    guard.merged["fix/37-enforce"] = [{"headRefOid": git("rev-parse", "HEAD", cwd=repo)}]
     assert guard.stop({"cwd": str(repo)}) is None
 
 
