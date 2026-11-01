@@ -207,6 +207,19 @@ def test_github_side_changes_need_an_owning_issue(guard, repo):
         assert "needs an issue log" in bash(guard, repo, command), command
 
 
+def test_glued_short_flags_and_gh_by_path_are_still_changes(guard, repo):
+    # Found by the property tests (#73): gh takes `-XPOST` and `-fname=x`, and gh may be named by its path.
+    for command in (
+        "gh api -XPOST repos/o/r/transfer",
+        "gh api -XDELETE repos/o/r/branches/main/protection",
+        "gh api -fname=X -fvalue=y repos/o/r/actions/variables",
+        "/usr/local/bin/gh secret set X --body y",
+    ):
+        assert "needs an issue log" in bash(guard, repo, command), command
+    assert bash(guard, repo, "gh api -XGET repos/o/r/hooks") is None
+    assert bash(guard, repo, "gh api -HAccept:x repos/o/r/hooks") is None
+
+
 def test_github_reads_and_decision_records_pass(guard, repo):
     for command in (
         "gh issue comment 37 --body 'line one\nline two; gh variable set X'",
