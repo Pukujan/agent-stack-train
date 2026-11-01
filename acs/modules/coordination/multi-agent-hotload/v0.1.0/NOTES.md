@@ -61,4 +61,4 @@ python acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check
 python -m pytest acs/modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
-After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable→hsw (default ON); basenames→hon); paste `acs_prompt_inject.system_block` at agent boot (always_on) (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.
+After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits→hsw (default ON); HTML pages→no writing module (agent-stack-train#81); basenames→hon); paste `acs_prompt_inject.system_block` at agent boot (always_on) (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.

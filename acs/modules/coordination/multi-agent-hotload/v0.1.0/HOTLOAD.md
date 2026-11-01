@@ -9,7 +9,7 @@ Component versions are **not** written down in this file. This pack ships in [Pu
 Install is complete only when all four are wired as **full stacks** (slim subsets fail):
 
 1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
-2. **FULL CGM** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
+2. **FULL CGM** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; PR/issue/docs/commits/posts/papers via `human-sounding-writing` (hsw, default ON); HTML pages need no writing module (agent-stack-train#81); basenames via `human-output-naming` (hon).
 3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
 4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR. Checkable artifact: `scripts/seat_protocol.py` executes the seat state machine, and `python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests/test_coordination.py -q` passes
 
@@ -194,8 +194,7 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 **acs_prompt_inject (required application step — ALWAYS-ON at boot):**
 
 1. `hotload_check` loads `acs_prompt_inject` from pinned CGM `docs/writing-routing.json` (fields: `application`, `human_facing_default`, `routes`, `apply_checklist`, `always_on`, `opt_in_forbidden`, `system_block`, `surfaces`), writes [`PROMPT_INJECT.md`](PROMPT_INJECT.md), and prints `system_block` on OK stdout.
-2. Agents **MUST paste** `acs_prompt_inject.system_block` into the agent **system prompt at session boot** (every CGM adopter). Not per-report. Not per-HTML. Opt-in is forbidden (`always_on: true`).
-3. Before publishing compare / GitHub Pages HTML, run `python "$CGM_ROOT/scripts/verify_hsw_applied.py" --root "$CGM_ROOT" --mode acs-html --html <path-to-published-report.html>` and fix any jargon / tool-dump fails.
+2. Agents **MUST paste** `acs_prompt_inject.system_block` into the agent **system prompt at session boot** (every CGM adopter). Not per-task. Opt-in is forbidden (`always_on: true`).
 3. Follow `apply_checklist` in `writing-routing.json`. Soft enforcement = no NLP CI grade of prose; contract language is still **MUST / APPLY**.
 
 
@@ -246,7 +245,7 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)
 - [ ] If zombie: reject boss actions; worker or re-queue; optional issue comment; no DM
 - [ ] Watchdog understood as **liveness only** (~10m), not failover
-- [ ] After VALID: paste acs_prompt_inject.system_block at agent boot; MUST load writing-direction (README) / hsw (prose/HTML/compare) / hon (basenames); verify_hsw_applied before Pages
+- [ ] After VALID: paste acs_prompt_inject.system_block at agent boot; MUST load writing-direction (README) / hsw (prose) / hon (basenames); HTML pages need no writing module
 - [ ] Titles will be human-readable
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)

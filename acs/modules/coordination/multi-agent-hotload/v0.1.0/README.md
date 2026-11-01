@@ -21,7 +21,7 @@ ACS is the source of truth for this pack. Desktop paths are deploy mirrors only 
 An agent that was told to load this hot-loader into a working repo has finished only when **all** of the following are true:
 
 - [ ] **FULL PCM** from the stack checkout's `pcm/`, used for continuity/checkpoints **and** GitHub governance (PR-only, required CI, protection/auto-merge preference, fail-closed) per [`docs/adopter-enforcement.md`](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md). Still not the proposal layer.
-- [ ] **FULL CGM** from the stack checkout's `cgm/`, with **all eight** module ids + human_output_contract docs. Route README via writing-direction; human-facing prose/HTML/compare/appendable via hsw (default ON); basenames via hon. Not a two-module subset.
+- [ ] **FULL CGM** from the stack checkout's `cgm/`, with **all eight** module ids + human_output_contract docs. Route README via writing-direction; human-facing prose via hsw (default ON); HTML pages need no writing module; basenames via hon. Not a two-module subset.
 - [ ] **OIO** from the stack checkout's `oio/`, installed into the adopter (issue-log surface + `AGENTS.md` guidance block). A component that cannot run is reported **PARTIAL**, never OK.
 - [ ] The adopter's `stack-manifest.json` is written with an **empty `agent-stack-train` pin** (follows the train) and a `check_manifest.py` CI step is added.
 - [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [BEHAVIOR.md](BEHAVIOR.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** (minutes + `claim_queue`) + **watchdog** (agent-less) + full `pins.pcm` / `pins.cgm`.
@@ -98,7 +98,7 @@ python acs/modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check
 ```
 
 `hotload_check` runs `validate_content_system.py` and **fails** unless stdout starts with `VALID`. No HSW-only shortcut.
-7. **After VALID:** MUST load modules per [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/writing-routing.json) / [`ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/ACS_VERIFY.md) (README/product → writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable → hsw (default ON); basenames → hon). Paste `acs_prompt_inject.system_block` (see [`PROMPT_INJECT.md`](PROMPT_INJECT.md)) into the agent system prompt at **boot** (always_on; not per-report). Before Pages/compare publish: `verify_hsw_applied.py --mode acs-html --html <compare.html>`. Soft = no NLP CI; language is MUST/APPLY.
+7. **After VALID:** MUST load modules per [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/writing-routing.json) / [`ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/ACS_VERIFY.md) (README/product → writing-direction; PR/issue/docs/commits → hsw (default ON); HTML pages → no writing module (agent-stack-train#81); basenames → hon). Paste `acs_prompt_inject.system_block` (see [`PROMPT_INJECT.md`](PROMPT_INJECT.md)) into the agent system prompt at **boot** (always_on; not per-task). Soft = no NLP CI; language is MUST/APPLY.
 
 ## Binding owner rules (summary)
 

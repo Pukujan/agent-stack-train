@@ -342,9 +342,9 @@ def render_prompt_inject_md(routing: dict, *, pin_version: str) -> str:
 
     Injects application, human_facing_default, routes, apply_checklist, and
     always-on system_block (see acs_prompt_inject.fields). Paste system_block
-    into agent system prompt at session boot — not per-report. HSW is ON by
-    default for every human-facing deliverable including HTML reports/compare/
-    appendable; basenames -> hon. Opt-in forbidden.
+    into agent system prompt at session boot — not per-task. HSW is ON by
+    default for human-facing prose; HTML pages need no writing module (#81);
+    basenames -> hon. Opt-in forbidden.
     """
     inject = routing.get("acs_prompt_inject") if isinstance(routing.get("acs_prompt_inject"), dict) else {}
     instruction = str(inject.get("instruction") or "").strip()
@@ -376,13 +376,13 @@ def render_prompt_inject_md(routing: dict, *, pin_version: str) -> str:
         route_rows.append(f"| {surf} | `{load}`{short_s} |")
     routes_table = "\n".join(route_rows) if route_rows else (
         "| README / product entry | `writing-direction` |\n"
-        "| Human-facing prose + HTML reports/compare/appendable | `human-sounding-writing` (**hsw**) |\n"
+        "| Human-facing prose (GitHub, docs, posts, papers) | `human-sounding-writing` (**hsw**) |\n"
         "| Generated artifact basenames / legends | `human-output-naming` (**hon**) |"
     )
     when_block = when or (
         "After `hotload_check` / CGM_VERIFY succeeds, before writing ANY human-facing "
-        "deliverable (GitHub/docs prose, HTML reports, compare HTML/UIs, appendable HTML, "
-        "posts, papers) — and before naming generated artifact / media paths."
+        "prose (GitHub/docs prose, commits, posts, papers) — and before naming generated "
+        "artifact / media paths."
     )
     return (
         f"# PROMPT_INJECT — acs_prompt_inject (CGM {pin_version})\n\n"
@@ -400,14 +400,14 @@ def render_prompt_inject_md(routing: dict, *, pin_version: str) -> str:
         f"- **load:** `{hfd_load}` (**hsw**) — `required_load: true`, `default_on: true`\n"
         f"- **covers:** {covers_md}\n"
         f"- **exceptions:** {exc_md} (README/product → writing-direction; basenames → **hon**)\n"
-        "- **rule:** HSW is ON by default for EVERY human-facing task/output including HTML "
-        "reports, compare HTML/UIs, and appendable HTML. Not optional. Not per-report opt-in. "
-        "Visible HTML prose → **hsw**; filesystem basenames → **hon**.\n\n"
+        "- **rule:** HSW is ON by default for EVERY human-facing prose task. Not optional. Not "
+        "per-task opt-in. HTML pages (reports, compare HTML/UIs, appendable HTML) need no "
+        "writing module (agent-stack-train#81); filesystem basenames → **hon**.\n\n"
         "## Boot paste — acs_prompt_inject.system_block (ALWAYS-ON)\n\n"
         f"- **always_on:** `{str(always_on).lower()}`\n"
         f"- **opt_in_forbidden:** `{str(opt_in_forbidden).lower()}`\n"
         "- **rule:** Paste the block below into the agent **system prompt at session boot** "
-        "(every CGM adopter). Not per-report. Not per-HTML. Not ACS-only.\n\n"
+        "(every CGM adopter). Not per-task. Not ACS-only.\n\n"
         "```\n"
         f"{system_block or instruction}\n"
         "```\n\n"
@@ -725,13 +725,8 @@ def run(
         "  next: MUST paste acs_prompt_inject.system_block into agent system prompt at BOOT "
         "(always_on; opt_in_forbidden; Claude Code already gets it from CLAUDE.md's "
         "acs:claude-bridge region). Then MUST load CGM modules per docs/writing-routing.json "
-        "/ docs/ACS_VERIFY.md (README/product -> writing-direction; human-facing prose/HTML/"
-        "compare/appendable -> hsw; basenames -> hon). Not per-report."
-    )
-    print(
-        "  hsw_verify: before publishing compare/Pages HTML run "
-        "python <cgm>/scripts/verify_hsw_applied.py --root <cgm> --mode acs-html "
-        "--html <path-to-published-report.html>"
+        "/ docs/ACS_VERIFY.md (README/product -> writing-direction; human-facing prose "
+        "-> hsw; HTML pages -> no writing module; basenames -> hon). Not per-task."
     )
     if inject_text:
         print("  --- acs_prompt_inject.system_block (BOOT PASTE) ---")

@@ -372,7 +372,7 @@ class ContentSystemValidationTests(unittest.TestCase):
 
 
 
-    def test_writing_router_lists_html_report_and_compare_surfaces(self):
+    def test_writing_router_keeps_html_pages_off_the_prose_route(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
         by_id = {route["id"]: route for route in contract["routes"]}
@@ -381,10 +381,13 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertEqual(route["load"], "human-sounding-writing")
         self.assertTrue(route["required_load"])
         self.assertTrue(route.get("default_on"))
-        self.assertTrue(any("html report" in s for s in surfaces))
-        self.assertTrue(any("compare html" in s for s in surfaces))
-        self.assertTrue(any("compare ui" in s for s in surfaces))
-        self.assertTrue(any("human-readable html" in s for s in surfaces))
+        # Retired for HTML (agent-stack-train#81): HTML pages are not routed to the prose module.
+        self.assertFalse(any("html" in s for s in surfaces), surfaces)
+        html_pages = next(item for item in contract["not_routed"] if item.get("id") == "html_pages")
+        html_surfaces = {str(s).lower() for s in html_pages["surfaces"]}
+        self.assertTrue(any("html report" in s for s in html_surfaces))
+        self.assertTrue(any("compare html" in s for s in html_surfaces))
+        self.assertTrue(any("compare ui" in s for s in html_surfaces))
         human_default = contract["human_facing_default"]
         self.assertEqual(human_default["load"], "human-sounding-writing")
         self.assertTrue(human_default["required_load"])
@@ -392,14 +395,15 @@ class ContentSystemValidationTests(unittest.TestCase):
         covers = {str(c).lower() for c in human_default["covers"]}
         self.assertTrue(any("every human-facing" in c for c in covers))
         instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
-        self.assertTrue("html report" in instruction or "compare html" in instruction)
+        self.assertIn("no writing module", instruction)
+        self.assertIn("html_pages", contract["human_facing_default"]["exceptions"])
         self.assertTrue("every human-facing" in instruction or "default" in instruction)
         self.assertTrue("per-report" in instruction or "optional" in instruction)
         self.assertIn("human_facing_default", contract["acs_prompt_inject"]["fields"])
         when = str(contract["acs_prompt_inject"]["when"]).lower()
-        self.assertTrue("html" in when or "compare" in when)
+        self.assertIn("prose", when)
 
-    def test_writing_contract_rejects_missing_html_report_surfaces(self):
+    def test_writing_contract_rejects_a_missing_html_pages_entry(self):
         import json
         import tempfile
 
@@ -437,10 +441,10 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "required_load": True,
                     "default_on": True,
                     "covers": [
-                        "every human-facing task/output",
-                        "HTML reports",
-                        "compare HTML",
+                        "every human-facing prose task",
+                        "GitHub and docs prose",
                     ],
+                    "exceptions": ["html_pages"],
                 },
                 "routes": [
                     {
@@ -482,10 +486,10 @@ class ContentSystemValidationTests(unittest.TestCase):
                 },
                 "acs_prompt_inject": {
                     "fields": ["routes", "apply_checklist", "human_facing_default"],
-                    "when": "before HTML reports and compare deliverables",
+                    "when": "before any human-facing prose",
                     "instruction": (
-                        "MUST load hsw for every human-facing task including HTML reports "
-                        "and compare HTML; do not treat as optional or per-report."
+                        "MUST load hsw for every human-facing prose task; "
+                        "do not treat as optional or per-task."
                     ),
                 },
             }
@@ -651,7 +655,7 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_writing_contract(staging)
             self.assertTrue(any("reader_facing_explanations" in e for e in errors), errors)
 
-    def test_writing_router_routes_marketing_intro_sites_to_both_modules(self):
+    def test_writing_router_routes_marketing_intro_sites_without_hsw(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
         by_id = {route["id"]: route for route in contract["routes"]}
@@ -663,10 +667,10 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertTrue(any("marketing" in item for item in surfaces), surfaces)
         self.assertTrue(any("demo" in item for item in surfaces), surfaces)
         self.assertTrue(any("intro" in item for item in surfaces), surfaces)
-        self.assertIn("human-sounding-writing", str(route.get("notes", "")).lower())
         also = {str(item).lower() for item in route.get("also_load_required", [])}
-        for needle in ("human-sounding-writing", "visual-direction", "brand-foundation", "html-demo"):
+        for needle in ("visual-direction", "brand-foundation", "html-demo"):
             self.assertIn(needle, also)
+        self.assertNotIn("human-sounding-writing", also)  # not required for HTML pages (#81)
         self.assertGreaterEqual(len(route["review_checklist"]), 6)
         joined = " ".join(str(item).lower() for item in route["review_checklist"])
         for needle in ("problem", "market", "component", "approximation", "demo", "feeling"):
@@ -789,10 +793,10 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "required_load": True,
                     "default_on": True,
                     "covers": [
-                        "every human-facing task/output",
-                        "HTML reports",
-                        "compare HTML",
+                        "every human-facing prose task",
+                        "GitHub and docs prose",
                     ],
+                    "exceptions": ["html_pages"],
                 },
                 "routes": [
                     {
@@ -811,10 +815,6 @@ class ContentSystemValidationTests(unittest.TestCase):
                             "commit subjects",
                             "non-README docs",
                             "changelog prose",
-                            "HTML reports",
-                            "compare HTML",
-                            "compare UIs",
-                            "human-readable HTML",
                         ],
                         "load": "human-sounding-writing",
                         "required_load": True,
@@ -838,11 +838,11 @@ class ContentSystemValidationTests(unittest.TestCase):
                 },
                 "acs_prompt_inject": {
                     "fields": ["routes", "apply_checklist", "human_facing_default"],
-                    "when": "before HTML reports and compare deliverables",
+                    "when": "before any human-facing prose",
                     "instruction": (
-                        "MUST load hsw for every human-facing task including HTML reports "
-                        "and compare HTML; filenames and speakable legends; do not treat as "
-                        "optional or per-report."
+                        "MUST load hsw for every human-facing prose task; HTML pages need "
+                        "no writing module; filenames and speakable legends; do not treat as "
+                        "optional or per-task."
                     ),
                 },
             }

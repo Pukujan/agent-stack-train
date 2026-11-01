@@ -2,7 +2,7 @@
 
 > **Give every project a clearer story.** A versioned content UX system for turning repository evidence into welcoming, skimmable, reviewable human-facing output.
 
-**Current helper version: `0.5.13` (`v0.5.13`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>` (optional `--html <compare.html>` before publishing human-facing HTML). Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
+**Current helper version: `0.5.13` (`v0.5.13`).** Pin this version or a commit SHA in adapters and ACS hotload — never silently follow moving `main`. Every adopter must inject the always-on HSW system block from `docs/writing-routing.json` (`acs_prompt_inject.system_block`) at agent start, then confirm with `python scripts/verify_hsw_applied.py --root <cgm>`. Adopter content freshness and asset references are verified via `python scripts/verify_adopter_content.py` or `validate_content_system.py --check-adopter-docs`; adopter README structure (PNG hero, problem narrative, status/evidence table, boundaries) via `--check-adopter-readme`. CGM validation and GitHub merge readiness are **separate** outcomes — see [`docs/ADOPTER_MERGE_GATES.md`](docs/ADOPTER_MERGE_GATES.md). Operational failures (pin ≠ enforcement) follow [`docs/ISSUE_LOG.md`](docs/ISSUE_LOG.md) / [`docs/issue-log-contract.json`](docs/issue-log-contract.json).
 
 <p align="center">
   <img src="assets/marketing/hero-story-loop.png" alt="An anime-inspired content designer and friendly story-guide companion review a research, writing, visual, and review loop for a clearer project story." width="100%">
@@ -21,7 +21,7 @@ Load only the modules the requested output needs. Paths are relative to this hel
 | `brand-foundation` | [`modules/brand-foundation`](modules/brand-foundation) | Audience, promise, personality, language boundaries, claim limits | Before public copy or visuals |
 | `content-context` | [`modules/content-context`](modules/content-context) | Evidence-bounded project brief from the target repo | Entering a repo or when the product story changed |
 | `writing-direction` | [`modules/writing-direction`](modules/writing-direction) | Scan-first README / product-entry story and selective bold | **MUST load** for README or product entry pages |
-| `human-sounding-writing` | [`modules/human-sounding-writing`](modules/human-sounding-writing) | Human voice, AI-tell scrub, restrained bold (short name **hsw** / HSW) | **MUST load (default ON)** for every human-facing deliverable except README/product entry: PRs, issues, commits, docs, posts, papers, **HTML reports / compare HTML / compare UIs** |
+| `human-sounding-writing` | [`modules/human-sounding-writing`](modules/human-sounding-writing) | Human voice, AI-tell scrub, restrained bold (short name **hsw** / HSW) | **MUST load (default ON)** for every human-facing prose deliverable except README/product entry: PRs, issues, commits, docs, posts, papers. Not required for HTML pages (#81) |
 | `human-output-naming` | [`modules/human-output-naming`](modules/human-output-naming) | Speakable generated artifact / asset filenames + per-feature legends (short name **hon** / HON) | **MUST load** before naming generated media, asset-manifest paths, committed media basenames, or filename legends |
 | `visual-direction` | [`modules/visual-direction`](modules/visual-direction) | Palette, composition, responsive roles, rejection rules | Before generating or placing visuals |
 | `image-generation` | [`modules/image-generation`](modules/image-generation) | Reproducible image briefs, prompts, and asset records | Creating or reviewing narrative raster assets |
@@ -38,7 +38,7 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 | Situation | Load | Notes |
 | --- | --- | --- |
 | README / product entry | `writing-direction` (+ brand / context as needed) | **MUST load.** Keep scan-first selective bold |
-| Marketing intro / sales site / technical demo page | `writing-direction` and `human-sounding-writing`, plus visual direction, brand foundation, and html-demo | **MUST load all of them** (route `marketing_intro_site`, 0.5.13+). Not the README exception. Brand feeling chooses the words and the pictures |
+| Marketing intro / sales site / technical demo page | `writing-direction`, plus visual direction, brand foundation, and html-demo | **MUST load all of them** (route `marketing_intro_site`, 0.5.13+). Not the README exception. Brand feeling chooses the words and the pictures |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ context as needed) | **MUST load.** Reader-facing explanation, not a manuscript; story order, evidence/status/boundaries, next action. A paper or raw data writeup stays on **hsw** |
 | PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose; one plain sentence per title |
 | Receipts (push, checkpoint, release) | `human-sounding-writing` (**hsw**) | **MUST load.** A receipt headline is one human sentence |
@@ -46,7 +46,7 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 | Non-README docs, changelog prose | `human-sounding-writing` (**hsw**) | **MUST load.** Guides and narrative changelog text |
 | Posts / blogs / social / general prose | `human-sounding-writing` (**hsw**) | **MUST load.** Human voice; restrained bold |
 | Papers / data writeups | `human-sounding-writing` (**hsw**) | **MUST load.** Same voice; apply chart / takeaway guidance |
-| HTML reports / compare HTML / compare UIs / appendable HTML | `human-sounding-writing` (**hsw**) | **MUST load (default ON as of 0.5.7).** Visible prose in human-facing HTML; no per-report opt-in |
+| HTML reports / compare HTML / compare UIs / appendable HTML | none required | Not routed (`html_pages`). Retired for HTML on 2026-11-01 (agent-stack-train#81) |
 | Generated artifact filenames / asset-manifest paths / committed media / filename legends | `human-output-naming` (**hon**) | **MUST load.** Speakable basenames (omit defaults) via `scripts/human_filename`; optional safe twin; per-feature legend; never opaque `p0`/hex or robot key=value stems |
 
 Issue, pull request, receipt, and commit prose rules (plain one-sentence titles, no `feat:` / `fix:` prefix codes, a plain-English meaning for every SHA, PR number, flag, or path): [`docs/NARRATIVE_AUTHORITY.md`](docs/NARRATIVE_AUTHORITY.md). The three-plane issue template and its triage live upstream in [Observational Issue Ops](https://github.com/Pukujan/observational-issue-ops); CGM links to that source and does not copy it. The certified versions of the whole stack live in their own repository, [agent-stack-train](https://github.com/Pukujan/agent-stack-train), whose [`stack-releases.json`](https://github.com/Pukujan/agent-stack-train/blob/main/stack-releases.json) is the single source of certified stack versions.
@@ -55,7 +55,7 @@ Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](doc
 
 **Filename before/after (0.5.5+):** `song_food-p0-00e86d.mp3` (and rejected robot draft `song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`. Defaults omitted; optional safe twin `song-food--up-8.mp3`. Per-feature legends live under [`docs/filename-legends/`](docs/filename-legends/). Hash stays an asset field (or suffix after human labels), never the basename.
 
-**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy. A marketing intro site is a different row: it loads writing-direction and hsw together.
+**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy. A marketing intro site is a different row: it loads writing-direction with visual direction, brand foundation, and html-demo.
 
 ## Why this exists
 

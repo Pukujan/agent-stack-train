@@ -12,7 +12,6 @@ from pathlib import Path
 from scripts.verify_hsw_applied import (
     check_always_on_contract,
     main,
-    scan_html_tells,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,8 +35,8 @@ class VerifyHswAppliedTests(unittest.TestCase):
         self.assertIs(inject["opt_in_forbidden"], True)
         self.assertIn("every", str(inject.get("audience", "")).lower())
         surfaces = {str(s).lower() for s in inject["surfaces"]}
-        self.assertTrue(any("html report" in s for s in surfaces))
-        self.assertTrue(any("compare html" in s for s in surfaces))
+        self.assertTrue(any("pull request" in s for s in surfaces))
+        self.assertFalse(any("html" in s for s in surfaces))  # retired for HTML (#81)
         block = inject["system_block"].lower()
         self.assertIn("always-on", block)
         self.assertIn("human-sounding-writing", block)
@@ -57,12 +56,12 @@ class VerifyHswAppliedTests(unittest.TestCase):
                     "load": "human-sounding-writing",
                     "required_load": True,
                     "default_on": True,
-                    "covers": ["every human-facing", "HTML reports", "compare"],
+                    "covers": ["every human-facing prose task", "GitHub and docs prose"],
                 },
                 "routes": [
                     {
                         "id": "github_and_docs_prose",
-                        "surfaces": ["HTML reports", "compare HTML", "compare UIs"],
+                        "surfaces": ["pull request titles", "commit messages"],
                         "load": "human-sounding-writing",
                     }
                 ],
@@ -79,53 +78,23 @@ class VerifyHswAppliedTests(unittest.TestCase):
             self.assertTrue(any("opt_in_forbidden" in e for e in errors), errors)
             self.assertTrue(any("system_block" in e for e in errors), errors)
 
-    def test_html_scan_flags_jargon_and_tool_dump(self):
+    def test_rejects_html_on_the_prose_route(self):
+        contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
+        for route in contract["routes"]:
+            if route["id"] == "github_and_docs_prose":
+                route["surfaces"].append("HTML reports")
         with tempfile.TemporaryDirectory() as directory:
-            html = Path(directory) / "compare.html"
-            html.write_text(
-                "<html><body><h1>Overview</h1>"
-                "<p>We delve into a seamless tapestry of results.</p>"
-                "<p>As an AI I will now run the tool_call next.</p>"
-                "</body></html>",
-                encoding="utf-8",
-            )
-            errors = scan_html_tells(html)
-            joined = " | ".join(errors).lower()
-            self.assertTrue("delve" in joined or "seamless" in joined or "tapestry" in joined, errors)
-            self.assertTrue("tool" in joined or "as an ai" in joined, errors)
+            staging = Path(directory) / "cgm"
+            (staging / "modules" / "human-sounding-writing").mkdir(parents=True)
+            (staging / "modules" / "human-sounding-writing" / "SKILL.md").write_text("# hsw\n", encoding="utf-8")
+            (staging / "docs").mkdir()
+            (staging / "docs" / "writing-routing.json").write_text(json.dumps(contract), encoding="utf-8")
+            errors = check_always_on_contract(staging)
+            self.assertTrue(any("html reports" in e for e in errors), errors)
 
-    def test_html_scan_clean_passes(self):
-        with tempfile.TemporaryDirectory() as directory:
-            html = Path(directory) / "compare.html"
-            html.write_text(
-                "<html><body><h1>Model A beat Model B on the holdout set</h1>"
-                "<p>Accuracy rose from 61% to 74% after the prompt change.</p>"
-                "</body></html>",
-                encoding="utf-8",
-            )
-            self.assertEqual(scan_html_tells(html), [])
-
-    def test_acs_html_mode_requires_html_path(self):
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = main(["--root", str(ROOT), "--mode", "acs-html"])
-        self.assertEqual(code, 1)
-        self.assertIn("requires at least one --html", buf.getvalue())
-
-    def test_html_mode_fails_on_jargon(self):
-        with tempfile.TemporaryDirectory() as directory:
-            html = Path(directory) / "bad.html"
-            html.write_text(
-                "<html><body><p>This groundbreaking paradigm will unlock the potential.</p></body></html>",
-                encoding="utf-8",
-            )
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = main(["--root", str(ROOT), "--mode", "html", "--html", str(html)])
-            self.assertEqual(code, 1)
-            out = buf.getvalue()
-            self.assertIn("HSW_VERIFY mode=html status=FAIL", out)
-            self.assertIn("INVALID", out)
+    def test_html_mode_is_gone(self):
+        with self.assertRaises(SystemExit):
+            main(["--root", str(ROOT), "--mode", "acs-html"])
 
 
 if __name__ == "__main__":
