@@ -1107,6 +1107,7 @@ def answer(harness: str, hook: str, text: str | None) -> int:
 
 DSH_PACKAGE = "@deepseek-ai/dsh-hooks-claude-code"
 DSH_PATCH_ID = "acs-guard-hooks"
+DSH_MARK = "def setup_dsh"  # present only in guards that know --harness dsh
 
 
 def dsh_hooks() -> dict:
@@ -1114,7 +1115,9 @@ def dsh_hooks() -> dict:
     def hook(sub: str) -> dict:
         command = (
             'g="$(git rev-parse --show-toplevel 2>/dev/null)/.claude/hooks/acs_guard.py"; '
-            f'[ -f "$g" ] || exit 0; exec python3 "$g" --harness dsh {sub}'
+            # A checkout on a stack older than this guard has no `--harness dsh`; it would answer
+            # "unknown harness" with exit 2, which dsh reads as a block, so skip it until it upgrades.
+            f'[ -f "$g" ] && grep -q "{DSH_MARK}" "$g" || exit 0; exec python3 "$g" --harness dsh {sub}'
         )
         return {"type": "command", "command": f"sh -c '{command}'", "timeout": 60}
     return {"hooks": {

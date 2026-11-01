@@ -764,7 +764,9 @@ def test_the_dsh_hook_command_runs_only_inside_a_stack_checkout(guard, repo, tmp
     assert subprocess.run(command, shell=True, cwd=outside, input=event, text=True).returncode == 0
     guard_copy = repo / ".claude" / "hooks" / "acs_guard.py"
     guard_copy.parent.mkdir(parents=True, exist_ok=True)
-    guard_copy.write_text("import sys; sys.exit(2)\n", encoding="utf-8")  # stands in for the guard
+    guard_copy.write_text("import sys; sys.exit(2)\n", encoding="utf-8")  # an older guard: no dsh support
+    assert subprocess.run(command, shell=True, cwd=repo, input=event, text=True).returncode == 0
+    guard_copy.write_text("import sys; sys.exit(2)  # def setup_dsh\n", encoding="utf-8")  # stands in for this guard
     assert subprocess.run(command, shell=True, cwd=repo, input=event, text=True).returncode == 2
 
 
