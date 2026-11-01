@@ -38,6 +38,9 @@ jobs:
       - name: The Octo sync's tests pass
         run: python scripts/test_octo_sync.py
 
+      - name: The activity meter's tests pass
+        run: python scripts/test_activity_meter.py
+
       - name: The trace encoder and stale-decision harness tests pass
         run: |
           python scripts/test_stale_decision.py

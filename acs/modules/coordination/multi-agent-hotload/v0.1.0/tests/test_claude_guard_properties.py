@@ -13,8 +13,9 @@ guard's own decision functions:
 1. Stop: the hook blocks if and only if some stack checkout the session touched
    (or the project folder) has uncommitted tracked changes, files the session
    wrote that git does not track, unpushed commits, a push without a PCM
-   checkpoint, or a pushed branch without an open, ready pull request with
-   auto-merge armed; and the reason names every such checkout and no other.
+   checkpoint, a pushed branch past its cadence limit (#108) without an open,
+   ready pull request, or an open, ready pull request without auto-merge
+   armed; and the reason names every such checkout and no other.
 2. Pre-tool: a Bash command that changes GitHub (or commits or pushes) without
    an owning issue is always blocked, and a read-only command never is.
 3. Pure helpers: the command splitter and the issue-reference patterns
@@ -132,6 +133,7 @@ def checkout_state(draw):
         "session_file": draw(RARELY),  # an untracked file a Write in the transcript made
         "unrelated_file": draw(st.booleans()),  # an untracked file the session never wrote
         "pr": draw(st.sampled_from(sorted(PR_STATES))),
+        "due": draw(MOSTLY),  # past the pull-request cadence limit (#108)
         "ref": draw(st.sampled_from([None, "write", "cd", "git-C"])),
     }
 
@@ -139,7 +141,7 @@ def checkout_state(draw):
 def clean(**changes) -> dict:
     """A referenced, pushed task branch with an armed pull request, changed as given."""
     base = {"adopter": True, "pcm": False, "task_branch": True, "commits": "pushed", "tracked_change": False,
-            "session_file": False, "unrelated_file": False, "pr": "armed", "ref": "cd"}
+            "session_file": False, "unrelated_file": False, "pr": "armed", "due": True, "ref": "cd"}
     return {**base, **changes}
 
 
@@ -155,7 +157,9 @@ def blocking(s: dict) -> bool:
         return True
     if s["pcm"] and s["commits"] != "pushed-checkpointed":
         return True
-    return s["pr"] in ("none", "draft", "no-auto-merge")  # an offline gh is a note, not a block
+    if s["pr"] in ("none", "draft"):
+        return s["due"]  # under the cadence limit, a pushed branch may wait for its pull request
+    return s["pr"] == "no-auto-merge"  # an offline gh is a note, not a block
 
 
 def commit(work: Path, name: str, message: str = "change") -> None:
@@ -180,6 +184,8 @@ def build_checkout(templates: dict, s: dict, dest: Path, i: int) -> Path:
             git("push", "-qu", "origin", branch, cwd=work)
         if c == "ahead-of-upstream":
             commit(work, f"more{i}.txt")
+    if s.get("due") and s["adopter"]:
+        (work / ".coord" / "cadence.json").write_text('{"pr_after_commits": 1}\n', encoding="utf-8")
     if s["tracked_change"]:
         (work / "AGENTS.md").write_text("# Rules\n\nEdited.\n", encoding="utf-8")
     if s["session_file"]:
@@ -216,6 +222,8 @@ def problem_lines(reason: str, top: str) -> list[str]:
 # an unpushed commit, and blocking work in a checkout the session never touched.
 @example(states=[clean(pr="none")], project_is_first=False, order=Random(0))
 @example(states=[clean(pr="draft")], project_is_first=False, order=Random(0))
+@example(states=[clean(pr="none", due=False)], project_is_first=False, order=Random(0))
+@example(states=[clean(pr="draft", due=False)], project_is_first=False, order=Random(0))
 @example(states=[clean(pr="no-auto-merge")], project_is_first=False, order=Random(0))
 @example(states=[clean(pr="gh-offline")], project_is_first=False, order=Random(0))
 @example(states=[clean(pcm=True)], project_is_first=False, order=Random(0))
