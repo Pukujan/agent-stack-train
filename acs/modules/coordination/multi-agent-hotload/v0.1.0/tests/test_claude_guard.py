@@ -61,6 +61,10 @@ def guard(monkeypatch):
     mod.authors = {}  # pull request selector -> author login; missing means the owner
     mod.trusted_var = None  # AUTO_MERGE_AUTHORS value, None when unset
     mod.permissions = {"owner": "admin"}
+    # GitHub's answers for the default branch's required checks (#114): classic protection, branch rules.
+    mod.protection = {"contexts": ["gates"], "checks": [{"context": "gates"}]}
+    mod.rules = []
+    mod.rest_pulls = []  # REST's open pull requests, which GraphQL may hide
     real_run = mod.run
 
     def fake_run(args, cwd, timeout=15):
@@ -80,6 +84,12 @@ def guard(monkeypatch):
             return 0, mod.permissions.get(args[2].split("/")[4], "read")
         if args[:3] == ["gh", "api", "repos/{owner}/{repo}"] and args[3:] == ["-q", ".allow_auto_merge"]:
             return (1, "") if mod.auto_merge is None else (0, mod.auto_merge + "\n")
+        if args[:2] == ["gh", "api"] and args[2].endswith("/protection/required_status_checks"):
+            return (1, "") if mod.protection is None else (0, json.dumps(mod.protection))
+        if args[:2] == ["gh", "api"] and "/rules/branches/" in args[2]:
+            return (1, "") if mod.rules is None else (0, json.dumps(mod.rules))
+        if args[:2] == ["gh", "api"] and args[2].startswith("repos/{owner}/{repo}/pulls?"):
+            return 0, json.dumps(mod.rest_pulls)
         return real_run(args, cwd, timeout)
 
     monkeypatch.setattr(mod, "run", fake_run)
@@ -547,6 +557,50 @@ def test_stop_asks_for_auto_merge_only_where_the_repository_allows_it(guard, rep
     guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": True, "autoMergeRequest": None}]
     assert "draft" in guard.stop({"cwd": str(repo)})  # a hand merge still needs a ready pull request
     guard.pulls["fix/37-enforce"] = []
+    assert "no open pull request" in guard.stop({"cwd": str(repo)})
+
+
+NOT_PROTECTED = {"message": "Branch not protected", "status": "404"}
+FREE_PRIVATE = {"message": "Upgrade to GitHub Pro or make this repository public to enable this feature.", "status": "403"}
+
+
+def test_stop_does_not_ask_for_auto_merge_where_nothing_requires_a_check(guard, repo):
+    _pushed_branch(repo)
+    _due(repo)
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
+    for protection, rules in ((NOT_PROTECTED, []), (FREE_PRIVATE, FREE_PRIVATE), ({"contexts": [], "checks": []}, [])):
+        guard.protection, guard.rules = protection, rules
+        assert guard.main_requires_checks(repo) is False
+        assert guard.stop({"cwd": str(repo)}) is None  # auto-merge would merge before CI; merging by hand is the step
+        assert "requires no check" in guard.pull_request_problem(repo, "fix/37-enforce", "due")[1]
+    guard.pulls["fix/37-enforce"] = []
+    reason = guard.stop({"cwd": str(repo)})
+    assert "no open pull request" in reason and "gh pr merge <N> --squash" in reason and "--auto" not in reason
+
+
+def test_a_ruleset_or_classic_protection_keeps_the_auto_merge_request(guard, repo):
+    _pushed_branch(repo)
+    _due(repo)
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
+    guard.protection, guard.rules = NOT_PROTECTED, [{"type": "pull_request"}, {"type": "required_status_checks"}]
+    assert guard.main_requires_checks(repo) is True
+    assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
+    guard.protection, guard.rules = None, None  # offline: unknown keeps asking, as before
+    assert guard.main_requires_checks(repo) is None
+    assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
+
+
+def test_a_pull_request_graphql_hides_is_found_through_rest(guard, repo):
+    _pushed_branch(repo)
+    _due(repo)
+    guard.pulls["fix/37-enforce"] = []
+    own = {"full_name": "o/r"}
+    guard.rest_pulls = [
+        {"number": 8, "draft": False, "auto_merge": None, "head": {"ref": "fix/37-enforce", "repo": {"full_name": "fork/r"}}, "base": {"repo": own}},
+        {"number": 9, "draft": False, "auto_merge": {"merge_method": "squash"}, "head": {"ref": "fix/37-enforce", "repo": own}, "base": {"repo": own}},
+    ]
+    assert guard.stop({"cwd": str(repo)}) is None
+    guard.rest_pulls = guard.rest_pulls[:1]  # only a fork's branch of the same name
     assert "no open pull request" in guard.stop({"cwd": str(repo)})
 
 
