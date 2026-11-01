@@ -583,6 +583,77 @@ def test_main_exits_two_with_the_reason_and_honours_acs_guard_off(guard, repo, m
     assert guard.main(["pre-tool"]) == 0
 
 
+# ---------------------------------------------------------------- other harnesses (#83)
+
+
+def _main(guard, monkeypatch, argv, event) -> int:
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(event)))
+    return guard.main(argv)
+
+
+def test_codex_pre_tool_blocks_with_exit_two_and_stop_answers_in_json(guard, repo, monkeypatch, capsys):
+    commit = {"tool_name": "Bash", "tool_input": {"command": "git commit -m x"}, "cwd": str(repo)}
+    assert _main(guard, monkeypatch, ["--harness", "codex", "pre-tool"], commit) == 2
+    assert "[stack guard]" in capsys.readouterr().err
+    (repo / "AGENTS.md").write_text("edited\n", encoding="utf-8")
+    assert _main(guard, monkeypatch, ["--harness", "codex", "stop"], {"cwd": str(repo), "stop_hook_active": False}) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["decision"] == "block" and "uncommitted" in out["reason"]
+
+
+def test_cursor_shell_command_is_checked_and_always_answered(guard, repo, monkeypatch, capsys):
+    shell = {"command": "git commit -m x", "cwd": str(repo), "conversation_id": "c1", "workspace_roots": [str(repo)]}
+    assert _main(guard, monkeypatch, ["--harness", "cursor", "pre-tool"], shell) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["permission"] == "deny" and "[stack guard]" in out["agent_message"]
+    assert _main(guard, monkeypatch, ["--harness", "cursor", "pre-tool"], {**shell, "command": "ls"}) == 0
+    assert json.loads(capsys.readouterr().out) == {"permission": "allow"}
+    monkeypatch.setenv("ACS_GUARD", "off")
+    assert _main(guard, monkeypatch, ["--harness", "cursor", "pre-tool"], shell) == 0
+    assert json.loads(capsys.readouterr().out) == {"permission": "allow"}
+
+
+def test_cursor_stop_finds_the_project_without_a_cwd_and_follows_up(guard, repo, monkeypatch, capsys):
+    (repo / "AGENTS.md").write_text("edited\n", encoding="utf-8")
+    monkeypatch.setenv("CURSOR_PROJECT_DIR", str(repo))
+    assert _main(guard, monkeypatch, ["--harness", "cursor", "stop"], {"status": "completed", "loop_count": 0}) == 0
+    assert "uncommitted" in json.loads(capsys.readouterr().out)["followup_message"]
+    event = guard.normalize("cursor", "stop", {"loop_count": 2, "workspace_roots": ["/w"], "conversation_id": "c"})
+    assert event["stop_hook_active"] is True and event["session_id"] == "c"
+
+
+def test_gemini_tools_map_to_the_checks_and_deny_in_json(guard, repo, monkeypatch, capsys):
+    shell = {"tool_name": "run_shell_command", "tool_input": {"command": "git commit -m x"}, "cwd": str(repo)}
+    assert _main(guard, monkeypatch, ["--harness", "gemini", "pre-tool"], shell) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["decision"] == "deny" and "[stack guard]" in out["reason"]
+    edit = guard.normalize("gemini", "pre-tool", {"tool_name": "write_file", "tool_input": {"file_path": "x"}})
+    assert edit["tool_name"] == "Write"
+    assert _main(guard, monkeypatch, ["--harness", "gemini", "pre-tool"], {**shell, "tool_input": {"command": "ls"}}) == 0
+    assert capsys.readouterr().out == ""
+
+
+def test_session_start_context_goes_in_each_harness_field(guard, capsys):
+    assert guard.answer("cursor", "session-start", "note") == 0
+    assert json.loads(capsys.readouterr().out) == {"additional_context": "note"}
+    for harness in ("claude", "codex", "gemini"):
+        guard.answer(harness, "session-start", "note")
+        assert json.loads(capsys.readouterr().out)["hookSpecificOutput"]["additionalContext"] == "note"
+
+
+def test_claude_and_codex_events_pass_through_unchanged(guard):
+    event = {"tool_name": "Bash", "tool_input": {"command": "ls"}, "cwd": "/x"}
+    assert guard.normalize("claude", "pre-tool", event) is event
+    assert guard.normalize("codex", "pre-tool", event) is event
+
+
+def test_an_unknown_harness_is_refused(guard, capsys):
+    assert guard.main(["--harness", "vim", "pre-tool"]) == 2
+    assert "unknown harness" in capsys.readouterr().err
+
+
 # ---------------------------------------------------------------- install
 
 
@@ -599,6 +670,35 @@ def test_settings_merge_keeps_the_adopters_hooks_and_is_idempotent(tmp_path):
     assert merged["hooks"]["PreToolUse"][0]["hooks"][0]["command"] == "python3 mine.py"
     assert set(merged["hooks"]) == {"SessionStart", "PreToolUse", "Stop"}
     assert bridge.plan_settings(tmp_path) is None
+
+
+def test_harness_hook_files_keep_the_adopters_entries_and_are_idempotent(tmp_path):
+    bridge = _load("claude_bridge")
+    mine = {"type": "command", "command": "./mine.sh"}
+    seeds = {
+        bridge.CODEX_HOOKS_REL: {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [mine]}]}},
+        bridge.CURSOR_HOOKS_REL: {"version": 1, "hooks": {"beforeShellExecution": [{"command": "./mine.sh"}]}},
+        bridge.GEMINI_SETTINGS_REL: {"theme": "dark", "context": {"fileName": "GEMINI.md"},
+                                     "hooks": {"BeforeTool": [{"matcher": "read_file", "hooks": [mine]}]}},
+    }
+    for rel, seed in seeds.items():
+        (tmp_path / rel).parent.mkdir(parents=True)
+        (tmp_path / rel).write_text(json.dumps(seed), encoding="utf-8")
+    for rel, plan in bridge.HARNESS_PLANS:
+        data = plan(tmp_path)
+        (tmp_path / rel).write_bytes(data)
+        assert plan(tmp_path) is None, rel
+    codex = json.loads((tmp_path / bridge.CODEX_HOOKS_REL).read_text())
+    assert codex["hooks"]["PreToolUse"][0]["hooks"][0] == mine
+    assert "--harness codex pre-tool" in codex["hooks"]["PreToolUse"][1]["hooks"][0]["command"]
+    assert set(codex["hooks"]) == {"SessionStart", "PreToolUse", "Stop"}
+    cursor = json.loads((tmp_path / bridge.CURSOR_HOOKS_REL).read_text())
+    assert cursor["version"] == 1 and cursor["hooks"]["beforeShellExecution"][0] == {"command": "./mine.sh"}
+    assert cursor["hooks"]["stop"][0]["loop_limit"] == 5
+    gemini = json.loads((tmp_path / bridge.GEMINI_SETTINGS_REL).read_text())
+    assert gemini["theme"] == "dark" and gemini["context"]["fileName"] == ["GEMINI.md", "AGENTS.md"]
+    assert gemini["hooks"]["BeforeTool"][0]["matcher"] == "read_file"
+    assert set(gemini["hooks"]) == {"SessionStart", "BeforeTool", "AfterAgent"}
 
 
 def test_check_guard_flags_missing_and_stale_copies(tmp_path):
@@ -619,3 +719,5 @@ def test_install_writes_the_guard(installer, make_stack, make_adopter, stub_exte
     bridge = installer.claude_bridge
     assert (adopter / bridge.GUARD_REL).is_file()
     assert bridge.check_guard(adopter) == []
+    for rel, plan in bridge.HARNESS_PLANS:
+        assert (adopter / rel).is_file() and plan(adopter) is None

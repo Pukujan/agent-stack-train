@@ -275,24 +275,45 @@ def guard_hooks() -> dict[str, list[dict]]:
 
 
 def _is_guard_entry(entry: object) -> bool:
-    return isinstance(entry, dict) and any(
-        isinstance(h, dict) and GUARD_MARK in str(h.get("command") or "") for h in entry.get("hooks") or []
-    )
+    """True for an entry that runs the guard: Claude/Codex/Gemini nest commands under `hooks`, Cursor doesn't."""
+    if not isinstance(entry, dict):
+        return False
+    commands = [entry] + [h for h in entry.get("hooks") or [] if isinstance(h, dict)]
+    return any(GUARD_MARK in str(c.get("command") or "") for c in commands)
 
 
-def _load_settings(adopter: Path) -> dict:
-    path = adopter / SETTINGS_REL
+def _load_settings(adopter: Path, rel: Path = SETTINGS_REL) -> dict:
+    path = adopter / rel
     if path.is_symlink() or (path.exists() and not path.is_file()):
-        raise BridgeError(f"{SETTINGS_REL}: not a regular file; refusing")
+        raise BridgeError(f"{rel}: not a regular file; refusing")
     if not path.exists():
         return {}
     try:
         data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise BridgeError(f"{SETTINGS_REL}: unreadable JSON: {exc}") from exc
+        raise BridgeError(f"{rel}: unreadable JSON: {exc}") from exc
     if not isinstance(data, dict) or not isinstance(data.get("hooks", {}), dict):
-        raise BridgeError(f"{SETTINGS_REL}: expected an object with an object `hooks`; fix it by hand")
+        raise BridgeError(f"{rel}: expected an object with an object `hooks`; fix it by hand")
     return data
+
+
+def _merge_hooks(data: dict, rel: Path, wanted: dict[str, list[dict]]) -> None:
+    hooks = data.setdefault("hooks", {})
+    for event, entries in wanted.items():
+        existing = hooks.get(event)
+        if existing is not None and not isinstance(existing, list):
+            raise BridgeError(f"{rel}: hooks.{event} is not a list; fix it by hand")
+        hooks[event] = [e for e in existing or [] if not _is_guard_entry(e)] + entries
+
+
+def _plan_json(adopter: Path, rel: Path, change) -> bytes | None:
+    """New bytes for the JSON file at ``rel`` after ``change(data)``, or None when current."""
+    data = _load_settings(adopter, rel)
+    before = json.dumps(data, sort_keys=True)
+    change(data)
+    if json.dumps(data, sort_keys=True) == before:
+        return None
+    return (json.dumps(data, indent=2) + "\n").encode("utf-8")
 
 
 def plan_settings(adopter: Path) -> bytes | None:
@@ -301,17 +322,86 @@ def plan_settings(adopter: Path) -> bytes | None:
     The adopter's own settings and hooks are kept; only entries that run the
     guard are replaced.
     """
-    data = _load_settings(adopter)
-    before = json.dumps(data, sort_keys=True)
-    hooks = data.setdefault("hooks", {})
-    for event, entries in guard_hooks().items():
-        existing = hooks.get(event)
-        if existing is not None and not isinstance(existing, list):
-            raise BridgeError(f"{SETTINGS_REL}: hooks.{event} is not a list; fix it by hand")
-        hooks[event] = [e for e in existing or [] if not _is_guard_entry(e)] + entries
-    if json.dumps(data, sort_keys=True) == before:
-        return None
-    return (json.dumps(data, indent=2) + "\n").encode("utf-8")
+    return _plan_json(adopter, SETTINGS_REL, lambda data: _merge_hooks(data, SETTINGS_REL, guard_hooks()))
+
+
+# ---------------------------------------------------------------- other harnesses (#83)
+# Codex, Cursor and Gemini CLI read AGENTS.md but not .claude/settings.json, so each gets
+# its own repository hook file running the same guard. Each harness asks the user once to
+# trust a project's hooks before it runs them.
+
+CODEX_HOOKS_REL = Path(".codex/hooks.json")
+CURSOR_HOOKS_REL = Path(".cursor/hooks.json")
+GEMINI_SETTINGS_REL = Path(".gemini/settings.json")
+GEMINI_CONTEXT_FILES = ("AGENTS.md", "GEMINI.md")
+
+
+def _guard_command(prefix: str, harness: str, sub: str) -> str:
+    return f'python3 "{prefix}{GUARD_REL.as_posix()}" --harness {harness} {sub}'
+
+
+def codex_hooks() -> dict[str, list[dict]]:
+    """Codex runs hooks in the session's folder and sets no project variable."""
+    def hook(sub: str) -> dict:
+        return {"type": "command", "command": _guard_command("$(git rev-parse --show-toplevel)/", "codex", sub), "timeout": 60}
+    return {
+        "SessionStart": [{"hooks": [hook("session-start")]}],
+        "PreToolUse": [{"matcher": "Bash", "hooks": [hook("pre-tool")]}],
+        "Stop": [{"hooks": [hook("stop")]}],
+    }
+
+
+def cursor_hooks() -> dict[str, list[dict]]:
+    """Cursor runs project hooks from the project root."""
+    def hook(sub: str, **extra) -> dict:
+        return {"command": _guard_command("", "cursor", sub), "timeout": 60, **extra}
+    return {
+        "sessionStart": [hook("session-start")],
+        "beforeShellExecution": [hook("pre-tool")],
+        "stop": [hook("stop", loop_limit=5)],
+    }
+
+
+def gemini_hooks() -> dict[str, list[dict]]:
+    """Gemini CLI sets GEMINI_PROJECT_DIR; its timeouts are in milliseconds."""
+    def hook(sub: str) -> dict:
+        return {"type": "command", "command": _guard_command("$GEMINI_PROJECT_DIR/", "gemini", sub), "timeout": 60000}
+    return {
+        "SessionStart": [{"hooks": [hook("session-start")]}],
+        "BeforeTool": [{"matcher": "run_shell_command|write_file|replace", "hooks": [hook("pre-tool")]}],
+        "AfterAgent": [{"hooks": [hook("stop")]}],
+    }
+
+
+def plan_codex_hooks(adopter: Path) -> bytes | None:
+    return _plan_json(adopter, CODEX_HOOKS_REL, lambda data: _merge_hooks(data, CODEX_HOOKS_REL, codex_hooks()))
+
+
+def plan_cursor_hooks(adopter: Path) -> bytes | None:
+    def change(data: dict) -> None:
+        data.setdefault("version", 1)
+        _merge_hooks(data, CURSOR_HOOKS_REL, cursor_hooks())
+    return _plan_json(adopter, CURSOR_HOOKS_REL, change)
+
+
+def plan_gemini_settings(adopter: Path) -> bytes | None:
+    """Gemini CLI reads only GEMINI.md unless told otherwise, so it is told to read AGENTS.md too."""
+    def change(data: dict) -> None:
+        _merge_hooks(data, GEMINI_SETTINGS_REL, gemini_hooks())
+        context = data.setdefault("context", {})
+        if not isinstance(context, dict):
+            raise BridgeError(f"{GEMINI_SETTINGS_REL}: `context` is not an object; fix it by hand")
+        names = context.get("fileName")
+        names = [names] if isinstance(names, str) else list(names or [])
+        context["fileName"] = names + [n for n in GEMINI_CONTEXT_FILES if n not in names]
+    return _plan_json(adopter, GEMINI_SETTINGS_REL, change)
+
+
+HARNESS_PLANS = (
+    (CODEX_HOOKS_REL, plan_codex_hooks),
+    (CURSOR_HOOKS_REL, plan_cursor_hooks),
+    (GEMINI_SETTINGS_REL, plan_gemini_settings),
+)
 
 
 def plan_guard(adopter: Path) -> bytes | None:

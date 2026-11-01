@@ -711,6 +711,8 @@ def run(args: argparse.Namespace) -> int:
         for rel, data in (
             (claude_bridge.GUARD_REL, claude_bridge.plan_guard(adopter)),
             (claude_bridge.SETTINGS_REL, claude_bridge.plan_settings(adopter)),
+            # Codex, Cursor and Gemini CLI run the same guard from their own hook files (#83).
+            *((rel, plan(adopter)) for rel, plan in claude_bridge.HARNESS_PLANS),
         ):
             if data is not None:
                 guard_writes.append((adopter / rel, data))
@@ -738,7 +740,7 @@ def run(args: argparse.Namespace) -> int:
     elif not refusals:
         say(f"  keep  {claude_bridge.CLAUDE_REL} (bridge region current)")
     for path, _ in guard_writes:
-        say(f"  write {path.relative_to(adopter)} (Claude Code guard hooks)")
+        say(f"  write {path.relative_to(adopter)} (guard hooks)")
     if oio_install == "pending":
         say("  oio   install the OIO issue-log surface (invoke the pinned installer)")
 
