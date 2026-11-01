@@ -310,6 +310,8 @@ def github_change(args: list[str]) -> str | None:
     while i < len(args):
         a = args[i]
         name, eq, value = a.partition("=")
+        if len(a) > 2 and a[0] == "-" and a[1] != "-" and a[2] != "=":
+            name, eq, value = a[:2], "=", a[2:]  # a short flag with its value glued on: -XPOST, -fname=x
         if name in ("-X", "--method"):
             method = (value if eq else (args[i + 1] if i + 1 < len(args) else "")).upper()
         elif name in GH_API_FIELDS:
@@ -337,7 +339,7 @@ def env_issue(top: Path, env: dict[str, str]) -> str | None:
 
 
 def check_gh(args: list[str], cwd: Path, env: dict[str, str] | None = None) -> str | None:
-    if len(args) < 3 or args[0] != "gh":
+    if len(args) < 3 or Path(args[0]).name != "gh":
         return None
     top = top_level(cwd)
     if top is None or not is_adopter(top):
