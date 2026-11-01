@@ -460,6 +460,26 @@ def test_stop_reports_uncommitted_tracked_changes_on_a_branch_and_on_main(guard,
     assert guard.stop({"cwd": str(repo)}) is None
 
 
+def test_a_seat_or_board_change_is_not_unfinished_work(guard, repo):
+    coord = repo / ".coord"
+    coord.mkdir(exist_ok=True)
+    claim = {"boss_failover": {"check_in": {"claim_file_path": ".coord/seat.json"}}}
+    files = {"boss_claim.json": "{}\n", "board.json": "{}\n", "board-events.jsonl": "", "seat.json": "{}\n",
+             "assignment.json": json.dumps(claim) + "\n"}
+    for name, text in files.items():
+        (coord / name).write_text(text, encoding="utf-8")
+    git("add", ".coord", cwd=repo)
+    git("commit", "-qm", "coord", cwd=repo)
+    git("push", "-q", "origin", "HEAD", cwd=repo)
+    for name in ("boss_claim.json", "board.json", "seat.json"):  # #104: dsh@air took the seat
+        (coord / name).write_text('{"who_is_boss_now": "dsh@air"}\n', encoding="utf-8")
+    (coord / "board-events.jsonl").write_text('{"task": "T-1"}\n', encoding="utf-8")
+    assert guard.stop({"cwd": str(repo)}) is None
+    (repo / "AGENTS.md").write_text("# Rules\n\nEdited.\n", encoding="utf-8")
+    reason = guard.stop({"cwd": str(repo)})
+    assert "1 uncommitted change(s)" in reason and "`AGENTS.md`" in reason and "boss_claim" not in reason
+
+
 def test_stop_reports_untracked_files_only_when_the_session_wrote_them(guard, repo, tmp_path):
     (repo / "notes-i-keep.txt").write_text("mine\n", encoding="utf-8")
     assert guard.stop({"cwd": str(repo)}) is None
