@@ -1,0 +1,9 @@
+PCM-0060 is closed. Its snapshot record is stale.
+
+The snapshot task file says `status: active` with the next action "Owner scope answer on #182" (`tasks/TASK-PCM-0060-host-capability-honesty.md`, front-matter JSON, line 3). Its index projection is `NEEDS_REVIEW` (`docs/CONTINUITY_INDEX.md:344-350`).
+
+Live GitHub (`gh issue view 182`, read-only) shows #182 CLOSED on 2026-10-31. The owner chose the probe plus SPEC adapter-seam slice. It merged as Pukujan/agent-stack-train#51 at `bad10a7`, and the record closeout merged as agent-stack-train#57 at `edf0772`.
+
+Next action: none for PCM-0060. The install and onboarding page was split out to #262 (PCM-0070).
+
+I changed nothing.

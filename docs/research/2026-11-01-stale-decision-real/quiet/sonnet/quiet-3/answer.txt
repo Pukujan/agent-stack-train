@@ -1,0 +1,12 @@
+PCM-0060 is active and blocked on a decision. The snapshot is from 2026-09-26, so I can't tell whether #182 has been answered since.
+
+**State:** Priority P3, owned by owner/Astra planning, with no dependencies. The task covers non-GitHub host honesty. Today a GitLab adopter silently loses issue authority while the generated guidance promises it. No host-capability probe exists in the CLI at 0.6.0, and there are no checkpoints and no PR or receipt yet. Until the scope is decided, the task changes no repository content.
+
+**Next action:** The owner answers the scope question on issue #182 (Pukujan/project-continuity-modules). The options are probe-only, probe plus a SPEC adapter-seam, or defer. Cite that decision comment in the task record. Then implement the chosen slice red-first:
+- a capability classification of the origin host in preflight or doctor, with a printed matrix
+- an honesty sentence in all guidance copies and in the init output
+- a SPEC note, if approved
+
+The full suite must stay at baseline, and six contexts plus a receipt go on #182.
+
+Evidence: `tasks/TASK-PCM-0060-host-capability-honesty.md` (its `next_action` field), and `checkpoints/CURRENT.md`.

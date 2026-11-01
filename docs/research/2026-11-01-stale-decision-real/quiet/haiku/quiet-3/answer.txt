@@ -1,0 +1,7 @@
+PCM-0060 is closed, so it has no next action of its own. The snapshot is stale.
+
+- **Snapshot (`tasks/TASK-PCM-0060-host-capability-honesty.md`, status `active`):** says the next action is the owner's scope answer on #182.
+- **Live GitHub issue #182 (`gh issue view`, read-only):** state CLOSED, updated 2026-10-31T23:36:43Z. The owner chose "Close, split page." The host probe and SPEC adapter seam merged in Pukujan/agent-stack-train#51 at `bad10a7`. The PCM-0060 record closed out in agent-stack-train#57 at `edf0772`, with checkpoint `pcm0060-closeout-1` at `f333ede`.
+- **Remaining work:** the install and onboarding page moved to PCM-0070 / #262. I did not check #262 or whether PCM-0070 exists.
+
+I changed nothing in the repo or on GitHub.

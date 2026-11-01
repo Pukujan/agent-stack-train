@@ -1,0 +1,14 @@
+PCM-0060 is finished. The snapshot is stale, and it's the only place that still shows it as open.
+
+**Snapshot (as of 2026-09-26):** the task file and CURRENT show `status: active`, with the next action "owner scope answer on #182". This is in `tasks/TASK-PCM-0060-host-capability-honesty.md`.
+
+**Live GitHub (issue #182, CLOSED 2026-10-31):**
+- The owner chose "Probe + adapter seam".
+- That slice merged in Pukujan/agent-stack-train#51 at `bad10a7`.
+- The owner then closed #182 with "Close, split page".
+- The closeout merged in agent-stack-train#57 at `edf0772`. The task record now says completed.
+- The last comment on #182 says "No further action on this issue."
+
+**Next action:** none for PCM-0060. The install and onboarding page it originally proposed is now #262 (PCM-0070), so any remaining work is there.
+
+The snapshot copy needs refreshing from the current record before anyone relies on it. I changed nothing.
