@@ -101,15 +101,42 @@ def installed_ref(repository: str, ref: str) -> str | None:
     return (read_file(repository, ".oio/install-manifest.json", ref) or {}).get("oio_ref")
 
 
+def open_pulls(repository: str) -> list[dict]:
+    """Open pull requests through REST: GraphQL (``gh pr list``) hides them in a flagged organization (#110)."""
+    pulls = gh_json("api", f"repos/{repository}/pulls?state=open&per_page=100")
+    return pulls if isinstance(pulls, list) else []
+
+
+def own_heads(pulls: list[dict], repository: str) -> dict[int, str]:
+    """Pull request number -> head branch, for pull requests from a branch of ``repository`` itself."""
+    return {pr["number"]: pr["head"]["ref"] for pr in pulls
+            if ((pr.get("head") or {}).get("repo") or {}).get("full_name") == repository}
+
+
+def failure_detail(output: str, tail: int = 15) -> str:
+    """The installer's failure reasons, then its last lines; the reasons come first and can scroll out of the tail."""
+    lines = output.strip().splitlines()
+    reasons, keep = [], False
+    for line in lines:
+        if line.endswith(": FAIL"):
+            keep = True
+        elif keep and not line.startswith("  - "):
+            keep = False
+        if keep:
+            reasons.append(line)
+    rest = [line for line in lines[-tail:] if line not in reasons]
+    return "\n".join(reasons + rest)
+
+
 def load_adopter(repository: str) -> Adopter:
     info = gh_json("api", f"repos/{repository}") or {}
     default = info.get("default_branch", "main")
-    prs = gh_json("pr", "list", "-R", repository, "--state", "open", "--json", "number,headRefName,isCrossRepository") or []
+    heads = own_heads(open_pulls(repository), repository)
     return Adopter(
         repository=repository,
         manifest=read_file(repository, "stack-manifest.json", default),
         installed_ref=installed_ref(repository, default),
-        open_prs={pr["number"]: installed_ref(repository, pr["headRefName"]) for pr in prs if not pr.get("isCrossRepository")},
+        open_prs={number: installed_ref(repository, ref) for number, ref in heads.items()},
     )
 
 
@@ -228,7 +255,7 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
     )
     log_tail = "\n".join((proc.stdout + proc.stderr).strip().splitlines()[-15:])
     if proc.returncode != 0:
-        raise RuntimeError(f"installer failed:\n{log_tail}")
+        raise RuntimeError(f"installer failed:\n{failure_detail(proc.stdout + proc.stderr)}")
     if not run(["git", "status", "--porcelain"], cwd=clone).stdout.strip():
         return "installer changed nothing"
     bumped = bump_workflows(clone, old, commit)
@@ -243,10 +270,12 @@ def upgrade(repository: str, stack_root: Path, version: str, commit: str, old: s
     run(["git", "push", "-q", "--force", "origin", BRANCH], cwd=clone)
     body = workdir / f"{clone.name}.md"
     body.write_text(pr_body(version, commit, old, leftovers, log_tail, bumped, (archived, over)), encoding="utf-8")
-    existing = gh_json("pr", "list", "-R", repository, "--head", BRANCH, "--state", "open", "--json", "url") or []
+    existing = [number for number, ref in own_heads(open_pulls(repository), repository).items() if ref == BRANCH]
     if existing:
-        run(["gh", "pr", "edit", existing[0]["url"], "--title", title, "--body-file", str(body)])
-        return f"updated {existing[0]['url']}"
+        # REST, like the lookup: the pushed branch already updated the pull request; this refreshes its title and body.
+        run(["gh", "api", "-X", "PATCH", f"repos/{repository}/pulls/{existing[0]}",
+             "-f", f"title={title}", "-F", f"body=@{body}"])
+        return f"updated https://github.com/{repository}/pull/{existing[0]}"
     url = run(["gh", "pr", "create", "-R", repository, "--head", BRANCH, "--title", title, "--body-file", str(body)], cwd=clone).stdout.strip()
     return f"opened {url}"
 
