@@ -78,7 +78,7 @@ def guard(monkeypatch):
             return (1, "") if mod.trusted_var is None else (0, mod.trusted_var)
         if args[:2] == ["gh", "api"] and "/collaborators/" in args[2]:
             return 0, mod.permissions.get(args[2].split("/")[4], "read")
-        if args[:3] == ["gh", "repo", "view"]:
+        if args[:3] == ["gh", "api", "repos/{owner}/{repo}"] and args[3:] == ["-q", ".allow_auto_merge"]:
             return (1, "") if mod.auto_merge is None else (0, mod.auto_merge + "\n")
         return real_run(args, cwd, timeout)
 
