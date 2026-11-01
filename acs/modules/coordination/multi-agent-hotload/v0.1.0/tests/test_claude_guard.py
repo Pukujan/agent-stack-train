@@ -201,6 +201,31 @@ def test_issue_logs_must_have_the_forms_required_headings(guard, repo, tmp_path)
     assert bash(guard, repo, f"gh issue create --title t --body-file {good}") is None
 
 
+def test_an_issue_log_must_be_stamped_with_the_agent_filing_it(guard, repo, tmp_path, monkeypatch):
+    head = "### Summary\n\nx\n\n### Issue Type\n\nbug\n\n### Lifecycle Status\n\nopen\n\n"
+    stamp = "### Content Author Account or Runtime Identity\n\n{}\n"
+    body = tmp_path / "issue.md"
+    claude = "agent:claude-code/103923d5-7c13-4151-80f4-3d063138da3e"
+    body.write_text(head + stamp.format(claude), encoding="utf-8")
+    monkeypatch.setattr(guard, "HARNESS", "workbuddy")  # #69: WorkBuddy copied a Claude Code stamp
+    session = "f9d1c194-e6a6-4366-97e3-426a2170f6f4"
+
+    def file(path):
+        event = {"tool_name": "Bash", "tool_input": {"command": f"gh issue create --title t --body-file {path}"},
+                 "cwd": str(repo), "session_id": session}
+        return guard.pre_tool(event)
+    blocked = file(body)
+    assert claude in blocked and "agent:workbuddy/f9d1c194" in blocked
+    body.write_text(head + stamp.format("agent:workbuddy/f9d1c194-e6a6-4366-97e3-426a2170f6f4"), encoding="utf-8")
+    assert file(body) is None
+    monkeypatch.setattr(guard, "HARNESS", "claude")  # the right harness, another session's id
+    session = "aaaaaaaa-1111-2222-3333-444444444444"
+    body.write_text(head + stamp.format(claude), encoding="utf-8")
+    assert "copied" in file(body)
+    body.write_text(head + stamp.format("Pukujan"), encoding="utf-8")  # a human filer is left to the form
+    assert file(body) is None
+
+
 def test_pull_requests_must_name_their_owning_issue(guard, repo):
     git("checkout", "-qb", "fix/37-enforce", cwd=repo)
     assert "Refs #N" in bash(guard, repo, "gh pr create --fill")
@@ -695,6 +720,58 @@ def test_claude_and_codex_events_pass_through_unchanged(guard):
     event = {"tool_name": "Bash", "tool_input": {"command": "ls"}, "cwd": "/x"}
     assert guard.normalize("claude", "pre-tool", event) is event
     assert guard.normalize("codex", "pre-tool", event) is event
+    assert guard.normalize("workbuddy", "pre-tool", event) is event
+
+
+def test_dsh_shell_tool_is_checked_and_blocks_with_exit_two(guard, repo, monkeypatch, capsys):
+    commit = {"tool_name": "bash", "tool_input": {"command": "git commit -m x"}, "cwd": str(repo), "session_id": "d1"}
+    assert _main(guard, monkeypatch, ["--harness", "dsh", "pre-tool"], commit) == 2
+    assert "[stack guard]" in capsys.readouterr().err
+
+
+def test_dsh_stops_count_as_retries_after_a_block(guard, repo, monkeypatch, retry_dir, capsys):
+    # dsh never sets stop_hook_active, so without the guard's own marker a stop would block forever.
+    (repo / "AGENTS.md").write_text("edited\n", encoding="utf-8")
+    event = {"cwd": str(repo), "session_id": "dsh-loop", "stop_hook_active": False}
+    assert guard.normalize("dsh", "stop", event)["stop_hook_active"] is False
+    assert _main(guard, monkeypatch, ["--harness", "dsh", "stop"], event) == 2
+    assert guard.normalize("dsh", "stop", event)["stop_hook_active"] is True
+    codes = [_main(guard, monkeypatch, ["--harness", "dsh", "stop"], event) for _ in range(guard.MAX_STOP_RETRIES + 1)]
+    assert codes[-1] == 0 and "after 5 blocked retries" in capsys.readouterr().err
+    assert guard.normalize("dsh", "stop", event)["stop_hook_active"] is False  # a passed stop starts over
+
+
+def test_setup_dsh_writes_the_hooks_and_adds_the_bridge_once(guard, tmp_path, capsys):
+    assert guard.setup_dsh([], home=tmp_path) == 1  # no profile yet
+    profile = tmp_path / ".dsh" / "profiles" / "desktop"
+    profile.mkdir(parents=True)
+    (profile / "cordis.patch.yml").write_text("- id: ui-chat\n  name: x\n", encoding="utf-8")
+    assert guard.setup_dsh([], home=tmp_path) == 0
+    assert guard.setup_dsh([], home=tmp_path) == 0
+    patch = (profile / "cordis.patch.yml").read_text()
+    assert patch.startswith("- id: ui-chat") and patch.count("id: acs-guard-hooks") == 1
+    hooks = json.loads((tmp_path / ".dsh" / "acs-hooks.json").read_text())["hooks"]
+    assert hooks["PreToolUse"][0]["matcher"] == "bash|Bash"
+    assert "--harness dsh stop" in hooks["Stop"][0]["hooks"][0]["command"]
+    assert "pnpm add @deepseek-ai/dsh-hooks-claude-code" in capsys.readouterr().out
+
+
+def test_the_dsh_hook_command_runs_only_inside_a_stack_checkout(guard, repo, tmp_path):
+    command = guard.dsh_hooks()["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
+    outside = tmp_path / "plain"
+    outside.mkdir()
+    event = json.dumps({"tool_name": "bash", "tool_input": {"command": "git commit -m x"}})
+    assert subprocess.run(command, shell=True, cwd=outside, input=event, text=True).returncode == 0
+    guard_copy = repo / ".claude" / "hooks" / "acs_guard.py"
+    guard_copy.parent.mkdir(parents=True, exist_ok=True)
+    guard_copy.write_text("import sys; sys.exit(2)\n", encoding="utf-8")  # stands in for the guard
+    assert subprocess.run(command, shell=True, cwd=repo, input=event, text=True).returncode == 2
+
+
+def test_every_harness_hook_file_is_protected(guard):
+    for rel in guard.HOOK_FILES:
+        assert guard.removes_guard("Write", {"file_path": f"/r/{rel}", "content": "{}"}), rel
+        assert not guard.removes_guard("Write", {"file_path": f"/r/{rel}", "content": "acs_guard.py"}), rel
 
 
 def test_an_unknown_harness_is_refused(guard, capsys):
@@ -734,6 +811,7 @@ def test_harness_hook_files_keep_the_adopters_entries_and_are_idempotent(tmp_pat
         (tmp_path / rel).write_text(json.dumps(seed), encoding="utf-8")
     for rel, plan in bridge.HARNESS_PLANS:
         data = plan(tmp_path)
+        (tmp_path / rel).parent.mkdir(exist_ok=True)
         (tmp_path / rel).write_bytes(data)
         assert plan(tmp_path) is None, rel
     codex = json.loads((tmp_path / bridge.CODEX_HOOKS_REL).read_text())
@@ -747,6 +825,9 @@ def test_harness_hook_files_keep_the_adopters_entries_and_are_idempotent(tmp_pat
     assert gemini["theme"] == "dark" and gemini["context"]["fileName"] == ["GEMINI.md", "AGENTS.md"]
     assert gemini["hooks"]["BeforeTool"][0]["matcher"] == "read_file"
     assert set(gemini["hooks"]) == {"SessionStart", "BeforeTool", "AfterAgent"}
+    workbuddy = json.loads((tmp_path / bridge.WORKBUDDY_SETTINGS_REL).read_text())
+    assert workbuddy["hooks"]["PreToolUse"][0]["matcher"] == "Bash"
+    assert "--harness workbuddy stop" in workbuddy["hooks"]["Stop"][0]["hooks"][0]["command"]
 
 
 def test_check_guard_flags_missing_and_stale_copies(tmp_path):

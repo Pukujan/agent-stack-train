@@ -330,13 +330,14 @@ def plan_settings(adopter: Path) -> bytes | None:
 
 
 # ---------------------------------------------------------------- other harnesses (#83)
-# Codex, Cursor and Gemini CLI read AGENTS.md but not .claude/settings.json, so each gets
+# Codex, Cursor, Gemini CLI and WorkBuddy read AGENTS.md but not .claude/settings.json, so each gets
 # its own repository hook file running the same guard. Each harness asks the user once to
 # trust a project's hooks before it runs them.
 
 CODEX_HOOKS_REL = Path(".codex/hooks.json")
 CURSOR_HOOKS_REL = Path(".cursor/hooks.json")
 GEMINI_SETTINGS_REL = Path(".gemini/settings.json")
+WORKBUDDY_SETTINGS_REL = Path(".codebuddy/settings.json")
 GEMINI_CONTEXT_FILES = ("AGENTS.md", "GEMINI.md")
 
 
@@ -377,6 +378,17 @@ def gemini_hooks() -> dict[str, list[dict]]:
     }
 
 
+def workbuddy_hooks() -> dict[str, list[dict]]:
+    """WorkBuddy (CodeBuddy) takes Claude Code's hook format from .codebuddy/settings.json."""
+    def hook(sub: str) -> dict:
+        return {"type": "command", "command": _guard_command("$(git rev-parse --show-toplevel)/", "workbuddy", sub), "timeout": 60}
+    return {
+        "SessionStart": [{"hooks": [hook("session-start")]}],
+        "PreToolUse": [{"matcher": "Bash", "hooks": [hook("pre-tool")]}],
+        "Stop": [{"hooks": [hook("stop")]}],
+    }
+
+
 def plan_codex_hooks(adopter: Path) -> bytes | None:
     return _plan_json(adopter, CODEX_HOOKS_REL, lambda data: _merge_hooks(data, CODEX_HOOKS_REL, codex_hooks()))
 
@@ -401,10 +413,15 @@ def plan_gemini_settings(adopter: Path) -> bytes | None:
     return _plan_json(adopter, GEMINI_SETTINGS_REL, change)
 
 
+def plan_workbuddy_settings(adopter: Path) -> bytes | None:
+    return _plan_json(adopter, WORKBUDDY_SETTINGS_REL, lambda data: _merge_hooks(data, WORKBUDDY_SETTINGS_REL, workbuddy_hooks()))
+
+
 HARNESS_PLANS = (
     (CODEX_HOOKS_REL, plan_codex_hooks),
     (CURSOR_HOOKS_REL, plan_cursor_hooks),
     (GEMINI_SETTINGS_REL, plan_gemini_settings),
+    (WORKBUDDY_SETTINGS_REL, plan_workbuddy_settings),
 )
 
 
