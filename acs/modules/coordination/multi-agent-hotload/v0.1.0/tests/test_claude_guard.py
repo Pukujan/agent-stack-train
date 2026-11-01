@@ -57,6 +57,7 @@ def guard(monkeypatch):
     monkeypatch.delenv("CLAUDE_PROJECT_DIR", raising=False)
     mod.pulls = {}
     mod.merged = {}
+    mod.auto_merge = "true"
     real_run = mod.run
 
     def fake_run(args, cwd, timeout=15):
@@ -66,6 +67,8 @@ def guard(monkeypatch):
                 return 0, json.dumps(mod.merged.get(branch, []))
             pulls = mod.pulls.get(branch, [{"number": 7, "isDraft": False, "autoMergeRequest": {"mergeMethod": "SQUASH"}}])
             return (1, "") if pulls is None else (0, json.dumps(pulls))
+        if args[:3] == ["gh", "repo", "view"]:
+            return (1, "") if mod.auto_merge is None else (0, mod.auto_merge + "\n")
         return real_run(args, cwd, timeout)
 
     monkeypatch.setattr(mod, "run", fake_run)
@@ -421,6 +424,19 @@ def test_stop_needs_an_open_pull_request_with_auto_merge(guard, repo):
     assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
     guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": True, "autoMergeRequest": None}]
     assert "draft" in guard.stop({"cwd": str(repo)})
+
+
+def test_stop_asks_for_auto_merge_only_where_the_repository_allows_it(guard, repo):
+    _pushed_branch(repo)
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": False, "autoMergeRequest": None}]
+    guard.auto_merge = None  # gh could not tell: keep asking, as before
+    assert "gh pr merge 7 --auto --squash" in guard.stop({"cwd": str(repo)})
+    guard.auto_merge = "false"
+    assert guard.stop({"cwd": str(repo)}) is None
+    guard.pulls["fix/37-enforce"] = [{"number": 7, "isDraft": True, "autoMergeRequest": None}]
+    assert "draft" in guard.stop({"cwd": str(repo)})  # a hand merge still needs a ready pull request
+    guard.pulls["fix/37-enforce"] = []
+    assert "no open pull request" in guard.stop({"cwd": str(repo)})
 
 
 def test_stop_does_not_block_on_gh_being_offline_but_says_so(guard, repo):
