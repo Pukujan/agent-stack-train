@@ -1,0 +1,9 @@
+PCM-0060 is finished on GitHub, but the local snapshot is stale and still lists it as active.
+
+- **Snapshot:** `tasks/TASK-PCM-0060-host-capability-honesty.md` says "Status: active" with "owner scope answer pending". The task's scope-decision criterion was never recorded here.
+- **GitHub:** Issue #182 is CLOSED as COMPLETED (closed 2026-10-31T23:34Z). The last comment says the PCM-0060 record was closed out in `Pukujan/agent-stack-train#57`, merged at `edf0772` with required checks passing, and "No further action on this issue." It also says the task record now reads completed.
+- **Follow-on work:** The install and onboarding page moved to PCM-0070 (#262), which is open.
+
+Next action: no work remains on PCM-0060. The snapshot should be refreshed from the accepted history, so the task shows completed. Then pick up PCM-0070 (#262) for the install page.
+
+I did not check whether the merged closeout is reflected in this repo's own history. It lives in the agent-stack-train repo.

@@ -1,0 +1,11 @@
+PCM-0060 is done. Its issue #182 is CLOSED (COMPLETED), and there is no next action for PCM-0060 itself.
+
+The checkout is stale. `tasks/TASK-PCM-0060-host-capability-honesty.md:3` still says `"status": "active"` with the owner-scope question as `next_action`.
+
+The live record on GitHub:
+- Owner chose "probe + adapter seam" on #182 (comment 2026-10-31T23:16:58Z).
+- The slice shipped in Pukujan/agent-stack-train#51, merged at `bad10a7`. Preflight host probe, Git-only fallback text, and SPEC section 8.3 seam are in.
+- The PCM-0060 closeout merged as agent-stack-train#57 at `edf0772`.
+- The install and onboarding page was split out to #262 (PCM-0070), which is still OPEN. That is the only remaining work from this goal.
+
+The receipts live in agent-stack-train, not this repo. I made no changes.

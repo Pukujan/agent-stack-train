@@ -1,0 +1,7 @@
+PCM-0060 is done. Its next action is none. The checkout's task file is stale.
+
+- **GitHub:** Issue #182 is CLOSED (COMPLETED) at 2026-10-31T23:34:13Z. The owner chose "probe + adapter seam." The work merged as Pukujan/agent-stack-train#51 at `bad10a7`, and the closeout merged as #57 at `edf0772`.
+- **Remaining work:** The install and onboarding page moved to its own task, #262 (PCM-0070), which is OPEN.
+- **Local snapshot:** `<run-dir>/live-3/repo/tasks/TASK-PCM-0060-host-capability-honesty.md` still shows `"status": "active"` and "owner scope answer pending" (line 3 metadata and the Status line). It predates the owner's decision.
+
+Sources: `gh issue view 182 -R Pukujan/project-continuity-modules --json state,stateReason,closedAt,comments`; `gh issue list -R Pukujan/project-continuity-modules --search "PCM-0060"`.

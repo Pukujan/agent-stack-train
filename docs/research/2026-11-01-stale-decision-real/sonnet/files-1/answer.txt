@@ -1,0 +1,11 @@
+PCM-0060 is active and waiting on a decision from the owner. It is a P3 task, and its issue is #182. The task's header and body record the state as of 2026-09-26 11:35Z. Its checkpoint log says "No checkpoints yet."
+
+The task is to make non-GitHub hosts honest about what they lose. A GitLab adopter silently loses the issue-authority half while the generated guidance promises it.
+
+The only work so far is a decision projection. No host-capability probe exists in the CLI at 0.6.0, and the task changes no repository content until the owner decides.
+
+The next action is for the owner to answer on #182 with one of three scopes: probe-only, probe plus a SPEC adapter-seam, or defer. The decision comment then gets cited in the task record.
+
+After that, the chosen slice lands red-first. That means a capability matrix in preflight or doctor, a template honesty sentence in all guidance copies and in init output, and a SPEC note if approved. It also needs the full suite at baseline, plus six contexts and a receipt on #182.
+
+Evidence: `tasks/TASK-PCM-0060-host-capability-honesty.md` (the header's `next_action` field and the Acceptance criteria section).

@@ -1,0 +1,15 @@
+PCM-0060 is active, P3, and still waiting on the owner. It is a decision gate with no code written and no checkpoints. The task changes no repository content until the owner decides.
+
+The task is "Host Capability Honesty" (leaf issue #182). Today a GitLab adopter silently loses the issue-authority half while the generated guidance promises it.
+
+**Next action:** The owner answers on #182 with one of three scopes: probe-only, probe plus a SPEC adapter-seam, or defer. The task file then needs the decision comment cited in it.
+
+If the owner picks a slice, it lands red-first:
+- A capability matrix of the origin host in preflight or doctor.
+- An honesty sentence in all guidance copies and in the init output.
+- A SPEC interface note, if approved.
+- The full suite at baseline, plus six required contexts and a receipt on #182.
+
+The last mention in `checkpoints/CURRENT.md` (2026-09-26) still lists it as an owner scope answer gate. I found no later decision in the snapshot.
+
+Evidence is in `tasks/TASK-PCM-0060-host-capability-honesty.md` (its `next_action` and status fields) and `checkpoints/CURRENT.md`.

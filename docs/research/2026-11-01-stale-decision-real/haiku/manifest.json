@@ -1,0 +1,18 @@
+{
+ "test": "real",
+ "snapshot": "d41dd55b614b745f5b331329e168128955c4e0bf",
+ "arms": [
+  "live-1",
+  "live-2",
+  "live-3",
+  "live-4",
+  "live-5",
+  "files-1",
+  "files-2",
+  "files-3",
+  "files-4",
+  "files-5"
+ ],
+ "stale": "Owner scope answer on #182 (probe-only / probe+SPEC adapter-seam / defer); then implement per acceptance.",
+ "truth": "Issue #182 in Pukujan/project-continuity-modules is CLOSED (2026-10-31). The owner chose 'probe + SPEC adapter seam' on 2026-10-31; the work merged in Pukujan/agent-stack-train PRs #51 and #57, PCM-0060 is done, and its install page moved to a new task, PCM-0070."
+}
