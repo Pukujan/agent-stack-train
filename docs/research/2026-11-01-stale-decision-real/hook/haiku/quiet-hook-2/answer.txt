@@ -1,0 +1,8 @@
+PCM-0060 is done, and there is no next action on its issue. The snapshot's task record is stale.
+
+- Snapshot record: `<run-dir>/quiet-hook-2/repo/tasks/TASK-PCM-0060-host-capability-honesty.md` says `status: active` and "Owner scope answer on #182 ... pending."
+- Issue Pukujan/project-continuity-modules#182 is CLOSED (2026-10-31T23:34:13Z). The owner chose the probe plus SPEC adapter-seam slice, merged in Pukujan/agent-stack-train#51 at `bad10a7`.
+- A closeout, Pukujan/agent-stack-train#57 at `edf0772`, marks the PCM-0060 record completed. The final comment says: "No further action on this issue."
+- The install and onboarding page was split into #262 (PCM-0070), which is the remaining open work.
+
+I did not modify any file or anything on GitHub.

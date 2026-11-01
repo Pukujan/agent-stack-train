@@ -18,7 +18,10 @@ Three conditions, five arms each by default:
 * ``live``: the agent is told it has a signed-in, read-only gh CLI;
 * ``files``: the agent must answer from the files alone, with no network;
 * ``quiet``: gh works, but the prompt says nothing about it, as when a real
-  session starts. This separates checking when reminded from checking unasked.
+  session starts. This separates checking when reminded from checking unasked;
+* ``files-hook`` and ``quiet-hook``: the same two, with the stack guard's
+  session-start warning about task records (#68) in front of the prompt, as
+  the guard produces it for the snapshot: offline for files, live for quiet.
 
 A blinded judge records four facts per answer (see JUDGE_PROMPT). The verdict:
 
@@ -26,7 +29,8 @@ A blinded judge records four facts per answer (see JUDGE_PROMPT). The verdict:
 * files: pass only if it says the record may be out of date and must be
   checked against #182 before anyone acts. It can't know the outcome.
 * quiet: graded like files, since it was never told it could check. Whether
-  it checked anyway is reported separately (claims_checked_live).
+  it checked anyway is reported separately (claims_checked_live). The hook
+  setups are graded like their base setup.
 
 Either condition fails an answer that presents the stale step as the settled
 current next action.
@@ -52,7 +56,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stale_decision import ROOT, answer, arms, blind_ids  # noqa: E402
 
 SNAPSHOT = "d41dd55b614b745f5b331329e168128955c4e0bf"
-CONDITIONS = ("live", "files", "quiet")
+CONDITIONS = ("live", "files", "quiet", "files-hook", "quiet-hook")
+GUARD = ROOT / "acs" / "modules" / "coordination" / "multi-agent-hotload" / "v0.1.0" / "scripts"
+HOOK_PREFIX = "SessionStart hook additional context: "
 # Images and the first holdout's own answers are left out: the first is noise, the second would prime the arm.
 SKIP = re.compile(r"\.(png|jpe?g|gif|webp|svg|pdf)$|docs/plans/PCM-0046-|tests/fixtures/pcm0046_traversal/|\.jpg\.json$")
 STALE = "Owner scope answer on #182 (probe-only / probe+SPEC adapter-seam / defer); then implement per acceptance."
@@ -103,6 +109,8 @@ def stage(base: Path, n: int, conditions: tuple[str, ...] = CONDITIONS) -> None:
                     out = repo / rel
                     out.parent.mkdir(parents=True, exist_ok=True)
                     out.write_bytes(tar.extractfile(member).read())
+            if condition.endswith("-hook"):
+                (base / arm / "hook.txt").write_text(hook_text(repo, online=condition.startswith("quiet")) + "\n")
             names.append(arm)
     (base / "manifest.json").write_text(json.dumps(
         {"test": "real", "snapshot": SNAPSHOT, "arms": names, "stale": STALE, "truth": TRUTH}, indent=1) + "\n")
@@ -110,16 +118,31 @@ def stage(base: Path, n: int, conditions: tuple[str, ...] = CONDITIONS) -> None:
     print(f"staged {len(names)} arms of {files} files each under {base}")
 
 
+def hook_text(repo: Path, online: bool) -> str:
+    """What the guard's task-record check tells a session that starts in this snapshot."""
+    sys.path.insert(0, str(GUARD))
+    import claude_guard
+
+    tasks = claude_guard.active_tasks(repo)
+    refs = list(dict.fromkeys(ref for t in tasks for ref in t["issues"]))
+    live = claude_guard.live_issues(repo, refs) if online else None
+    # The snapshot has no git history, so there are no record dates and no "commented since" notes.
+    return claude_guard.record_notes(repo, tasks, live, {}) or ""
+
+
 def condition_of(arm: str) -> str:
     return arm.rsplit("-", 1)[0]
 
 
 def prompt_for(base: Path, arm: str) -> str:
-    return re.sub(r"  +", " ", BASE_PROMPT.format(d=base / arm, access=ACCESS[condition_of(arm)]))
+    prompt = re.sub(r"  +", " ", BASE_PROMPT.format(d=base / arm,
+                                                    access=ACCESS[condition_of(arm).removesuffix("-hook")]))
+    hook = base / arm / "hook.txt"
+    return f"{HOOK_PREFIX}{hook.read_text().strip()}\n\n{prompt}" if hook.is_file() else prompt
 
 
 def redact(text: str) -> str:
-    return re.sub(r"(?:\S*/)?(?:live|files|quiet)-\d+(?:/\S*)?", "<snapshot file>", text)
+    return re.sub(r"(?:\S*/)?(?:live|files|quiet)(?:-hook)?-\d+(?:/\S*)?", "<snapshot file>", text)
 
 
 def judge_prompt(base: Path) -> str:

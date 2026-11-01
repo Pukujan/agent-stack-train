@@ -1,0 +1,9 @@
+PCM-0060 is finished. The task record in your snapshot is out of date, because it still says "active".
+
+GitHub issue #182 (Pukujan/project-continuity-modules) was closed on 2026-10-31 by the owner ("Close, split page").
+
+- **What shipped:** the chosen slice was the host probe plus the SPEC adapter seam. It merged in Pukujan/agent-stack-train#51 at `bad10a7`. Preflight now prints the origin host's capabilities. Guidance copies and `init` state the Git-only fallback. SPEC section 8.3 documents the four-operation adapter seam.
+- **Close-out:** the task record was marked completed in agent-stack-train#57, merged at `edf0772`. PCM now lives in agent-stack-train under `pcm/`.
+- **Remaining work:** the install and onboarding page moved to its own task, #262 (PCM-0070).
+
+The next action for PCM-0060 is none. The recorded "owner scope answer" step is already done, so don't act on it. If you want to continue, take up PCM-0070 (#262) instead. I didn't change any files or anything on GitHub.

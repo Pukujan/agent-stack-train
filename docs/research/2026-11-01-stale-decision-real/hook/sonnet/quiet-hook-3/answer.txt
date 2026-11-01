@@ -1,0 +1,10 @@
+PCM-0060 is finished, so there is nothing left to implement. The task record in your snapshot is stale: it still says "active" and waits on an owner scope answer.
+
+- **Issue #182:** closed by the owner on 2026-10-31 ("Close, split page").
+- **Chosen slice:** a host probe plus the SPEC adapter seam. It merged in `Pukujan/agent-stack-train#51` at `bad10a7`, with all 13 required checks passing.
+- **Record close-out:** the task record was marked completed in `Pukujan/agent-stack-train#57`, merged at `edf0772`. The issue's last comment says "No further action on this issue."
+- **Remaining work:** the install and onboarding page was not in that slice. It moved to #262 (PCM-0070).
+
+Next action: none for PCM-0060. Don't act on the recorded "owner scope answer" step. If you want the leftover work, pick up PCM-0070 (#262) and read that issue first. PCM now lives in `Pukujan/agent-stack-train` under `pcm/`, so changes go there.
+
+I changed nothing. I read only the task file in the snapshot and the issue comments on GitHub.

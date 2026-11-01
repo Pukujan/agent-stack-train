@@ -7,9 +7,12 @@ model cannot skip it. Text in ``AGENTS.md`` and ``CLAUDE.md`` competes with
 Claude Code's own defaults and loses often enough to matter (#37).
 
     acs_guard.py session-start   SessionStart: fetch, warn when the checkout is
-                                 behind or off the default branch, and hand
-                                 Claude the default branch's AGENTS.md when the
-                                 local copy differs
+                                 behind or off the default branch, hand Claude
+                                 the default branch's AGENTS.md when the local
+                                 copy differs, and warn when an active task
+                                 record is behind its issue on GitHub (closed,
+                                 or commented on since), or when that can't be
+                                 checked (#68). It never blocks.
     acs_guard.py pre-tool        PreToolUse: block (exit 2) work without an
                                  owning issue, pushes to the default branch,
                                  force pushes, worktrees outside
@@ -45,6 +48,7 @@ import re
 import shlex
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 GUARD_NAME = "acs_guard.py"
@@ -454,6 +458,145 @@ def stop(event: dict) -> str | None:
     return None
 
 
+# ---------------------------------------------------------------- task records vs GitHub (#68)
+
+TASK_MARKER_RE = re.compile(r"<!--\s*continuity:task\s+(\{.*?\})\s*-->", re.S)
+ISSUE_URL_RE = re.compile(r"^https://github\.com/([\w.-]+/[\w.-]+)/issues/(\d+)$")
+NAMED_ISSUE_RE = re.compile(r"(?<![\w/#])(?:([\w.-]+/[\w.-]+))?#(\d{1,7})\b")
+ORIGIN_RE = re.compile(r"github\.com[:/]([\w.-]+/[\w.-]+?)(?:\.git)?/?$")
+MAX_RECORD_ISSUES = 60  # one GraphQL query; beyond this, say so instead of checking
+MAX_RECORD_NOTES = 12
+# A comment this soon after the record, or a PCM receipt, is the same work reporting itself, not news.
+SAME_SESSION_SECONDS = 15 * 60
+RECEIPT_RE = re.compile(r"^\s*<!--\s*pcm:receipt")
+
+
+def active_tasks(top: Path) -> list[dict]:
+    """Active PCM task records, each with the issues it depends on: its own, then any its next action names."""
+    tasks = []
+    for path in sorted([*top.glob("tasks/TASK-*.md"), *top.glob("*/tasks/TASK-*.md")]):
+        try:
+            m = TASK_MARKER_RE.search(path.read_text(encoding="utf-8"))
+            meta = json.loads(m.group(1)) if m else None
+        except (OSError, ValueError):
+            continue
+        own = ISSUE_URL_RE.match(str(meta.get("issue_url", ""))) if isinstance(meta, dict) else None
+        if not own or meta.get("status") != "active":
+            continue
+        issues = [(own.group(1), int(own.group(2)))]
+        next_action = str(meta.get("next_action", ""))
+        for repo, number in NAMED_ISSUE_RE.findall(next_action):
+            ref = (repo or own.group(1), int(number))
+            if ref not in issues:
+                issues.append(ref)
+        tasks.append({"id": str(meta.get("id") or path.stem), "path": path.relative_to(top).as_posix(),
+                      "next_action": next_action, "issues": issues})
+    return tasks
+
+
+def live_issues(top: Path, refs: list[tuple[str, int]]) -> dict | None:
+    """State, close date and latest comment of each issue, in one GraphQL query; None if GitHub can't be reached."""
+    fields = "state closedAt comments(last: 1) { nodes { createdAt body author { login } } }"
+    parts = []
+    for i, (repo, number) in enumerate(refs):
+        owner, name = repo.split("/", 1)
+        parts.append(f'i{i}: repository(owner: {json.dumps(owner)}, name: {json.dumps(name)}) '
+                     f'{{ issueOrPullRequest(number: {number}) {{ ... on Issue {{ {fields} }} '
+                     f'... on PullRequest {{ {fields} }} }} }}')
+    # An issue that doesn't exist makes gh exit non-zero but still returns data for the rest.
+    _, out = run(["gh", "api", "graphql", "-f", "query={ " + " ".join(parts) + " }"], top, timeout=20)
+    try:
+        data = json.loads(out).get("data")
+    except (ValueError, AttributeError):
+        data = None
+    if not isinstance(data, dict):
+        return None
+    live = {}
+    for i, ref in enumerate(refs):
+        item = ((data.get(f"i{i}") or {}).get("issueOrPullRequest")) or None
+        if item:
+            last = (item.get("comments") or {}).get("nodes") or [None]
+            live[ref] = {"state": item.get("state"), "closed_at": item.get("closedAt"), "last_comment": last[-1]}
+    return live
+
+
+def record_notes(top: Path, tasks: list[dict], live: dict | None, recorded: dict[str, str | None]) -> str | None:
+    """What a resuming agent must know before trusting a task record. Silent when every record is current."""
+    if not tasks:
+        return None
+    origin = ORIGIN_RE.search(git(top, "remote", "get-url", "origin") or "")
+    here = origin.group(1).casefold() if origin else None
+
+    def name(ref: tuple[str, int]) -> str:
+        return f"#{ref[1]}" if ref[0].casefold() == here else f"{ref[0]}#{ref[1]}"
+
+    if live is None:
+        ids = ", ".join(t["id"] for t in tasks[:MAX_RECORD_NOTES]) + (" and more" if len(tasks) > MAX_RECORD_NOTES else "")
+        return (f"Could not reach GitHub to check the issues behind {len(tasks)} active task record(s) ({ids}). "
+                "Their recorded status and next actions are unverified and may be out of date: check the "
+                "issue (for example `continuity issue verify <TASK-ID>`) before acting on one.")
+    notes = []
+    for task in tasks:
+        quoted = task["next_action"][:160] + ("…" if len(task["next_action"]) > 160 else "")
+        for k, ref in enumerate(task["issues"]):
+            issue = live.get(ref)
+            if issue is None:
+                continue
+            if str(issue["state"]).upper() in {"CLOSED", "MERGED"}:
+                when = str(issue["closed_at"] or "")[:10]
+                what = (f"its issue {name(ref)} closed on {when}, but the record still says active" if k == 0 else
+                        f"its next action depends on {name(ref)}, which closed on {when}")
+                notes.append(f"- {task['id']} (`{task['path']}`): {what}. The recorded next action "
+                             f"(\"{quoted}\") is out of date; read {name(ref)} before acting.")
+                break
+            comment, since = issue["last_comment"], recorded.get(task["path"])
+            if comment and since and _news(comment, since):
+                who = (comment.get("author") or {}).get("login", "someone")
+                notes.append(f"- {task['id']} (`{task['path']}`): {name(ref)} has a comment from {who} on "
+                             f"{comment['createdAt'][:10]}, after this record last changed ({since[:10]}). "
+                             f"Read it before acting on the recorded next action (\"{quoted}\").")
+                break
+    if not notes:
+        return None
+    more = f"\n- …and {len(notes) - MAX_RECORD_NOTES} more." if len(notes) > MAX_RECORD_NOTES else ""
+    return ("These task records are behind GitHub, which is the authority. Do not act on their recorded "
+            "next action until you have read the issue:\n" + "\n".join(notes[:MAX_RECORD_NOTES]) + more)
+
+
+def check_records(top: Path) -> str | None:
+    tasks = active_tasks(top)
+    refs = list(dict.fromkeys(ref for t in tasks for ref in t["issues"]))
+    if not refs:
+        return None
+    if len(refs) > MAX_RECORD_ISSUES:
+        return (f"{len(tasks)} active task records name {len(refs)} issues, too many to check at startup. "
+                "Check a task's issue on GitHub before acting on its recorded next action.")
+    recorded = {t["path"]: _utc(git(top, "log", "-1", "--format=%cI", "--", t["path"])) for t in tasks}
+    return record_notes(top, tasks, live_issues(top, refs), recorded)
+
+
+def _news(comment: dict, since: str) -> bool:
+    """Whether a comment came after the record and is not the record's own work reporting itself."""
+    try:
+        posted = datetime.fromisoformat(str(comment.get("createdAt", "")).replace("Z", "+00:00"))
+        recorded = datetime.fromisoformat(since.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if RECEIPT_RE.match(str(comment.get("body", ""))):
+        return False
+    return (posted - recorded).total_seconds() > SAME_SESSION_SECONDS
+
+
+def _utc(stamp: str | None) -> str | None:
+    """A git ISO date as UTC ``YYYY-MM-DDTHH:MM:SSZ``, so it compares as text with GitHub's dates."""
+    if not stamp:
+        return None
+    try:
+        return datetime.fromisoformat(stamp).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return None
+
+
 def session_start(event: dict) -> str | None:
     top = top_level(Path(os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or os.getcwd()))
     if top is None or not is_adopter(top):
@@ -479,6 +622,9 @@ def session_start(event: dict) -> str | None:
             f"The local AGENTS.md differs from `origin/{default}`. The GitHub copy below is the authority; "
             f"follow it over the local one.\n\n<agents-md source=\"origin/{default}\">\n{remote_rules}\n</agents-md>"
         )
+    records = check_records(top)
+    if records:
+        notes.append(records)
     if event.get("source") == "compact":
         notes.append(
             "Context was just compacted. Summaries and earlier briefs are not the owner's words; "

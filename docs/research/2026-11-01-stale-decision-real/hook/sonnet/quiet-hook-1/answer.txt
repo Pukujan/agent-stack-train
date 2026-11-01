@@ -1,0 +1,10 @@
+PCM-0060 is finished, so there is no next action for you. The local task record is stale and still says "active", with a next action of "Owner scope answer on #182". Issue #182 is closed, and the closing comments show the work landed.
+
+- **Scope decision:** the owner chose the host probe plus the SPEC adapter seam.
+- **Merged:** Pukujan/agent-stack-train#51, merged at `bad10a7`. It adds the host capability lines in `continuity preflight`, a NOTE in `continuity init`, a Git-only fallback sentence in every guidance copy, and SPEC section 8.3.
+- **Closed:** the owner said "Close, split page" on 2026-10-31.
+- **Close-out:** agent-stack-train#57, merged at `edf0772`, marked the task record completed.
+- **Split-off work:** the install and onboarding page now belongs to #262 (PCM-0070).
+- **Where the work lives:** PCM now lives in `Pukujan/agent-stack-train` under `pcm/`.
+
+I checked the task file in the snapshot and issue #182 on GitHub. I changed nothing.
