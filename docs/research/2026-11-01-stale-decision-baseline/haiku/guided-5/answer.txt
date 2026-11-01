@@ -1,0 +1,10 @@
+CURRENT says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." The live issue says #53 is closed ("Make GitHub authority and checkpoint evidence real"). The guidance says live issue state outranks a stale projection, so CURRENT is stale.
+
+Next action: do not run the acceptance from CURRENT. First re-read #53 and its parent on GitHub to find out why it was closed and whether the two-user acceptance was met. If closure was not authorized or the acceptance is unmet, record that on #53 with a correction link and reopen it. Then update CURRENT with an as-of date, the parent and dependency links, and the live status.
+
+I did not query GitHub. The issue.json file does not name the parent issue, so I could not check it.
+
+Files read:
+<run-dir>/haiku/guided-5/GUIDANCE.md
+<run-dir>/haiku/guided-5/CURRENT.md
+<run-dir>/haiku/guided-5/issue.json

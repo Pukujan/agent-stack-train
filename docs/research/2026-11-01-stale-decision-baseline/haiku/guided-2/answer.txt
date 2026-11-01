@@ -1,0 +1,5 @@
+Current state: CURRENT.md says leaf #53 is open, with the next action "Execute the hosted two-user acceptance on the parent issue." The live issue.json says #53 ("Make GitHub authority and checkpoint evidence real") is CLOSED. The GitHub state wins over the projection, so CURRENT.md is stale and the acceptance should not start from it. The parent issue is not named in either file, so I could not check its state.
+
+Next action: re-read live #53 and its parent, then record the closed-versus-open mismatch on the issue. If the closure was not intended, ask the owner before resuming the acceptance work.
+
+Files read: <run-dir>/haiku/guided-2/CURRENT.md and .../guided-2/issue.json.

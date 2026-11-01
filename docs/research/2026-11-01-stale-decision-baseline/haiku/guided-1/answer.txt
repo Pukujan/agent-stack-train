@@ -1,0 +1,3 @@
+The live issue wins over the snapshot. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue." But issue.json says #53, "Make GitHub authority and checkpoint evidence real," is closed. Per GUIDANCE.md, a stale projection yields to its field's authority, so CURRENT.md is out of date.
+
+Next action: re-read live #53 for its closure reason, PR/merge SHA, and CI results, plus its parent and dependencies. The snapshot has no parent or dependency links, so I cannot confirm the lineage. If the two-user acceptance is still owed, record that on the issue before running it. Do not start the acceptance from CURRENT.md alone.

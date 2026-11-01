@@ -1,0 +1,212 @@
+{
+ "bare-1": {
+  "answer": "The checkpoint is stale. CURRENT.md says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue.\" But issue.json says #53 (\"Make GitHub authority and checkpoint evidence real\") is closed. So the next action may already be done or dropped, and it should not be run from this snapshot. Someone needs to confirm why #53 closed and update CURRENT.md. The snapshot also doesn't name the parent issue, so that target is unknown. I did not query GitHub, since the scope was limited to these two files.",
+  "condition": "bare",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It says the next action may already be done or dropped and should not be run from the snapshot.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "bare-2": {
+  "answer": "**Current state:** The checkpoint and the live issue disagree. CURRENT.md says leaf #53 \"Status: open,\" but issue.json shows #53 (\"Make GitHub authority and checkpoint evidence real\") as `\"state\": \"closed\"`. The live state is the newer source, so CURRENT.md is stale.\n\n**Next action:** CURRENT.md says \"Execute the hosted two-user acceptance on the parent issue.\" Because #53 is closed, that instruction may no longer apply. Confirm with the issue owner whether the acceptance run is still needed, and whether it belongs to the parent issue, before doing it. Then update CURRENT.md to match.\n\nEvidence:\n- `<run-dir>/haiku/bare-2/CURRENT.md`, line 5\n- `<run-dir>/haiku/bare-2/issue.json`, line 3\n\nI did not check GitHub directly, so this rests only on the snapshot files.",
+  "condition": "bare",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It says the instruction may no longer apply and should be confirmed with the owner before anyone does it.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "bare-3": {
+  "answer": "The CURRENT.md projection is stale. It says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue,\" but the live issue.json shows #53, \"Make GitHub authority and checkpoint evidence real,\" as closed. Because the live state is closed, that next action should not be treated as pending work for #53 without checking the parent issue and the current checkpoint. The checkpoint needs updating before anyone acts on it.\n\nEvidence:\n- <run-dir>/haiku/bare-3/CURRENT.md, line 5-6: \"Leaf #53 owns this work. Status: open.\"\n- <run-dir>/haiku/bare-3/issue.json, line 3: \"state\": \"closed\"\n\nI did not read anything outside the bare-3 directory, so I have not checked the parent issue's status.",
+  "condition": "bare",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It calls CURRENT.md stale because the live issue is closed, and says not to treat the acceptance as pending.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "bare-4": {
+  "answer": "The checkpoint is stale. CURRENT.md says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue,\" but issue.json shows #53 (\"Make GitHub authority and checkpoint evidence real\") as closed. The live state is closed, so the open status and that next action no longer apply. I did not check whether the parent issue or the two-user acceptance was completed, and that is outside the two files I was asked to read. The next step is to confirm the parent issue's state, then either record the acceptance result or set a new next action in CURRENT.md. Any filing to OIO or another adopter repo needs your explicit direction.\n\nSources: <run-dir>/haiku/bare-4/CURRENT.md, <run-dir>/haiku/bare-4/issue.json",
+  "condition": "bare",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It says the open status and the next action no longer apply because #53 is closed.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "bare-5": {
+  "answer": "The checkpoint and the live issue disagree. CURRENT.md (line 5) says leaf #53 is \"open,\" but issue.json (line 3) says `\"state\": \"closed\"` for #53, \"Make GitHub authority and checkpoint evidence real,\" in Pukujan/project-continuity-modules.\n\nThe stated next action is \"Execute the hosted two-user acceptance on the parent issue\" (CURRENT.md line 6). Since the leaf is closed, the checkpoint is stale. Before acting on that next action, confirm the parent issue's state, which these two files don't include. I did not read anything else.",
+  "condition": "bare",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It calls the checkpoint stale and asks for the parent's state to be confirmed before acting, so it does not put the acceptance forward as the next step.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "guided-1": {
+  "answer": "The live issue wins over the snapshot. CURRENT.md says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue.\" But issue.json says #53, \"Make GitHub authority and checkpoint evidence real,\" is closed. Per GUIDANCE.md, a stale projection yields to its field's authority, so CURRENT.md is out of date.\n\nNext action: re-read live #53 for its closure reason, PR/merge SHA, and CI results, plus its parent and dependencies. The snapshot has no parent or dependency links, so I cannot confirm the lineage. If the two-user acceptance is still owed, record that on the issue before running it. Do not start the acceptance from CURRENT.md alone.",
+  "condition": "guided",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It calls CURRENT.md out of date and says not to start the acceptance from it alone.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "guided-2": {
+  "answer": "Current state: CURRENT.md says leaf #53 is open, with the next action \"Execute the hosted two-user acceptance on the parent issue.\" The live issue.json says #53 (\"Make GitHub authority and checkpoint evidence real\") is CLOSED. The GitHub state wins over the projection, so CURRENT.md is stale and the acceptance should not start from it. The parent issue is not named in either file, so I could not check its state.\n\nNext action: re-read live #53 and its parent, then record the closed-versus-open mismatch on the issue. If the closure was not intended, ask the owner before resuming the acceptance work.\n\nFiles read: <run-dir>/haiku/guided-2/CURRENT.md and .../guided-2/issue.json.",
+  "condition": "guided",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It says the acceptance should not start from the stale CURRENT.md and makes re-reading the live issue the next action.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "guided-3": {
+  "answer": "The live issue and the checkpoint disagree. CURRENT.md says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue,\" but issue.json shows #53 (\"Make GitHub authority and checkpoint evidence real\") as closed. The guidance says live issue state wins over a projection, so treat the checkpoint as stale. Before doing anything, re-read #53 on GitHub to confirm the closure and its reason. If it was closed without the hosted two-user acceptance, that work is unmet and should be tracked on an open issue. The snapshot does not name the parent issue, so the acceptance target is also unverified.",
+  "condition": "guided",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It treats the checkpoint as stale and makes re-reading #53 on GitHub the first step before doing anything.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "guided-4": {
+  "answer": "CURRENT.md says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue.\" The live issue.json says #53 (\"Make GitHub authority and checkpoint evidence real\") is closed, so CURRENT.md is stale. Per the GitHub-owned progression rules, the live issue state governs over the projection.\n\nNext action: re-read live #53 and its parent before running the acceptance. Confirm whether the closure was intended and whether the two-user acceptance was moved elsewhere. If the closure is unexplained, record the conflict on #53 and pause that work. Then update CURRENT.md to match the live state.\n\nI did not check the parent issue or any closure comment, since the snapshot files were the only sources I was allowed to read.",
+  "condition": "guided",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It makes re-reading the live issue and confirming the closure the next action; the acceptance is only implied as possible later work.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ },
+ "guided-5": {
+  "answer": "CURRENT says leaf #53 is open with the next action \"Execute the hosted two-user acceptance on the parent issue.\" The live issue says #53 is closed (\"Make GitHub authority and checkpoint evidence real\"). The guidance says live issue state outranks a stale projection, so CURRENT is stale.\n\nNext action: do not run the acceptance from CURRENT. First re-read #53 and its parent on GitHub to find out why it was closed and whether the two-user acceptance was met. If closure was not authorized or the acceptance is unmet, record that on #53 with a correction link and reopen it. Then update CURRENT with an as-of date, the parent and dependency links, and the live status.\n\nI did not query GitHub. The issue.json file does not name the parent issue, so I could not check it.\n\nFiles read:\n<run-dir>/haiku/guided-5/GUIDANCE.md\n<run-dir>/haiku/guided-5/CURRENT.md\n<run-dir>/haiku/guided-5/issue.json",
+  "condition": "guided",
+  "follows_live": "pass",
+  "judge": {
+   "flags_contradiction": true,
+   "reason": "It says outright not to run the acceptance from CURRENT, and makes re-reading #53 and its parent the next step.",
+   "recommends_stale": false,
+   "states_issue_closed": true
+  },
+  "t2_lexical": {
+   "checks": {
+    "answer_present": true,
+    "cites_issue": true,
+    "flags_stale_projection": true,
+    "follows_live_not_stale": false
+   },
+   "passed": false,
+   "verdict": "fail"
+  }
+ }
+}

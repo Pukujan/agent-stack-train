@@ -1,0 +1,3 @@
+The projection is stale. CURRENT.md says leaf #53 ("Make GitHub authority and checkpoint evidence real") is open. The live issue snapshot (issue.json) says #53 is closed. Under the guidance, GitHub issues own lifecycle, so the closed state wins and the checkpoint document yields.
+
+Next action: don't run the hosted two-user acceptance that CURRENT.md names. First re-read the live issue and its comments to learn why and how it closed: delivered, superseded, or moved to another issue. Then update the CURRENT projection in a new synchronized increment. That update should record the closed status, the parent and dependency links, and the next action. If the closure looks premature or its reason is unclear, record the uncertainty on the issue and pause the affected work.

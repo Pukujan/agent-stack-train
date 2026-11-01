@@ -1,0 +1,3 @@
+The checkpoint is stale. CURRENT.md says leaf #53 is open with the next action "Execute the hosted two-user acceptance on the parent issue," but issue.json shows #53 ("Make GitHub authority and checkpoint evidence real") as closed. The live state is closed, so the open status and that next action no longer apply. I did not check whether the parent issue or the two-user acceptance was completed, and that is outside the two files I was asked to read. The next step is to confirm the parent issue's state, then either record the acceptance result or set a new next action in CURRENT.md. Any filing to OIO or another adopter repo needs your explicit direction.
+
+Sources: <run-dir>/haiku/bare-4/CURRENT.md, <run-dir>/haiku/bare-4/issue.json

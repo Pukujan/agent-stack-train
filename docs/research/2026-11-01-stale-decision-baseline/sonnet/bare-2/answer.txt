@@ -1,0 +1,3 @@
+The CURRENT.md is stale. It says leaf #53 is open and the next action is to run the hosted two-user acceptance on the parent issue. The live issue JSON shows #53 ("Make GitHub authority and checkpoint evidence real") is closed.
+
+The next action is to refresh CURRENT.md from the live state before doing anything else. I haven't checked why #53 closed, whether the acceptance ran, or whether it moved to the parent issue. Check the issue's closing comment or linked PR first. Then either record the acceptance as done or pick the next open leaf. Don't run the acceptance on the strength of the old note.

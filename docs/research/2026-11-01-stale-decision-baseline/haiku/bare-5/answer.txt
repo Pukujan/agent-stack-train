@@ -1,0 +1,3 @@
+The checkpoint and the live issue disagree. CURRENT.md (line 5) says leaf #53 is "open," but issue.json (line 3) says `"state": "closed"` for #53, "Make GitHub authority and checkpoint evidence real," in Pukujan/project-continuity-modules.
+
+The stated next action is "Execute the hosted two-user acceptance on the parent issue" (CURRENT.md line 6). Since the leaf is closed, the checkpoint is stale. Before acting on that next action, confirm the parent issue's state, which these two files don't include. I did not read anything else.

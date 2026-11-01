@@ -1,0 +1,5 @@
+The projection is stale. CURRENT.md says leaf #53 ("Make GitHub authority and checkpoint evidence real") is open. The live issue JSON shows #53 is closed. Under the guidance, the live GitHub issue owns status, so CURRENT.md loses on that field.
+
+I can't tell from these files why #53 closed (merged, completed or abandoned). I also can't tell whether the "hosted two-user acceptance" was done, and the snapshot doesn't name the parent issue.
+
+Next action: don't run the acceptance yet. Re-read #53's closing record and its parent ancestry on GitHub. If the acceptance wasn't done, record that on the parent or a new linked leaf. Then fix CURRENT.md in a new synchronized increment to show closed status and the real next action.
