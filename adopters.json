@@ -1,15 +1,15 @@
 {
   "note": "Repositories the upgrade-adopters workflow keeps on the certified stack. Add a repository once it is on the one-checkout stack: its stack-manifest.json pins agent-stack-train alone, with an empty pin.",
   "repositories": [
-    "Pukujan-lab/nyc-map-agent",
-    "Pukujan-lab/server-management",
-    "Pukujan-lab/personal-branding-project",
-    "Pukujan-lab/app-builder-automation",
+    "pukujan-lab-2/nyc-map-agent",
+    "pukujan-lab-2/server-management",
+    "pukujan-lab-2/personal-branding-project",
+    "pukujan-lab-2/app-builder-automation",
     "Pukujan/design-bakery",
     "Pukujan/claude-code-launcher",
     "Pukujan/inference-recommendation-engine",
-    "Pukujan-lab/cross-repo-repairer",
-    "Pukujan-lab/voice-agent-research",
-    "Pukujan-lab/octo-database"
+    "pukujan-lab-2/cross-repo-repairer",
+    "pukujan-lab-2/voice-agent-research",
+    "pukujan-lab-2/octo-database"
   ]
 }
