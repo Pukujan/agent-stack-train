@@ -17,7 +17,7 @@ hook. The machine contract applies to **every CGM adopter**.
 
 | Call | Checks |
 | --- | --- |
-| `--root <cgm>` (default / `--mode helper`) | Full helper: `system-version.json`, all eight `EXPECTED_MODULES` (including `writing-direction` and `human-sounding-writing`), schemas, templates, helper docs (including `docs/WRITING_ROUTING.md` and `docs/writing-routing.json`), README contract. |
+| `--root <cgm>` (default / `--mode helper`) | Full helper: `system-version.json`, all seven `EXPECTED_MODULES` (including `writing-direction` and `human-sounding-writing`), schemas, templates, helper docs (including `docs/WRITING_ROUTING.md` and `docs/writing-routing.json`), README contract. |
 | `--root <cgm> --mode writing` | **ACS hotload entrypoint:** both writing modules’ `SKILL.md`, soft router markdown + JSON contract (`content-generation.writing-routing.v1`), commit surfaces routed to hsw, `required_load` / `apply_checklist` / `acs_prompt_inject`, and that `system-version.json` lists both writing modules. Prints a stable `CGM_VERIFY` line. |
 | `--root <cgm> --adapter <project>/.content-system --project-root <project>` | Full helper **plus** target adapter: adapter `modules` must equal the full eight-module helper set (so HSW cannot be omitted on a 0.5.x pin). |
 

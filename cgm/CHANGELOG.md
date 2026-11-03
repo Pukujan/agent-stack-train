@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The README route `readme_product_entry` is deleted (agent-stack-train#117):** CGM no longer routes how a project writes its README or product pages, not even as an opt-in. The module `writing-direction` stays for research plans, architecture explanations and evidence briefs. The validator rejects the route if it returns.
+
+- **`html-demo` module deleted (agent-stack-train#117):** it set a section order (context, problem, mechanism, proof, next step) that did not match the project's own storyboard and said nothing about how a page looks. The module is removed from `EXPECTED_MODULES`, every `system-version.json`, ACS pins and hotload text; CGM now has seven modules.
+
 - **CGM helps with GitHub prose only (agent-stack-train#117):** the always-on `system_block` now covers PR and issue titles and bodies, issue-log titles, comments, commits, receipts and changelog prose. It no longer says "ANY human-facing prose", and it no longer makes the agent load writing modules for the project's own product.
 - The `marketing_intro_site` route (the sales arc) is retired. Marketing and sales sites, demo pages and HTML follow the owner's direction. The README route `readme_product_entry` is now opt-in: `required_load` false, `opt_in` true. A new `not_routed` entry `product_pages_and_sites` records this.
 - The validator fails if `marketing_intro_site` returns or if the README route becomes required again; the system block must scope itself to GitHub prose.

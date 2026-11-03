@@ -3,8 +3,8 @@
   "note": "Records only the CGM module shape and the ACS module id/version. Component versions and commits are not recorded here: they come from the agent-stack-train checkout at install time, where every component sits at the one stack commit.",
   "pins": {
     "cgm": {
-      "module_count": 8,
-      "module_count_word": "eight",
+      "module_count": 7,
+      "module_count_word": "seven",
       "modules": [
         "brand-foundation",
         "content-context",
@@ -12,8 +12,7 @@
         "human-sounding-writing",
         "human-output-naming",
         "visual-direction",
-        "image-generation",
-        "html-demo"
+        "image-generation"
       ]
     },
     "acs_hotload_module": {
@@ -24,7 +23,7 @@
   "superseded": {
     "note": "Stale values that MUST NOT reappear as a pin. Presence of the canonical value alone is not enough: a projection that also still carries one of these has drifted.",
     "cgm.module_count": [
-      "seven"
+      "eight"
     ]
   },
   "projections": [

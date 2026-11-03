@@ -25,7 +25,6 @@ Load only the modules the requested output needs. Paths are relative to this hel
 | `human-output-naming` | [`modules/human-output-naming`](modules/human-output-naming) | Speakable generated artifact / asset filenames + per-feature legends (short name **hon** / HON) | **MUST load** before naming generated media, asset-manifest paths, committed media basenames, or filename legends |
 | `visual-direction` | [`modules/visual-direction`](modules/visual-direction) | Palette, composition, responsive roles, rejection rules | Before generating or placing visuals |
 | `image-generation` | [`modules/image-generation`](modules/image-generation) | Reproducible image briefs, prompts, and asset records | Creating or reviewing narrative raster assets |
-| `html-demo` | [`modules/html-demo`](modules/html-demo) | Accessible responsive HTML demo of the story | Demo pages that must hold up at mobile / tablet / desktop |
 
 **Load id for hsw remains `human-sounding-writing`.** Agents asked for "hsw" or "HSW" load that module; do not invent a separate folder or adapter id.
 
@@ -37,7 +36,6 @@ Soft router — soft means no NLP CI grade of prose, **not** optional load. Agen
 
 | Situation | Load | Notes |
 | --- | --- | --- |
-| README / product entry | `writing-direction` (+ brand / context as needed) | **Opt-in.** Load only when the owner asks. Keep scan-first selective bold |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ context as needed) | **MUST load.** Reader-facing explanation, not a manuscript; story order, evidence/status/boundaries, next action. A paper or raw data writeup stays on **hsw** |
 | PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose; one plain sentence per title |
 | Receipts (push, checkpoint, release) | `human-sounding-writing` (**hsw**) | **MUST load.** A receipt headline is one human sentence |
@@ -54,7 +52,7 @@ Full table, apply checklist, and conflict notes: [`docs/WRITING_ROUTING.md`](doc
 
 **Filename before/after (0.5.5+):** `song_food-p0-00e86d.mp3` (and rejected robot draft `song-food_pitch-plus-8st_speed-0pct.mp3`) → `Song Food – up 8.mp3`. Defaults omitted; optional safe twin `song-food--up-8.mp3`. Per-feature legends live under [`docs/filename-legends/`](docs/filename-legends/). Hash stays an asset field (or suffix after human labels), never the basename.
 
-**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy. A marketing intro site is a different row: it loads writing-direction with visual direction, brand foundation, and html-demo.
+**This README uses writing-direction** (scan-first selective bold). Do not apply hsw bold restraints to README or product-entry copy.
 
 ## Why this exists
 
@@ -168,7 +166,7 @@ Migration notes for adding `human-sounding-writing` / hsw and `human-output-nami
 
 ## Evidence and boundaries
 
-The helper contract is **shipped as repository structure and guidance**: eight module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
+The helper contract is **shipped as repository structure and guidance**: seven module entry points, templates, schemas, a validator, image records, README rules, and a version pin. The contract does not prove that a target project’s product claims are true; those claims must come from the target repository.
 
 For each important claim, the v2 brief makes the explanation explicit: **what does this source support, and what does it leave unproven?** Repository evidence points to an exact revision and useful locator; external claims use direct citations. A citation makes the path inspectable—it does not certify that the source is correct.
 

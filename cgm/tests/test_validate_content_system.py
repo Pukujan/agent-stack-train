@@ -18,7 +18,7 @@ from scripts.validate_content_system import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "human-output-naming", "visual-direction", "image-generation", "html-demo"})
+MODULES = sorted({"brand-foundation", "content-context", "writing-direction", "human-sounding-writing", "human-output-naming", "visual-direction", "image-generation"})
 COMMIT = "a" * 40
 SOURCE_URI = f"https://github.com/Pukujan/demo/blob/{COMMIT}/src/app.py#L2-L6"
 
@@ -272,7 +272,6 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "human-sounding-writing",
                     "visual-direction",
                     "image-generation",
-                    "html-demo",
                 ],
             }
             (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
@@ -324,7 +323,6 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "human-sounding-writing",
                     "visual-direction",
                     "image-generation",
-                    "html-demo",
                 ],
             }
             (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
@@ -425,7 +423,6 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "human-sounding-writing",
                     "visual-direction",
                     "image-generation",
-                    "html-demo",
                 ],
             }
             (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")
@@ -661,20 +658,18 @@ class ContentSystemValidationTests(unittest.TestCase):
         by_id = {route["id"]: route for route in contract["routes"]}
         # The sales-arc route is retired (agent-stack-train#117).
         self.assertNotIn("marketing_intro_site", by_id)
-        readme = by_id["readme_product_entry"]
-        self.assertIs(readme["required_load"], False)
-        self.assertIs(readme["opt_in"], True)
+        self.assertNotIn("readme_product_entry", by_id)
         block = contract["acs_prompt_inject"]["system_block"].lower()
         self.assertIn("github prose", block)
         self.assertNotIn("any human-facing prose", block)
         # No product-page module is a required load in the always-on text.
-        for module in ("visual-direction", "brand-foundation", "html-demo"):
+        for module in ("visual-direction", "brand-foundation"):
             self.assertNotIn(module, block)
         self.assertNotIn("marketing_intro_site", contract["human_facing_default"]["exceptions"])
         not_routed = {item["id"] for item in contract["not_routed"]}
         self.assertIn("product_pages_and_sites", not_routed)
 
-    def test_writing_contract_rejects_the_retired_marketing_route_and_required_readme(self):
+    def test_writing_contract_rejects_the_retired_marketing_and_readme_routes(self):
         import json
         import shutil
         import tempfile
@@ -689,13 +684,11 @@ class ContentSystemValidationTests(unittest.TestCase):
             contract_path = staging / "docs" / "writing-routing.json"
             contract = json.loads(contract_path.read_text(encoding="utf-8"))
             contract["routes"].append({"id": "marketing_intro_site", "surfaces": ["marketing intro sites"], "load": "writing-direction"})
-            for route in contract["routes"]:
-                if route["id"] == "readme_product_entry":
-                    route["required_load"] = True
+            contract["routes"].append({"id": "readme_product_entry", "surfaces": ["README.md"], "load": "writing-direction"})
             contract_path.write_text(json.dumps(contract), encoding="utf-8")
             errors = check_writing_contract(staging)
             self.assertTrue(any("marketing_intro_site is retired" in e for e in errors), errors)
-            self.assertTrue(any("readme_product_entry must be opt-in" in e for e in errors), errors)
+            self.assertTrue(any("readme_product_entry is retired" in e for e in errors), errors)
 
     def test_writing_router_requires_always_on_inject(self):
         import json
@@ -774,7 +767,6 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "human-output-naming",
                     "visual-direction",
                     "image-generation",
-                    "html-demo",
                 ],
             }
             (staging / "system-version.json").write_text(json.dumps(version), encoding="utf-8")

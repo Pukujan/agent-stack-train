@@ -20,7 +20,7 @@ to remove. The ACS installer refuses a checkout that is missing a component.
 | Dependency | What it is (full stack) |
 | --- | --- |
 | PCM | [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md): continuity/checkpoints + GitHub issues own progression + PR-only + required CI gates + branch-protection/auto-merge preference + fail-closed + leaf/parent receipts. Still not the proposal layer. |
-| CGM | Full eight modules: `brand-foundation`, `content-context`, `writing-direction`, `human-sounding-writing`, `human-output-naming`, `visual-direction`, `image-generation`, `html-demo` + `human_output_contract` (README playbook/template/contract, quality PDD/SDD/TDD, provenance, WRITING_ROUTING, HSW guide/rules, HON guide/rules, scanability, claim-evidence). |
+| CGM | Full seven modules: `brand-foundation`, `content-context`, `writing-direction`, `human-sounding-writing`, `human-output-naming`, `visual-direction`, `image-generation` + `human_output_contract` (README playbook/template/contract, quality PDD/SDD/TDD, provenance, WRITING_ROUTING, HSW guide/rules, HON guide/rules, scanability, claim-evidence). |
 | OIO | The observational issue-log surface: project ontology, observational issue form, triage workflow, and the `AGENTS.md` guidance block merged inside a delimited region. Installed by OIO's own installer, invoked by `acs_install.py`. |
 
 Validate CGM adapters with:

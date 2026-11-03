@@ -131,7 +131,6 @@ REQUIRED_CGM_MODULES = (
     "human-output-naming",
     "visual-direction",
     "image-generation",
-    "html-demo",
 )
 
 REQUIRED_PCM_FEATURES = (
@@ -360,7 +359,7 @@ def render_prompt_inject_md(routing: dict, *, pin_version: str) -> str:
     hfd_covers = hfd.get("covers") if isinstance(hfd.get("covers"), list) else []
     hfd_exc = hfd.get("exceptions") if isinstance(hfd.get("exceptions"), list) else []
     covers_md = ", ".join(f"`{c}`" for c in hfd_covers) if hfd_covers else "(see CGM writing-routing.json)"
-    exc_md = ", ".join(f"`{e}`" for e in hfd_exc) if hfd_exc else "`readme_product_entry`, `generated_artifact_filenames`"
+    exc_md = ", ".join(f"`{e}`" for e in hfd_exc) if hfd_exc else "`generated_artifact_filenames`"
     routes = routing.get("routes") if isinstance(routing.get("routes"), list) else []
     route_rows = []
     for r in routes:

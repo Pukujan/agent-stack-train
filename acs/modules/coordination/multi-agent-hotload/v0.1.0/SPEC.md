@@ -46,7 +46,7 @@ Install is complete only when **all** of the following hold, as **full stacks**:
 1. **FULL PCM** at the train's certified revision — continuity/checkpoints **and**
    GitHub-owned progression (PR-only, required CI gates, protection/auto-merge
    preference, fail-closed gates, leaf/parent receipts). Not the proposal layer.
-2. **FULL CGM** at the train's certified revision — all eight modules including
+2. **FULL CGM** at the train's certified revision — all seven modules including
    `human-output-naming`, plus the `human_output_contract`.
 3. **The coordination runtime** — join-order roles, boss lease (minutes),
    claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less watchdog, proposals → claim → PR.

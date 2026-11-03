@@ -50,7 +50,6 @@ CGM_MODULES = [
     "human-output-naming",
     "visual-direction",
     "image-generation",
-    "html-demo",
 ]
 
 # Mirrors the real ``pins.json``: the CGM module shape and the ACS module id/version.

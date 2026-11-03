@@ -10,8 +10,7 @@
     "human-sounding-writing",
     "human-output-naming",
     "visual-direction",
-    "image-generation",
-    "html-demo"
+    "image-generation"
   ],
   "canonical_files": [
     "project-brief.json",
