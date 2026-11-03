@@ -393,7 +393,7 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertTrue(human_default["required_load"])
         self.assertTrue(human_default["default_on"])
         covers = {str(c).lower() for c in human_default["covers"]}
-        self.assertTrue(any("every human-facing" in c for c in covers))
+        self.assertTrue(any("github prose" in c for c in covers))
         instruction = str(contract["acs_prompt_inject"]["instruction"]).lower()
         self.assertIn("no writing module", instruction)
         self.assertIn("html_pages", contract["human_facing_default"]["exceptions"])
@@ -655,31 +655,26 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_writing_contract(staging)
             self.assertTrue(any("reader_facing_explanations" in e for e in errors), errors)
 
-    def test_writing_router_routes_marketing_intro_sites_without_hsw(self):
+    def test_writing_router_covers_github_prose_only(self):
         import json
         contract = json.loads((ROOT / "docs" / "writing-routing.json").read_text(encoding="utf-8"))
         by_id = {route["id"]: route for route in contract["routes"]}
-        route = by_id.get("marketing_intro_site")
-        self.assertIsNotNone(route, "writing-routing.json must declare marketing_intro_site")
-        self.assertEqual(route["load"], "writing-direction")
-        self.assertIs(route["required_load"], True)
-        surfaces = {str(item).lower() for item in route["surfaces"]}
-        self.assertTrue(any("marketing" in item for item in surfaces), surfaces)
-        self.assertTrue(any("demo" in item for item in surfaces), surfaces)
-        self.assertTrue(any("intro" in item for item in surfaces), surfaces)
-        also = {str(item).lower() for item in route.get("also_load_required", [])}
-        for needle in ("visual-direction", "brand-foundation", "html-demo"):
-            self.assertIn(needle, also)
-        self.assertNotIn("human-sounding-writing", also)  # not required for HTML pages (#81)
-        self.assertGreaterEqual(len(route["review_checklist"]), 6)
-        joined = " ".join(str(item).lower() for item in route["review_checklist"])
-        for needle in ("problem", "market", "component", "approximation", "demo", "feeling"):
-            self.assertIn(needle, joined)
+        # The sales-arc route is retired (agent-stack-train#117).
+        self.assertNotIn("marketing_intro_site", by_id)
+        readme = by_id["readme_product_entry"]
+        self.assertIs(readme["required_load"], False)
+        self.assertIs(readme["opt_in"], True)
         block = contract["acs_prompt_inject"]["system_block"].lower()
-        self.assertIn("marketing intro", block)
+        self.assertIn("github prose", block)
+        self.assertNotIn("any human-facing prose", block)
+        # No product-page module is a required load in the always-on text.
+        for module in ("visual-direction", "brand-foundation", "html-demo"):
+            self.assertNotIn(module, block)
         self.assertNotIn("marketing_intro_site", contract["human_facing_default"]["exceptions"])
+        not_routed = {item["id"] for item in contract["not_routed"]}
+        self.assertIn("product_pages_and_sites", not_routed)
 
-    def test_writing_contract_rejects_missing_marketing_intro_route(self):
+    def test_writing_contract_rejects_the_retired_marketing_route_and_required_readme(self):
         import json
         import shutil
         import tempfile
@@ -693,12 +688,14 @@ class ContentSystemValidationTests(unittest.TestCase):
             )
             contract_path = staging / "docs" / "writing-routing.json"
             contract = json.loads(contract_path.read_text(encoding="utf-8"))
-            contract["routes"] = [
-                route for route in contract["routes"] if route.get("id") != "marketing_intro_site"
-            ]
+            contract["routes"].append({"id": "marketing_intro_site", "surfaces": ["marketing intro sites"], "load": "writing-direction"})
+            for route in contract["routes"]:
+                if route["id"] == "readme_product_entry":
+                    route["required_load"] = True
             contract_path.write_text(json.dumps(contract), encoding="utf-8")
             errors = check_writing_contract(staging)
-            self.assertTrue(any("marketing_intro_site" in e for e in errors), errors)
+            self.assertTrue(any("marketing_intro_site is retired" in e for e in errors), errors)
+            self.assertTrue(any("readme_product_entry must be opt-in" in e for e in errors), errors)
 
     def test_writing_router_requires_always_on_inject(self):
         import json

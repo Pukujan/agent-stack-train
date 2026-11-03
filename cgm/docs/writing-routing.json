@@ -2,7 +2,7 @@
   "schema_version": "content-generation.writing-routing.v1",
   "enforcement": "soft",
   "application": "must_load",
-  "note": "Agents MUST load the listed module before writing each surface (APPLY, not prefer). HSW is the default for human-facing prose (GitHub and docs prose, commits, posts, papers) except README/product entry (writing-direction) and filename-only surfaces (human-output-naming). HTML pages are not routed to HSW: since agent-stack-train#81 (2026-11-01) no writing module is required before writing an HTML report, compare page or other agent-produced HTML (see not_routed). Soft = no NLP CI grade of prose; presence of modules + this contract (including always-on inject) is what validate_content_system and verify_hsw_applied check. EVERY CGM adopter must inject the always-on system_block into agent prompts at start (see acs_prompt_inject / always_on_system_block). Filename surfaces route to human-output-naming (hon) with speakable basenames + per-feature legends; see also docs/human-output-naming.json / docs/HUMAN_OUTPUT_NAMING.md. Marketing intro sites, sales sites, and technical demo pages use route marketing_intro_site: writing-direction plus visual-direction, brand-foundation, and html-demo. That surface is not the README exception.",
+  "note": "Agents MUST load human-sounding-writing (hsw) before writing GitHub prose (PR and issue titles and bodies, issue-log titles, comments, commits, receipts, changelog prose) and human-output-naming (hon) before naming files the stack itself writes. This router does not decide how a project's own README, product pages, marketing or sales sites, demo pages or HTML are written: those follow the owner's direction, and writing-direction is loaded there only when the owner asks (agent-stack-train#117). The sales-arc route marketing_intro_site is retired. HTML pages need no writing module (agent-stack-train#81). Soft = no NLP CI grade of prose; presence of modules + this contract (including the always-on inject) is what validate_content_system and verify_hsw_applied check. EVERY CGM adopter must inject the always-on system_block into agent prompts at start (see acs_prompt_inject / always_on_system_block).",
   "routes": [
     {
       "id": "readme_product_entry",
@@ -11,12 +11,13 @@
         "product entry pages"
       ],
       "load": "writing-direction",
-      "required_load": true,
+      "required_load": false,
       "also_load_optional": [
         "brand-foundation",
         "content-context"
       ],
-      "notes": "Keep scan-first selective bold and the README scanability contract."
+      "notes": "Opt-in only (agent-stack-train#117): the owner's direction decides how a README or product page is written. Load writing-direction here only when the owner asks for it. Never required.",
+      "opt_in": true
     },
     {
       "id": "reader_facing_explanations",
@@ -41,35 +42,6 @@
         "Use descriptive headings and selective bold so a heading-and-bold scan tells a usable second story; do not turn the brief into a README clone.",
         "End with a clear next action, example, or smallest useful path for the reader.",
         "Adapt the checks to the document type; do not add promotional claims a research brief does not support."
-      ]
-    },
-    {
-      "id": "marketing_intro_site",
-      "surfaces": [
-        "marketing intro sites",
-        "sales sites",
-        "technical demo pages",
-        "big-tech intro websites",
-        "product demo pages"
-      ],
-      "load": "writing-direction",
-      "required_load": true,
-      "also_load_required": [
-        "visual-direction",
-        "brand-foundation",
-        "html-demo"
-      ],
-      "notes": "A front marketing, sales, or technical intro site (the shape a big-tech product demo uses) loads writing-direction as the story module. It is not the README exception. It is an HTML page, so human-sounding-writing is not required for it (retired for HTML in agent-stack-train#81). Product-entry bold stays one short scan anchor. The verified-number rule still applies. visual-direction, brand-foundation, and html-demo are required too: the brand feeling chooses the words and the pictures, and a picture or short video shows that feeling. Do not narrate the image pipeline. Do not treat a technical diagram as the only visual. Open issues #44 and #51 cover personal welcome pages and a purpose-keyed router. This route does not close them, and a profile page does not inherit this sales arc.",
-      "review_checklist": [
-        "Open with a very short intro a stranger can recognize. The product name waits until after the problem and the market.",
-        "Then define the problem and the consequence, with one concrete case.",
-        "Then the market impact, in money, in developer time, and in external research. Every number is cited, and the source's own limit stays beside it.",
-        "Then introduce the product and what it does.",
-        "Then how it solves the problem: name each component and how that component answers one failure.",
-        "Then a metric approximation of how far the product moves those problems. Label it as a reading of the external findings. It is not a product benchmark, a revenue figure, or an adoption count.",
-        "Then the technical definition and a comparison with the alternative the reader already has.",
-        "The demo page opens with a short video of how it works, then the interactive demo, then how that demo solves the problem, then how to use it.",
-        "Define the language from the brand feeling. A picture or a short video shows that feeling. A caption names the feeling. It does not narrate how the picture was made, and a technical diagram is not the only visual."
       ]
     },
     {
@@ -149,20 +121,28 @@
         "human-facing HTML deliverables",
         "human-readable compare outputs"
       ],
-      "reason": "Retired for HTML on 2026-11-01 (agent-stack-train#81): no writing module is required before writing an HTML page. Marketing intro sites, sales sites, and technical demo pages still follow route marketing_intro_site; filenames still follow human-output-naming."
+      "reason": "Retired for HTML on 2026-11-01 (agent-stack-train#81): no writing module is required before writing an HTML page. Marketing intro sites, sales sites and technical demo pages are not routed either (agent-stack-train#117): the owner decides how they read."
+    },
+    {
+      "id": "product_pages_and_sites",
+      "surfaces": [
+        "README.md",
+        "product entry pages",
+        "marketing intro sites",
+        "sales sites",
+        "technical demo pages",
+        "product demo pages"
+      ],
+      "reason": "Not routed (agent-stack-train#117): CGM helps with GitHub prose, not with how a project writes its own product. The route marketing_intro_site and the required README load are retired; load writing-direction only when the owner asks."
     }
   ],
   "apply_checklist": [
-    "Identify the writing surface (README, product entry, human-facing research plan / architecture explanation / evidence brief, PR title/body, issue title/body, issue-log title, commit message/subject, non-README doc, changelog prose, post/blog/social, paper/data writeup, marketing intro site, HTML page, or generated filename).",
-    "Look up the surface in routes[].surfaces in docs/writing-routing.json (or the table in docs/WRITING_ROUTING.md). If it is a reader-facing research plan, architecture explanation, or evidence brief, route to writing-direction (see the reader_facing_explanations route and its review_checklist) \u2014 a scholarly paper or raw data writeup still routes to human-sounding-writing (hsw). If it is human-facing prose and not README/product entry, not a reader-facing explanation, not an HTML page, and not a filename-only surface, default to human-sounding-writing (human_facing_default).",
-    "HTML pages (HTML reports, compare HTML/UIs, appendable HTML, other agent-produced HTML) are in not_routed: no writing module is required before writing them (agent-stack-train#81).",
-    "MUST load modules/<load>/SKILL.md for that route before drafting \u2014 required_load is true; do not skip because the surface is short or 'just a commit'.",
+    "Identify the writing surface. If it is GitHub prose (PR title/body, issue title/body, issue-log title, comment, commit message/subject, receipt, changelog prose), MUST load modules/human-sounding-writing/SKILL.md before drafting; do not skip because it is short or 'just a commit'.",
     "Apply the module rules to the draft (voice, AI-tell scrub, bold policy as the module states).",
-    "README / product entry stays on writing-direction; do not apply hsw bold restraints there.",
-    "A marketing intro site, sales site, or technical demo page is route marketing_intro_site. MUST load writing-direction plus visual-direction, brand-foundation, and html-demo. Follow that route's review checklist. It is not the README exception.",
+    "A README, product page, marketing or sales site, demo page or HTML page is NOT governed by CGM: follow the owner's direction. Load writing-direction only when the owner asks for it (agent-stack-train#117).",
     "Human-facing research plans, architecture explanations, and evidence briefs route to writing-direction (reader_facing_explanations); apply its review_checklist. A scholarly paper or raw data writeup still routes to hsw.",
-    "If the surface is a generated artifact filename, asset-manifest path, committed media basename, or filename legend, MUST load modules/human-output-naming/SKILL.md (hon), call scripts/human_filename (speakable by default; optional safe_twin), and keep a per-feature legend.",
-    "Never treat HSW as optional, soft-skip, or per-task opt-in for GitHub and docs prose, commits, posts, or papers."
+    "If the surface is a filename the stack itself writes (generated artifact, asset-manifest path, committed media basename, filename legend), MUST load modules/human-output-naming/SKILL.md (hon), call scripts/human_filename (speakable by default; optional safe_twin), and keep a per-feature legend.",
+    "Never treat HSW as optional or per-task opt-in for GitHub prose."
   ],
   "required_writing_modules": [
     "writing-direction",
@@ -205,9 +185,9 @@
       "papers and data writeups",
       "every other human-facing prose deliverable"
     ],
-    "when": "At agent start / session boot for EVERY repo that pins CGM \u2014 not per-task and not ACS-only. Paste system_block into the agent system prompt before the agent writes ANY human-facing prose: GitHub or docs prose, commits, posts, papers \u2014 and before naming generated artifact / asset-manifest / media paths.",
-    "system_block": "CGM ALWAYS-ON WRITING RULE (every adopter that pins this helper)\n\nBefore you write ANY human-facing prose \u2014 PR/issue/commit prose, issue-log titles, receipts, docs, changelog prose, posts, papers \u2014 you MUST load and apply modules/human-sounding-writing/SKILL.md (hsw).\n\nThis rule is always on. Opt-in is forbidden. Do not wait for a per-task flag.\n\nExceptions (only these):\n- README.md / product entry pages \u2192 load modules/writing-direction/SKILL.md instead\n- Human-facing research plans, architecture explanations, and evidence briefs \u2192 load modules/writing-direction/SKILL.md (reader-facing explanation, not a manuscript or data writeup)\n- Generated artifact filenames / asset-manifest paths / media basenames / filename legends \u2192 load modules/human-output-naming/SKILL.md (hon)\n- HTML pages (HTML reports, compare HTML/UIs, appendable HTML, other agent-produced HTML) \u2192 no writing module is required\n\nMarketing intro sites, sales sites, and technical demo pages are not the README exception. Load modules/writing-direction/SKILL.md, plus modules/visual-direction/SKILL.md, modules/brand-foundation/SKILL.md, and modules/html-demo/SKILL.md, and follow the marketing_intro_site review checklist. Product-entry bold stays one short scan anchor. The verified-number rule still applies. Words and pictures come from the brand feeling.\n\nIf you cannot load a required skill file from the pinned CGM checkout, stop and report that.\n\nFilenames: use scripts/human_filename (speakable basenames; optional safe_twin) and keep a per-feature legend. Hash may stay a separate manifest field.\n",
-    "instruction": "ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for every human-facing prose task. Before writing ANY human-facing prose, MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true; HSW is not optional for prose. README and product entry pages \u2192 writing-direction. Human-facing research plans, architecture explanations, and evidence briefs \u2192 writing-direction (reader_facing_explanations; a scholarly paper or raw data writeup stays on hsw). Pull request titles/bodies, issue titles/bodies, issue-log titles, commit messages, commit subjects, non-README docs, changelog prose, posts/blogs/social/general prose, and papers/data writeups \u2192 human-sounding-writing (hsw). HTML pages (HTML reports, compare HTML/UIs, appendable HTML, other agent-produced HTML) need no writing module (not_routed html_pages, agent-stack-train#81). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on, not prefer. Follow apply_checklist and human_facing_default in this file. Generated artifact filenames, asset-manifest paths, committed media basenames, and filename legends \u2192 human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames (omit defaults; optional safe_twin); keep a per-feature legend (glossary + file list); never opaque p0/hex stems or robot key=value stems. Marketing intro sites, sales sites, and technical demo pages load writing-direction (route marketing_intro_site, also visual-direction, brand-foundation, and html-demo). That surface is not the README exception."
+    "when": "At agent start / session boot for EVERY repo that pins CGM \u2014 not per-task and not ACS-only. Paste system_block into the agent system prompt before the agent writes GitHub prose (PRs, issues, issue logs, comments, commits, receipts) \u2014 and before naming files the stack itself writes.",
+    "system_block": "CGM ALWAYS-ON WRITING RULE (every adopter that pins this helper)\n\nBefore you write GitHub prose \u2014 PR and issue titles and bodies, issue-log titles, comments, commit messages, receipts, changelog prose \u2014 you MUST load and apply modules/human-sounding-writing/SKILL.md (hsw).\n\nThis rule is always on for that prose. Opt-in is forbidden. Do not wait for a per-task flag.\n\nThis rule does not cover the project's own product. READMEs, product pages, marketing or sales sites, demo pages and HTML pages follow the owner's direction; no writing module is required, and writing-direction is loaded only when the owner asks. HTML pages need no writing module.\n\nExceptions (only these):\n- Human-facing research plans, architecture explanations, and evidence briefs \u2192 load modules/writing-direction/SKILL.md (reader-facing explanation, not a manuscript or data writeup)\n- Filenames the stack itself writes (generated artifacts, asset-manifest paths, media basenames, filename legends) \u2192 load modules/human-output-naming/SKILL.md (hon)\n\nIf you cannot load a required skill file from the pinned CGM checkout, stop and report that.\n\nFilenames the stack writes: use scripts/human_filename (speakable basenames; optional safe_twin) and keep a per-feature legend. Hash may stay a separate manifest field.\n",
+    "instruction": "ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste acs_prompt_inject.system_block into the agent system prompt at start. HSW (human-sounding-writing) is ON by default for GitHub prose. Before writing it, MUST load modules/human-sounding-writing/SKILL.md. Opt-in is forbidden; always_on is true; HSW is not optional for GitHub prose. HTML pages need no writing module. Pull request titles/bodies, issue titles/bodies, issue-log titles, comments, commit messages, receipts and changelog prose \u2192 human-sounding-writing (hsw). README, product pages, marketing and sales sites, demo pages and HTML pages are not routed (agent-stack-train#117, #81): follow the owner's direction. Human-facing research plans, architecture explanations, and evidence briefs \u2192 writing-direction (reader_facing_explanations). Soft enforcement means no NLP CI grade of prose; the contract language is MUST/APPLY/default_on/always_on. Follow apply_checklist and human_facing_default in this file. Filenames the stack itself writes \u2192 human-output-naming (hon): MUST load that skill and use scripts/human_filename with speakable basenames; keep a per-feature legend; never opaque p0/hex stems."
   },
   "human_facing_default": {
     "load": "human-sounding-writing",
@@ -218,19 +198,17 @@
       "HSW"
     ],
     "exceptions": [
-      "readme_product_entry",
       "reader_facing_explanations",
       "generated_artifact_filenames",
+      "product_pages_and_sites",
       "html_pages"
     ],
     "covers": [
-      "every human-facing prose task",
-      "GitHub and docs prose",
+      "GitHub prose",
       "commit messages and subjects",
-      "posts blogs social",
-      "papers and data writeups"
+      "changelog prose"
     ],
-    "notes": "Default ON for all human-facing prose. Do not treat HSW as optional, per-task, or only-when-writing-posts. README/product entry stays on writing-direction; reader-facing research plans, architecture explanations, and evidence briefs also stay on writing-direction (reader_facing_explanations route); basename/legend naming stays on human-output-naming (hon). HTML pages are an exception since agent-stack-train#81: no writing module is required for them (not_routed html_pages). Route marketing_intro_site is not an exception to its own route: a marketing intro site loads writing-direction, visual-direction, brand-foundation, and html-demo."
+    "notes": "Default ON for GitHub prose. Do not treat HSW as optional or per-task. README, product pages, marketing and sales sites, demo pages and HTML are not routed (agent-stack-train#117, #81): the owner decides. Reader-facing research plans, architecture explanations and evidence briefs stay on writing-direction (reader_facing_explanations route); filenames the stack itself writes stay on human-output-naming (hon)."
   },
   "always_on_system_block": {
     "path": "acs_prompt_inject.system_block",
@@ -252,8 +230,8 @@
       ],
       "bootstrap_steps": [
         "At session start, read .content-system/ and the pinned CGM checkout; do not read the helper's moving main.",
-        "Paste acs_prompt_inject.system_block into the agent system prompt before writing any human-facing deliverable; opt-in is forbidden.",
-        "MUST load modules/writing-direction/SKILL.md for README/product entry, modules/human-sounding-writing/SKILL.md for PR/issue/commit prose and docs, and modules/human-output-naming/SKILL.md for generated filenames and legends.",
+        "Paste acs_prompt_inject.system_block into the agent system prompt before writing GitHub prose; opt-in is forbidden.",
+        "MUST load modules/human-sounding-writing/SKILL.md for PR/issue/commit prose, and modules/human-output-naming/SKILL.md for filenames the stack writes. README and product pages follow the owner's direction.",
         "Generate the full narrative image set (hero PNG raster, problem, supporting) and register each in .content-system/asset-manifest.json with a prompt record; never use an SVG as the README hero.",
         "Before handoff, run validate_content_system.py --check-adopter-readme (or verify_adopter_content.py) and fix failures."
       ],

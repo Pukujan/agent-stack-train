@@ -61,7 +61,7 @@ def check_always_on_contract(root: Path) -> list[str]:
         if human_default.get("default_on") is not True:
             errors.append("human_facing_default.default_on must be true")
         covers = {str(c).lower() for c in human_default.get("covers", [])}
-        for needle in ("every human-facing", "github and docs prose"):
+        for needle in ("github prose", "commit messages"):
             if not any(needle in cover for cover in covers):
                 errors.append(f"human_facing_default.covers must mention {needle}")
 
@@ -99,10 +99,10 @@ def check_always_on_contract(root: Path) -> list[str]:
         ):
             if needle not in lowered:
                 errors.append(f"acs_prompt_inject.system_block must mention {needle}")
-        if "marketing intro" not in lowered:
+        if "github prose" not in lowered or "product" not in lowered:
             errors.append(
-                "acs_prompt_inject.system_block must say a marketing intro site "
-                "is not the README exception"
+                "acs_prompt_inject.system_block must scope the rule to GitHub prose "
+                "and say it does not cover the project's own product"
             )
 
     instruction = str(inject.get("instruction") or "")

@@ -33,12 +33,11 @@ Load only the modules the requested output needs. Paths are relative to this hel
 
 ## Writing router
 
-Soft router — soft means no NLP CI grade of prose, **not** optional load. Agents **MUST load** the routed module (`required_load`). **HSW is default ON** for every human-facing deliverable except README/product entry (and filename-only → **hon**). No per-report opt-in.
+Soft router — soft means no NLP CI grade of prose, **not** optional load. Agents **MUST load** the routed module (`required_load`). **HSW is default ON** for GitHub prose (PRs, issues, issue logs, comments, commits, receipts). CGM does not decide how a project writes its own README, product pages or sites: the owner does (agent-stack-train#117). Filenames the stack writes → **hon**. No per-report opt-in for GitHub prose.
 
 | Situation | Load | Notes |
 | --- | --- | --- |
-| README / product entry | `writing-direction` (+ brand / context as needed) | **MUST load.** Keep scan-first selective bold |
-| Marketing intro / sales site / technical demo page | `writing-direction`, plus visual direction, brand foundation, and html-demo | **MUST load all of them** (route `marketing_intro_site`, 0.5.13+). Not the README exception. Brand feeling chooses the words and the pictures |
+| README / product entry | `writing-direction` (+ brand / context as needed) | **Opt-in.** Load only when the owner asks. Keep scan-first selective bold |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ context as needed) | **MUST load.** Reader-facing explanation, not a manuscript; story order, evidence/status/boundaries, next action. A paper or raw data writeup stays on **hsw** |
 | PR titles/bodies, issue titles/bodies, issue-log titles | `human-sounding-writing` (**hsw**) | **MUST load.** Human-facing GitHub prose; one plain sentence per title |
 | Receipts (push, checkpoint, release) | `human-sounding-writing` (**hsw**) | **MUST load.** A receipt headline is one human sentence |
