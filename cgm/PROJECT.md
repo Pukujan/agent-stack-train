@@ -18,7 +18,7 @@ When the evidence is missing, the output must say so. A citation proves traceabi
 
 ## Scope
 
-- Eight module entry points under `modules/` — brand foundation, content context, writing direction, human-sounding writing (**hsw**), human-output naming (**hon**), visual direction, image generation, and HTML demo.
+- Seven module entry points under `modules/` — brand foundation, content context, writing direction, human-sounding writing (**hsw**), human-output naming (**hon**), visual direction, and image generation.
 - The writing router: which module a writing surface must load before drafting (`docs/WRITING_ROUTING.md`, `docs/writing-routing.json`).
 - Human-output rules for issue, pull request, receipt, and commit prose (`docs/NARRATIVE_AUTHORITY.md`).
 - Templates, schemas, and the README contract (`templates/`, `schemas/`).

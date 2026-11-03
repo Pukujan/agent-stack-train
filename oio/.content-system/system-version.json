@@ -12,8 +12,7 @@
     "human-sounding-writing",
     "human-output-naming",
     "visual-direction",
-    "image-generation",
-    "html-demo"
+    "image-generation"
   ],
   "authoritative_project_files": [
     "PROJECT.md",

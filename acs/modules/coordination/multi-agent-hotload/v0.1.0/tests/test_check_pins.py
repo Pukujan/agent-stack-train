@@ -81,8 +81,8 @@ def test_check_pins_fails_on_drifted_module_count(tmp_path: Path):
     # HOTLOAD.md projects cgm.module_count. Version commits are not projected.
     target = root / "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
     text = target.read_text(encoding="utf-8")
-    assert "eight module" in text
-    target.write_text(text.replace("eight module", "six module"), encoding="utf-8")
+    assert "seven module" in text
+    target.write_text(text.replace("seven module", "six module"), encoding="utf-8")
     proc = _run(root)
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout
@@ -105,7 +105,7 @@ def test_check_pins_fails_on_superseded_value_even_when_canonical_present(tmp_pa
     target = root / "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
     text = target.read_text(encoding="utf-8")
     # Canonical value stays; a superseded one is appended (the "carries both" case).
-    target.write_text(text + "\n(legacy) seven modules\n", encoding="utf-8")
+    target.write_text(text + "\n(legacy) eight modules\n", encoding="utf-8")
     proc = _run(root)
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout

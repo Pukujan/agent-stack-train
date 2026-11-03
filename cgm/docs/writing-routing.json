@@ -5,21 +5,6 @@
   "note": "Agents MUST load human-sounding-writing (hsw) before writing GitHub prose (PR and issue titles and bodies, issue-log titles, comments, commits, receipts, changelog prose) and human-output-naming (hon) before naming files the stack itself writes. This router does not decide how a project's own README, product pages, marketing or sales sites, demo pages or HTML are written: those follow the owner's direction, and writing-direction is loaded there only when the owner asks (agent-stack-train#117). The sales-arc route marketing_intro_site is retired. HTML pages need no writing module (agent-stack-train#81). Soft = no NLP CI grade of prose; presence of modules + this contract (including the always-on inject) is what validate_content_system and verify_hsw_applied check. EVERY CGM adopter must inject the always-on system_block into agent prompts at start (see acs_prompt_inject / always_on_system_block).",
   "routes": [
     {
-      "id": "readme_product_entry",
-      "surfaces": [
-        "README.md",
-        "product entry pages"
-      ],
-      "load": "writing-direction",
-      "required_load": false,
-      "also_load_optional": [
-        "brand-foundation",
-        "content-context"
-      ],
-      "notes": "Opt-in only (agent-stack-train#117): the owner's direction decides how a README or product page is written. Load writing-direction here only when the owner asks for it. Never required.",
-      "opt_in": true
-    },
-    {
       "id": "reader_facing_explanations",
       "surfaces": [
         "human-facing research plans",
@@ -133,7 +118,7 @@
         "technical demo pages",
         "product demo pages"
       ],
-      "reason": "Not routed (agent-stack-train#117): CGM helps with GitHub prose, not with how a project writes its own product. The route marketing_intro_site and the required README load are retired; load writing-direction only when the owner asks."
+      "reason": "Not routed (agent-stack-train#117): CGM helps with GitHub prose, not with how a project writes its own product. The routes marketing_intro_site and readme_product_entry are removed; the owner decides how these read."
     }
   ],
   "apply_checklist": [

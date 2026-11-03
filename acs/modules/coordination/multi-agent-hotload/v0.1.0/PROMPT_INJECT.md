@@ -71,7 +71,6 @@ ALWAYS-ON for every CGM adopter (ACS is one consumer, not the only one). Paste a
 
 | Surfaces (sample) | MUST load |
 | --- | --- |
-| README.md; product entry pages | `writing-direction` |
 | human-facing research plans; reader-facing research briefs; architecture explanations; evidence briefs; human-facing project explanations | `writing-direction` |
 | pull request titles; pull request bodies; issue titles; issue bodies; issue log titles; receipts; push receipts; commit messages; ... | `human-sounding-writing` (hsw/HSW) |
 | generated artifact filenames; asset-manifest paths; committed media basenames; filename legends | `human-output-naming` (hon/HON) |

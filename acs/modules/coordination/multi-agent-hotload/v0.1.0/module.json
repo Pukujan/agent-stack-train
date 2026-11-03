@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
+  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM (seven modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Every component comes from the same agent-stack-train checkout, at its one commit.",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-10-05",
@@ -190,7 +190,7 @@
   },
   "dependencies": [
     "PCM from the agent-stack-train checkout's pcm/ folder, at the stack commit — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
-    "CGM from the agent-stack-train checkout's cgm/ folder, at the stack commit — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "CGM from the agent-stack-train checkout's cgm/ folder, at the stack commit — FULL seven-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
     "OIO from the agent-stack-train checkout's oio/ folder, at the stack commit — the observational issue-log surface (ontology, issue form, triage workflow, AGENTS.md guidance block); the ACS installer invokes OIO's own installer; pin/reference, do not vendor",
     "agent-stack-train stack-releases.json — the certified version set the adopter's stack-manifest.json follows (empty pins)",
     "Python 3 + jsonschema for hotload_check"

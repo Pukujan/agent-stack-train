@@ -3,9 +3,9 @@
 Soft router for choosing a writing module. **Soft** means CGM does not
 NLP-grade prose in CI. It does **not** mean optional: agents **MUST load** the
 routed module before writing the listed surfaces (APPLY / `required_load`).
-**HSW is ON by default** for every human-facing prose deliverable except README /
-product entry (`writing-direction`) and filename-only surfaces
-(`human-output-naming`). No per-task opt-in. HTML pages need no writing module
+**HSW is ON by default** for GitHub prose. READMEs, product pages and sites are not
+routed (agent-stack-train#117), and filename-only surfaces go to
+`human-output-naming`. No per-task opt-in. HTML pages need no writing module
 (retired for HTML on 2026-11-01, agent-stack-train#81).
 
 Machine-readable twin: [`docs/writing-routing.json`](writing-routing.json)
@@ -16,7 +16,6 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 
 | Situation | Load | Notes |
 | --- | --- | --- |
-| README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | **Opt-in (agent-stack-train#117).** Load only when the owner asks. When loaded, keep scan-first selective bold and the README scanability contract. |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ `content-context` as needed) | **MUST load.** Reader-facing explanation, not a manuscript. Story order, selective bold, evidence/status/boundaries distinct, clear next action. A scholarly paper or raw data writeup stays on **hsw**. |
 | Pull request titles and bodies | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human-facing GitHub prose; plain titles, reader-first bodies. |
 | Issue titles, issue bodies, issue-log titles | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Same voice rules for tracker prose agents publish. Titles are one plain human sentence. |

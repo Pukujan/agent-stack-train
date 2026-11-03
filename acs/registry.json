@@ -39,7 +39,7 @@
       "summary": "FULL PCM + FULL CGM + OIO + coordination runtime (join-order, 30m lease, claim-file claim_queue, agent-less watchdog). The adopter follows the release train via stack-manifest.json (empty pins). Slim subsets are incomplete installs; an uninstallable component (e.g. OIO) is reported PARTIAL, never as success.",
       "dependencies": [
         "PCM from the agent-stack-train checkout's pcm/ folder (full stack)",
-        "CGM from the agent-stack-train checkout's cgm/ folder (full eight modules incl. human-output-naming)",
+        "CGM from the agent-stack-train checkout's cgm/ folder (full seven modules incl. human-output-naming)",
         "OIO from the agent-stack-train checkout's oio/ folder (observational issue-log surface; installer invoked by acs_install.py)",
         "agent-stack-train stack-releases.json (certified version set the adopter manifest follows)"
       ]

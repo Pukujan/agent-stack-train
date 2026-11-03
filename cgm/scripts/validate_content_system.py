@@ -21,7 +21,6 @@ EXPECTED_MODULES = {
     "human-output-naming",
     "visual-direction",
     "image-generation",
-    "html-demo",
 }
 
 WRITING_MODULES = (
@@ -77,7 +76,6 @@ FILENAME_LEGEND_DIR = "docs/filename-legends"
 FILENAME_LEGEND_SCHEMA = "content-generation.filename-legend.v1"
 ADAPTER_FILENAME_LEGEND_DIR = ".content-system/filename-legends"
 REQUIRED_ROUTER_ROUTE_IDS = (
-    "readme_product_entry",
     "reader_facing_explanations",
     "github_and_docs_prose",
     "generated_artifact_filenames",
@@ -848,13 +846,10 @@ def check_writing_contract(root: Path) -> list[str]:
         if not route.get("load"):
             errors.append(f"{WRITING_ROUTER_CONTRACT} route {route_id} missing load")
 
-    readme_route = by_id.get("readme_product_entry") or {}
-    if readme_route.get("load") != "writing-direction":
-        errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry must load writing-direction")
-    if readme_route.get("required_load") is not False or readme_route.get("opt_in") is not True:
+    if "readme_product_entry" in by_id:
         errors.append(
-            f"{WRITING_ROUTER_CONTRACT} readme_product_entry must be opt-in "
-            "(required_load false, opt_in true; agent-stack-train#117)"
+            f"{WRITING_ROUTER_CONTRACT} readme_product_entry is retired (agent-stack-train#117): "
+            "CGM does not route how a project writes its own README"
         )
     reader_route = by_id.get("reader_facing_explanations") or {}
     if reader_route.get("load") != "writing-direction":

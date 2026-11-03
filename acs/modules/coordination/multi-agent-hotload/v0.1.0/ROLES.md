@@ -103,7 +103,7 @@ Claims, branches, PRs, and boss actions (ACCEPT/REJECT) are **only** on the hot-
 | System | Role |
 | --- | --- |
 | PCM | **Full** continuity + PR-only/gates/protection/auto-merge preference — **not** boss, not proposal store, not lease store of record |
-| CGM | **Full** stack (eight modules + contracts) for titles/README/UX — **not** ownership |
+| CGM | **Full** stack (seven modules + contracts) for titles/README/UX — **not** ownership |
 | Tool brand (Grok/Claude/Codex/…) | Irrelevant to seat assignment |
 | Watchdog | Liveness flags only — not failover |
 | Local SQLite / device DBs | Execution aids — GitHub issues / claim file win on disagreement |

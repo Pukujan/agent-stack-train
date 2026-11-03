@@ -107,8 +107,7 @@
         "human-sounding-writing",
         "human-output-naming",
         "visual-direction",
-        "image-generation",
-        "html-demo"
+        "image-generation"
       ],
       "human_output_contract": [
         "docs/README_PLAYBOOK.md",
@@ -133,7 +132,6 @@
         "docs/human-output-naming.json"
       ],
       "routing": {
-        "readme_product_entry": "writing-direction (MUST load; scan-first selective bold; do not apply HSW bold restraints)",
         "pr_issue_docs_commits": "human-sounding-writing / hsw (MUST load for PR/issue titles+bodies, docs, commits)",
         "posts_blogs_papers": "human-sounding-writing (hsw / HSW)",
         "contract": "docs/writing-routing.json + docs/ACS_VERIFY.md — application=must_load; human_facing_default; acs_prompt_inject after VALID",

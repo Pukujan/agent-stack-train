@@ -51,7 +51,7 @@ complete, pinned install:
 
 - **Full-stack wiring** — PCM (PR-only delivery, required CI gates,
   protection/auto-merge preference, leaf/parent receipts) plus the full Content
-  Generation Modules contract (all eight modules including human-output-naming),
+  Generation Modules contract (all seven modules including human-output-naming),
   both from the same agent-stack-train checkout as ACS, joined to the
   coordination runtime. A slim subset fails the install on purpose.
 - **Coordination rules** — join-order roles, a boss **lease** with FIFO failover,
