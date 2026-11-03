@@ -23,6 +23,10 @@ EXPECTED_MODULES = {
     "image-generation",
 }
 
+# Module ids an adopter's adapter may still list after CGM deleted them (agent-stack-train#117),
+# so an upgrade does not fail on an adapter the owner has not edited yet.
+RETIRED_MODULES = {"html-demo"}
+
 WRITING_MODULES = (
     "writing-direction",
     "human-sounding-writing",
@@ -1401,7 +1405,7 @@ def check_adapter(
     for field in ("helper_repository", "helper_version", "helper_commit"):
         if not system.get(field):
             errors.append(f"adapter system-version.json missing {field}")
-    if not system.get("modules") or set(system["modules"]) != EXPECTED_MODULES:
+    if not system.get("modules") or set(system["modules"]) - RETIRED_MODULES != EXPECTED_MODULES:
         errors.append("adapter system-version.json modules do not match the helper contract")
 
     project = values.get("project-brief.json", {})
