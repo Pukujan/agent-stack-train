@@ -2,7 +2,7 @@
   "schema_version": "agent-stack-train.stack-releases.v1",
   "release_train": "current",
   "published_by": "https://github.com/Pukujan/agent-stack-train",
-  "recorded_at": "2026-11-01T21:04:54Z",
+  "recorded_at": "2026-11-03T00:29:39Z",
   "status": "certified",
   "certified": {
     "project-continuity-modules": {
@@ -15,7 +15,7 @@
     "content-generation-modules": {
       "version": "0.5.13",
       "commit": "c47740d71ca68be6a782b24dd8f28b905c620506",
-      "modules": 8,
+      "modules": 7,
       "role": "Narrative and styling authority: writing routing, human-sounding writing, output naming, visual direction, image generation."
     },
     "agent-custom-setup": {
@@ -30,8 +30,8 @@
       "role": "Issue-log ticketing system: the canonical issue form, the filer stamp, and its triage."
     },
     "agent-stack-train": {
-      "version": "1.0.9",
-      "commit": "496bf33e0a8327345a8e3ba19e3dc40eae47164a",
+      "version": "1.0.10",
+      "commit": "5c54daaf000cc7e4efa77407d061cff354fdfcd9",
       "role": "The stack release: PCM, CGM, ACS and OIO at one commit of this repository. A one-checkout adopter installs from it and pins it alone."
     }
   },
