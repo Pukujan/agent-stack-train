@@ -196,6 +196,17 @@ class InstallerTests(unittest.TestCase):
             install(str(self.target))
         self.assertEqual(self.tree(), before)
 
+    def test_managed_file_already_holding_the_package_content_is_not_a_conflict(self):
+        install(str(self.target))
+        manifest_path = self.target / ".oio/install-manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        # The adopter's copy equals the new package file, but the manifest records an older version's hash.
+        manifest["managed_files"][".github/scripts/oio_record.py"] = "0" * 64
+        manifest_path.write_text(json.dumps(manifest))
+        self.assertIn("VALID", " ".join(install(str(self.target), check_only=False) + install(str(self.target), check_only=True)))
+        refreshed = json.loads(manifest_path.read_text())
+        self.assertNotEqual(refreshed["managed_files"][".github/scripts/oio_record.py"], "0" * 64)
+
     def test_install_writes_lf_canonical_bytes_and_hashes_them(self):
         install(str(self.target))
         source = (ROOT / "ontology/default.json").read_bytes()
