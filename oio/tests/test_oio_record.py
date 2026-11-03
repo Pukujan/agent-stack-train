@@ -102,6 +102,39 @@ class RecordTests(unittest.TestCase):
         del record["filer"]["destination_repository"]
         self.assertEqual(oio_record.missing_fields(record, schema), ["filer.destination_repository"])
 
+    def define_priorities(self):
+        path = self.top / ".oio/ontology/project.json"
+        project = json.loads(path.read_text())
+        project["priorities"] = [{"path": "1", "concept_id": "concept-one"}, {"path": "2", "concept_id": "concept-two"}]
+        path.write_text(json.dumps(project))
+
+    def test_a_defined_priority_resolves_to_the_ontologys_concept(self):
+        self.define_priorities()
+        code, out, err = self.write("--priority", "2")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["priority"], {"status": "resolved", "path": "2", "concept_id": "concept-two"})
+
+    def test_an_undefined_priority_is_refused_with_the_paths_that_exist(self):
+        self.define_priorities()
+        code, out, err = self.write("--priority", "999")
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("not a priority path", err)
+        self.assertIn("1, 2", err)
+
+    def test_no_priority_stays_unresolved(self):
+        self.define_priorities()
+        code, out, err = self.write()
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["priority"], {"status": "unresolved", "path": None, "concept_id": None})
+
+    def test_the_self_test_passes_against_a_defined_ontology(self):
+        self.define_priorities()
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(oio_record.Path, "cwd", return_value=self.top), contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = oio_record.main(["--self-test"])
+        self.assertEqual(code, 0, err.getvalue())
+        self.assertIn("self-test ok", out.getvalue())
+
     def test_the_writer_is_installed_into_adopters(self):
         self.assertIn(".github/scripts/oio_record.py", oio_installer.PACKAGE_FILES)
 
