@@ -16,8 +16,7 @@ documented in `acs_prompt_inject.system_block` inside the JSON contract.
 
 | Situation | Load | Notes |
 | --- | --- | --- |
-| README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | **MUST load.** Keep scan-first selective bold and the README scanability contract. |
-| Marketing intro sites, sales sites, technical demo pages | `writing-direction`, plus `visual-direction`, `brand-foundation`, and `html-demo` | **MUST load all of them.** hsw is not required: these are HTML pages (agent-stack-train#81). Route `marketing_intro_site`. This is not the README exception. Follow the sales arc in that route's checklist. The brand feeling chooses the words and the pictures. |
+| README / product entry | `writing-direction` (+ `brand-foundation` / `content-context` as needed) | **Opt-in (agent-stack-train#117).** Load only when the owner asks. When loaded, keep scan-first selective bold and the README scanability contract. |
 | Human-facing research plans, architecture explanations, evidence briefs | `writing-direction` (+ `content-context` as needed) | **MUST load.** Reader-facing explanation, not a manuscript. Story order, selective bold, evidence/status/boundaries distinct, clear next action. A scholarly paper or raw data writeup stays on **hsw**. |
 | Pull request titles and bodies | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Human-facing GitHub prose; plain titles, reader-first bodies. |
 | Issue titles, issue bodies, issue-log titles | `human-sounding-writing` (short name **hsw** / HSW) | **MUST load.** Same voice rules for tracker prose agents publish. Titles are one plain human sentence. |
@@ -79,47 +78,13 @@ Apply these checks to the brief without copying the README outline mechanically:
 Machine-readable twin: the `reader_facing_explanations` route in
 [`writing-routing.json`](writing-routing.json) (its `review_checklist`).
 
-## Marketing intro sites (0.5.13+)
-
-A front marketing page, a sales page, or a technical demo in the shape of a
-big-tech product intro is route `marketing_intro_site`. It is a product entry,
-and it is **not** the README exception that loads `writing-direction` alone.
-
-Load all of these before drafting:
-
-- [`modules/writing-direction/SKILL.md`](../modules/writing-direction/SKILL.md) — primary story module. One short bold anchor per section, so headings and bold still scan as a second story.
-- [`modules/visual-direction/SKILL.md`](../modules/visual-direction/SKILL.md), [`modules/brand-foundation/SKILL.md`](../modules/brand-foundation/SKILL.md), and [`modules/html-demo/SKILL.md`](../modules/html-demo/SKILL.md).
-
-The story order for this surface is the route's `review_checklist`, not the
-generic README sequence:
-
-1. A very short intro. The product name waits.
-2. The problem and its consequence.
-3. Market impact in money, in developer time, and in external research. Cite every number and keep the source's own limit beside it.
-4. What the product is and what it does.
-5. How it solves the problem: each component, and which failure that component answers.
-6. A metric approximation of how far the product moves those problems. Label it as a reading of the external findings. It is not a product benchmark, a revenue figure, or an adoption count.
-7. The technical definition, and a comparison with the alternative the reader already has.
-8. The demo page: a short video of how it works, then the interactive demo, then how that demo solves the problem, then how to use it.
-
-The brand feeling chooses the ontology and the language. A picture or a short
-video shows that feeling. The caption names the feeling. It does not narrate
-how the picture was made. A technical diagram is not the only visual.
-
-Do not merge the bold policies blindly. Product-entry bold stays: one short
-scan anchor. HSW still scrubs tells and forbids invented numbers. A personal
-profile or welcome page stays on the open requests in issues #44 and #51.
-This route does not close those issues, and a profile page does not grow a
-market section to satisfy this checklist.
-
 ## Human-facing default (0.5.6+)
 
 `human_facing_default` in [`writing-routing.json`](writing-routing.json) sets
-**hsw** as the default load for every human-facing prose deliverable. Exceptions:
+**hsw** as the default load for GitHub prose (agent-stack-train#117). Exceptions:
 
-- README / product entry → `writing-direction`
+- README / product pages / marketing and sales sites / demo pages → not routed (agent-stack-train#117): the owner decides; `writing-direction` only when asked
 - HTML pages (HTML reports, compare HTML/UIs, appendable HTML) → no writing module (`html_pages`, agent-stack-train#81)
-- Marketing intro sites, sales sites, and technical demo pages follow their own route (`marketing_intro_site`): `writing-direction` plus visual direction, brand foundation, and html-demo.
 - Human-facing research plans / architecture explanations / evidence briefs →
   `writing-direction` (reader-facing explanation, not a manuscript)
 - Generated artifact filenames / legends → `human-output-naming` (**hon**) for

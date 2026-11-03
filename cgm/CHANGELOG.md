@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **CGM helps with GitHub prose only (agent-stack-train#117):** the always-on `system_block` now covers PR and issue titles and bodies, issue-log titles, comments, commits, receipts and changelog prose. It no longer says "ANY human-facing prose", and it no longer makes the agent load writing modules for the project's own product.
+- The `marketing_intro_site` route (the sales arc) is retired. Marketing and sales sites, demo pages and HTML follow the owner's direction. The README route `readme_product_entry` is now opt-in: `required_load` false, `opt_in` true. A new `not_routed` entry `product_pages_and_sites` records this.
+- The validator fails if `marketing_intro_site` returns or if the README route becomes required again; the system block must scope itself to GitHub prose.
+
 - **HTML pages no longer need a writing module (agent-stack-train#81):** the rule that agents load `human-sounding-writing` (**hsw**) before any HTML is retired. HTML reports, compare HTML and UIs, appendable HTML and other agent-produced HTML move to a new `not_routed` entry, `html_pages`, and `human_facing_default` lists it as an exception. HSW stays required for pull request, issue and commit prose, issue-log titles, docs, changelog, posts and papers.
 - The `marketing_intro_site` route drops hsw from `also_load_required`. It now loads `writing-direction` with `visual-direction`, `brand-foundation` and `html-demo`.
 - The always-on `system_block`, the instruction text, `apply_checklist`, the README and AGENTS router tables, `WRITING_ROUTING.md`, `ACS_VERIFY.md` and both skill entry points say the same thing.

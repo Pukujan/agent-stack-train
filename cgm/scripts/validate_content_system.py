@@ -79,7 +79,6 @@ ADAPTER_FILENAME_LEGEND_DIR = ".content-system/filename-legends"
 REQUIRED_ROUTER_ROUTE_IDS = (
     "readme_product_entry",
     "reader_facing_explanations",
-    "marketing_intro_site",
     "github_and_docs_prose",
     "generated_artifact_filenames",
 )
@@ -852,8 +851,11 @@ def check_writing_contract(root: Path) -> list[str]:
     readme_route = by_id.get("readme_product_entry") or {}
     if readme_route.get("load") != "writing-direction":
         errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry must load writing-direction")
-    if readme_route.get("required_load") is not True:
-        errors.append(f"{WRITING_ROUTER_CONTRACT} readme_product_entry required_load must be true")
+    if readme_route.get("required_load") is not False or readme_route.get("opt_in") is not True:
+        errors.append(
+            f"{WRITING_ROUTER_CONTRACT} readme_product_entry must be opt-in "
+            "(required_load false, opt_in true; agent-stack-train#117)"
+        )
     reader_route = by_id.get("reader_facing_explanations") or {}
     if reader_route.get("load") != "writing-direction":
         errors.append(
@@ -880,52 +882,11 @@ def check_writing_contract(root: Path) -> list[str]:
             f"{WRITING_ROUTER_CONTRACT} reader_facing_explanations needs a review_checklist "
             "with at least 3 checks"
         )
-    marketing_route = by_id.get("marketing_intro_site") or {}
-    if marketing_route.get("load") != "writing-direction":
+    if "marketing_intro_site" in by_id:
         errors.append(
-            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site must load writing-direction"
+            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site is retired (agent-stack-train#117): "
+            "CGM does not route how a project writes its own sites"
         )
-    if marketing_route.get("required_load") is not True:
-        errors.append(
-            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site required_load must be true"
-        )
-    marketing_surfaces = {str(item).lower() for item in marketing_route.get("surfaces", [])}
-    for needle in ("marketing", "demo", "intro"):
-        if not any(needle in surface for surface in marketing_surfaces):
-            errors.append(
-                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site surfaces must mention {needle}"
-            )
-    also_required = {str(item).lower() for item in marketing_route.get("also_load_required", [])}
-    if "human-sounding-writing" in also_required:
-        errors.append(
-            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site must not require "
-            "human-sounding-writing: hsw is not required for HTML pages (agent-stack-train#81)"
-        )
-    for needle in (
-        "visual-direction",
-        "brand-foundation",
-        "html-demo",
-    ):
-        if needle not in also_required:
-            errors.append(
-                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site also_load_required "
-                f"must include {needle}"
-            )
-    marketing_checklist = marketing_route.get("review_checklist")
-    if not isinstance(marketing_checklist, list) or len(marketing_checklist) < 6:
-        errors.append(
-            f"{WRITING_ROUTER_CONTRACT} marketing_intro_site needs a review_checklist "
-            "with at least 6 checks"
-        )
-        marketing_joined = ""
-    else:
-        marketing_joined = " ".join(str(item).lower() for item in marketing_checklist)
-    for needle in ("problem", "market", "component", "approximation", "demo", "feeling"):
-        if needle not in marketing_joined:
-            errors.append(
-                f"{WRITING_ROUTER_CONTRACT} marketing_intro_site review_checklist "
-                f"must mention {needle}"
-            )
     prose_route = by_id.get("github_and_docs_prose") or {}
     if prose_route.get("load") != "human-sounding-writing":
         errors.append(f"{WRITING_ROUTER_CONTRACT} github_and_docs_prose must load human-sounding-writing")
@@ -1034,7 +995,7 @@ def check_writing_contract(root: Path) -> list[str]:
                 f"{WRITING_ROUTER_CONTRACT} human_facing_default.default_on must be true"
             )
         covers = {str(c).lower() for c in human_default.get("covers", [])}
-        for needle in ("every human-facing", "github and docs prose"):
+        for needle in ("github prose", "commit messages"):
             if not any(needle in cover for cover in covers):
                 errors.append(
                     f"{WRITING_ROUTER_CONTRACT} human_facing_default.covers must mention {needle}"
@@ -1161,10 +1122,10 @@ def check_writing_contract(root: Path) -> list[str]:
                     f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must say HTML pages "
                     "need no writing module"
                 )
-            if "marketing intro" not in lowered_block:
+            if "github prose" not in lowered_block or "product" not in lowered_block:
                 errors.append(
-                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must say "
-                    "a marketing intro site is not the README exception"
+                    f"{WRITING_ROUTER_CONTRACT} acs_prompt_inject.system_block must scope the rule "
+                    "to GitHub prose and say it does not cover the project's own product"
                 )
         if "system_block" not in (fields or []):
             errors.append(

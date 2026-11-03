@@ -9,9 +9,8 @@ description: >-
   pages (HTML reports, compare HTML/UIs, appendable HTML). Official short name: hsw
   (also HSW); canonical module id remains human-sounding-writing. Do not use
   for README or product-entry copy — load writing-direction and
-  docs/WRITING_ROUTING.md instead. Marketing intro sites load
-  writing-direction (route marketing_intro_site), not this module. Not
-  optional for prose.
+  docs/WRITING_ROUTING.md instead. The router does not govern a project's own sites or
+  product pages (agent-stack-train#117). Not optional for GitHub prose.
 ---
 
 # Human-sounding writing
@@ -41,11 +40,6 @@ Do **not** apply this module’s bold restraints to READMEs. README scanability
 and selective bold anchors stay under `writing-direction` and the README
 scanability contract.
 
-A **marketing intro site, sales site, or technical demo page** is not that
-stop. Route `marketing_intro_site` loads this module together with
-`writing-direction`. Keep one short writing-direction scan anchor. The tell
-scrub and the verified-number rule in this module still apply. The brand
-feeling chooses the words and the pictures.
 
 ## Durable references (in this repository)
 
