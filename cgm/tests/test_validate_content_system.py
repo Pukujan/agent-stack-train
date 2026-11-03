@@ -130,6 +130,26 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check(target)
             self.assertTrue(any("missing module" in error for error in errors))
 
+    def test_adapter_still_listing_a_retired_module_is_accepted(self):
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            adapter = Path(directory) / ".content-system"
+            adapter.mkdir()
+            system = {
+                "schema_version": "content-generation.adapter.v1",
+                "helper_repository": "https://example.invalid/helper",
+                "helper_version": "0.1.1",
+                "helper_commit": "abc123",
+                "modules": list(MODULES) + ["html-demo"],
+            }
+            (adapter / "system-version.json").write_text(json.dumps(system), encoding="utf-8")
+            errors = check_adapter(adapter, Path(directory))
+            self.assertFalse(any("modules do not match" in e for e in errors), errors)
+            system["modules"] = list(MODULES)[:-1] + ["html-demo"]
+            (adapter / "system-version.json").write_text(json.dumps(system), encoding="utf-8")
+            errors = check_adapter(adapter, Path(directory))
+            self.assertTrue(any("modules do not match" in e for e in errors), errors)
+
     def test_adapter_requires_project_and_asset_contract(self):
         with tempfile.TemporaryDirectory() as directory:
             adapter = Path(directory) / ".content-system"

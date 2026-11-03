@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **An adapter may still list a retired module (agent-stack-train#117):** the adapter check accepts `html-demo` beside the seven current modules, so an adopter's upgrade does not fail on an adapter its owner has not edited yet. Any other extra or missing module still fails.
+
 - **The README route `readme_product_entry` is deleted (agent-stack-train#117):** CGM no longer routes how a project writes its README or product pages, not even as an opt-in. The module `writing-direction` stays for research plans, architecture explanations and evidence briefs. The validator rejects the route if it returns.
 
 - **`html-demo` module deleted (agent-stack-train#117):** it set a section order (context, problem, mechanism, proof, next step) that did not match the project's own storyboard and said nothing about how a page looks. The module is removed from `EXPECTED_MODULES`, every `system-version.json`, ACS pins and hotload text; CGM now has seven modules.
