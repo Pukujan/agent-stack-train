@@ -88,6 +88,7 @@ GUARD_NAME = "acs_guard.py"
 ISSUE_FORM = Path(".github/ISSUE_TEMPLATE/observational-issue.yml")
 ISSUE_REF_RE = re.compile(r"\b(?:Refs|Closes|Fixes|Resolves)\b:?\s+(?:[\w.-]+/[\w.-]+)?#\d+", re.IGNORECASE)
 BRANCH_ISSUE_RE = re.compile(r"(?:^|[/_-])(?:issue-?|gh-?)?(\d{1,7})(?=[/_-]|$)")
+TASK_ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-\d{4}$")
 LINK_RE = re.compile(r"^(?:([\w.-]+/[\w.-]+))?#?(\d{1,7})$")
 CHECKPOINT_PREFIX = "PCM "
 SEPARATORS = set(";&|()\n")
@@ -303,10 +304,12 @@ def check_git(sub: str, args: list[str], cwd: Path) -> str | None:
         return need_issue(top, branch, "git push")
     if sub == "worktree" and args[:1] == ["add"]:
         rest = args[1:]
-        path, i = None, 0
+        path, new_branch, i = None, None, 0
         while i < len(rest):
             a = rest[i]
             if a in ("-b", "-B", "--reason"):
+                if a != "--reason" and i + 1 < len(rest):
+                    new_branch = rest[i + 1]
                 i += 2
                 continue
             if not a.startswith("-"):
@@ -320,6 +323,16 @@ def check_git(sub: str, args: list[str], cwd: Path) -> str | None:
         target = (cwd / path).expanduser().resolve()
         allowed = main.parent / "worktrees"
         if main.name == "main" and target.parent == allowed.resolve():
+            task_id = target.name
+            # `continuity worktree remove` proves the merge for task/<TASK-ID>-<slug>; a branch for
+            # another task (or none) in this task's slot can't be cleaned up safely later.
+            wrong_branch = new_branch is not None and not new_branch.startswith(f"task/{task_id}-")
+            if wrong_branch and TASK_ID_RE.fullmatch(task_id):
+                return (
+                    f"git worktree add -b {new_branch} {path}: the worktree for {task_id} must be on a "
+                    f"`task/{task_id}-<slug>` branch. Run `continuity worktree create {task_id}`, which names "
+                    "the branch from the task record."
+                )
             return None
         return (
             f"git worktree add {path}: worktrees go only at <project>/worktrees/<TASK-ID>, beside the "
