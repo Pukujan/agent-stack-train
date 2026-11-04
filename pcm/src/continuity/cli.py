@@ -1472,6 +1472,12 @@ def branch_for_task(task_path: Path) -> str:
     return f"task/{task_path.stem.removeprefix('TASK-')}"
 
 
+def is_task_branch(ref: str | None, task_id: str) -> bool:
+    """True when `ref` is a local `task/<TASK-ID>-<slug>` branch for exactly this task."""
+    prefix = f"refs/heads/task/{task_id}-"
+    return ref is not None and ref.startswith(prefix) and len(ref) > len(prefix)
+
+
 def dev_root_strays(canonical_root: Path) -> list[str]:
     """Checkouts of this same repository sitting directly under the dev root.
 
@@ -3088,10 +3094,17 @@ def remove_managed_worktree(root: Path, task_id: str) -> Path:
         raise ContinuityError("this project uses strict single-checkout mode; no managed worktrees may be removed")
     task_path, _ = task_for_worktree(root, task_id, config)
     path = managed_worktree_path(root, task_id)
-    branch = branch_for_task(task_path)
     matches = [entry for entry in worktree_inventory(root) if Path(entry.path).resolve() == path.resolve(strict=False)]
-    if len(matches) != 1 or matches[0].branch != f"refs/heads/{branch}":
+    if len(matches) != 1:
         raise ContinuityError(f"no uniquely registered managed worktree for {task_id} at {path}")
+    # A hand-made branch may carry a different slug than the task file; the
+    # merge proof below is checked against the branch actually checked out.
+    branch = (matches[0].branch or "").removeprefix("refs/heads/")
+    if not is_task_branch(matches[0].branch, task_id):
+        raise ContinuityError(
+            f"refusing cleanup: managed worktree for {task_id} is on {branch or 'detached HEAD'}, "
+            f"not a task/{task_id}-<slug> branch: {path}"
+        )
     if matches[0].locked:
         raise ContinuityError(f"refusing cleanup: managed worktree for {task_id} is pinned/locked: {path}")
     status = git_run(path, ["status", "--porcelain", "--untracked-files=all"]).stdout.strip()
