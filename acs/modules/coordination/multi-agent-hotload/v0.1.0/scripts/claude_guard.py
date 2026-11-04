@@ -27,6 +27,11 @@ Claude Code's own defaults and loses often enough to matter (#37).
                                  request whose author is not trusted (#91),
                                  shell loops and watches that poll GitHub
                                  faster than the cadence allows (#108),
+                                 code put on the deploy host by hand
+                                 (`scp`/`rsync` to it, `git pull` or a
+                                 `deploy.sh` over `ssh`) instead of through
+                                 Komodo (`.coord/deploy.json` names the
+                                 hosts; server-management#117),
                                  and edits that remove
                                  this guard
     acs_guard.py stop            Stop: block ending a turn while work is not on
@@ -465,16 +470,156 @@ def check_gh(args: list[str], cwd: Path, env: dict[str, str] | None = None) -> s
     return None
 
 
+# ---------------------------------------------------------------- hand deploys (server-management#117)
+
+# Services on the deploy host deploy only through Komodo, which acts when a GitHub branch moves.
+# Agents kept copying code there with scp or pulling a branch on the host, which skips review and
+# leaves the host running code no branch holds. `.coord/deploy.json` in an adopter overrides these:
+# `hosts` (an empty list turns the rule off) and `how` (where the block message points).
+DEPLOY_FILE = Path(".coord") / "deploy.json"
+DEPLOY_DEFAULTS = {
+    "hosts": ["vps", "octo-vps", "100.118.248.35"],
+    "how": "`uv run scripts/deploy.py how <service>` in pukujan-lab-2/server-management says how a service "
+           "deploys; a service with no Komodo path gets one (its `vps/HOSTING.md` section 3), or ask the owner",
+}
+SSH_VALUE_FLAGS = set("BbcDEeFIiJLlmOoPpQRSWw")
+SCP_RSYNC = {"scp", "rsync"}
+# Commands that put code on the host's checkout; reading it (`git log`, `git status`) is fine.
+GIT_MOVES = {"pull", "checkout", "switch", "reset", "merge", "rebase", "restore", "clone"}
+DEPLOY_SCRIPT_RE = re.compile(r"^(?:auto)?deploy\.sh$")
+WRAPPERS = {"sudo", "env", "nohup", "exec", "time", "bash", "sh", "zsh"}
+WRAPPER_VALUE_FLAGS = {"-u", "-g", "-C"}
+
+
+def deploy_config(top: Path | None) -> dict:
+    """The deploy hosts and pointer in force for a checkout: the defaults, with the adopter's valid overrides."""
+    config = {"hosts": list(DEPLOY_DEFAULTS["hosts"]), "how": DEPLOY_DEFAULTS["how"]}
+    try:
+        data = json.loads((top / DEPLOY_FILE).read_text(encoding="utf-8")) if top else None
+    except (OSError, ValueError):
+        data = None
+    if isinstance(data, dict):
+        hosts = data.get("hosts")
+        if isinstance(hosts, list) and all(isinstance(h, str) and h.strip() for h in hosts):
+            config["hosts"] = [h.strip() for h in hosts]
+        if isinstance(data.get("how"), str) and data["how"].strip():
+            config["how"] = data["how"].strip()
+    return config
+
+
+def host_of(target: str) -> str:
+    """``vps`` from ``ubuntu@vps``, ``ssh://ubuntu@vps:22`` or ``[vps]``."""
+    host = target.removeprefix("ssh://").rpartition("@")[2]
+    if host.startswith("["):
+        return host[1:].partition("]")[0].lower()
+    return host.partition(":")[0].lower()
+
+
+def unwrap(args: list[str]) -> list[str]:
+    """The command under ``sudo -u x``, ``env A=b``, ``nohup`` and the like."""
+    i, wrapped = 0, False
+    while i < len(args):
+        a = args[i]
+        if Path(a).name in WRAPPERS or (wrapped and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", a)):
+            wrapped = True
+            i += 1
+        elif wrapped and a.startswith("-") and a != "-c":
+            i += 2 if a in WRAPPER_VALUE_FLAGS else 1
+        else:
+            break
+    return args[i:]
+
+
+def ssh_target(args: list[str]) -> tuple[str, list[str]] | None:
+    """(host, remote command words) of an ``ssh`` call. OpenSSH reads options after the host too."""
+
+    def options(i: int) -> int:
+        while i < len(args) and args[i].startswith("-") and len(args[i]) > 1:
+            if args[i] == "--":
+                return i + 1
+            i += 2 if len(args[i]) == 2 and args[i][1] in SSH_VALUE_FLAGS else 1
+        return i
+
+    i = options(1)
+    if i >= len(args):
+        return None
+    return host_of(args[i]), args[options(i + 1):]
+
+
+def deploys_by_hand(args: list[str]) -> str | None:
+    """What a command run on the deploy host does to its code, or None for an inspection."""
+    args = unwrap(args)
+    if len(args) > 1 and args[0] == "-c":  # `bash -c '<script>'`
+        return next(filter(None, map(deploys_by_hand, segments(args[1]))), None)
+    if not args:
+        return None
+    if DEPLOY_SCRIPT_RE.match(Path(args[0]).name):
+        return f"runs `{Path(args[0]).name}`"
+    call = git_call(args, Path("."))
+    if call and call[0] in GIT_MOVES:
+        return f"runs `git {call[0]}`"
+    return None
+
+
+def hand_deploy(cwd: Path, env: dict[str, str], args: list[str], rest: list[list[str]]) -> str | None:
+    """Why a command puts code on the deploy host outside Komodo, or None.
+
+    ``rest`` is the simple commands after this one: an ``ssh host <<EOF`` reads them as its script.
+    """
+    args = unwrap(args)
+    name = Path(args[0]).name if args else ""
+    if name not in SCP_RSYNC and name != "ssh":
+        return None
+    top = top_level(cwd)
+    if top is None or not is_adopter(top):
+        project = os.environ.get("CLAUDE_PROJECT_DIR")
+        top = top_level(Path(project)) if project else None
+        if top is None or not is_adopter(top):
+            return None
+    config = deploy_config(top)
+    hosts = {h.lower() for h in config["hosts"]}
+    if not hosts:
+        return None
+    what = None
+    if name in SCP_RSYNC:
+        dest = args[-1] if len(args) > 1 else ""
+        if ":" in dest and not dest.startswith("-") and host_of(dest) in hosts:
+            what = f"`{name}` copies files to `{host_of(dest)}`"
+    else:
+        target = ssh_target(args)
+        if target and target[0] in hosts:
+            host, words = target
+            stdin = next((n for n, w in enumerate(words) if w in ("<", "<<")), len(words))
+            # `ssh host <<EOF` (or `ssh host bash -s <<EOF`) reads the next lines as its script.
+            remote = segments(" ".join(words[:stdin])) + (rest if words[stdin:stdin + 1] == ["<<"] else [])
+            for step in remote:
+                done = deploys_by_hand(step)
+                if done:
+                    what = f"this {done} on `{host}`"
+                    break
+    if what is None or env_issue(top, env):
+        return None
+    return (
+        f"Deploying by hand: {what}. Services on the deploy host deploy only through Komodo: merge to the "
+        f"branch that deploys the service and Komodo picks it up within 3 minutes. {config['how']}. "
+        "Inspection (`docker ps`, `journalctl`, `cat`, `systemctl status`, `sudo warm ...`) is fine. "
+        f"If the owner directed this exact change, prefix the command with `{ISSUE_ENV}=<owner/repo>#N` "
+        "naming the issue that records it."
+    )
+
+
 def check_bash(command: str, cwd: Path) -> str | None:
     reason = polls_too_fast(command, cwd)
     if reason:
         return reason
-    for env, args in segments_with_env(command):
+    parts = segments_with_env(command)
+    for n, (env, args) in enumerate(parts):
         if args[0] == "cd" and len(args) > 1:
             cwd = (cwd / args[1]).expanduser()
             continue
         call = git_call(args, cwd)
-        reason = check_git(*call) if call else check_gh(args, cwd, env) or wrong_stamp(args)
+        reason = (check_git(*call) if call else check_gh(args, cwd, env) or wrong_stamp(args)) \
+            or hand_deploy(cwd, env, args, [a for _, a in parts[n + 1:]])
         if reason:
             return reason
     return None

@@ -743,6 +743,81 @@ def test_the_query_reads_partial_answers_and_treats_no_answer_as_unreachable(gua
     assert guard.live_issues(repo, refs) is None
 
 
+# ---------------------------------------------------------------- hand deploys (server-management#117)
+
+
+def test_copying_code_to_the_deploy_host_is_blocked(guard, repo):
+    for command in (
+        "scp -r app vps:~/apps/octo/",
+        "scp -i ~/.ssh/key -P 22 build.tgz ubuntu@100.118.248.35:/tmp/",
+        "rsync -az --delete ./ vps:apps/octo",
+        "rsync -az -e 'ssh -p 22' src/ ubuntu@octo-vps:/home/ubuntu/apps/octo/",
+        "cd .coord && sudo scp x.py VPS:/srv/x.py",
+    ):
+        reason = bash(guard, repo, command)
+        assert reason and "Komodo" in reason, command
+        assert "deploy.py how <service>" in reason and "vps/HOSTING.md" in reason, command
+
+
+def test_moving_the_hosts_checkout_or_running_its_deploy_script_is_blocked(guard, repo):
+    for command in (
+        "ssh vps 'cd ~/apps/octo && git pull'",
+        "ssh vps git -C apps/octo pull --ff-only",
+        "ssh -t ubuntu@100.118.248.35 'cd apps/octo; git fetch && git checkout feat/x'",
+        "ssh vps -- git -C apps/octo reset --hard origin/feat/x",
+        "ssh vps 'sudo -u ubuntu -H bash -c \"cd apps/octo && git switch feat/x\"'",
+        "ssh vps ./apps/octo/deploy.sh",
+        "ssh vps 'sudo bash /home/ubuntu/apps/octo/autodeploy.sh'",
+        "ssh vps <<'EOF'\ncd ~/apps/octo\ngit pull\nEOF",
+        "ssh vps bash -s <<EOF\n./deploy.sh\nEOF",
+    ):
+        reason = bash(guard, repo, command)
+        assert reason and "Deploying by hand" in reason, command
+
+
+def test_inspecting_the_deploy_host_and_copying_from_it_pass(guard, repo):
+    for command in (
+        "ssh vps docker ps",
+        "ssh vps 'journalctl -u komodo-periphery -n 50'",
+        "ssh vps cat ~/apps/octo/deploy.sh",
+        "ssh vps sudo warm hold octo --for 2h --reason demo",
+        "ssh vps systemctl status komodo-periphery",
+        "ssh vps 'cd ~/apps/octo && git log -3 && git status'",
+        "scp vps:/var/log/syslog ./syslog",
+        "rsync -az vps:backups/ ./backups/",
+        "scp build.tgz mac-pro:/tmp/",
+        "ssh mac-pro 'cd ~/x && git pull'",
+        "git pull",
+    ):
+        assert bash(guard, repo, command) is None, command
+
+
+def test_the_deploy_hosts_come_from_the_adopters_config(guard, repo):
+    deploy = repo / ".coord" / "deploy.json"
+    deploy.write_text(json.dumps({"hosts": ["box"], "how": "see DEPLOY.md"}), encoding="utf-8")
+    assert "see DEPLOY.md" in bash(guard, repo, "scp a.py box:/srv/")
+    assert bash(guard, repo, "scp a.py vps:/srv/") is None
+    deploy.write_text(json.dumps({"hosts": []}), encoding="utf-8")
+    assert bash(guard, repo, "scp a.py vps:/srv/") is None
+    deploy.write_text(json.dumps({"hosts": "vps", "how": 3}), encoding="utf-8")  # invalid: defaults stay
+    assert guard.deploy_config(repo) == {"hosts": guard.DEPLOY_DEFAULTS["hosts"], "how": guard.DEPLOY_DEFAULTS["how"]}
+    deploy.write_text("{not json", encoding="utf-8")
+    assert "Komodo" in bash(guard, repo, "scp a.py vps:/srv/")
+
+
+def test_a_hand_deploy_the_owner_directed_names_its_issue(guard, repo):
+    assert bash(guard, repo, "ACS_ISSUE=o/r#37 scp warm vps:/tmp/warm") is None
+    assert "Komodo" in bash(guard, repo, "ACS_ISSUE=o/r#99 scp warm vps:/tmp/warm")
+
+
+def test_hand_deploys_from_outside_a_checkout_use_the_project(guard, repo, tmp_path, monkeypatch):
+    elsewhere = tmp_path / "scratch"
+    elsewhere.mkdir()
+    assert bash(guard, elsewhere, "scp a.py vps:/srv/") is None
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+    assert "Komodo" in bash(guard, elsewhere, "scp a.py vps:/srv/")
+
+
 # ---------------------------------------------------------------- scope and switch
 
 
