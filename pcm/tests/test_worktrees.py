@@ -345,6 +345,118 @@ class ManagedWorktreeTests(unittest.TestCase):
             ).returncode,
         )
 
+    def hand_made_worktree(self, branch: str) -> Path:
+        """A worktree at the managed path whose branch was not made by `continuity worktree create`."""
+        path = self.worktrees / self.task_id
+        self.git(["git", "worktree", "add", "-b", branch, str(path), "main"])
+        return path
+
+    def commit_completed_task(self, path: Path, branch: str) -> None:
+        task_in_tree = path / self.task_path.relative_to(self.root)
+        text = task_in_tree.read_text(encoding="utf-8")
+        meta = extract_marker(text, "task")
+        assert meta is not None
+        meta["status"] = "completed"
+        task_in_tree.write_text(
+            text.replace(marker("task", extract_marker(text, "task") or {}), marker("task", meta), 1),
+            encoding="utf-8",
+        )
+        (path / "README.md").write_text("Task work\n", encoding="utf-8")
+        self.commit_all("task change", path)
+        self.git(["git", "push", "--set-upstream", "origin", branch], path)
+
+    def merge_on_origin(self, branch: str) -> None:
+        merge_checkout = self.base / "merge-checkout"
+        self.git(["git", "clone", str(self.remote), str(merge_checkout)], self.base)
+        self.git(["git", "fetch", "origin", branch], merge_checkout)
+        self.git(["git", "merge", "--ff-only", f"origin/{branch}"], merge_checkout)
+        self.git(["git", "push", "origin", "HEAD:main"], merge_checkout)
+
+    def github_with_merged(self, merged: list[dict[str, object]], seen_heads: list[str]):
+        def external(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+            if command[:3] == ["gh", "pr", "list"]:
+                head = command[command.index("--head") + 1]
+                seen_heads.append(head)
+                return subprocess.CompletedProcess(
+                    command, 0, json.dumps([item for item in merged if item["headRefName"] == head]), ""
+                )
+            if command[:3] == ["gh", "pr", "checks"]:
+                return subprocess.CompletedProcess(command, 0, json.dumps([{"name": "quality", "bucket": "pass"}]), "")
+            return subprocess.run(command, cwd=cwd, capture_output=True, check=False, text=True)
+
+        return external
+
+    def test_cleanup_removes_merged_task_branch_whose_slug_differs_from_task_file(self) -> None:
+        branch = "task/DPT-0001-hand-made-slug"
+        path = self.hand_made_worktree(branch)
+        self.commit_completed_task(path, branch)
+        self.merge_on_origin(branch)
+        head_oid = self.git(["git", "rev-parse", "HEAD"], cwd=path).stdout.strip()
+        merged: list[dict[str, object]] = [
+            {
+                "number": 41,
+                "headRefName": branch,
+                "headRefOid": head_oid,
+                "baseRefName": "main",
+                "mergedAt": "2026-11-04T00:00:00Z",
+                "mergeCommit": {"oid": head_oid},
+            }
+        ]
+        seen_heads: list[str] = []
+
+        with (
+            patch("continuity.cli.github_repository", return_value="org/repo"),
+            patch("continuity.cli.remote_default_branch", return_value="main"),
+            patch("continuity.cli.run_external", side_effect=self.github_with_merged(merged, seen_heads)),
+        ):
+            self.assertEqual(path, remove_managed_worktree(self.root, self.task_id))
+        self.assertEqual([branch], seen_heads)
+        self.assertFalse(path.exists())
+        self.assertNotEqual(
+            0,
+            subprocess.run(
+                ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch}"], cwd=self.root
+            ).returncode,
+        )
+
+    def test_cleanup_refuses_managed_path_on_another_tasks_branch(self) -> None:
+        branch = "task/DPT-0002-safe-cleanup"
+        path = self.hand_made_worktree(branch)
+        self.complete_task_on_main()
+        verify = patch("continuity.cli.verify_merged_task", return_value=True)
+        with verify as verified, self.assertRaisesRegex(ContinuityError, "not a task/DPT-0001-<slug> branch"):
+            remove_managed_worktree(self.root, self.task_id)
+        verified.assert_not_called()
+        self.assertTrue(path.exists())
+
+    def test_cleanup_refuses_unmerged_task_branch_whose_slug_differs(self) -> None:
+        branch = "task/DPT-0001-hand-made-slug"
+        path = self.hand_made_worktree(branch)
+        self.commit_completed_task(path, branch)
+        # The task file's own branch merged; the branch in the worktree did not.
+        seen_heads: list[str] = []
+        merged: list[dict[str, object]] = [
+            {
+                "number": 7,
+                "headRefName": "task/DPT-0001-safe-cleanup",
+                "headRefOid": self.git(["git", "rev-parse", "HEAD"], cwd=path).stdout.strip(),
+                "baseRefName": "main",
+                "mergedAt": "2026-11-04T00:00:00Z",
+                "mergeCommit": {"oid": "c" * 40},
+            }
+        ]
+        self.complete_task_on_main()
+
+        with (
+            patch("continuity.cli.github_repository", return_value="org/repo"),
+            patch("continuity.cli.remote_default_branch", return_value="main"),
+            patch("continuity.cli.run_external", side_effect=self.github_with_merged(merged, seen_heads)),
+            self.assertRaisesRegex(ContinuityError, "no uniquely matching merged PR"),
+        ):
+            remove_managed_worktree(self.root, self.task_id)
+        self.assertEqual([branch], seen_heads)
+        self.assertTrue(path.exists())
+
     def test_github_cleanup_requires_merged_pr_head_and_green_required_checks(self) -> None:
         head = "a" * 40
         merge = "b" * 40
