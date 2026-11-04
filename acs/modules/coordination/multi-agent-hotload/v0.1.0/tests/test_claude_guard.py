@@ -191,6 +191,17 @@ def test_worktrees_in_the_pcm_project_folder_pass(guard, tmp_path):
     assert "worktrees go only at" in bash(guard, main, "git worktree add -b t ../other/TASK-1")
 
 
+def test_task_worktree_needs_that_tasks_branch(guard, tmp_path):
+    main = _repo(tmp_path, tmp_path / "widget" / "main")
+    for branch in ("task/WCP-0041-bounded-state", "task/WCP-0041-x"):
+        assert bash(guard, main, f"git worktree add -b {branch} ../worktrees/WCP-0041") is None, branch
+    assert bash(guard, main, "git worktree add ../worktrees/WCP-0041 task/WCP-0041-bounded-state") is None
+    for branch in ("task/WCP-0042-bounded-state", "task/WCP-0041", "feature/WCP-0041-x", "t"):
+        for flag in ("-b", "-B"):
+            message = bash(guard, main, f"git worktree add {flag} {branch} ../worktrees/WCP-0041")
+            assert message and "continuity worktree create WCP-0041" in message, (flag, branch)
+
+
 def test_worktree_tools_are_blocked(guard, repo):
     event = {"cwd": str(repo)}
     assert guard.pre_tool({**event, "tool_name": "EnterWorktree", "tool_input": {}})
