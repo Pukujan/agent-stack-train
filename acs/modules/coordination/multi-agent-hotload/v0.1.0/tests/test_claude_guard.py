@@ -652,9 +652,13 @@ def test_session_start_hands_over_the_default_branchs_rules(guard, repo, tmp_pat
     assert "compacted" in guard.session_start({"cwd": str(repo), "source": "compact"})
 
 
+def quiet_start(guard, repo):
+    return guard.cadence_note(repo) + "\n\n" + guard.DEPLOY_DEFAULTS["note"]
+
+
 def test_session_start_is_quiet_on_a_current_default_branch(guard, repo):
-    # The cadence (#108) is the one thing every session is told.
-    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == guard.cadence_note(repo)
+    # The cadence (#108) and the deploy host's note are the things every session is told.
+    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == quiet_start(guard, repo)
 
 
 # ---------------------------------------------------------------- task records vs GitHub (#68)
@@ -728,7 +732,7 @@ def test_open_issues_with_nothing_new_stay_quiet(guard, repo, monkeypatch):
     add_task(repo)
     add_task(repo, task_id="PCM-0001", issue=1, status="done")
     seen = stub_live(guard, monkeypatch, {("acme/widget", 182): issue()})
-    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == guard.cadence_note(repo)
+    assert guard.session_start({"cwd": str(repo), "source": "startup"}) == quiet_start(guard, repo)
     assert seen == [[("acme/widget", 182)]]  # the finished task is not checked
 
 
@@ -811,9 +815,19 @@ def test_the_deploy_hosts_come_from_the_adopters_config(guard, repo):
     deploy.write_text(json.dumps({"hosts": []}), encoding="utf-8")
     assert bash(guard, repo, "scp a.py vps:/srv/") is None
     deploy.write_text(json.dumps({"hosts": "vps", "how": 3}), encoding="utf-8")  # invalid: defaults stay
-    assert guard.deploy_config(repo) == {"hosts": guard.DEPLOY_DEFAULTS["hosts"], "how": guard.DEPLOY_DEFAULTS["how"]}
+    assert guard.deploy_config(repo) == guard.DEPLOY_DEFAULTS
     deploy.write_text("{not json", encoding="utf-8")
     assert "Komodo" in bash(guard, repo, "scp a.py vps:/srv/")
+
+
+def test_session_start_points_at_the_hosts_warm_holds(guard, repo):
+    assert "sudo warm hold" in guard.session_start({"cwd": str(repo), "source": "startup"})
+    deploy = repo / ".coord" / "deploy.json"
+    deploy.write_text(json.dumps({"note": "Run `box keep-warm` before a demo."}), encoding="utf-8")
+    context = guard.session_start({"cwd": str(repo), "source": "startup"})
+    assert "box keep-warm" in context and "sudo warm" not in context
+    deploy.write_text(json.dumps({"note": ""}), encoding="utf-8")
+    assert "warm" not in guard.session_start({"cwd": str(repo), "source": "startup"})
 
 
 def test_a_hand_deploy_the_owner_directed_names_its_issue(guard, repo):
