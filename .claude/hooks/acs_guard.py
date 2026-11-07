@@ -488,12 +488,18 @@ def check_gh(args: list[str], cwd: Path, env: dict[str, str] | None = None) -> s
 # Services on the deploy host deploy only through Komodo, which acts when a GitHub branch moves.
 # Agents kept copying code there with scp or pulling a branch on the host, which skips review and
 # leaves the host running code no branch holds. `.coord/deploy.json` in an adopter overrides these:
-# `hosts` (an empty list turns the rule off) and `how` (where the block message points).
+# `hosts` (an empty list turns the rule off), `how` (where the block message points) and `note`
+# (shown at session start so agents find the host's own tools, such as warm holds; "" turns it off).
 DEPLOY_FILE = Path(".coord") / "deploy.json"
 DEPLOY_DEFAULTS = {
     "hosts": ["vps", "octo-vps", "100.118.248.35"],
     "how": "`uv run scripts/deploy.py how <service>` in pukujan-lab-2/server-management says how a service "
            "deploys; a service with no Komodo path gets one (its `vps/HOSTING.md` section 3), or ask the owner",
+    "note": "Services on the VPS sleep when idle. Before a demo or a timed test, keep a project warm: "
+            "`ssh vps sudo warm check <project> --for <time>` shows what a hold keeps up and whether it would be "
+            "refused, then `ssh vps sudo warm hold <project> --for <time> --reason <why>`. `warm status` lists holds "
+            "and `warm release <project>` ends one; a hold expires by itself. The projects are the `[[project]]` "
+            "entries in pukujan-lab-2/server-management `vps/services.toml` (see its `vps/warm/README.md`).",
 }
 SSH_VALUE_FLAGS = set("BbcDEeFIiJLlmOoPpQRSWw")
 SCP_RSYNC = {"scp", "rsync"}
@@ -505,8 +511,8 @@ WRAPPER_VALUE_FLAGS = {"-u", "-g", "-C"}
 
 
 def deploy_config(top: Path | None) -> dict:
-    """The deploy hosts and pointer in force for a checkout: the defaults, with the adopter's valid overrides."""
-    config = {"hosts": list(DEPLOY_DEFAULTS["hosts"]), "how": DEPLOY_DEFAULTS["how"]}
+    """The deploy hosts, pointer and note in force for a checkout: the defaults, with the adopter's valid overrides."""
+    config = {"hosts": list(DEPLOY_DEFAULTS["hosts"]), "how": DEPLOY_DEFAULTS["how"], "note": DEPLOY_DEFAULTS["note"]}
     try:
         data = json.loads((top / DEPLOY_FILE).read_text(encoding="utf-8")) if top else None
     except (OSError, ValueError):
@@ -517,6 +523,8 @@ def deploy_config(top: Path | None) -> dict:
             config["hosts"] = [h.strip() for h in hosts]
         if isinstance(data.get("how"), str) and data["how"].strip():
             config["how"] = data["how"].strip()
+        if isinstance(data.get("note"), str):
+            config["note"] = data["note"].strip()
     return config
 
 
@@ -1462,6 +1470,9 @@ def session_start(event: dict) -> str | None:
     if records:
         notes.append(records)
     notes.append(cadence_note(top))
+    note = deploy_config(top)["note"]
+    if note:
+        notes.append(note)
     stranded = overdue_branches(top, default)
     if stranded:
         notes.append(
