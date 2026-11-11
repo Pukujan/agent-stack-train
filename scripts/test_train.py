@@ -134,6 +134,15 @@ class CheckAdopterWorkflowTests(unittest.TestCase):
         self.assertIn("uses: actions/setup-python@", text)
         self.assertLess(text.index("uses: actions/setup-python@"), text.index("check_manifest.py"))
 
+    def test_reusable_workflows_prefer_the_runners_python(self) -> None:
+        # setup-python cannot install on a self-hosted Mac (writes /Users/runner, needs sudo).
+        root = Path(__file__).resolve().parents[1] / ".github/workflows"
+        for name in ("check-adopter", "close-on-merge", "close-sweep", "oio-status-drift"):
+            text = (root / f"{name}.yml").read_text(encoding="utf-8")
+            self.assertIn("id: python", text, name)
+            self.assertIn("if: steps.python.outputs.found != 'true'", text, name)
+            self.assertLess(text.index("id: python"), text.index("uses: actions/setup-python@"), name)
+
 
 if __name__ == "__main__":
     unittest.main()
