@@ -10,7 +10,10 @@ auto-merge armed; ``None`` means gh failed), and its merged ones from ``guard.me
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import time
+from datetime import datetime, timezone
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -528,13 +531,134 @@ def test_stop_checks_other_checkouts_the_session_worked_in(guard, repo, tmp_path
     (plain / "AGENTS.md").write_text("changed\n", encoding="utf-8")
     event = {"cwd": str(repo), "transcript_path": transcript(
         tmp_path, repo,
-        ("Bash", {"command": f"cd {other} && git status"}),
+        ("Bash", {"command": f"cd {other} && git add -A"}),
         ("Bash", {"command": f"git -C {plain} commit -C HEAD"}),
     )}
     reason = guard.stop(event)
     assert f"`{other}`" in reason and "tracked files on `main`" in reason
     assert str(plain) not in reason
     assert guard.stop({"cwd": str(repo)}) is None  # without the transcript only the project folder counts
+
+
+def session(tmp_path: Path, *calls: tuple[str | None, str], began: float | None = None) -> str:
+    """A transcript of Bash calls as (the folder the call started in, or None when the harness records none; command)."""
+    lines = []
+    for i, (cwd, command) in enumerate(calls):
+        entry = {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {"command": command}}]}}
+        if cwd is not None:
+            entry["cwd"] = cwd
+        if began is not None:
+            entry["timestamp"] = datetime.fromtimestamp(began + i, timezone.utc).isoformat().replace("+00:00", "Z")
+        lines.append(json.dumps(entry))
+    path = tmp_path / "calls.jsonl"
+    path.write_text("\n".join([*lines, ""]), encoding="utf-8")
+    return str(path)
+
+
+def _other(tmp_path: Path) -> Path:
+    (tmp_path / "second").mkdir()
+    return _repo(tmp_path / "second", tmp_path / "second" / "worktree")
+
+
+def _age(path: Path, seconds: float) -> None:
+    then = time.time() - seconds
+    os.utime(path, (then, then))
+
+
+def test_stop_ignores_a_checkout_the_session_only_looked_at(guard, repo, tmp_path):
+    # #131: one `git -C <worktree> status --short | head -3` made a week-old set of deletions this session's blocker.
+    other = _other(tmp_path)
+    (other / "AGENTS.md").unlink()
+    looks = [
+        f"git -C {other} status --short | head -3",
+        f"cd {other} && git status",
+        f"cd {other} && git log --oneline -1 2>/dev/null; git diff > /dev/null 2>&1",
+        f"cd {other} && ls -la && cat AGENTS.md | wc -l",
+        f"git -C {other} stash list; git -C {other} branch --show-current; git -C {other} remote -v",
+        f"d={other}; git -C {other} rev-parse --show-toplevel && echo ok",
+    ]
+    for command in looks:
+        event = {"cwd": str(repo), "transcript_path": session(tmp_path, (str(repo), command))}
+        assert guard.stop(event) is None, command
+
+
+def test_stop_still_checks_a_checkout_the_session_could_have_written_to(guard, repo, tmp_path):
+    other = _other(tmp_path)
+    (other / "AGENTS.md").unlink()
+    works = [
+        f"git -C {other} checkout -b fix/37-x",
+        f"git -C {other} stash",
+        f"git -C {other} branch new-branch",
+        f"cd {other} && git status > status.txt",
+        f"cd {other} && ./build.sh",
+        f"cd {other} && git status && rm -rf build",
+        f"git -C {other} log &> log.txt",
+    ]
+    for command in works:
+        event = {"cwd": str(repo), "transcript_path": session(tmp_path, (str(repo), command))}
+        reason = guard.stop(event)
+        assert reason and f"`{other}`" in reason, command
+
+
+def test_stop_follows_a_cd_made_in_an_earlier_call(guard, repo, tmp_path):
+    other = _other(tmp_path)
+    (other / "AGENTS.md").unlink()
+    # Claude Code records the folder each call starts in, so the second call's own folder is the other checkout.
+    recorded = session(tmp_path, (str(repo), f"cd {other}"), (str(other), "git commit -qam wip"))
+    assert f"`{other}`" in guard.stop({"cwd": str(repo), "transcript_path": recorded})
+    # A harness that records no folder: the last `cd` carries over to the next call.
+    carried = session(tmp_path, (None, f"cd {other}"), (None, "git commit -qam wip"))
+    assert f"`{other}`" in guard.stop({"cwd": str(repo), "transcript_path": carried})
+    # A recorded folder wins over an earlier `cd`: the session went back to its project and wrote there.
+    back = session(tmp_path, (str(repo), f"cd {other} && git status"), (str(repo), "git commit -qam wip"))
+    assert guard.stop({"cwd": str(repo), "transcript_path": back}) is None
+
+
+def test_old_changes_in_another_checkout_are_a_note_and_new_ones_block(guard, repo, tmp_path):
+    other = _other(tmp_path)
+    (other / "old.txt").write_text("old\n", encoding="utf-8")
+    (other / "gone.txt").write_text("gone\n", encoding="utf-8")
+    git("add", "-A", cwd=other)
+    git("commit", "-qm", "more", cwd=other)
+    git("push", "-q", "origin", "main", cwd=other)
+    (other / "old.txt").write_text("edited last week\n", encoding="utf-8")
+    (other / "gone.txt").unlink()
+    for path in (other / "old.txt", other):  # a deleted file is dated by its folder
+        _age(path, 7 * 86400)
+    began = time.time() - 3600
+    event = {"cwd": str(repo), "transcript_path": session(tmp_path, (str(repo), f"git -C {other} add -A"), began=began)}
+    assert guard.stop(event) is None  # the session wrote there, but every change is older than the session
+    (other / "AGENTS.md").write_text("# Rules\n\nEdited now.\n", encoding="utf-8")
+    reason = guard.stop(event)
+    assert "1 uncommitted change(s) to tracked files on `main` (`AGENTS.md`)" in reason
+    assert "2 uncommitted change(s) to tracked files on `main`" in reason and "older than this session" in reason
+    assert "not yours to commit or push" in reason
+
+
+def test_old_changes_in_the_sessions_own_project_still_block(guard, repo, tmp_path):
+    (repo / "AGENTS.md").write_text("# Rules\n\nEdited last week.\n", encoding="utf-8")
+    _age(repo / "AGENTS.md", 7 * 86400)
+    event = {"cwd": str(repo), "transcript_path": session(tmp_path, (str(repo), "ls"), began=time.time() - 3600)}
+    assert "1 uncommitted change(s) to tracked files on `main`" in guard.stop(event)
+
+
+def test_the_session_start_is_read_from_the_head_of_a_long_transcript(guard, tmp_path, monkeypatch):
+    began = time.time() - 7200
+    path = session(tmp_path, *[("/x", "ls")] * 50, began=began)
+    monkeypatch.setattr(guard, "TRANSCRIPT_TAIL", 400)  # the tail now starts near the last call
+    assert abs(guard.session_began({"transcript_path": path}) - began) < 1
+    assert guard.session_began({"transcript_path": str(tmp_path / "missing.jsonl")}) is None
+
+
+def test_redirections_are_read_as_writes_only_when_they_name_a_file(guard):
+    def reads(command):
+        return all(guard.only_reads(args) for args in guard.segments(command))
+    for command in ("git status 2>/dev/null", "git log 2>&1 | head -3", "cat a.txt > /dev/null", "grep x < in.txt",
+                    "git --version", "echo hi >&2"):
+        assert reads(command), command
+    for command in ("git status > out.txt", "echo hi >> notes.md", "git log &> log.txt", "cat a 2> err.log",
+                    "git stash", "git config user.name x", "git branch -D old", "python3 tool.py", "sed -i s/a/b/ f"):
+        assert not reads(command), command
 
 
 def test_stop_reads_a_missing_or_garbled_transcript_as_empty(guard, repo, tmp_path):

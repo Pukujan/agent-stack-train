@@ -134,7 +134,7 @@ def checkout_state(draw):
         "unrelated_file": draw(st.booleans()),  # an untracked file the session never wrote
         "pr": draw(st.sampled_from(sorted(PR_STATES))),
         "due": draw(MOSTLY),  # past the pull-request cadence limit (#108)
-        "ref": draw(st.sampled_from([None, "write", "cd", "git-C"])),
+        "ref": draw(st.sampled_from([None, "write", "cd", "git-C", "cd-read", "git-C-read"])),
     }
 
 
@@ -202,10 +202,19 @@ def tool_uses(work: Path, s: dict, i: int) -> list[tuple[str, dict]]:
     if s["ref"] == "write":
         uses.append(("Write", {"file_path": str(work / "AGENTS.md"), "content": "# Rules\n"}))
     elif s["ref"] == "cd":
-        uses.append(("Bash", {"command": f"cd {shlex.quote(str(work))} && git status"}))
+        uses.append(("Bash", {"command": f"cd {shlex.quote(str(work))} && git add -A"}))
     elif s["ref"] == "git-C":
-        uses.append(("Bash", {"command": f"git -C {shlex.quote(str(work))} log --oneline -1; echo done"}))
+        uses.append(("Bash", {"command": f"git -C {shlex.quote(str(work))} commit --amend --no-edit; echo done"}))
+    elif s["ref"] == "cd-read":  # looking is not working (#131)
+        uses.append(("Bash", {"command": f"cd {shlex.quote(str(work))} && git status"}))
+    elif s["ref"] == "git-C-read":
+        uses.append(("Bash", {"command": f"git -C {shlex.quote(str(work))} log --oneline -1 2>/dev/null | head -3; echo done"}))
     return uses
+
+
+def worked_in(s: dict) -> bool:
+    """Whether the session's tool calls for this checkout could have written to it."""
+    return s["session_file"] or s["ref"] in ("write", "cd", "git-C")
 
 
 def problem_lines(reason: str, top: str) -> list[str]:
@@ -219,7 +228,7 @@ def problem_lines(reason: str, top: str) -> list[str]:
     order=st.randoms(use_true_random=False),
 )
 # Fixed examples every run checks beside the random ones: each pull request state, a missing checkpoint,
-# an unpushed commit, and blocking work in a checkout the session never touched.
+# an unpushed commit, and blocking work in a checkout the session never touched or only read.
 @example(states=[clean(pr="none")], project_is_first=False, order=Random(0))
 @example(states=[clean(pr="draft")], project_is_first=False, order=Random(0))
 @example(states=[clean(pr="none", due=False)], project_is_first=False, order=Random(0))
@@ -230,6 +239,8 @@ def problem_lines(reason: str, top: str) -> list[str]:
 @example(states=[clean(pcm=True, commits="pushed-checkpointed")], project_is_first=False, order=Random(0))
 @example(states=[clean(commits="ahead-of-upstream")], project_is_first=False, order=Random(0))
 @example(states=[clean(ref=None, tracked_change=True), clean(pr="gh-offline", tracked_change=True)], project_is_first=False, order=Random(0))
+@example(states=[clean(ref="git-C-read", tracked_change=True)], project_is_first=False, order=Random(0))
+@example(states=[clean(ref="cd-read", commits="unpushed")], project_is_first=False, order=Random(0))
 def test_stop_blocks_iff_a_touched_checkout_has_work_off_github(guard, templates, states, project_is_first, order):
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -248,7 +259,7 @@ def test_stop_blocks_iff_a_touched_checkout_has_work_off_github(guard, templates
                 project = work
             mine = tool_uses(work, s, i)
             uses += mine
-            referenced.append(bool(mine) or (i == 0 and project_is_first))
+            referenced.append(worked_in(s) or (i == 0 and project_is_first))
         order.shuffle(uses)
         event = {"cwd": str(project), "transcript_path": transcript(root, project, *uses)}
 
