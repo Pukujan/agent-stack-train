@@ -743,6 +743,7 @@ def pre_tool(event: dict) -> str | None:
 
 # Stop looks at every stack checkout the session worked in, found from its transcript (#69).
 TRANSCRIPT_TAIL = 4 * 1024 * 1024
+TRANSCRIPT_HEAD = 256 * 1024  # enough to reach the first timestamped line
 MAX_CHECKOUTS = 15
 MAX_LOOKUPS = 60
 MAX_STOP_RETRIES = 5  # blocked retried stops per session before the guard lets one through
@@ -778,12 +779,83 @@ def transcript_events(path: str) -> list[dict]:
     return events
 
 
+# Commands that only read (#131). A checkout the session ran nothing else in was looked at, not
+# worked in, so its old uncommitted changes are not this session's to push. Anything not listed
+# here counts as work: a script, an unknown tool, or a git subcommand that has a writing form.
+READ_ONLY_GIT = {
+    "status", "log", "diff", "show", "rev-parse", "rev-list", "ls-files", "ls-remote", "ls-tree", "cat-file",
+    "for-each-ref", "describe", "blame", "shortlog", "grep", "merge-base", "name-rev", "count-objects",
+    "diff-tree", "diff-index", "diff-files", "show-ref", "check-ignore", "check-attr", "version", "help",
+}
+# (subcommand, first argument) for subcommands that read only in this form; "" is no argument at all.
+READ_ONLY_GIT_FORMS = {
+    ("stash", "list"), ("stash", "show"), ("worktree", "list"), ("remote", ""), ("remote", "-v"),
+    ("remote", "get-url"), ("remote", "show"), ("branch", ""), ("branch", "--show-current"),
+    ("config", "--get"), ("config", "--get-all"), ("config", "--list"), ("config", "-l"),
+}
+READ_ONLY_TOOLS = {
+    "ls", "cat", "head", "tail", "wc", "grep", "egrep", "fgrep", "rg", "du", "df", "stat", "file", "pwd",
+    "echo", "printf", "true", "false", "test", "[", "which", "tree", "sort", "uniq", "cut", "tr", "nl",
+    "basename", "dirname", "realpath", "readlink", "date", "diff", "cmp", "jq", "id", "hostname", "uname",
+}
+REDIRECT_CHARS = set("<>&|")
+NOT_A_FILE = {"/dev/null", "/dev/stdout", "/dev/stderr", "-"}
+
+
+def strip_redirects(args: list[str]) -> tuple[bool, list[str]]:
+    """(does it write a file, the arguments without redirections).
+
+    `segments` splits on `;&|()` only, so `2>/dev/null`, `2>&1` and `> out.txt` stay in a command's
+    arguments as an operator and its target.
+    """
+    wrote = False
+    kept: list[str] = []
+    i = 0
+    while i < len(args):
+        token = args[i]
+        if token and set(token) <= REDIRECT_CHARS and ("<" in token or ">" in token):
+            target = args[i + 1] if i + 1 < len(args) else ""
+            if kept and kept[-1].isdigit():
+                kept.pop()  # the file descriptor in `2>`
+            if ">" in token and target not in NOT_A_FILE and not ("&" in token and target.isdigit()):
+                wrote = True
+            i += 2
+        else:
+            kept.append(token)
+            i += 1
+    return wrote, kept
+
+
+def only_reads(args: list[str]) -> bool:
+    """True when this simple command is on the read-only lists and writes no file."""
+    wrote, args = strip_redirects(args)
+    if wrote:
+        return False
+    if not args:
+        return True
+    name = Path(args[0]).name
+    if name == "git":
+        call = git_call(args, Path("."))
+        if call is None:
+            return True  # `git --version`, a bare `git`
+        sub, rest, _cwd = call
+        return sub in READ_ONLY_GIT or (sub, rest[0] if rest else "") in READ_ONLY_GIT_FORMS
+    return name in READ_ONLY_TOOLS
+
+
 def session_paths(event: dict, cwd: Path) -> tuple[list[Path], list[Path]]:
-    """(directories the session worked in, files it wrote), from Edit/Write paths and `cd`/`git -C` targets."""
+    """(directories the session worked in, files it wrote).
+
+    A directory counts when the session edited a file in it or ran a command there that could write:
+    one after a `cd`, one with `git -C`, or one in the folder the tool call started in. Commands that
+    only read (`only_reads`) do not count (#131).
+    """
     dirs: list[Path] = []
     written: list[Path] = []
+    carried: Path | None = None  # the last `cd` target, for a harness that does not record each call's folder
     for entry in transcript_events(event.get("transcript_path") or ""):
-        here = Path(entry["cwd"]) if isinstance(entry.get("cwd"), str) else cwd
+        recorded = isinstance(entry.get("cwd"), str)
+        here = Path(entry["cwd"]) if recorded else (carried or cwd)
         content = (entry.get("message") or {}).get("content") if isinstance(entry.get("message"), dict) else None
         for item in content if isinstance(content, list) else []:
             if not isinstance(item, dict) or item.get("type") != "tool_use":
@@ -799,13 +871,19 @@ def session_paths(event: dict, cwd: Path) -> tuple[list[Path], list[Path]]:
                 for args in segments(tool_input["command"]):
                     if args[0] == "cd" and len(args) > 1 and args[1] != "-":
                         where = resolve(args[1], where)
-                        dirs.append(where)
-                    elif Path(args[0]).name == "git":
+                        continue
+                    if only_reads(args):
+                        continue
+                    target = where
+                    if Path(args[0]).name == "git":
                         i = 1
                         while i < len(args) and args[i].startswith("-"):  # only flags before the subcommand
                             if args[i] == "-C" and i + 1 < len(args):
-                                dirs.append(resolve(args[i + 1], where))
+                                target = resolve(args[i + 1], target)
                             i += 2 if args[i] in ("-C", "-c", "--git-dir", "--work-tree") else 1
+                    dirs.append(target)
+                if not recorded:
+                    carried = where
     return dirs, written
 
 
@@ -822,12 +900,14 @@ def session_checkouts(project: Path, event: dict) -> tuple[list[Path], list[Path
     dirs, written = session_paths(event, project)
     tops: list[Path] = []
     seen: list[Path] = []
+    tried: set[Path] = set()
     lookups = 0
     for d in [project, *dirs]:
         if len(tops) >= MAX_CHECKOUTS or lookups >= MAX_LOOKUPS:
             break
-        if any(within(d, s) for s in seen):
+        if d in tried or any(within(d, s) for s in seen):
             continue
+        tried.add(d)
         lookups += 1
         top = top_level(d)
         if top is None or any(top.resolve() == s.resolve() for s in seen):
@@ -1142,15 +1222,44 @@ def merged_at_tip(top: Path, branch: str) -> bool:
 
 
 def session_began(event: dict) -> float | None:
-    """When the session's transcript starts (seconds since the epoch), or None without one."""
-    for entry in transcript_events(event.get("transcript_path") or ""):
-        stamp = entry.get("timestamp")
+    """When the session's transcript starts (seconds since the epoch), or None without one.
+
+    Read from the head of the file: `transcript_events` keeps only the tail, which in a long session
+    starts well after the session did.
+    """
+    try:
+        with open(event.get("transcript_path") or "", "rb") as fh:
+            head = fh.read(TRANSCRIPT_HEAD).decode("utf-8", errors="replace").splitlines()
+    except (OSError, TypeError):
+        return None
+    for line in head:
+        try:
+            stamp = json.loads(line).get("timestamp")
+        except (ValueError, AttributeError):
+            continue
         if isinstance(stamp, str):
             try:
                 return datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp()
             except ValueError:
                 continue
     return None
+
+
+def changed_since(top: Path, path: str, since: float) -> bool:
+    """Whether a tracked path changed at or after ``since``, by its date on disk.
+
+    A deleted file has no date, so the nearest folder that still exists answers for it: deleting an
+    entry updates its folder. A path that cannot be read at all counts as changed.
+    """
+    path = path.split(" -> ")[-1].strip('"')  # a rename shows as `old -> new`
+    p = top / path
+    while True:
+        try:
+            return p.lstat().st_mtime >= since
+        except OSError:
+            if p == top or p.parent == p:
+                return True
+            p = p.parent
 
 
 def unpushed_branches(top: Path, branch: str | None, since: float | None) -> list[tuple[str, int]]:
@@ -1171,11 +1280,14 @@ def unpushed_branches(top: Path, branch: str | None, since: float | None) -> lis
     return found
 
 
-def checkout_problems(top: Path, written: list[Path], local_only: bool = False, since: float | None = None) -> tuple[list[str], list[str]]:
+def checkout_problems(top: Path, written: list[Path], local_only: bool = False, since: float | None = None,
+                      own: bool = True) -> tuple[list[str], list[str]]:
     """(problems, notes) that keep one checkout's work off GitHub.
 
     ``local_only`` keeps to work that exists only on this machine and skips the checkpoint and
-    pull-request checks, which an agent may not be able to fix.
+    pull-request checks, which an agent may not be able to fix. ``own`` is False for a checkout other
+    than the session's project: there, an uncommitted change older than the session is another
+    session's work, so it is a note and not a problem (#131).
     """
     problems: list[str] = []
     notes: list[str] = []
@@ -1193,6 +1305,12 @@ def checkout_problems(top: Path, written: list[Path], local_only: bool = False, 
         path for line in (git(top, "status", "--porcelain", "--untracked-files=no") or "").splitlines()
         if line.strip() and (path := line.split(None, 1)[-1]) not in state
     ]
+    if not own and since is not None:
+        old = [path for path in tracked if not changed_since(top, path, since)]
+        if old:
+            tracked = [path for path in tracked if path not in old]
+            notes.append(f"{len(old)} uncommitted change(s) to tracked files on {where} ({names(old)}) are older than "
+                         "this session. They are not yours to commit or push; leave them and tell the owner.")
     if tracked:
         problems.append(f"{len(tracked)} uncommitted change(s) to tracked files on {where} ({names(tracked)}): {fix}.")
     mine = [str(p.resolve().relative_to(top.resolve())) for p in written if within(p, top)]
@@ -1280,10 +1398,12 @@ def stop(event: dict) -> str | None:
     project = Path(os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or os.getcwd())
     tops, written = session_checkouts(project, event)
     since = session_began(event)
+    home = top_level(project)
     problems: list[str] = []
     notes: list[str] = []
     for top in tops:
-        found, noted = checkout_problems(top, written, local_only=retry, since=since)
+        own = home is not None and top.resolve() == home.resolve()
+        found, noted = checkout_problems(top, written, local_only=retry, since=since, own=own)
         problems += [f"- `{top}`: {p}" for p in found]
         notes += [f"- `{top}`: {n}" for n in noted]
     if not problems:
